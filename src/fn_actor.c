@@ -1877,11 +1877,17 @@ void fn_actor_function_fire_blit(fn_actor_t * actor)
   destrect.y = actor->position.y * pixelsize;
   destrect.w = actor->position.w * pixelsize;
   destrect.h = actor->position.h * pixelsize;
-  SDL_BlitSurface(tile0, NULL, target, &destrect);
+  if (tile0 != NULL) {
+    SDL_BlitSurface(tile0, NULL, target, &destrect);
+  }
   destrect.x += FN_TILE_WIDTH * pixelsize;
-  SDL_BlitSurface(tile1, NULL, target, &destrect);
+  if (tile1 != NULL) {
+    SDL_BlitSurface(tile1, NULL, target, &destrect);
+  }
   destrect.x += FN_TILE_WIDTH * pixelsize;
-  SDL_BlitSurface(tile2, NULL, target, &destrect);
+  if (tile2 != NULL) {
+    SDL_BlitSurface(tile2, NULL, target, &destrect);
+  }
 }
 
 /* --------------------------------------------------------------- */

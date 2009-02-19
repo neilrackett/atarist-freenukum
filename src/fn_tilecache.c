@@ -211,11 +211,6 @@ int fn_tilecache_loadfile(
         if (tc->tiles[tc->size] == NULL)
         {
             return -1;
-        } else {
-          SDL_UpdateRect(tc->tiles[tc->size],
-              0, 0,
-              tc->tiles[tc->size]->w,
-              tc->tiles[tc->size]->h);
         }
         tc->size++;
         num_tiles--;
