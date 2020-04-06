@@ -13,6 +13,8 @@ const HALFTILE_HEIGHT: usize = 8;
 const TILE_WIDTH: usize = HALFTILE_WIDTH * 2;
 const TILE_HEIGHT: usize = HALFTILE_HEIGHT * 2;
 const MAX_TILES_PER_FILE: usize = 50;
+const HEALTH_COUNT: usize = 8;
+const INVENTORY_WIDTH: usize = 4;
 
 fn main() {
     println!("Starting FreeNukum…");

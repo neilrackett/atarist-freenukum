@@ -21,16 +21,14 @@ impl Game {
 
         let scale = self.settings.scale;
 
+        let w = (TILE_WIDTH + 2) * MAX_TILES_PER_FILE;
+        let h = (TILE_HEIGHT + 2) * tile::Category::all().len();
+
         let window = video_subsystem
             .window(
                 "FreeNukum",
-                (scale
-                    * ((TILE_WIDTH as usize + 2) * MAX_TILES_PER_FILE)
-                        as f32) as u32,
-                (scale
-                    * ((TILE_HEIGHT as usize + 2)
-                        * tile::Category::all().len())
-                        as f32) as u32,
+                (scale * w as f32) as u32,
+                (scale * h as f32) as u32,
             )
             .position_centered()
             .opengl()
@@ -61,6 +59,15 @@ impl Game {
                 canvas.copy(tile, None, dst).unwrap();
             }
         }
+
+        let dst = Rect::new(0, 0, w as u32, h as u32);
+
+        crate::borders::draw_borders(
+            &mut canvas,
+            tiles.get(&crate::tile::Category::Border).unwrap(),
+            &dst,
+        )?;
+
         canvas.present();
 
         let mut event_pump = sdl_context.event_pump()?;
