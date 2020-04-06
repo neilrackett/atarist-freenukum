@@ -6,7 +6,7 @@ use crate::{
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, RenderTarget};
 
-pub fn draw_borders<'t, C: RenderTarget>(
+pub fn draw<'t, C: RenderTarget>(
     target: &mut Canvas<C>,
     tiles: &Tiles<'t>,
     dst: &Rect,

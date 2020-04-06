@@ -3,7 +3,7 @@ use crate::tile;
 use crate::{MAX_TILES_PER_FILE, TILE_HEIGHT, TILE_WIDTH};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Rect;
+use sdl2::rect::{Point, Rect};
 use std::fs::create_dir_all;
 
 const MIN_W: u32 = TILE_WIDTH as u32 * 20;
@@ -66,7 +66,15 @@ impl Game {
 
         let dst = Rect::new(0, 0, w as u32, h as u32);
 
-        crate::borders::draw_borders(&mut canvas, &tiles, &dst)?;
+        let msg = b"Hello World!\nHow are you today?\nFine, thanks a lot $$$#\":&;<=>@";
+
+        crate::borders::draw(&mut canvas, &tiles, &dst)?;
+        crate::text::print(
+            &mut canvas,
+            &tiles,
+            &Point::new(100, 100),
+            msg,
+        )?;
 
         canvas.present();
 
@@ -91,10 +99,16 @@ impl Game {
                                 MIN_H,
                             );
                             let dst = Rect::new(0, 0, w, h);
-                            crate::borders::draw_borders(
+                            crate::borders::draw(
                                 &mut canvas,
                                 &tiles,
                                 &dst,
+                            )?;
+                            crate::text::print(
+                                &mut canvas,
+                                &tiles,
+                                &Point::new(100, 100),
+                                msg,
                             )?;
                             canvas.present();
                         }
