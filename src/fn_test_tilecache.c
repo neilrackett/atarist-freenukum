@@ -86,7 +86,6 @@ void blithex(SDL_Surface * target,
 
 int main(int argc, char ** argv)
 {
-  g_type_init();
   SDL_Surface * screen;
   size_t i = 0;
   size_t j = 0;

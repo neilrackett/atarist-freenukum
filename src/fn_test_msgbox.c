@@ -39,7 +39,6 @@
 
 int main(int argc, char ** argv)
 {
-    g_type_init();
     SDL_Surface * screen;
     FnTexture * msgbox;
     int res;

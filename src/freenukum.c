@@ -66,8 +66,6 @@
 
 int main(int argc, char ** argv)
 {
-  g_type_init();
-
   int res = 0; /* results are stored here */
 
   int retval = 1; /* The return value from the program. */

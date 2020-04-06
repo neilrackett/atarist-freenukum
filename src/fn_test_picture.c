@@ -40,8 +40,6 @@
 
 int main(int argc, char ** argv)
 {
-    g_type_init();
-
     int fd;
     int res;
     int quit = 0;

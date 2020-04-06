@@ -45,7 +45,7 @@ src = [
 sdl_lib = meson.get_compiler('c').find_library('SDL')
 sdl_ttf_lib = meson.get_compiler('c').find_library('SDL_ttf')
 curl_lib = meson.get_compiler('c').find_library('curl')
-glib = dependency('gobject-2.0')
+glib = dependency('gobject-2.0', version: '>=2.36')
 zip_lib = meson.get_compiler('c').find_library('zip')
 
 conf = configuration_data()
