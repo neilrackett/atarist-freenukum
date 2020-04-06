@@ -1,0 +1,12 @@
+[package]
+name = "freenukum"
+version = "0.3.0"
+authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
+edition = "2018"
+
+[dependencies]
+bitvec = "0.17"
+dirs = "2"
+sdl2 = "0.32"
+serde = "1"
+serde_derive = "1"
