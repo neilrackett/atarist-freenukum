@@ -1,5 +1,5 @@
 use crate::settings::Settings;
-use crate::HALFTILE_WIDTH;
+use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH, TILES_PER_FILE};
 use bitvec::order::Msb0 as Endian;
 use bitvec::slice::{AsBits, BitSlice};
 use sdl2::event::Event;
@@ -26,29 +26,7 @@ impl Game {
 
         let scale = self.settings.scale;
 
-        let window = video_subsystem
-            .window("FreeNukum", scale as u32 * 900, scale as u32 * 470)
-            .position_centered()
-            .opengl()
-            .build()
-            .map_err(|e| e.to_string())?;
-
-        let mut canvas =
-            window.into_canvas().build().map_err(|e| e.to_string())?;
-        canvas
-            .set_scale(self.settings.scale, self.settings.scale)
-            .unwrap();
-        let texture_creator = canvas.texture_creator();
-
-        canvas.clear();
-
-        let path = dirs::data_local_dir()
-            .unwrap()
-            .join("freenukum")
-            .join("data");
-        create_dir_all(&path).unwrap();
-
-        for (row, file) in vec![
+        let files = vec![
             "BACK0.DN1",
             "BACK1.DN1",
             "BACK2.DN1",
@@ -75,10 +53,39 @@ impl Game {
             "FONT2.DN1",
             "BORDER.DN1",
             "NUMBERS.DN1",
-        ]
-        .into_iter()
-        .enumerate()
-        {
+        ];
+
+        let window = video_subsystem
+            .window(
+                "FreeNukum",
+                (scale
+                    * ((HALFTILE_WIDTH as usize * 2 + 2) * TILES_PER_FILE)
+                        as f32) as u32,
+                (scale
+                    * ((HALFTILE_HEIGHT as usize * 2 + 2) * files.len())
+                        as f32) as u32,
+            )
+            .position_centered()
+            .opengl()
+            .build()
+            .map_err(|e| e.to_string())?;
+
+        let mut canvas =
+            window.into_canvas().build().map_err(|e| e.to_string())?;
+        canvas
+            .set_scale(self.settings.scale, self.settings.scale)
+            .unwrap();
+        let texture_creator = canvas.texture_creator();
+
+        canvas.clear();
+
+        let path = dirs::data_local_dir()
+            .unwrap()
+            .join("freenukum")
+            .join("data");
+        create_dir_all(&path).unwrap();
+
+        for (row, file) in files.into_iter().enumerate() {
             let path = path.join(file);
 
             let mut file = File::open(path).unwrap();
