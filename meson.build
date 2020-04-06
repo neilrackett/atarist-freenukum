@@ -1,9 +1,8 @@
 project(
-  'freenukum',
-  'c',
-  version: '0.3.0',
-# TODO: enable these options
-#   default_options: ['c_std=c11'],
+    'freenukum',
+    'c',
+    version: '0.3.0',
+    default_options: ['c_std=c11'],
 )
 
 src = [
