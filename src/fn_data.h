@@ -29,11 +29,9 @@
 #ifndef FN_DATA_H
 #define FN_DATA_H
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #ifdef HAVE_SDL_SDL_TTF_H
 #include <SDL/SDL_ttf.h>
 #endif /* HAVE_SDL_SDL_TTF_H */

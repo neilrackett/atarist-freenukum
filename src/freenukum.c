@@ -26,9 +26,7 @@
  *
  *******************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
 
 #ifdef HAVE_SDL_SDL_TTF_H
 #ifdef HAVE_LIBCURL
@@ -40,7 +38,7 @@
 
 /* --------------------------------------------------------------- */
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <dirent.h>

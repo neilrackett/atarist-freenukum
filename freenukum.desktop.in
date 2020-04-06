@@ -1,6 +1,6 @@
 [Desktop Entry]
-Version=@PACKAGE_VERSION@
-Name=@PACKAGE_NAME@
+Version=@version@
+Name=FreeNukum
 Type=Application
 Icon=freenukum
 Comment=Clone of the original Duke Nukum 1 Jump'n Run game

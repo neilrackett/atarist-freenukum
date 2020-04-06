@@ -26,7 +26,7 @@
  *
  *******************************************************************/
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>

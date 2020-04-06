@@ -26,9 +26,7 @@
  *
  *******************************************************************/
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif /* HAVE_CONFIG_H */
 
 #ifndef HAVE_AUTOMATIC_DOWNLOAD
 #ifdef HAVE_SDL_SDL_TTF_H

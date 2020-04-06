@@ -29,7 +29,7 @@
 #ifndef FN_BOT_H
 #define FN_BOT_H
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 #include "fn_hero.h"
 #include "fn_environment.h"
