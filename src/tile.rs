@@ -9,6 +9,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+pub type Tiles<'t> = BTreeMap<Category, Vec<Texture<'t>>>;
+
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Category {
     Back0,
@@ -150,7 +152,7 @@ impl Category {
 pub fn load<'t, T>(
     path: &Path,
     creator: &'t TextureCreator<T>,
-) -> Result<BTreeMap<Category, Vec<Texture<'t>>>, String> {
+) -> Result<Tiles<'t>, String> {
     let mut data: BTreeMap<Category, Vec<Texture<'t>>> = BTreeMap::new();
     for category in Category::all().into_iter() {
         data.insert(

@@ -1,10 +1,13 @@
 use crate::settings::Settings;
 use crate::tile;
 use crate::{MAX_TILES_PER_FILE, TILE_HEIGHT, TILE_WIDTH};
-use sdl2::event::Event;
+use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::rect::Rect;
 use std::fs::create_dir_all;
+
+const MIN_W: u32 = TILE_WIDTH as u32 * 20;
+const MIN_H: u32 = TILE_HEIGHT as u32 * 12;
 
 pub struct Game {
     settings: Settings,
@@ -24,14 +27,15 @@ impl Game {
         let w = (TILE_WIDTH + 2) * MAX_TILES_PER_FILE;
         let h = (TILE_HEIGHT + 2) * tile::Category::all().len();
 
-        let window = video_subsystem
+        let mut window = video_subsystem
             .window(
                 "FreeNukum",
                 (scale * w as f32) as u32,
                 (scale * h as f32) as u32,
             )
             .position_centered()
-            .opengl()
+            .vulkan()
+            .resizable()
             .build()
             .map_err(|e| e.to_string())?;
 
@@ -62,11 +66,7 @@ impl Game {
 
         let dst = Rect::new(0, 0, w as u32, h as u32);
 
-        crate::borders::draw_borders(
-            &mut canvas,
-            tiles.get(&crate::tile::Category::Border).unwrap(),
-            &dst,
-        )?;
+        crate::borders::draw_borders(&mut canvas, &tiles, &dst)?;
 
         canvas.present();
 
@@ -80,6 +80,26 @@ impl Game {
                         keycode: Some(Keycode::Escape),
                         ..
                     } => break 'running,
+                    Event::Window { win_event, .. } => match win_event {
+                        WindowEvent::SizeChanged(w, h) => {
+                            let w = std::cmp::max(
+                                (w as f32 / scale) as u32,
+                                MIN_W,
+                            );
+                            let h = std::cmp::max(
+                                (h as f32 / scale) as u32,
+                                MIN_H,
+                            );
+                            let dst = Rect::new(0, 0, w, h);
+                            crate::borders::draw_borders(
+                                &mut canvas,
+                                &tiles,
+                                &dst,
+                            )?;
+                            canvas.present();
+                        }
+                        _ => {}
+                    },
                     _ => {}
                 }
             }
