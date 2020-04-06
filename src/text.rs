@@ -6,6 +6,26 @@ use sdl2::render::{Canvas, RenderTarget};
 const FONT1_START_INDEX: usize = 10usize;
 const FONT2_START_INDEX: usize = 19usize;
 
+pub fn dimensions(text: &[u8]) -> (usize, usize) {
+    let mut x = 0usize;
+    let mut y = 0usize;
+    let mut w = 0usize;
+
+    for letter in text {
+        w = std::cmp::max(x, w);
+        if x == 0 {
+            y += 1;
+        }
+        x += 1;
+        if *letter == b'\n' {
+            x = 0;
+        }
+    }
+    w = std::cmp::max(x, w);
+
+    (w * FONT_WIDTH, y * FONT_HEIGHT)
+}
+
 pub fn print<'t, C: RenderTarget>(
     target: &mut Canvas<C>,
     tiles: &Tiles<'t>,

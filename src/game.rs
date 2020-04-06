@@ -4,58 +4,49 @@ use crate::{MAX_TILES_PER_FILE, TILE_HEIGHT, TILE_WIDTH};
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::rect::{Point, Rect};
-use std::fs::create_dir_all;
+use sdl2::render::{Canvas, RenderTarget};
 
 const MIN_W: u32 = TILE_WIDTH as u32 * 20;
 const MIN_H: u32 = TILE_HEIGHT as u32 * 12;
 
-pub struct Game {
-    settings: Settings,
+enum Continuation {
+    Continue,
+    Leave,
 }
 
-impl Game {
-    pub fn new(settings: Settings) -> Self {
-        Game { settings }
+enum State {
+    MainMenu,
+}
+
+pub struct Game<'a, C: RenderTarget> {
+    settings: Settings,
+    canvas: Canvas<C>,
+    sdl_context: sdl2::Sdl,
+    tiles: &'a tile::Tiles<'a>,
+    state: State,
+}
+
+impl<'a, C: RenderTarget> Game<'a, C> {
+    pub fn new(
+        settings: Settings,
+        canvas: Canvas<C>,
+        sdl_context: sdl2::Sdl,
+        tiles: &'a tile::Tiles<'a>,
+    ) -> Self {
+        Game {
+            settings,
+            canvas,
+            tiles,
+            sdl_context,
+            state: State::MainMenu,
+        }
     }
 
-    pub fn run(&self) -> Result<(), String> {
-        let sdl_context = sdl2::init()?;
-        let video_subsystem = sdl_context.video()?;
-
-        let scale = self.settings.scale;
-
+    pub fn run(&mut self) -> Result<(), String> {
         let w = (TILE_WIDTH + 2) * MAX_TILES_PER_FILE;
         let h = (TILE_HEIGHT + 2) * tile::Category::all().len();
 
-        let mut window = video_subsystem
-            .window(
-                "FreeNukum",
-                (scale * w as f32) as u32,
-                (scale * h as f32) as u32,
-            )
-            .position_centered()
-            .vulkan()
-            .resizable()
-            .build()
-            .map_err(|e| e.to_string())?;
-
-        let mut canvas =
-            window.into_canvas().build().map_err(|e| e.to_string())?;
-        canvas
-            .set_scale(self.settings.scale, self.settings.scale)
-            .unwrap();
-        let texture_creator = canvas.texture_creator();
-
-        canvas.clear();
-
-        let path = dirs::data_local_dir()
-            .unwrap()
-            .join("freenukum")
-            .join("data");
-        create_dir_all(&path).unwrap();
-
-        let tiles = tile::load(&path, &texture_creator).unwrap();
-
+        /* TODO: move this to external tool
         for (row, (_category, tiles)) in tiles.iter().enumerate() {
             for (col, tile) in tiles.iter().enumerate() {
                 let dst =
@@ -63,63 +54,86 @@ impl Game {
                 canvas.copy(tile, None, dst).unwrap();
             }
         }
+        */
 
         let dst = Rect::new(0, 0, w as u32, h as u32);
 
         let msg = b"Hello World!\nHow are you today?\nFine, thanks a lot $$$#\":&;<=>@";
 
-        crate::borders::draw(&mut canvas, &tiles, &dst)?;
+        crate::borders::draw(&mut self.canvas, &self.tiles, &dst)?;
+
         crate::text::print(
-            &mut canvas,
-            &tiles,
+            &mut self.canvas,
+            &self.tiles,
             &Point::new(100, 100),
             msg,
         )?;
 
-        canvas.present();
+        self.canvas.present();
 
-        let mut event_pump = sdl_context.event_pump()?;
+        let mut event_pump = self.sdl_context.event_pump()?;
 
         'running: loop {
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit { .. }
-                    | Event::KeyDown {
-                        keycode: Some(Keycode::Escape),
-                        ..
-                    } => break 'running,
-                    Event::Window { win_event, .. } => match win_event {
-                        WindowEvent::SizeChanged(w, h) => {
-                            let w = std::cmp::max(
-                                (w as f32 / scale) as u32,
-                                MIN_W,
-                            );
-                            let h = std::cmp::max(
-                                (h as f32 / scale) as u32,
-                                MIN_H,
-                            );
-                            let dst = Rect::new(0, 0, w, h);
-                            crate::borders::draw(
-                                &mut canvas,
-                                &tiles,
-                                &dst,
-                            )?;
-                            crate::text::print(
-                                &mut canvas,
-                                &tiles,
-                                &Point::new(100, 100),
-                                msg,
-                            )?;
-                            canvas.present();
-                        }
-                        _ => {}
-                    },
-                    _ => {}
+            for e in event_pump.poll_iter() {
+                match self.process_event(e)? {
+                    Continuation::Continue => {}
+                    Continuation::Leave => break 'running,
                 }
             }
-            // The rest of the game loop goes here...
         }
 
         Ok(())
+    }
+
+    fn process_event(&mut self, e: Event) -> Result<Continuation, String> {
+        match e {
+            Event::Window { win_event, .. } => match win_event {
+                WindowEvent::SizeChanged(w, h) => {
+                    let scale = self.settings.scale;
+                    let w =
+                        std::cmp::max((w as f32 / scale) as u32, MIN_W);
+                    let h =
+                        std::cmp::max((h as f32 / scale) as u32, MIN_H);
+                    let dst = Rect::new(0, 0, w, h);
+                    crate::borders::draw(
+                        &mut self.canvas,
+                        &self.tiles,
+                        &dst,
+                    )?;
+                    self.canvas.set_draw_color(sdl2::pixels::Color::RGB(
+                        150, 0, 0,
+                    ));
+                    let msg = b"Hello!";
+                    crate::text::print(
+                        &mut self.canvas,
+                        &self.tiles,
+                        &Point::new(100, 100),
+                        msg,
+                    )?;
+                    self.canvas.present();
+                    Ok(Continuation::Continue)
+                }
+                _ => match self.state {
+                    State::MainMenu => self.process_event_main_menu(e),
+                },
+            },
+            _ => match self.state {
+                State::MainMenu => self.process_event_main_menu(e),
+            },
+        }
+    }
+
+    fn process_event_main_menu(
+        &mut self,
+        e: Event,
+    ) -> Result<Continuation, String> {
+        match e {
+            Event::Quit { .. }
+            | Event::KeyDown {
+                keycode: Some(Keycode::Escape),
+                ..
+            } => Ok(Continuation::Leave),
+            _ => Ok(Continuation::Continue),
+        }
     }
 }
