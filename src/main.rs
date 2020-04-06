@@ -4,17 +4,20 @@ extern crate serde_derive;
 mod borders;
 mod game;
 mod settings;
+mod tile;
 
 use game::Game;
 
-const HALFTILE_WIDTH: u8 = 8;
-const HALFTILE_HEIGHT: u8 = 8;
-const TILES_PER_FILE: usize = 50;
+const HALFTILE_WIDTH: usize = 8;
+const HALFTILE_HEIGHT: usize = 8;
+const TILE_WIDTH: usize = HALFTILE_WIDTH * 2;
+const TILE_HEIGHT: usize = HALFTILE_HEIGHT * 2;
+const MAX_TILES_PER_FILE: usize = 50;
 
 fn main() {
     println!("Starting FreeNukum…");
 
-    let settings = settings::Settings { scale: 1.5f32 };
+    let settings = settings::Settings { scale: 2f32 };
 
     let game = Game::new(settings);
 
