@@ -151,7 +151,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         box_height,
         env);
 
-  FnGeometry * targetrect;
+  Geometry * targetrect;
 
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
@@ -200,7 +200,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
           iter != fn_list_last(menu->entries);
           iter = fn_list_next(iter))
       {
-        targetrect = fn_geometry_new(
+        targetrect = geometry_new(
             FN_FONT_WIDTH * pixelsize * 3,
             FN_FONT_HEIGHT * pixelsize * (i + textrows + 1),
             FN_FONT_WIDTH * pixelsize * menu->width,
@@ -215,10 +215,10 @@ char fn_menu_get_choice(fn_menu_t * menu,
             entry->name
             );
         if (i == menu->currententry) {
-          fn_geometry_set_x(targetrect,
-              fn_geometry_get_x(targetrect) -
+          geometry_set_x(targetrect,
+              geometry_x(targetrect) -
               FN_FONT_WIDTH * pixelsize * 2);
-          pointrect.y = fn_geometry_get_y(targetrect) + destrect.y;
+          pointrect.y = geometry_y(targetrect) + destrect.y;
           fn_texture_clone_to_texture(
               fn_environment_get_tile(
                 env,

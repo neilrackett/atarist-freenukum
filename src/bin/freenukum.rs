@@ -1,4 +1,4 @@
-use freenukum::{
+use freenukum_rs::{
     tile, Game, Settings, MAX_TILES_PER_FILE, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::create_dir_all;

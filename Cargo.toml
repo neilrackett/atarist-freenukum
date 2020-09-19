@@ -1,5 +1,5 @@
 [package]
-name = "freenukum"
+name = "freenukum-rs"
 version = "0.3.0"
 authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"

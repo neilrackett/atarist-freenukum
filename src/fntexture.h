@@ -36,7 +36,7 @@
 
 /* =============================================================== */
 
-#include "fngeometry.h"
+#include "rusted.h"
 #include "fn_environment.h"
 
 /* =============================================================== */
@@ -115,9 +115,9 @@ fn_texture_blit_to_sdl_surface(
 void
 fn_texture_clone_to_texture(
     FnTexture * source,
-    FnGeometry * sourcegeometry,
+    Geometry * sourcegeometry,
     FnTexture * target,
-    FnGeometry * targetgeometry);
+    Geometry * targetgeometry);
 
 /* =============================================================== */
 
@@ -138,7 +138,7 @@ fn_texture_get_height(
 void
 fn_texture_fill_area(
     FnTexture * texture,
-    FnGeometry * area,
+    Geometry * area,
     guchar red,
     guchar green,
     guchar blue);

@@ -7,6 +7,10 @@ fn main() {
 
     cbindgen::Builder::new()
         .with_crate(crate_dir)
+        .with_pragma_once(true)
+        .with_language(cbindgen::Language::C)
+        .with_tab_width(4)
+        .with_line_length(78)
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("src/rusted.h");

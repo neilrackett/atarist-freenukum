@@ -43,7 +43,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   FnTexture * inputfield_surface = NULL;
 
   SDL_Rect dstrect;
-  FnGeometry * inputfield_rect;
+  Geometry * inputfield_rect;
 
   int i = 0;
   int res = 0;
@@ -78,7 +78,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   dstrect.w = fn_texture_get_width(msgbox);
   dstrect.h = fn_texture_get_height(msgbox);
 
-  inputfield_rect = fn_geometry_new(
+  inputfield_rect = geometry_new(
       FN_FONT_WIDTH * pixelsize,
       fn_texture_get_height(msgbox) - FN_FONT_HEIGHT * 4 * pixelsize,
       fn_texture_get_width(inputfield_surface),

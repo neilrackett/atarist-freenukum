@@ -34,14 +34,14 @@
 #include "fn_tile.h"
 #include "fn_drop.h"
 #include "fntexture.h"
-#include "fngeometry.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
 FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 {
     FnTexture * drop;
-    FnGeometry * geometry;
+    Geometry * geometry;
     size_t num_read = 0;
     fn_tileheader_t h;
 
@@ -64,7 +64,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
     h.width = 2;
     h.height = 16;
 
-    geometry = fn_geometry_new(x, y, width, height);
+    geometry = geometry_new(x, y, width, height);
 
     while(num_read != num_loads)
     {
@@ -80,8 +80,8 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
             x = 0;
             y += 16 * pixelsize;
         }
-        fn_geometry_set_x(geometry, x);
-        fn_geometry_set_y(geometry, y);
+        geometry_set_x(geometry, x);
+        geometry_set_y(geometry, y);
         num_read++;
     }
 

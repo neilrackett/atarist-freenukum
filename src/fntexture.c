@@ -400,18 +400,12 @@ fn_texture_blit_to_sdl_surface(
 void
 fn_texture_clone_to_texture(
     FnTexture * source,
-    FnGeometry * sourcegeometry,
+    Geometry * sourcegeometry,
     FnTexture * target,
-    FnGeometry * targetgeometry)
+    Geometry * targetgeometry)
 {
   g_return_if_fail(FN_IS_TEXTURE(source));
   g_return_if_fail(FN_IS_TEXTURE(target));
-  if (sourcegeometry != NULL) {
-    g_return_if_fail(FN_IS_GEOMETRY(sourcegeometry));
-  }
-  if (targetgeometry != NULL) {
-    g_return_if_fail(FN_IS_GEOMETRY(targetgeometry));
-  }
 
   FnTexturePrivate * sourcepriv = source->priv;
   FnTexturePrivate * targetpriv = target->priv;
@@ -419,21 +413,19 @@ fn_texture_clone_to_texture(
   SDL_Rect * sourcerect = NULL;
   if (sourcegeometry != NULL) {
     sourcerect = g_malloc0(sizeof(SDL_Rect));
-    fn_geometry_get_data(sourcegeometry,
-        (gint  *) &(sourcerect->x),
-        (gint  *) &(sourcerect->y),
-        (guint *) &(sourcerect->w),
-        (guint *) &(sourcerect->h));
+    sourcerect->x = sourcegeometry->x;
+    sourcerect->y = sourcegeometry->y;
+    sourcerect->w = sourcegeometry->w;
+    sourcerect->h = sourcegeometry->h;
   }
 
   SDL_Rect * targetrect = NULL;
   if (targetgeometry != NULL) {
     targetrect = g_malloc0(sizeof(SDL_Rect));
-    fn_geometry_get_data(targetgeometry,
-        (gint  *) &(targetrect->x),
-        (gint  *) &(targetrect->y),
-        (guint *) &(targetrect->w),
-        (guint *) &(targetrect->h));
+    targetrect->x = targetgeometry->x;
+    targetrect->y = targetgeometry->y;
+    targetrect->w = targetgeometry->w;
+    targetrect->h = targetgeometry->h;
   }
 
   SDL_BlitSurface(
@@ -471,15 +463,12 @@ fn_texture_get_height(FnTexture * texture)
 void
 fn_texture_fill_area(
     FnTexture * texture,
-    FnGeometry * area,
+    Geometry * area,
     guchar red,
     guchar green,
     guchar blue)
 {
   g_return_if_fail(FN_IS_TEXTURE(texture));
-  if (area != NULL) {
-    g_return_if_fail(FN_IS_GEOMETRY(area));
-  }
 
   gint x;
   gint y;
@@ -487,7 +476,10 @@ fn_texture_fill_area(
   guint height;
 
   if (area != NULL) {
-    fn_geometry_get_data(area, &x, &y, &width, &height);
+    x = area->x;
+    y = area->y;
+    width = area->w;
+    height = area->h;
   } else {
     x = 0;
     y = 0;

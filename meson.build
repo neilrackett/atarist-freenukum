@@ -5,7 +5,47 @@ project(
     default_options: ['c_std=c11'],
 )
 
-src = [
+cargo = find_program('cargo', required: true)
+cargo_script = find_program('scripts/cargo.sh')
+
+profile = get_option('profile')
+
+cargo_manifest = files(
+    'Cargo.toml',
+)
+
+rust_src = files(
+    'src/borders.rs',
+    'src/game.rs',
+    'src/geometry.rs',
+    'src/lib.rs',
+    'src/settings.rs',
+    'src/sprite.rs',
+    'src/text.rs',
+    'src/tile.rs',
+)
+
+cargo_build = custom_target(
+    'cargo-build',
+    build_by_default: true,
+    command: [
+        cargo_script, 
+        '@SOURCE_ROOT@',
+        '@OUTPUT@',
+        meson.build_root(),
+        profile,
+    ],
+    console: true,
+    input: [
+        rust_src,
+        cargo_manifest,
+    ],
+    output: [
+        'libfreenukum_rs.so',
+    ]
+)
+
+c_src = [
     'src/fn_borders.c',
     'src/fn_bot.c',
     'src/fn_collision.c',
@@ -35,7 +75,6 @@ src = [
     'src/fn_tilecache.c',
     'src/fnactor.c',
     'src/fnactorgroup.c',
-    'src/fngeometry.c',
     'src/fngraphics.c',
     'src/fnscreen.c',
     'src/fntexture.c',
@@ -75,7 +114,6 @@ test_tile = executable(
     'test_tile',
     [
         'src/fn_test_tile.c',
-
         'src/fn_bot.c',
         'src/fn_collision.c',
         'src/fn_data.c',
@@ -93,7 +131,6 @@ test_tile = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -103,6 +140,12 @@ test_tile = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -130,7 +173,6 @@ test_borders = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -140,6 +182,12 @@ test_borders = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -166,7 +214,6 @@ test_drop = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -176,6 +223,12 @@ test_drop = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -203,7 +256,6 @@ test_effect = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -213,6 +265,12 @@ test_effect = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -247,7 +305,6 @@ test_hero = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -257,6 +314,12 @@ test_hero = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -282,7 +345,6 @@ test_infobox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -292,6 +354,12 @@ test_infobox = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -319,7 +387,6 @@ test_inputbox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -329,6 +396,12 @@ test_inputbox = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -354,7 +427,6 @@ test_level_loader = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -364,6 +436,12 @@ test_level_loader = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -391,7 +469,6 @@ test_mainmenu = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -401,6 +478,12 @@ test_mainmenu = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -427,7 +510,6 @@ test_menu = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -437,6 +519,12 @@ test_menu = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -462,7 +550,6 @@ test_msgbox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -472,6 +559,12 @@ test_msgbox = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -498,7 +591,6 @@ test_picture = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -508,6 +600,12 @@ test_picture = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -535,7 +633,6 @@ test_picture_splash = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -545,6 +642,12 @@ test_picture_splash = executable(
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
+    ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
     ],
 )
 
@@ -579,7 +682,6 @@ test_tilecache = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngeometry.c',
         'src/fngraphics.c',
         'src/fntexture.c',
     ],
@@ -590,11 +692,17 @@ test_tilecache = executable(
         sdl_ttf_lib,
         zip_lib,
     ],
+    objects: [
+        'build/libfreenukum_rs.so',
+    ],
+    link_depends: [
+        cargo_build,
+    ],
 )
 
 executable(
     'freenukum',
-    src,
+    c_src,
     dependencies: [
         curl_lib,
         glib,
@@ -603,45 +711,10 @@ executable(
         zip_lib,
     ],
     include_directories: include_directories('.'),
-)
-
-cargo = find_program('cargo', required: true)
-cargo_script = find_program('scripts/cargo.sh')
-
-profile = get_option('profile')
-
-cargo_manifest = files(
-    'Cargo.toml',
-)
-
-rust_sources = files(
-    'src/borders.rs',
-    'src/config.h.in',
-    'src/game.rs',
-    'src/geometry.rs',
-    'src/lib.rs',
-    'src/settings.rs',
-    'src/sprite.rs',
-    'src/text.rs',
-    'src/tile.rs',
-)
-
-cargo_release = custom_target(
-    'cargo-build',
-    build_by_default: true,
-    command: [
-        cargo_script, 
-        '@SOURCE_ROOT@',
-        '@OUTPUT@',
-        meson.build_root(),
-        profile,
+    objects: [
+        'build/libfreenukum_rs.so',
     ],
-    console: true,
-    input: [
-        rust_sources,
-        cargo_manifest,
+    link_depends: [
+        cargo_build,
     ],
-    output: [
-        'libfreenukum.so',
-    ]
 )

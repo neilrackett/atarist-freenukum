@@ -39,7 +39,7 @@
 
 void fn_text_printletter(
     FnTexture * target,
-    FnGeometry * r,
+    Geometry * r,
     fn_environment_t * env,
     char c)
 {
@@ -60,40 +60,40 @@ void fn_text_printletter(
 
 void fn_text_print(
     FnTexture * target,
-    FnGeometry * r,
+    Geometry * r,
     fn_environment_t * env,
     char * text)
 {
-  FnGeometry * dstrect;
+  Geometry * dstrect;
 
   char * walker;
   char * end;
 
   if (r != NULL) {
-    dstrect = fn_geometry_clone(r);
+    dstrect = geometry_clone(r);
   } else {
-    dstrect = fn_geometry_new(0, 0, 0, 0);
+    dstrect = geometry_new(0, 0, 0, 0);
   }
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
-  fn_geometry_set_width(dstrect, pixelsize * FN_FONT_WIDTH);
-  fn_geometry_set_height(dstrect, pixelsize * FN_FONT_HEIGHT);
+  geometry_set_w(dstrect, pixelsize * FN_FONT_WIDTH);
+  geometry_set_h(dstrect, pixelsize * FN_FONT_HEIGHT);
 
   end = text + strlen(text);
 
   for (walker = text; walker < end; walker++) {
     if (*walker == '\n') {
-      fn_geometry_set_x(dstrect, fn_geometry_get_x(r));
-      gint y = fn_geometry_get_y(dstrect);
-      fn_geometry_set_y(dstrect, y + pixelsize * FN_FONT_HEIGHT);
+      geometry_set_x(dstrect, geometry_x(r));
+      gint y = geometry_y(dstrect);
+      geometry_set_y(dstrect, y + pixelsize * FN_FONT_HEIGHT);
     } else {
       fn_text_printletter(
           target,
           dstrect,
           env,
           *walker);
-      gint x = fn_geometry_get_x(dstrect);
-      fn_geometry_set_x(dstrect, x + pixelsize * FN_FONT_WIDTH);
+      gint x = geometry_x(dstrect);
+      geometry_set_x(dstrect, x + pixelsize * FN_FONT_WIDTH);
     }
   }
   g_object_unref(dstrect);

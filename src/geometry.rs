@@ -8,6 +8,10 @@ pub struct Geometry {
 }
 
 impl Geometry {
+    pub fn new(x: i32, y: i32, w: u32, h: u32) -> Geometry {
+        Geometry { x, y, w, h }
+    }
+
     pub fn set_x(&mut self, x: i32) {
         self.x = x;
     }
@@ -48,6 +52,23 @@ impl Geometry {
 
 mod ffi {
     use super::Geometry;
+
+    #[no_mangle]
+    pub unsafe extern "C" fn geometry_new(
+        x: i32,
+        y: i32,
+        w: u32,
+        h: u32,
+    ) -> *mut Geometry {
+        &mut Geometry::new(x, y, w, h)
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn geometry_clone(
+        geometry: *const Geometry,
+    ) -> *mut Geometry {
+        &mut (*geometry).clone()
+    }
 
     #[no_mangle]
     pub unsafe extern "C" fn geometry_set_x(

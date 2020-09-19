@@ -38,13 +38,13 @@
 #include "fn_tilecache.h"
 #include "fn_environment.h"
 #include "fntexture.h"
-#include "fngeometry.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
 void fn_text_printletter(
     FnTexture * target,
-    FnGeometry * r,
+    Geometry * r,
     fn_environment_t * env,
     char c);
 
@@ -52,7 +52,7 @@ void fn_text_printletter(
 
 void fn_text_print(
     FnTexture * target,
-    FnGeometry * r,
+    Geometry * r,
     fn_environment_t * env,
     char * text);
 

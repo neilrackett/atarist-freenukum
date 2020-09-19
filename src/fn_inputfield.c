@@ -134,8 +134,8 @@ void fn_inputfield_blit(fn_inputfield_t * field,
   fn_text_print(target, NULL, env,
       field->data);
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  FnGeometry * cursorrect =
-    fn_geometry_new(
+  Geometry * cursorrect =
+    geometry_new(
         field->cursor * FN_FONT_WIDTH * pixelsize - pixelsize / 2,
         pixelsize,
         pixelsize,
