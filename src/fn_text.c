@@ -39,7 +39,7 @@
 
 void fn_text_printletter(
     FnTexture * target,
-    Geometry * r,
+    FnGeometry * r,
     fn_environment_t * env,
     char c)
 {
@@ -60,11 +60,11 @@ void fn_text_printletter(
 
 void fn_text_print(
     FnTexture * target,
-    Geometry * r,
+    FnGeometry * r,
     fn_environment_t * env,
     char * text)
 {
-  Geometry dstrect;
+  FnGeometry dstrect;
 
   char * walker;
   char * end;
@@ -72,7 +72,7 @@ void fn_text_print(
   if (r != NULL) {
     dstrect = *r;
   } else {
-    dstrect = geometry_create(0, 0, 0, 0);
+    dstrect = fn_geometry_create(0, 0, 0, 0);
   }
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 

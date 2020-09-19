@@ -44,7 +44,7 @@
 
 void fn_text_printletter(
     FnTexture * target,
-    Geometry * r,
+    FnGeometry * r,
     fn_environment_t * env,
     char c);
 
@@ -52,7 +52,7 @@ void fn_text_printletter(
 
 void fn_text_print(
     FnTexture * target,
-    Geometry * r,
+    FnGeometry * r,
     fn_environment_t * env,
     char * text);
 

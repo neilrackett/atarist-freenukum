@@ -89,7 +89,7 @@ FnTexture * fn_msgbox(
   FnTexture * msgbox;
   Uint8 i, j;
   int tilenr;
-  Geometry r = geometry_create(0, 0, 0, 0);
+  FnGeometry r = fn_geometry_create(0, 0, 0, 0);
 
   fn_msgbox_get_text_information(
       text,

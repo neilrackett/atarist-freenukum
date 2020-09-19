@@ -41,7 +41,7 @@
 FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 {
     FnTexture * drop;
-    Geometry geometry;
+    FnGeometry geometry;
     size_t num_read = 0;
     fn_tileheader_t h;
 
@@ -64,7 +64,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
     h.width = 2;
     h.height = 16;
 
-    geometry = geometry_create(x, y, width, height);
+    geometry = fn_geometry_create(x, y, width, height);
 
     while(num_read != num_loads)
     {

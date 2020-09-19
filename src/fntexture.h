@@ -115,9 +115,9 @@ fn_texture_blit_to_sdl_surface(
 void
 fn_texture_clone_to_texture(
     FnTexture * source,
-    Geometry * sourcegeometry,
+    FnGeometry * sourcegeometry,
     FnTexture * target,
-    Geometry * targetgeometry);
+    FnGeometry * targetgeometry);
 
 /* =============================================================== */
 
@@ -138,7 +138,7 @@ fn_texture_get_height(
 void
 fn_texture_fill_area(
     FnTexture * texture,
-    Geometry * area,
+    FnGeometry * area,
     guchar red,
     guchar green,
     guchar blue);

@@ -54,7 +54,7 @@ mod ffi {
     use super::Geometry;
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_create(
+    pub unsafe extern "C" fn fn_geometry_create(
         x: i32,
         y: i32,
         w: u32,
@@ -64,14 +64,14 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_clone(
+    pub unsafe extern "C" fn fn_geometry_clone(
         geometry: *const Geometry,
     ) -> *mut Geometry {
         &mut (*geometry).clone()
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_set_x(
+    pub unsafe extern "C" fn fn_geometry_set_x(
         geometry: *mut Geometry,
         x: i32,
     ) {
@@ -79,7 +79,7 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_set_y(
+    pub unsafe extern "C" fn fn_geometry_set_y(
         geometry: *mut Geometry,
         y: i32,
     ) {
@@ -87,7 +87,7 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_set_w(
+    pub unsafe extern "C" fn fn_geometry_set_w(
         geometry: *mut Geometry,
         w: u32,
     ) {
@@ -95,7 +95,7 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_set_h(
+    pub unsafe extern "C" fn fn_geometry_set_h(
         geometry: *mut Geometry,
         h: u32,
     ) {
@@ -103,7 +103,7 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_set_data(
+    pub unsafe extern "C" fn fn_geometry_set_data(
         geometry: *mut Geometry,
         x: i32,
         y: i32,
@@ -114,22 +114,30 @@ mod ffi {
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_x(geometry: *const Geometry) -> i32 {
+    pub unsafe extern "C" fn fn_geometry_x(
+        geometry: *const Geometry,
+    ) -> i32 {
         (*geometry).x()
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_y(geometry: *const Geometry) -> i32 {
+    pub unsafe extern "C" fn fn_geometry_y(
+        geometry: *const Geometry,
+    ) -> i32 {
         (*geometry).y()
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_w(geometry: *const Geometry) -> u32 {
+    pub unsafe extern "C" fn fn_geometry_w(
+        geometry: *const Geometry,
+    ) -> u32 {
         (*geometry).w()
     }
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_h(geometry: *const Geometry) -> u32 {
+    pub unsafe extern "C" fn fn_geometry_h(
+        geometry: *const Geometry,
+    ) -> u32 {
         (*geometry).h()
     }
 }

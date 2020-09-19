@@ -151,7 +151,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         box_height,
         env);
 
-  Geometry targetrect;
+  FnGeometry targetrect;
 
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
@@ -200,7 +200,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
           iter != fn_list_last(menu->entries);
           iter = fn_list_next(iter))
       {
-        targetrect = geometry_create(
+        targetrect = fn_geometry_create(
             FN_FONT_WIDTH * pixelsize * 3,
             FN_FONT_HEIGHT * pixelsize * (i + textrows + 1),
             FN_FONT_WIDTH * pixelsize * menu->width,
