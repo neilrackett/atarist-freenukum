@@ -56,11 +56,6 @@ struct fn_environment_t {
   Uint8 initialized;
 
   /**
-   * The pixelsize.
-   */
-  Uint8 pixelsize;
-
-  /**
    * The video flags.
    */
   Uint32 videoflags;
@@ -170,30 +165,6 @@ Uint8 fn_environment_load_tilecache(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the pixel size of the environment.
- *
- * @param  env  The environment.
- *
- * @return The pixelsize.
- */
-Uint8 fn_environment_get_pixelsize(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Set the pixelsize for the environment.
- *
- * @param  env        The environment.
- * @param  pixelsize  The pixelsize. It must be a number from
- *                    1 to 10. If an invalid number is passed,
- *                    the pixelsize is reset to 1.
- */
-void fn_environment_set_pixelsize(fn_environment_t * env,
-    Uint8 pixelsize);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the information if the environment is in fullscreen mode.
  *
  * @param  env  The environment.
@@ -231,33 +202,11 @@ Uint32 fn_environment_get_transparent(fn_environment_t * env);
  *
  * @param  env     The environment.
  * @param  width   The width of the surface in original-game pixels.
- *                 The returned width will be multiplied by the
- *                 pixelsize of the environment.
  * @param  height  The height of the surface in orginal-game pixels.
- *                 The returned height will be multiplied by the
- *                 pixelsize of the environment.
  *
  * @return The newly created surface.
  */
 SDL_Surface * fn_environment_create_surface(fn_environment_t * env,
-    int width,
-    int height);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create a new SDL Surface with the environment's settings.
- * The user is responsible for freeing that surface on his own by
- * calling SDL_Free on it.
- *
- * @param  env     The environment.
- * @param  width   The width of the surface in real pixels.
- * @param  height  The height of the surface in real pixels.
- *
- * @return The newly created surface.
- */
-SDL_Surface * fn_environment_create_surface_with_aboslute_size(
-    fn_environment_t * env,
     int width,
     int height);
 

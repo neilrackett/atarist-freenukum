@@ -74,24 +74,23 @@ void fn_text_print(
   } else {
     dstrect = fn_geometry_create(0, 0, 0, 0);
   }
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
-  dstrect.w = pixelsize * FN_FONT_WIDTH;
-  dstrect.h = pixelsize * FN_FONT_HEIGHT;
+  dstrect.w = FN_FONT_WIDTH;
+  dstrect.h = FN_FONT_HEIGHT;
 
   end = text + strlen(text);
 
   for (walker = text; walker < end; walker++) {
     if (*walker == '\n') {
       dstrect.x = r->x;
-      dstrect.y = dstrect.y + pixelsize * FN_FONT_HEIGHT;
+      dstrect.y = dstrect.y + FN_FONT_HEIGHT;
     } else {
       fn_text_printletter(
           target,
           &dstrect,
           env,
           *walker);
-      dstrect.x = dstrect.x + pixelsize * FN_FONT_WIDTH;
+      dstrect.x = dstrect.x + FN_FONT_WIDTH;
     }
   }
 }

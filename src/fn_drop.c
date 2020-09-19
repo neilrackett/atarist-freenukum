@@ -47,8 +47,6 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 
     FnTexture * tile;
 
-    Uint8 pixelsize = fn_environment_get_pixelsize(env);
-
     drop = fn_texture_new_with_environment(
         FN_DROP_WIDTH * FN_TILE_WIDTH,
         FN_DROP_HEIGHT * FN_TILE_HEIGHT,
@@ -58,8 +56,8 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 
     gint  x      = 0;
     gint  y      = 0;
-    guint width  = FN_TILE_WIDTH  * pixelsize;
-    guint height = FN_TILE_HEIGHT * pixelsize;
+    guint width  = FN_TILE_WIDTH;
+    guint height = FN_TILE_HEIGHT;
 
     h.width = 2;
     h.height = 16;
@@ -74,11 +72,11 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
             FALSE);
         fn_texture_clone_to_texture(tile, NULL, drop, &geometry);
         g_object_unref(tile);
-        x += 16 * pixelsize;
-        if (x == 16 * FN_DROP_WIDTH * pixelsize)
+        x += 16;
+        if (x == 16 * FN_DROP_WIDTH)
         {
             x = 0;
-            y += 16 * pixelsize;
+            y += 16;
         }
         geometry.x = x;
         geometry.y = y;

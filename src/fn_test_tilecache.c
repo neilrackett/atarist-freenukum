@@ -66,8 +66,6 @@ void blithex(SDL_Surface * target,
   snprintf(dst, 3, "%02X", x);
   int i;
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-
   for (i = 0; i < strlen(dst); i++) {
     if(dst[i] >= ' ' && dst[i] <= 'Z')
       tilenr = dst[i] - ' ' + FONT_ASCII_UPPERCASE;
@@ -78,7 +76,7 @@ void blithex(SDL_Surface * target,
         NULL,
         target,
         r);
-    r->x += (pixelsize * FN_FONT_WIDTH);
+    r->x += FN_FONT_WIDTH;
   }
 }
 
@@ -90,13 +88,11 @@ int main(int argc, char ** argv)
   size_t i = 0;
   size_t j = 0;
 
-  Uint8 pixelsize = 1;
   int res;
   int quit = 0;
   SDL_Event event;
   fn_environment_t * env;
   env = fn_environment_create();
-  fn_environment_set_pixelsize(env, 1);
   fn_environment_load_tilecache(env);
 
   fn_error_set_handler(fn_error_print_commandline);
@@ -139,8 +135,8 @@ int main(int argc, char ** argv)
   }
 
   screen = SDL_SetVideoMode(
-      FN_TILE_WIDTH * pixelsize * (50+1),
-      FN_TILE_HEIGHT * pixelsize * (26+1),
+      FN_TILE_WIDTH * (50+1),
+      FN_TILE_HEIGHT * (26+1),
       FN_COLOR_DEPTH,
       FN_SURFACE_FLAGS);
 
@@ -154,12 +150,12 @@ int main(int argc, char ** argv)
   SDL_Rect r;
   r.x = 0;
   r.y = 0;
-  r.w = FN_TILE_WIDTH * pixelsize;
-  r.h = FN_TILE_HEIGHT * pixelsize;
+  r.w = FN_TILE_WIDTH;
+  r.h = FN_TILE_HEIGHT;
 
   for (i = 0; i != 26; i++) {
     r.x = 0;
-    r.y = (i+1) * FN_TILE_HEIGHT * pixelsize;
+    r.y = (i+1) * FN_TILE_HEIGHT;
     blithex(screen,
         &r,
         env,
@@ -167,7 +163,7 @@ int main(int argc, char ** argv)
   }
 
   for (i = 0; i != 50; i++) {
-    r.x = (i+1) * FN_TILE_WIDTH * pixelsize;
+    r.x = (i+1) * FN_TILE_WIDTH;
     r.y = 0;
     blithex(screen,
         &r,
@@ -179,8 +175,8 @@ int main(int argc, char ** argv)
   {
     for(i = 0; i != size[j]; i++)
     {
-      r.x = (i+1) * FN_TILE_WIDTH * pixelsize;
-      r.y = (j+1) * FN_TILE_HEIGHT * pixelsize;
+      r.x = (i+1) * FN_TILE_WIDTH;
+      r.y = (j+1) * FN_TILE_HEIGHT;
       FnTexture * tile =
         fn_environment_get_tile(env, sumuntil(size, j)+i);
       fn_texture_blit_to_sdl_surface(

@@ -38,19 +38,18 @@
 void fn_effect_blend_step(
     SDL_Surface * s,
     Uint32 blendcolor,
-    Uint32 removecolor,
-    Uint8 pixelsize)
+    Uint32 removecolor)
 {
   SDL_Rect r;
   Uint32 * pixels;
 
-  r.w = pixelsize;
-  r.h = pixelsize;
+  r.w = 1;
+  r.h = 1;
   fn_error_printf(1024, "s->w = %d, s->h = %d", s->w, s->h);
 
   pixels = (Uint32 *)s->pixels;
-  for (r.y = 0; r.y < pixelsize * s->h; r.y += pixelsize) {
-    for (r.x = 0; r.x < pixelsize * s->w; r.x += pixelsize) {
+  for (r.y = 0; r.y < s->h; r.y += 1) {
+    for (r.x = 0; r.x < s->w; r.x += 1) {
       if (pixels[r.x + r.y * s->w] == removecolor) {
         SDL_FillRect(s, &r, blendcolor);
       }
@@ -63,8 +62,7 @@ void fn_effect_blend_step(
 void fn_effect_blend(
     SDL_Surface * s,
     Uint8 step,
-    Uint32 blendcolor,
-    Uint8 pixelsize)
+    Uint32 blendcolor)
 {
   SDL_PixelFormat * format = s->format;
   static Uint32 colors[16] = {
@@ -91,8 +89,7 @@ void fn_effect_blend(
 
   fn_effect_blend_step(s,
       blendcolor,
-      colors[step],
-      pixelsize);
+      colors[step]);
 }
 
 /* --------------------------------------------------------------- */

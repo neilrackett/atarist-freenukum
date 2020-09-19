@@ -44,7 +44,6 @@ int main(int argc, char ** argv)
 {
     int fd;
     fn_tileheader_t h;
-    Uint8 pixelsize = 3;
     int quit = 0;
     int res;
     SDL_Event event;
@@ -72,8 +71,8 @@ int main(int argc, char ** argv)
     }
 
     screen = SDL_SetVideoMode(
-            FN_DROP_WIDTH * FN_TILE_WIDTH * pixelsize,
-            FN_DROP_HEIGHT * FN_TILE_HEIGHT * pixelsize,
+            FN_DROP_WIDTH * FN_TILE_WIDTH,
+            FN_DROP_HEIGHT * FN_TILE_HEIGHT,
             FN_COLOR_DEPTH,
             FN_SURFACE_FLAGS);
 

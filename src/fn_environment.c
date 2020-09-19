@@ -124,7 +124,6 @@ fn_environment_t * fn_environment_create()
   fn_environment_t * env = malloc(sizeof(fn_environment_t));
 
   /* fill with default values */
-  env->pixelsize = 2;
   env->videoflags = FN_SURFACE_FLAGS;
   env->transparent = 0;
   env->fullscreen = 0;
@@ -208,13 +207,6 @@ fn_environment_t * fn_environment_create()
     }
   }
 
-  /* TODO rewrite this once we can load uint8 from the settings */
-  long int pixelsize = 0;
-  fn_settings_get_longint_with_default(env->settings,
-      "pixelsize",
-      &pixelsize, FN_DEFAULT_PIXELSIZE);
-  env->pixelsize = (Uint8)pixelsize;
-
   fn_settings_get_bool_with_default(env->settings,
       "fullscreen",
       &(env->fullscreen), FN_DEFAULT_FULLSCREEN);
@@ -230,8 +222,8 @@ fn_environment_t * fn_environment_create()
   env->graphics = fn_graphics_new(FALSE);
 
   env->screen = SDL_SetVideoMode(
-      FN_WINDOW_WIDTH * env->pixelsize,
-      FN_WINDOW_HEIGHT * env->pixelsize,
+      FN_WINDOW_WIDTH,
+      FN_WINDOW_HEIGHT,
       FN_COLOR_DEPTH,
       env->videoflags);
   if (env->screen == NULL) {
@@ -320,7 +312,7 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
       printf("%s\n", message_cmdline);
 #ifdef HAVE_SDL_SDL_TTF_H
       TTF_Font * font = NULL;
-      int fontsize = 10 * env->pixelsize;
+      int fontsize = 10;
       if (TTF_Init() != -1) {
         font = fn_environment_loadfont(fontsize);
       }
@@ -423,25 +415,6 @@ Uint8 fn_environment_load_tilecache(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_get_pixelsize(fn_environment_t * env)
-{
-  return env->pixelsize;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_environment_set_pixelsize(fn_environment_t * env,
-    Uint8 pixelsize)
-{
-  if (pixelsize > 10 || pixelsize < 1) {
-    env->pixelsize = 1;
-  } else {
-    env->pixelsize = pixelsize;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_environment_get_fullscreen(fn_environment_t * env)
 {
   return env->fullscreen;
@@ -467,18 +440,10 @@ Uint32 fn_environment_get_transparent(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-SDL_Surface * fn_environment_create_surface(fn_environment_t * env,
-   int width, int height)
-{
-  return fn_environment_create_surface_with_aboslute_size(
-      env, width * env->pixelsize, height * env->pixelsize);
-}
-
-/* --------------------------------------------------------------- */
-
-SDL_Surface * fn_environment_create_surface_with_aboslute_size(
+SDL_Surface * fn_environment_create_surface(
     fn_environment_t * env,
-    int width, int height)
+    int width,
+    int height)
 {
   SDL_Surface * surface = SDL_CreateRGBSurface(
       env->screen->flags,

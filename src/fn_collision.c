@@ -76,37 +76,33 @@ int fn_collision_overlap_rect_area(SDL_Rect * rect,
 /* --------------------------------------------------------------- */
 
 void fn_collision_area_draw(SDL_Surface * destination,
-    Uint8 pixelsize,
     Uint32 x, Uint32 y, Uint32 w, Uint32 h)
 {
   Uint32 color = FN_COLLISION_DEBUG_COLOR(destination->format);
   SDL_Rect destrect;
 
-  destrect.x = pixelsize * x;
-  destrect.y = pixelsize * y;
-  destrect.w = pixelsize;
-  destrect.h = pixelsize * h;
+  destrect.x = x;
+  destrect.y = y;
+  destrect.w = 1;
+  destrect.h = h;
 
   SDL_FillRect(destination, &destrect, color);
-  destrect.x += (w - 1) * pixelsize;
+  destrect.x += w - 1;
   SDL_FillRect(destination, &destrect, color);
-  destrect.x = x * pixelsize;
-  destrect.y = y * pixelsize;
-  destrect.h = pixelsize;
-  destrect.w = w * pixelsize;
+  destrect.x = x;
+  destrect.y = y;
+  destrect.h = 1;
+  destrect.w = w;
   SDL_FillRect(destination, &destrect, color);
-  destrect.y = (y + h - 1) * pixelsize;
+  destrect.y = y + h - 1;
   SDL_FillRect(destination, &destrect, color);
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_collision_rect_draw(SDL_Surface * destination,
-    Uint8 pixelsize,
-    SDL_Rect * rect)
+void fn_collision_rect_draw(SDL_Surface * destination, SDL_Rect * rect)
 {
-  fn_collision_area_draw(destination, pixelsize,
-      rect->x, rect->y, rect->w, rect->h);
+  fn_collision_area_draw(destination, rect->x, rect->y, rect->w, rect->h);
 }
 
 /* --------------------------------------------------------------- */

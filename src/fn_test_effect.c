@@ -56,8 +56,6 @@ int main(int argc, char ** argv)
   int quit = 0;
   Uint8 step = 0;
 
-  Uint8 pixelsize = 2;
-
   fn_error_set_handler(fn_error_print_commandline);
 
   picture = fn_picture_load(
@@ -77,7 +75,7 @@ int main(int argc, char ** argv)
           quit = 1;
           break;
         case SDL_KEYDOWN:
-          fn_effect_blend(screen, step, 0x00, pixelsize);
+          fn_effect_blend(screen, step, 0x00);
           step++;
           break;
         case SDL_VIDEOEXPOSE:

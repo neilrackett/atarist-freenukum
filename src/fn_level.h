@@ -261,17 +261,6 @@ fn_tilecache_t * fn_level_get_tilecache(fn_level_t * lv);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the pixel size of the level.
- *
- * @param  lv  The level.
- *
- * @return The pixel size.
- */
-Uint8 fn_level_get_pixelsize(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Indicate if we are still playing this level.
  * 
  * @param  lv    The level we want to play.

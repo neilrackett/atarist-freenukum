@@ -77,11 +77,8 @@ int main(int argc, char ** argv)
     char * homedir;
     char levelfile[1024];
     fn_environment_t * env = fn_environment_create();
-    fn_environment_set_pixelsize(env, 1);
     fn_environment_load_tilecache(env);
     fn_environment_check_for_episodes(env);
-
-    Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
     int argok = 0;
     char levelnumber;
@@ -151,8 +148,8 @@ int main(int argc, char ** argv)
     SDL_Rect r;
     r.x = 0;
     r.y = 0;
-    r.w = FN_TILE_WIDTH * pixelsize * FN_LEVEL_WIDTH;
-    r.h = FN_TILE_HEIGHT * pixelsize * FN_LEVEL_HEIGHT;
+    r.w = FN_TILE_WIDTH * FN_LEVEL_WIDTH;
+    r.h = FN_TILE_HEIGHT * FN_LEVEL_HEIGHT;
 
     fn_level_blit_to_surface(lv,
         level,
@@ -228,8 +225,8 @@ int main(int argc, char ** argv)
 
                       global_x = (r.x) + (click_x);
                       global_y = (r.y) + (click_y);
-                      tile_x = global_x / FN_TILE_WIDTH / pixelsize;
-                      tile_y = global_y / FN_TILE_HEIGHT / pixelsize;
+                      tile_x = global_x / FN_TILE_WIDTH;
+                      tile_y = global_y / FN_TILE_HEIGHT;
 
                       tilenr = fn_level_get_raw(lv, tile_x, tile_y);
                       is_solid = fn_level_is_solid(lv, tile_x, tile_y);

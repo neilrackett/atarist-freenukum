@@ -341,13 +341,11 @@ fn_texture_set_data(
   guint j = 0;
   guchar * iter = data;
 
-  guchar pixelsize = fn_environment_get_pixelsize(priv->env);
-
   SDL_Rect r;
   r.x = 0;
   r.y = 0;
-  r.w = pixelsize;
-  r.h = pixelsize;
+  r.w = 1;
+  r.h = 1;
 
   SDL_PixelFormat * fmt = surface->format;
   Uint32 color;
@@ -367,8 +365,8 @@ fn_texture_set_data(
         color = SDL_MapRGB(fmt, red, green, blue);
       }
 
-      r.x = j * pixelsize;
-      r.y = i * pixelsize;
+      r.x = j;
+      r.y = i;
 
       SDL_FillRect(surface, &r, color);
 

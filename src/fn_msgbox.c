@@ -96,7 +96,6 @@ FnTexture * fn_msgbox(
       &columns,
       &rows);
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
   msgbox = fn_texture_new_with_environment(
       FN_FONT_WIDTH * (columns + 2),
       FN_FONT_HEIGHT * (rows + 2),
@@ -117,10 +116,10 @@ FnTexture * fn_msgbox(
       else if (i % 2 == 0  && j % 2 == 0)   tilenr = BORD_BLUE_MIDDLE;
       else continue;
 
-      r.x = j * pixelsize * FN_FONT_WIDTH;
-      r.y = i * pixelsize * FN_FONT_HEIGHT;
-      r.w = pixelsize * FN_FONT_WIDTH;
-      r.h = pixelsize * FN_FONT_HEIGHT;
+      r.x = j * FN_FONT_WIDTH;
+      r.y = i * FN_FONT_HEIGHT;
+      r.w = FN_FONT_WIDTH;
+      r.h = FN_FONT_HEIGHT;
       fn_texture_clone_to_texture(
           fn_environment_get_tile(env, tilenr),
           NULL,
@@ -129,10 +128,10 @@ FnTexture * fn_msgbox(
     }
   }
 
-  r.x = pixelsize * FN_FONT_WIDTH;
-  r.y = pixelsize * FN_FONT_HEIGHT;
-  r.w = pixelsize * FN_FONT_WIDTH;
-  r.h = pixelsize * FN_FONT_HEIGHT;
+  r.x = FN_FONT_WIDTH;
+  r.y = FN_FONT_HEIGHT;
+  r.w = FN_FONT_WIDTH;
+  r.h = FN_FONT_HEIGHT;
 
   fn_text_print(msgbox,
       &r,

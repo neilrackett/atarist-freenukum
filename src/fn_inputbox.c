@@ -62,7 +62,6 @@ fn_inputbox_answer_t fn_inputbox_show(
   }
   sprintf(walker, "\n\n\nOK (Enter)   Abort (Esc)\n");
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
   inputfield_surface = fn_texture_new_with_environment(
       FN_FONT_WIDTH * answer_len,
       FN_FONT_HEIGHT,
@@ -79,8 +78,8 @@ fn_inputbox_answer_t fn_inputbox_show(
   dstrect.h = fn_texture_get_height(msgbox);
 
   inputfield_rect = fn_geometry_create(
-      FN_FONT_WIDTH * pixelsize,
-      fn_texture_get_height(msgbox) - FN_FONT_HEIGHT * 4 * pixelsize,
+      FN_FONT_WIDTH,
+      fn_texture_get_height(msgbox) - FN_FONT_HEIGHT * 4,
       fn_texture_get_width(inputfield_surface),
       fn_texture_get_height(inputfield_surface)
       );

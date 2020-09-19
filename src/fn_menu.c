@@ -153,15 +153,11 @@ char fn_menu_get_choice(fn_menu_t * menu,
 
   FnGeometry targetrect;
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-
   fn_menuentry_t * entry = NULL;
 
   SDL_Rect destrect;
-  destrect.x =
-    ((fn_environment_get_screen_sdl(env)->w) - (box_width * pixelsize)) / 2;
-  destrect.y =
-    ((fn_environment_get_screen_sdl(env)->h)-(box_height * pixelsize))/2;
+  destrect.x = ((fn_environment_get_screen_sdl(env)->w) - box_width) / 2;
+  destrect.y = ((fn_environment_get_screen_sdl(env)->h) - box_height) / 2;
   destrect.w = box_width;
   destrect.h = box_height;
 
@@ -178,10 +174,10 @@ char fn_menu_get_choice(fn_menu_t * menu,
   tick = SDL_AddTimer(80, fn_menu_timer_triggered, 0);
 
   SDL_Rect pointrect;
-  pointrect.x = FN_FONT_WIDTH * pixelsize + destrect.x;
-  pointrect.w = FN_FONT_WIDTH * pixelsize;
-  pointrect.y = FN_FONT_HEIGHT * pixelsize + destrect.y;
-  pointrect.h = FN_FONT_HEIGHT * pixelsize;
+  pointrect.x = FN_FONT_WIDTH + destrect.x;
+  pointrect.w = FN_FONT_WIDTH;
+  pointrect.y = FN_FONT_HEIGHT + destrect.y;
+  pointrect.h = FN_FONT_HEIGHT;
 
   int updateWholeMenu = 0;
   int updateWholeScreen = 1;
@@ -201,10 +197,10 @@ char fn_menu_get_choice(fn_menu_t * menu,
           iter = fn_list_next(iter))
       {
         targetrect = fn_geometry_create(
-            FN_FONT_WIDTH * pixelsize * 3,
-            FN_FONT_HEIGHT * pixelsize * (i + textrows + 1),
-            FN_FONT_WIDTH * pixelsize * menu->width,
-            FN_FONT_HEIGHT * pixelsize
+            FN_FONT_WIDTH * 3,
+            FN_FONT_HEIGHT * (i + textrows + 1),
+            FN_FONT_WIDTH * menu->width,
+            FN_FONT_HEIGHT
             );
 
         entry = (fn_menuentry_t *)iter->data;
@@ -215,7 +211,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
             entry->name
             );
         if (i == menu->currententry) {
-          targetrect.x = targetrect.x - FN_FONT_WIDTH * pixelsize * 2;
+          targetrect.x = targetrect.x - FN_FONT_WIDTH * 2;
           pointrect.y = targetrect.y + destrect.y;
           fn_texture_clone_to_texture(
               fn_environment_get_tile(
@@ -294,10 +290,8 @@ char fn_menu_get_choice(fn_menu_t * menu,
           break;
         case SDL_MOUSEMOTION:
           {
-            int x = (event.motion.x - destrect.x) / pixelsize
-              - FN_FONT_WIDTH * 3;
-            int y = (event.motion.y - destrect.y) / pixelsize
-              - FN_FONT_HEIGHT * (textrows + 1);
+            int x = event.motion.x - destrect.x - FN_FONT_WIDTH * 3;
+            int y = event.motion.y - destrect.y - FN_FONT_HEIGHT * (textrows + 1);
             if (x > 0 && x < FN_FONT_WIDTH * menu->width) {
               int menuitem = y / FN_FONT_HEIGHT;
               if (menuitem >= 0 && menuitem < menu->num_entries) {
@@ -310,10 +304,8 @@ char fn_menu_get_choice(fn_menu_t * menu,
         case SDL_MOUSEBUTTONDOWN:
           if (event.button.button == SDL_BUTTON_LEFT) {
             /* we only use left mouse button in the menu */
-            int x = (event.button.x - destrect.x) / pixelsize
-              - FN_FONT_WIDTH * 3;
-            int y = (event.button.y - destrect.y) / pixelsize
-              - FN_FONT_HEIGHT * (textrows + 1);
+            int x = event.button.x - destrect.x - FN_FONT_WIDTH * 3;
+            int y = event.button.y - destrect.y - FN_FONT_HEIGHT * (textrows + 1);
             if (x > 0 && x < FN_FONT_WIDTH * menu->width) {
               int menuitem = y / FN_FONT_HEIGHT;
               if (menuitem >= 0 && menuitem < menu->num_entries) {

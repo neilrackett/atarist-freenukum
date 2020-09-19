@@ -112,11 +112,10 @@ void fn_bot_blit(fn_bot_t * bot, SDL_Surface * target)
   SDL_Rect dstrect;
   FnTexture * tile = NULL;
   fn_environment_t * env = bot->environment;
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  dstrect.x = bot->x * pixelsize * FN_HALFTILE_WIDTH;
-  dstrect.y = bot->y * pixelsize * FN_HALFTILE_HEIGHT;
-  dstrect.w = FN_TILE_WIDTH * pixelsize;
-  dstrect.h = FN_TILE_HEIGHT * pixelsize;
+  dstrect.x = bot->x * FN_HALFTILE_WIDTH;
+  dstrect.y = bot->y * FN_HALFTILE_HEIGHT;
+  dstrect.w = FN_TILE_WIDTH;
+  dstrect.h = FN_TILE_HEIGHT;
   switch(bot->type) {
     case FN_BOT_TYPE_FIREWHEEL:
       /* TODO */
@@ -133,20 +132,20 @@ void fn_bot_blit(fn_bot_t * bot, SDL_Surface * target)
             ANIM_FOOTBOT + 2);
         fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
-        dstrect.x += FN_TILE_WIDTH * pixelsize;
+        dstrect.x += FN_TILE_WIDTH;
 
         tile = fn_environment_get_tile(env,
             ANIM_FOOTBOT + 3);
         fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
-        dstrect.x -= FN_TILE_WIDTH * pixelsize;
-        dstrect.y -= FN_TILE_HEIGHT * pixelsize;
+        dstrect.x -= FN_TILE_WIDTH;
+        dstrect.y -= FN_TILE_HEIGHT;
 
         tile = fn_environment_get_tile(env,
             ANIM_FOOTBOT + 0);
         fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
-        dstrect.x += FN_TILE_WIDTH * pixelsize;
+        dstrect.x += FN_TILE_WIDTH;
 
         tile = fn_environment_get_tile(env,
             ANIM_FOOTBOT + 1);
@@ -175,7 +174,7 @@ void fn_bot_blit(fn_bot_t * bot, SDL_Surface * target)
         tile = fn_environment_get_tile(env,
             ANIM_CARBOT);
         fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
-        dstrect.x += FN_TILE_WIDTH * pixelsize;
+        dstrect.x += FN_TILE_WIDTH;
         tile = fn_environment_get_tile(env,
             ANIM_CARBOT + 1);
         fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);

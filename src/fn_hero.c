@@ -146,12 +146,11 @@ void fn_hero_blit(fn_hero_t * hero,
   }
 
   fn_environment_t * env = hero->env;
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
-  dstrect.x = pixelsize * (fn_hero_get_x(hero) - FN_HALFTILE_WIDTH);
-  dstrect.y = pixelsize * fn_hero_get_y(hero);
-  dstrect.w = pixelsize * fn_hero_get_w(hero);
-  dstrect.h = pixelsize * fn_hero_get_h(hero);
+  dstrect.x = fn_hero_get_x(hero) - FN_HALFTILE_WIDTH;
+  dstrect.y = fn_hero_get_y(hero);
+  dstrect.w = fn_hero_get_w(hero);
+  dstrect.h = fn_hero_get_h(hero);
 
   tilenr = hero->tilenr;
   if (hero->immunitycountdown > hero->immunityduration - 1) {
@@ -179,7 +178,7 @@ void fn_hero_blit(fn_hero_t * hero,
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   if (fn_environment_get_draw_collision_bounds(env)) {
-    fn_collision_rect_draw(target, pixelsize, &(hero->position));
+    fn_collision_rect_draw(target, &(hero->position));
 
     Uint16 i = 0;
     Uint16 j = 0;
@@ -201,7 +200,7 @@ void fn_hero_blit(fn_hero_t * hero,
             obstacle.w = FN_TILE_WIDTH;
             obstacle.h = FN_TILE_HEIGHT;
 
-            fn_collision_rect_draw(target, pixelsize, &obstacle);
+            fn_collision_rect_draw(target, &obstacle);
           }
         }
       }

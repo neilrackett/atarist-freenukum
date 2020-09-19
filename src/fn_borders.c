@@ -44,10 +44,9 @@ void fn_borders_blit_tile(
     int x,
     int y)
 {
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
   SDL_Rect dstrect;
-  dstrect.x = FN_HALFTILE_WIDTH * pixelsize * x;
-  dstrect.y = FN_HALFTILE_HEIGHT * pixelsize * y;
+  dstrect.x = FN_HALFTILE_WIDTH * x;
+  dstrect.y = FN_HALFTILE_HEIGHT * y;
   fn_texture_blit_to_sdl_surface(
       tile,
       NULL,
@@ -203,11 +202,10 @@ void fn_borders_blit_life(
   }
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
   lifesurface = SDL_CreateRGBSurface(
       screen->flags,
-      FN_FONT_WIDTH * pixelsize * FN_NUM_MAXLIFE,
-      FN_TILE_HEIGHT * pixelsize,
+      FN_FONT_WIDTH * FN_NUM_MAXLIFE,
+      FN_TILE_HEIGHT,
       screen->format->BitsPerPixel,
       0,
       0,
@@ -218,10 +216,10 @@ void fn_borders_blit_life(
       env, lifesurface, lifetiles, FN_NUM_MAXLIFE, 1, 0
       );
 
-  dstrect.x = 30 * pixelsize * FN_FONT_WIDTH;
-  dstrect.y = 7.5 * pixelsize * FN_FONT_HEIGHT;
-  dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH * pixelsize;
-  dstrect.h = FN_TILE_HEIGHT * pixelsize;
+  dstrect.x = 30 * FN_FONT_WIDTH;
+  dstrect.y = 7.5 * FN_FONT_HEIGHT;
+  dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH;
+  dstrect.h = FN_TILE_HEIGHT;
 
   SDL_BlitSurface(lifesurface, NULL, screen, &dstrect);
   SDL_FreeSurface(lifesurface);
@@ -258,11 +256,10 @@ void fn_borders_blit_score(
       scoretext
       );
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  dstrect.x = 30 * pixelsize * FN_FONT_WIDTH;
-  dstrect.y = 3 * pixelsize * FN_FONT_HEIGHT;
-  dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH * pixelsize;
-  dstrect.h = FN_TILE_HEIGHT * pixelsize;
+  dstrect.x = 30 * FN_FONT_WIDTH;
+  dstrect.y = 3 * FN_FONT_HEIGHT;
+  dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH;
+  dstrect.h = FN_TILE_HEIGHT;
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(scoresurface, NULL, screen, &dstrect);
@@ -303,11 +300,10 @@ void fn_borders_blit_firepower(
       FN_NUM_MAXFIREPOWER * 2, 4, 0
       );
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  dstrect.x = 30 * pixelsize * FN_FONT_WIDTH;
-  dstrect.y = 12 * pixelsize * FN_FONT_HEIGHT;
-  dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH * pixelsize;
-  dstrect.h = FN_TILE_HEIGHT * 2 * pixelsize;
+  dstrect.x = 30 * FN_FONT_WIDTH;
+  dstrect.y = 12 * FN_FONT_HEIGHT;
+  dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH;
+  dstrect.h = FN_TILE_HEIGHT * 2;
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_BlitSurface(firepowersurface, NULL, screen, &dstrect);
@@ -362,11 +358,10 @@ void fn_borders_blit_inventory(
       FN_NUM_MAXFIREPOWER * 2, 4, 0
       );
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  dstrect.x = 30 * pixelsize * FN_FONT_WIDTH;
-  dstrect.y = 18 * pixelsize * FN_FONT_HEIGHT;
-  dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH * pixelsize;
-  dstrect.h = FN_TILE_HEIGHT * 2 * pixelsize;
+  dstrect.x = 30 * FN_FONT_WIDTH;
+  dstrect.y = 18 * FN_FONT_HEIGHT;
+  dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH;
+  dstrect.h = FN_TILE_HEIGHT * 2;
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_BlitSurface(inventorysurface, NULL, screen, &dstrect);

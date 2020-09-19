@@ -33,11 +33,9 @@
 void fn_effect_blend_step(
     SDL_Surface * s,
     Uint32 blendcolor,
-    Uint32 removecolor,
-    Uint8 pixelsize);
+    Uint32 removecolor);
 
 void fn_effect_blend(
     SDL_Surface * s,
     Uint8 step,
-    Uint32 blendcolor,
-    Uint8 pixelsize);
+    Uint32 blendcolor);

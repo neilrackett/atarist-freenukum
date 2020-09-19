@@ -223,14 +223,12 @@ int fn_collision_distance_vertical_rect_area(
  * Debug drawing function for a collision area.
  *
  * @param  destination  The surface on which to draw.
- * @param  pixelsize    The pixelsize with which to draw.
  * @param  x     The x coordinate of the area.
  * @param  y     The y coordinate of the area.
  * @param  w     The width of the area.
  * @param  h     The height of the area.
  */
 void fn_collision_area_draw(SDL_Surface * destination,
-    Uint8 pixelsize,
     Uint32 x, Uint32 y, Uint32 w, Uint32 h);
 
 /* --------------------------------------------------------------- */
@@ -239,11 +237,9 @@ void fn_collision_area_draw(SDL_Surface * destination,
  * Debug drawing function for a collision rectangle.
  *
  * @param  destination  The surface on which to draw.
- * @param  pixelsize    The pixelsize with which to draw.
  * @param  rect  The rectangle.
  */
 void fn_collision_rect_draw(SDL_Surface * destination,
-    Uint8 pixelsize,
     SDL_Rect * rect);
 
 /* --------------------------------------------------------------- */

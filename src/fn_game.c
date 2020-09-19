@@ -256,23 +256,21 @@ int fn_game_start_in_level(
   }
   close(fd);
 
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  dstrect.x = FN_TILE_WIDTH * pixelsize;
-  dstrect.y = FN_TILE_HEIGHT * pixelsize;
-  dstrect.w = (FN_LEVELWINDOW_WIDTH + 2) * pixelsize * FN_TILE_WIDTH;
-  dstrect.h = (FN_LEVELWINDOW_HEIGHT + 2) * pixelsize * FN_TILE_HEIGHT;
+  dstrect.x = FN_TILE_WIDTH;
+  dstrect.y = FN_TILE_HEIGHT;
+  dstrect.w = (FN_LEVELWINDOW_WIDTH + 2) * FN_TILE_WIDTH;
+  dstrect.h = (FN_LEVELWINDOW_HEIGHT + 2) * FN_TILE_HEIGHT;
 
-  srcrect.x = (fn_hero_get_x(hero)+FN_TILE_WIDTH) * pixelsize -
-    dstrect.w / 2;
-  srcrect.y = fn_hero_get_y(hero) * pixelsize - dstrect.h / 2;
+  srcrect.x = (fn_hero_get_x(hero)+FN_TILE_WIDTH) - dstrect.w / 2;
+  srcrect.y = fn_hero_get_y(hero) - dstrect.h / 2;
   if (srcrect.x < 0) {
     srcrect.x = 0;
   }
   if (srcrect.y < 0) {
     srcrect.y = 0;
   }
-  srcrect.w = FN_LEVELWINDOW_WIDTH * pixelsize * FN_TILE_WIDTH;
-  srcrect.h = FN_LEVELWINDOW_HEIGHT * pixelsize * FN_TILE_HEIGHT;
+  srcrect.w = FN_LEVELWINDOW_WIDTH * FN_TILE_WIDTH;
+  srcrect.h = FN_LEVELWINDOW_HEIGHT * FN_TILE_HEIGHT;
 
   tick = SDL_AddTimer(80, fn_game_timer_triggered, 0);
 
@@ -385,8 +383,8 @@ int fn_game_start_in_level(
             case SDLK_DOWN:
               if (event.key.keysym.mod & KMOD_SHIFT) {
                 if (srcrect.y + srcrect.h
-                    < FN_LEVEL_HEIGHT * pixelsize * FN_TILE_HEIGHT) {
-                  srcrect.y += pixelsize * FN_HALFTILE_HEIGHT;
+                    < FN_LEVEL_HEIGHT * FN_TILE_HEIGHT) {
+                  srcrect.y += FN_HALFTILE_HEIGHT;
                 }
               }
               doupdate = 1;
@@ -394,7 +392,7 @@ int fn_game_start_in_level(
             case SDLK_UP:
               if (event.key.keysym.mod & KMOD_SHIFT) {
                 if (srcrect.y > 0) {
-                  srcrect.y -= pixelsize * FN_HALFTILE_HEIGHT;
+                  srcrect.y -= FN_HALFTILE_HEIGHT;
                 }
               } else {
                 fn_level_hero_interact_start(lv);
@@ -404,7 +402,7 @@ int fn_game_start_in_level(
             case SDLK_LEFT:
               if (event.key.keysym.mod & KMOD_SHIFT) {
                 if (srcrect.x > 0) {
-                  srcrect.x -= pixelsize * FN_HALFTILE_WIDTH;
+                  srcrect.x -= FN_HALFTILE_WIDTH;
                 }
               } else {
                 directions |= FNK_LEFT_ENABLED;
@@ -422,8 +420,8 @@ int fn_game_start_in_level(
             case SDLK_RIGHT:
               if (event.key.keysym.mod & KMOD_SHIFT) {
                 if (srcrect.x + srcrect.w
-                    < FN_LEVEL_WIDTH * pixelsize * FN_TILE_WIDTH) {
-                  srcrect.x += pixelsize * FN_HALFTILE_WIDTH;
+                    < FN_LEVEL_WIDTH * FN_TILE_WIDTH) {
+                  srcrect.x += FN_HALFTILE_WIDTH;
                 }
               } else {
                 directions |= FNK_RIGHT_ENABLED;
@@ -536,31 +534,23 @@ int fn_game_start_in_level(
             case fn_event_heromoved:
               {
                 SDL_Rect * heropos = fn_hero_get_position(hero);
-                srcrect.x = pixelsize *
-                  (heropos->x + heropos->w / 2 -
-                   FN_LEVELWINDOW_WIDTH * FN_TILE_WIDTH / 2);
+                srcrect.x = heropos->x + heropos->w / 2 -
+                   FN_LEVELWINDOW_WIDTH * FN_TILE_WIDTH / 2;
                 if (srcrect.x < 0) {
                   srcrect.x = 0;
                 }
-                srcrect.y = pixelsize *
-                  (heropos->y -
-                   FN_LEVELWINDOW_HEIGHT * FN_TILE_HEIGHT / 2);
+                srcrect.y = heropos->y -
+                   FN_LEVELWINDOW_HEIGHT * FN_TILE_HEIGHT / 2;
                 if (srcrect.y < 0) {
                   srcrect.y = 0;
                 }
-                if (srcrect.x + srcrect.w >
-                    FN_LEVEL_WIDTH * FN_TILE_WIDTH * pixelsize)
+                if (srcrect.x + srcrect.w > FN_LEVEL_WIDTH * FN_TILE_WIDTH)
                 {
-                  srcrect.x =
-                    FN_LEVEL_WIDTH * FN_TILE_WIDTH * pixelsize -
-                    srcrect.w;
+                  srcrect.x = FN_LEVEL_WIDTH * FN_TILE_WIDTH - srcrect.w;
                 }
-                if (srcrect.y + srcrect.h >
-                    FN_LEVEL_HEIGHT * FN_TILE_HEIGHT * pixelsize)
+                if (srcrect.y + srcrect.h > FN_LEVEL_HEIGHT * FN_TILE_HEIGHT)
                 {
-                  srcrect.y =
-                    FN_LEVEL_HEIGHT * FN_TILE_HEIGHT * pixelsize -
-                    srcrect.h;
+                  srcrect.y = FN_LEVEL_HEIGHT * FN_TILE_HEIGHT - srcrect.h;
                 }
               }
               break;

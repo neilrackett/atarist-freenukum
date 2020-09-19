@@ -133,13 +133,12 @@ void fn_inputfield_blit(fn_inputfield_t * field,
   fn_texture_fill_area(target, NULL, 0, 0, 0);
   fn_text_print(target, NULL, env,
       field->data);
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
   FnGeometry cursorrect =
     fn_geometry_create(
-        field->cursor * FN_FONT_WIDTH * pixelsize - pixelsize / 2,
-        pixelsize,
-        pixelsize,
-        (FN_FONT_HEIGHT - 2) * pixelsize);
+        field->cursor * FN_FONT_WIDTH,
+        1,
+        1,
+        FN_FONT_HEIGHT - 2);
 
   fn_texture_fill_area(target, &cursorrect, 0x88, 0x88, 0x88);
 }

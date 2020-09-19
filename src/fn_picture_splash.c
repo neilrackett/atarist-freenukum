@@ -95,12 +95,10 @@ int fn_picture_splash_show_with_message(
     FnTexture * msgbox;
     SDL_Rect dstrect;
 
-    msgbox = fn_msgbox(env,
-        msg);
+    msgbox = fn_msgbox(env, msg);
 
-    Uint8 pixelsize = fn_environment_get_pixelsize(env);
-    dstrect.x = x * pixelsize;
-    dstrect.y = y * pixelsize;
+    dstrect.x = x;
+    dstrect.y = y;
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
     g_object_unref(msgbox);

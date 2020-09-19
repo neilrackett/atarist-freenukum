@@ -768,9 +768,8 @@ fn_level_t * fn_level_load(int fd,
   SDL_FillRect(lv->surface_fixed, NULL, transparent);
 
   SDL_Rect r;
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  r.w = FN_TILE_WIDTH * pixelsize;
-  r.h = FN_TILE_HEIGHT * pixelsize;
+  r.w = FN_TILE_WIDTH;
+  r.h = FN_TILE_HEIGHT;
 
   Uint16 y = 0;
   Uint16 x = 0;
@@ -780,8 +779,8 @@ fn_level_t * fn_level_load(int fd,
       tilenr = fn_level_get_tile(lv, x, y);
       tile = NULL;
       if (tilenr > 1 && tilenr < (48 * 8)) {
-        r.x = x * FN_TILE_WIDTH * pixelsize;
-        r.y = y * FN_TILE_WIDTH * pixelsize;
+        r.x = x * FN_TILE_WIDTH;
+        r.y = y * FN_TILE_HEIGHT;
         tile = fn_environment_get_tile(env, tilenr);
         fn_texture_blit_to_sdl_surface(tile, NULL, lv->surface_fixed, &r);
       }
@@ -897,7 +896,6 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   fn_list_t * iter = NULL;
 
   fn_environment_t * env = fn_level_get_environment(lv);
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
   /* load the background tiles */
   /*
@@ -916,25 +914,21 @@ void fn_level_blit_to_surface(fn_level_t * lv,
 
   /* calculate the bounds of the area we have to blit. */
   if (sourcerect) {
-    x_start = (sourcerect->x / FN_TILE_WIDTH / pixelsize)
-      - (FN_LEVELWINDOW_WIDTH / 2);
+    x_start = (sourcerect->x / FN_TILE_WIDTH) - (FN_LEVELWINDOW_WIDTH / 2);
     if (x_start < 0) {
       x_start = 0;
     }
-    x_end = x_start + (sourcerect->w / FN_TILE_WIDTH / pixelsize) * 2;
+    x_end = x_start + (sourcerect->w / FN_TILE_WIDTH) * 2;
     if (x_end > FN_LEVEL_WIDTH) {
       x_end = FN_LEVEL_WIDTH;
       x_start = x_end - FN_LEVELWINDOW_WIDTH * 2;
     }
 
-    y_start = (sourcerect->y / FN_TILE_HEIGHT / pixelsize)
-      - (FN_LEVELWINDOW_HEIGHT / 2);
+    y_start = (sourcerect->y / FN_TILE_HEIGHT) - (FN_LEVELWINDOW_HEIGHT / 2);
     if (y_start < 0) {
       y_start = 0;
     }
-    y_end =
-      y_start +
-      (sourcerect->h / FN_TILE_HEIGHT / pixelsize) * 2;
+    y_end = y_start + (sourcerect->h / FN_TILE_HEIGHT) * 2;
     if (y_end > FN_LEVEL_HEIGHT) {
       y_end = FN_LEVEL_HEIGHT;
       y_start = y_end - FN_LEVELWINDOW_HEIGHT * 2;
@@ -943,8 +937,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
 
   r.x = 0;
   r.y = 0;
-  r.w = FN_TILE_WIDTH * pixelsize;
-  r.h = FN_TILE_HEIGHT * pixelsize;
+  r.w = FN_TILE_WIDTH;
+  r.h = FN_TILE_HEIGHT;
 
   fn_hero_t * hero = fn_environment_get_hero(env);
 
@@ -1035,14 +1029,6 @@ SDL_Surface * fn_level_get_surface(fn_level_t * lv)
 fn_tilecache_t * fn_level_get_tilecache(fn_level_t * lv)
 {
   return fn_environment_get_tilecache(lv->environment);
-}
-
-/* --------------------------------------------------------------- */
-
-/* TODO this is deprecated! remove it. */
-Uint8 fn_level_get_pixelsize(fn_level_t * lv)
-{
-  return fn_environment_get_pixelsize(lv->environment);
 }
 
 /* --------------------------------------------------------------- */

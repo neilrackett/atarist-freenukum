@@ -98,17 +98,15 @@ void fn_shot_blit(fn_shot_t * shot)
     fn_tilecache_t * tc = fn_level_get_tilecache(shot->level);
     FnTexture * tile = fn_tilecache_get_tile(tc,
         OBJ_SHOT+shot->counter);
-    Uint8 pixelsize = fn_level_get_pixelsize(shot->level);
     destrect.x =
-      (shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH) *
-      pixelsize;
-    destrect.y = shot->position.y * pixelsize;
-    destrect.w = FN_TILE_WIDTH * pixelsize;
-    destrect.h = shot->position.h * pixelsize;
+      (shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH);
+    destrect.y = shot->position.y;
+    destrect.w = FN_TILE_WIDTH;
+    destrect.h = shot->position.h;
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
     if (shot->draw_collision_bounds) {
-      fn_collision_rect_draw(target, pixelsize, &(shot->position));
+      fn_collision_rect_draw(target, &(shot->position));
     }
   }
 }

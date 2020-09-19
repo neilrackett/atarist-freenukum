@@ -49,7 +49,6 @@ typedef struct fn_tilecache_t fn_tilecache_t;
 
 struct fn_tilecache_t {
     FnTexture * tiles[FN_TILECACHE_SIZE];
-    Uint8 pixelsize;
     ssize_t size;
 };
 

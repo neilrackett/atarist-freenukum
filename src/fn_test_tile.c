@@ -73,13 +73,12 @@ int main(int argc, char ** argv)
     fn_tile_loadheader(fd, &h);
  
     screen = fn_environment_get_screen_sdl(env);
-    Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
     SDL_Rect r;
     r.x = 0;
     r.y = 0;
-    r.w = h.width * 8 * pixelsize;
-    r.h = h.height * pixelsize;
+    r.w = h.width * 8;
+    r.h = h.height;
     size_t i = 0;
     while (i != h.tiles)
     {
@@ -88,7 +87,7 @@ int main(int argc, char ** argv)
         fn_texture_blit_to_sdl_surface(tile, NULL, screen, &r);
         g_object_unref(tile);
         i++;
-        r.x += 8 * h.width * pixelsize;
+        r.x += 8 * h.width;
         r.y = 0;
     }
     SDL_UpdateRect(screen, 0, 0, 0, 0);
