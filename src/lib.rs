@@ -20,4 +20,5 @@ pub const FONT_WIDTH: usize = 8;
 pub const FONT_HEIGHT: usize = 8;
 
 pub use game::Game;
+pub use geometry::Geometry;
 pub use settings::Settings;

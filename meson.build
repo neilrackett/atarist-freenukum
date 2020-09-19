@@ -604,3 +604,44 @@ executable(
     ],
     include_directories: include_directories('.'),
 )
+
+cargo = find_program('cargo', required: true)
+cargo_script = find_program('scripts/cargo.sh')
+
+profile = get_option('profile')
+
+cargo_manifest = files(
+    'Cargo.toml',
+)
+
+rust_sources = files(
+    'src/borders.rs',
+    'src/config.h.in',
+    'src/game.rs',
+    'src/geometry.rs',
+    'src/lib.rs',
+    'src/settings.rs',
+    'src/sprite.rs',
+    'src/text.rs',
+    'src/tile.rs',
+)
+
+cargo_release = custom_target(
+    'cargo-build',
+    build_by_default: true,
+    command: [
+        cargo_script, 
+        '@SOURCE_ROOT@',
+        '@OUTPUT@',
+        meson.build_root(),
+        profile,
+    ],
+    console: true,
+    input: [
+        rust_sources,
+        cargo_manifest,
+    ],
+    output: [
+        'libfreenukum.so',
+    ]
+)
