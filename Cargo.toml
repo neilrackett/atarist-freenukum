@@ -13,3 +13,6 @@ dirs = "2"
 sdl2 = "0.33"
 serde = "1"
 serde_derive = "1"
+
+[build-dependencies]
+cbindgen = "0.14.4"
