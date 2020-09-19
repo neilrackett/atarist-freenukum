@@ -41,7 +41,7 @@
 FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 {
     FnTexture * drop;
-    Geometry * geometry;
+    Geometry geometry;
     size_t num_read = 0;
     fn_tileheader_t h;
 
@@ -64,7 +64,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
     h.width = 2;
     h.height = 16;
 
-    geometry = geometry_new(x, y, width, height);
+    geometry = geometry_create(x, y, width, height);
 
     while(num_read != num_loads)
     {
@@ -72,7 +72,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
             env,
             &h,
             FALSE);
-        fn_texture_clone_to_texture(tile, NULL, drop, geometry);
+        fn_texture_clone_to_texture(tile, NULL, drop, &geometry);
         g_object_unref(tile);
         x += 16 * pixelsize;
         if (x == 16 * FN_DROP_WIDTH * pixelsize)
@@ -80,8 +80,8 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
             x = 0;
             y += 16 * pixelsize;
         }
-        geometry_set_x(geometry, x);
-        geometry_set_y(geometry, y);
+        geometry.x = x;
+        geometry.y = y;
         num_read++;
     }
 

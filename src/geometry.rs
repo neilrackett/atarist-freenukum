@@ -54,13 +54,13 @@ mod ffi {
     use super::Geometry;
 
     #[no_mangle]
-    pub unsafe extern "C" fn geometry_new(
+    pub unsafe extern "C" fn geometry_create(
         x: i32,
         y: i32,
         w: u32,
         h: u32,
-    ) -> *mut Geometry {
-        &mut Geometry::new(x, y, w, h)
+    ) -> Geometry {
+        Geometry::new(x, y, w, h)
     }
 
     #[no_mangle]

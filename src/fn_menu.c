@@ -151,7 +151,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         box_height,
         env);
 
-  Geometry * targetrect;
+  Geometry targetrect;
 
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
@@ -200,7 +200,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
           iter != fn_list_last(menu->entries);
           iter = fn_list_next(iter))
       {
-        targetrect = geometry_new(
+        targetrect = geometry_create(
             FN_FONT_WIDTH * pixelsize * 3,
             FN_FONT_HEIGHT * pixelsize * (i + textrows + 1),
             FN_FONT_WIDTH * pixelsize * menu->width,
@@ -210,26 +210,22 @@ char fn_menu_get_choice(fn_menu_t * menu,
         entry = (fn_menuentry_t *)iter->data;
         fn_text_print(
             target,
-            targetrect,
+            &targetrect,
             env,
             entry->name
             );
         if (i == menu->currententry) {
-          geometry_set_x(targetrect,
-              geometry_x(targetrect) -
-              FN_FONT_WIDTH * pixelsize * 2);
-          pointrect.y = geometry_y(targetrect) + destrect.y;
+          targetrect.x = targetrect.x - FN_FONT_WIDTH * pixelsize * 2;
+          pointrect.y = targetrect.y + destrect.y;
           fn_texture_clone_to_texture(
               fn_environment_get_tile(
                 env,
                 OBJ_POINT + animationframe),
               NULL,
               target,
-              targetrect);
+              &targetrect);
         }
         i++;
-
-        g_object_unref(targetrect);
       }
 
       fn_texture_blit_to_sdl_surface(target, NULL,

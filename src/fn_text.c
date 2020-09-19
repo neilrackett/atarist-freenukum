@@ -64,39 +64,36 @@ void fn_text_print(
     fn_environment_t * env,
     char * text)
 {
-  Geometry * dstrect;
+  Geometry dstrect;
 
   char * walker;
   char * end;
 
   if (r != NULL) {
-    dstrect = geometry_clone(r);
+    dstrect = *r;
   } else {
-    dstrect = geometry_new(0, 0, 0, 0);
+    dstrect = geometry_create(0, 0, 0, 0);
   }
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
-  geometry_set_w(dstrect, pixelsize * FN_FONT_WIDTH);
-  geometry_set_h(dstrect, pixelsize * FN_FONT_HEIGHT);
+  dstrect.w = pixelsize * FN_FONT_WIDTH;
+  dstrect.h = pixelsize * FN_FONT_HEIGHT;
 
   end = text + strlen(text);
 
   for (walker = text; walker < end; walker++) {
     if (*walker == '\n') {
-      geometry_set_x(dstrect, geometry_x(r));
-      gint y = geometry_y(dstrect);
-      geometry_set_y(dstrect, y + pixelsize * FN_FONT_HEIGHT);
+      dstrect.x = r->x;
+      dstrect.y = dstrect.y + pixelsize * FN_FONT_HEIGHT;
     } else {
       fn_text_printletter(
           target,
-          dstrect,
+          &dstrect,
           env,
           *walker);
-      gint x = geometry_x(dstrect);
-      geometry_set_x(dstrect, x + pixelsize * FN_FONT_WIDTH);
+      dstrect.x = dstrect.x + pixelsize * FN_FONT_WIDTH;
     }
   }
-  g_object_unref(dstrect);
 }
 
 /* --------------------------------------------------------------- */

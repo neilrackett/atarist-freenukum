@@ -43,7 +43,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   FnTexture * inputfield_surface = NULL;
 
   SDL_Rect dstrect;
-  Geometry * inputfield_rect;
+  Geometry inputfield_rect;
 
   int i = 0;
   int res = 0;
@@ -78,7 +78,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   dstrect.w = fn_texture_get_width(msgbox);
   dstrect.h = fn_texture_get_height(msgbox);
 
-  inputfield_rect = geometry_new(
+  inputfield_rect = geometry_create(
       FN_FONT_WIDTH * pixelsize,
       fn_texture_get_height(msgbox) - FN_FONT_HEIGHT * 4 * pixelsize,
       fn_texture_get_width(inputfield_surface),
@@ -99,7 +99,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   fn_inputfield_blit(inputfield, inputfield_surface,
       env);
   fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
-      inputfield_rect);
+      &inputfield_rect);
   fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
@@ -205,7 +205,7 @@ fn_inputbox_answer_t fn_inputbox_show(
           fn_inputfield_blit(inputfield, inputfield_surface,
               env);
           fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
-              inputfield_rect);
+              &inputfield_rect);
           fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
           SDL_UpdateRect(screen, 0, 0, 0, 0);
           break;

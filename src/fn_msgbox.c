@@ -89,7 +89,7 @@ FnTexture * fn_msgbox(
   FnTexture * msgbox;
   Uint8 i, j;
   int tilenr;
-  Geometry * r = geometry_new(0, 0, 0, 0);
+  Geometry r = geometry_create(0, 0, 0, 0);
 
   fn_msgbox_get_text_information(
       text,
@@ -117,27 +117,25 @@ FnTexture * fn_msgbox(
       else if (i % 2 == 0  && j % 2 == 0)   tilenr = BORD_BLUE_MIDDLE;
       else continue;
 
-      geometry_set_data(r,
-          j * pixelsize * FN_FONT_WIDTH,
-          i * pixelsize * FN_FONT_HEIGHT,
-          pixelsize * FN_FONT_WIDTH,
-          pixelsize * FN_FONT_HEIGHT);
+      r.x = j * pixelsize * FN_FONT_WIDTH;
+      r.y = i * pixelsize * FN_FONT_HEIGHT;
+      r.w = pixelsize * FN_FONT_WIDTH;
+      r.h = pixelsize * FN_FONT_HEIGHT;
       fn_texture_clone_to_texture(
           fn_environment_get_tile(env, tilenr),
           NULL,
           msgbox,
-          r);
+          &r);
     }
   }
 
-  geometry_set_data(r,
-      pixelsize * FN_FONT_WIDTH,
-      pixelsize * FN_FONT_HEIGHT,
-      pixelsize * FN_FONT_WIDTH,
-      pixelsize * FN_FONT_HEIGHT);
+  r.x = pixelsize * FN_FONT_WIDTH;
+  r.y = pixelsize * FN_FONT_HEIGHT;
+  r.w = pixelsize * FN_FONT_WIDTH;
+  r.h = pixelsize * FN_FONT_HEIGHT;
 
   fn_text_print(msgbox,
-      r,
+      &r,
       env,
       text);
   

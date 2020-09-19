@@ -32,9 +32,9 @@ typedef struct {
 
 Geometry *geometry_clone(const Geometry *geometry);
 
-uint32_t geometry_h(const Geometry *geometry);
+Geometry geometry_create(int32_t x, int32_t y, uint32_t w, uint32_t h);
 
-Geometry *geometry_new(int32_t x, int32_t y, uint32_t w, uint32_t h);
+uint32_t geometry_h(const Geometry *geometry);
 
 void geometry_set_data(Geometry *geometry,
                        int32_t x,
