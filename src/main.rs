@@ -4,6 +4,7 @@ extern crate serde_derive;
 mod borders;
 mod game;
 mod settings;
+mod sprite;
 mod text;
 mod tile;
 
