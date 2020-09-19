@@ -4,6 +4,9 @@ version = "0.3.0"
 authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"
 
+[lib]
+crate-type = ["rlib", "cdylib"]
+
 [dependencies]
 bitvec = "0.17"
 dirs = "2"
