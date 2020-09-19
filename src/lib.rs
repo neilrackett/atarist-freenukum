@@ -3,7 +3,6 @@ extern crate serde_derive;
 
 mod borders;
 mod game;
-mod geometry;
 mod settings;
 mod sprite;
 mod text;
@@ -20,5 +19,8 @@ pub const FONT_WIDTH: usize = 8;
 pub const FONT_HEIGHT: usize = 8;
 
 pub use game::Game;
-pub use geometry::Geometry;
 pub use settings::Settings;
+
+pub mod transition;
+
+pub use transition::geometry::Geometry;

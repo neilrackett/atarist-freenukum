@@ -17,12 +17,12 @@ cargo_manifest = files(
 rust_src = files(
     'src/borders.rs',
     'src/game.rs',
-    'src/geometry.rs',
     'src/lib.rs',
     'src/settings.rs',
     'src/sprite.rs',
     'src/text.rs',
     'src/tile.rs',
+    'src/transition/geometry.rs',
 )
 
 cargo_build = custom_target(
