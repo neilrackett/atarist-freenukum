@@ -305,14 +305,14 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
             "Press any key to close this window.");
       }
       char message_cmdline[1024];
-      char message_screen[1024];
+      char message_screen[2049];
       snprintf(message_cmdline, 1024,
           "Could not load data level and graphics files.\n"
           "You can download the shareware episode for free from\n"
           "http://www.3drealms.com/duke1/\n"
           "Copy the data files to\n"
           "%s\n", env->datapath);
-      snprintf(message_screen, 1024,
+      snprintf(message_screen, 2049,
           "%s\n"
           "%s\n",
           message_cmdline,
