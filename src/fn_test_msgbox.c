@@ -82,7 +82,7 @@ int main(int argc, char ** argv)
         msg);
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, NULL);
-    g_object_unref(msgbox);
+    fn_texture_free(msgbox);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
 
     while (quit == 0)

@@ -89,7 +89,7 @@ int main(int argc, char ** argv)
     fn_texture_blit_to_sdl_surface(drop, NULL, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
     
-    g_object_unref(drop);
+    fn_texture_free(drop);
 
     while (quit == 0)
     {

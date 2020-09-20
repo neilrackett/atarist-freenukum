@@ -599,7 +599,7 @@ int fn_game_start_in_level(
 
 cleanup:
   if (backdrop != NULL) {
-    g_object_unref(backdrop);
+    fn_texture_free(backdrop);
   }
   if (lv != NULL) {
     returnvalue = lv->levelpassed;

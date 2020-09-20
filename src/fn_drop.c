@@ -71,7 +71,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
             &h,
             FALSE);
         fn_texture_clone_to_texture(tile, NULL, drop, &geometry);
-        g_object_unref(tile);
+        fn_texture_free(tile);
         x += 16;
         if (x == 16 * FN_DROP_WIDTH)
         {

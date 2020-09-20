@@ -184,16 +184,16 @@ fn_inputbox_answer_t fn_inputbox_show(
             case SDLK_RETURN:
               SDL_BlitSurface(temp, NULL, screen, &dstrect);
               SDL_FreeSurface(temp);
-              g_object_unref(msgbox);
+              fn_texture_free(msgbox);
               fn_inputfield_free(inputfield);
-              g_object_unref(inputfield_surface);
+              fn_texture_free(inputfield_surface);
               return fn_inputbox_answer_ok;
               break;
             case SDLK_ESCAPE:
               SDL_BlitSurface(temp, NULL, screen, &dstrect);
               SDL_FreeSurface(temp);
-              g_object_unref(msgbox);
-              g_object_unref(inputfield_surface);
+              fn_texture_free(msgbox);
+              fn_texture_free(inputfield_surface);
               fn_inputfield_free(inputfield);
               return fn_inputbox_answer_quit;
               break;

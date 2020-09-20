@@ -85,7 +85,7 @@ int main(int argc, char ** argv)
         tile = fn_tile_load(
             fd, env, &h, 0);
         fn_texture_blit_to_sdl_surface(tile, NULL, screen, &r);
-        g_object_unref(tile);
+        fn_texture_free(tile);
         i++;
         r.x += 8 * h.width;
         r.y = 0;

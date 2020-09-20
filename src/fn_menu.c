@@ -340,8 +340,8 @@ char fn_menu_get_choice(fn_menu_t * menu,
 
   SDL_EnableKeyRepeat(0, 0);
   SDL_RemoveTimer(tick);
-  g_object_unref(target);
-  g_object_unref(box);
+  fn_texture_free(target);
+  fn_texture_free(box);
 
   return choice;
 }

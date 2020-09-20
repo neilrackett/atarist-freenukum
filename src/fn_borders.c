@@ -263,7 +263,7 @@ void fn_borders_blit_score(
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(scoresurface, NULL, screen, &dstrect);
-  g_object_unref(scoresurface);
+  fn_texture_free(scoresurface);
 }
 
 /* --------------------------------------------------------------- */

@@ -101,11 +101,11 @@ int fn_picture_splash_show_with_message(
     dstrect.y = y;
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
-    g_object_unref(msgbox);
+    fn_texture_free(msgbox);
   }
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
-  g_object_unref(picture);
+  fn_texture_free(picture);
 
   while (1) {
     res = SDL_WaitEvent(&event);

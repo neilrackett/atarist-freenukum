@@ -114,7 +114,8 @@ FnTexture * fn_picture_load(int fd,
       }
     }
 
-    fn_texture_set_data(picture, data);
+    fn_texture_set_data(
+        picture, data, fn_environment_get_transparent(env));
 
     return picture;
 }

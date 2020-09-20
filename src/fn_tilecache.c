@@ -225,7 +225,7 @@ void fn_tilecache_destroy(fn_tilecache_t * tc)
     while (tc->size > 0)
     {
         tc->size--;
-        g_object_unref(tc->tiles[tc->size]);
+        fn_texture_free(tc->tiles[tc->size]);
     }
 }
 

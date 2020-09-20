@@ -59,7 +59,7 @@ void fn_infobox_show(
   SDL_BlitSurface(screen, &dstrect, temp, NULL);
 
   fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
-  g_object_unref(msgbox);
+  fn_texture_free(msgbox);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
   while (1) {

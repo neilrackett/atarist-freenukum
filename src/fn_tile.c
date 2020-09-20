@@ -109,7 +109,7 @@ FnTexture * fn_tile_load(
     num_read++;
   }
 
-  fn_texture_set_data(tile, data);
+  fn_texture_set_data(tile, data, fn_environment_get_transparent(env));
 
   g_free(data);
   return tile;
