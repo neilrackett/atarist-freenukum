@@ -14,10 +14,5 @@ sdl2 = "0.33"
 serde = "1"
 serde_derive = "1"
 
-# We add a dependency on the old sdl v1 crate. This is only a temporary
-# measure, and the dependency will be removed during the migration to
-# sdl2.
-sdl = "0.3.6"
-
 [build-dependencies]
 cbindgen = "0.14.4"

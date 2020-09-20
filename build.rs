@@ -11,7 +11,6 @@ fn main() {
         .with_language(cbindgen::Language::C)
         .with_tab_width(4)
         .with_line_length(78)
-        .with_item_prefix("Fn")
         .generate()
         .expect("Unable to generate bindings")
         .write_to_file("src/rusted.h");

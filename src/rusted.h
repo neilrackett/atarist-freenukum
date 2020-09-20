@@ -5,30 +5,32 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define FnFONT_HEIGHT 8
+#define FONT_HEIGHT 8
 
-#define FnFONT_WIDTH 8
+#define FONT_WIDTH 8
 
-#define FnHALFTILE_HEIGHT 8
+#define HALFTILE_HEIGHT 8
 
-#define FnHALFTILE_WIDTH 8
+#define HALFTILE_WIDTH 8
 
-#define FnHEALTH_COUNT 8
+#define HEALTH_COUNT 8
 
-#define FnINVENTORY_WIDTH (FnHEALTH_COUNT / 2)
+#define INVENTORY_WIDTH (HEALTH_COUNT / 2)
 
-#define FnMAX_TILES_PER_FILE 50
+#define MAX_TILES_PER_FILE 50
 
-#define FnTILE_HEIGHT (FnHALFTILE_HEIGHT * 2)
+#define TILE_HEIGHT (HALFTILE_HEIGHT * 2)
 
-#define FnTILE_WIDTH (FnHALFTILE_WIDTH * 2)
+#define TILE_WIDTH (HALFTILE_WIDTH * 2)
 
 typedef struct {
     int32_t x;
     int32_t y;
     uint32_t w;
     uint32_t h;
-} FnGeometry;
+} Geometry;
+
+typedef Geometry FnGeometry;
 
 FnGeometry *fn_geometry_clone(const FnGeometry *geometry);
 
