@@ -892,7 +892,6 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   int x_end = FN_LEVEL_WIDTH;
   int y_start = 0;
   int y_end = FN_LEVEL_HEIGHT;
-  SDL_Rect r;
   fn_list_t * iter = NULL;
 
   fn_environment_t * env = fn_level_get_environment(lv);
@@ -934,11 +933,6 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       y_start = y_end - FN_LEVELWINDOW_HEIGHT * 2;
     }
   }
-
-  r.x = 0;
-  r.y = 0;
-  r.w = FN_TILE_WIDTH;
-  r.h = FN_TILE_HEIGHT;
 
   fn_hero_t * hero = fn_environment_get_hero(env);
 
