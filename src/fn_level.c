@@ -883,8 +883,8 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
 
 void fn_level_blit_to_surface(fn_level_t * lv,
     SDL_Surface * target,
-    SDL_Rect * targetrect,
-    SDL_Rect * sourcerect,
+    FnGeometry * targetrect,
+    FnGeometry * sourcerect,
     FnTexture * backdrop1,
     FnTexture * backdrop2)
 {
@@ -900,16 +900,16 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   /*
   SDL_FillRect(lv->surface, sourcerect, 0);
   */
+  SDL_Rect srcrect = fn_geometry_as_sdl_rect(sourcerect);
   if (backdrop1 != NULL) {
     fn_texture_blit_to_sdl_surface(
         backdrop1, NULL, lv->surface, sourcerect);
   } else {
-    SDL_FillRect(lv->surface, sourcerect, 0);
+    SDL_FillRect(lv->surface, &srcrect, 0);
   }
 
   SDL_BlitSurface(
-      lv->surface_fixed, sourcerect,
-      lv->surface, sourcerect);
+      lv->surface_fixed, &srcrect, lv->surface, &srcrect);
 
   /* calculate the bounds of the area we have to blit. */
   if (sourcerect) {
@@ -1006,8 +1006,10 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     }
   }
 
+  SDL_Rect trect = fn_geometry_as_sdl_rect(targetrect);
+
   /* blit the whole thing to the caller */
-  SDL_BlitSurface(lv->surface, sourcerect, target, targetrect);
+  SDL_BlitSurface(lv->surface, &srcrect, target, &trect);
 }
 
 /* --------------------------------------------------------------- */

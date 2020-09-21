@@ -42,7 +42,7 @@ fn_inputbox_answer_t fn_inputbox_show(
   SDL_Surface * temp = NULL;
   FnTexture * inputfield_surface = NULL;
 
-  SDL_Rect dstrect;
+  FnGeometry destrect;
   FnGeometry inputfield_rect;
 
   int i = 0;
@@ -71,10 +71,10 @@ fn_inputbox_answer_t fn_inputbox_show(
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
 
-  dstrect.x = ((screen->w) - (fn_texture_get_width(msgbox)))/2;
-  dstrect.y = ((screen->h) - (fn_texture_get_height(msgbox)))/2;
-  dstrect.w = fn_texture_get_width(msgbox);
-  dstrect.h = fn_texture_get_height(msgbox);
+  destrect.x = ((screen->w) - (fn_texture_get_width(msgbox)))/2;
+  destrect.y = ((screen->h) - (fn_texture_get_height(msgbox)))/2;
+  destrect.w = fn_texture_get_width(msgbox);
+  destrect.h = fn_texture_get_height(msgbox);
 
   inputfield_rect = fn_geometry_create(
       FN_FONT_WIDTH,
@@ -85,9 +85,10 @@ fn_inputbox_answer_t fn_inputbox_show(
 
   /* backup the background */
   temp = SDL_CreateRGBSurface(screen->flags,
-      dstrect.w, dstrect.h,
+      destrect.w, destrect.h,
       screen->format->BitsPerPixel,
       0, 0, 0, 0);
+  SDL_Rect dstrect = fn_geometry_as_sdl_rect(&destrect);
   SDL_BlitSurface(screen, &dstrect, temp, NULL);
 
   fn_inputfield_t * inputfield = fn_inputfield_new(
@@ -98,7 +99,7 @@ fn_inputbox_answer_t fn_inputbox_show(
       env);
   fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
       &inputfield_rect);
-  fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
+  fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
   while (1) {
@@ -204,7 +205,7 @@ fn_inputbox_answer_t fn_inputbox_show(
               env);
           fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
               &inputfield_rect);
-          fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
+          fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);
           SDL_UpdateRect(screen, 0, 0, 0, 0);
           break;
         case SDL_VIDEOEXPOSE:

@@ -93,7 +93,7 @@ int fn_picture_splash_show_with_message(
 
   if (fn_environment_tilecache_loaded(env) && msg != NULL) {
     FnTexture * msgbox;
-    SDL_Rect dstrect;
+    FnGeometry dstrect;
 
     msgbox = fn_msgbox(env, msg);
 

@@ -159,8 +159,8 @@ int fn_game_start_in_level(
   int returnvalue = 0;
   int fd = 0;
   fn_level_t * lv = NULL;
-  SDL_Rect dstrect;
-  SDL_Rect srcrect;
+  FnGeometry dstrect;
+  FnGeometry srcrect;
   SDL_Event event;
   int res = 0;
   int doupdate = 1;
@@ -296,13 +296,14 @@ int fn_game_start_in_level(
   {
     if (doupdate) {
       SDL_Surface * screen = fn_environment_get_screen_sdl(env);
+      SDL_Rect srect = fn_geometry_as_sdl_rect(&srcrect);
       fn_level_blit_to_surface(lv,
           level,
           &srcrect,
           &srcrect,
           backdrop,
           NULL);
-      SDL_BlitSurface(level, &srcrect, screen, &dstrect);
+      SDL_BlitSurface(level, &srect, screen, &dstrect);
       if (updateWholeScreen) {
         SDL_UpdateRect(screen, 0, 0, 0, 0);
         updateWholeScreen = 0;

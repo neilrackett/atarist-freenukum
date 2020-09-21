@@ -231,8 +231,8 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid);
  */
 void fn_level_blit_to_surface(fn_level_t * lv,
     SDL_Surface * target,
-    SDL_Rect * targetrect,
-    SDL_Rect * sourcerect,
+    FnGeometry * targetrect,
+    FnGeometry * sourcerect,
     FnTexture * backdrop1,
     FnTexture * backdrop2);
 
