@@ -301,7 +301,12 @@ int fn_game_start_in_level(
           &srcrect,
           backdrop,
           NULL);
-      SDL_BlitSurface(level, &srect, screen, &dstrect);
+      // I don't know the reason, but when using
+      // fn_geometry_as_sdl_rect(&dstrect), and then passing this as a
+      // parameter, it doesn't work properly. I don't care to investigate,
+      // because in the end, it will all be replaced by rust code, so I
+      // simply cast for now to get rid of the warning.
+      SDL_BlitSurface(level, &srect, screen, (SDL_Rect*)(&dstrect));
       if (updateWholeScreen) {
         SDL_UpdateRect(screen, 0, 0, 0, 0);
         updateWholeScreen = 0;
