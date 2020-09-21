@@ -84,7 +84,7 @@ char * fonts[] = {
 /* --------------------------------------------------------------- */
 
 #ifdef HAVE_SDL_SDL_TTF_H
-TTF_Font * fn_environment_loadfont(fontsize)
+TTF_Font * fn_environment_loadfont(const int fontsize)
 {
   TTF_Font * font = NULL;
   char path[256] = "";
@@ -572,3 +572,14 @@ fn_hero_t * fn_environment_get_hero(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
+FnTextureCreationParams fn_environment_build_texture_creation_params(
+        fn_environment_t * env)
+{
+  FnTextureCreationParams params;
+  params.flags = env->screen->flags;
+  params.bits_per_pixel = env->screen->format->BitsPerPixel;
+  params.transparent = env->transparent;
+  return params;
+}
+
+/* --------------------------------------------------------------- */

@@ -37,7 +37,7 @@ void fn_infobox_show(
 {
   FnTexture * msgbox;
   SDL_Surface * temp;
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
 
   int res;
 

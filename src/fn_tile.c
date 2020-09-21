@@ -35,7 +35,6 @@
 #include "fn_object.h"
 #include "fn_tile.h"
 #include "fn.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 
@@ -55,10 +54,10 @@ FnTexture * fn_tile_load(
   guint width = h->width * 8;
   guint height = h->height;
 
-  FnTexture * tile = fn_texture_new_with_environment(
+  FnTexture * tile = fn_texture_new_with_params(
       width,
       height,
-      env);
+      fn_environment_build_texture_creation_params(env));
 
   guchar * data = g_new(guchar, width * height * 4);
 

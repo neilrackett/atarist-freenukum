@@ -134,7 +134,7 @@ void fn_hero_blit(fn_hero_t * hero,
     SDL_Surface * target,
     fn_level_t * level)
 {
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
   int tilenr;
   FnTexture * tile;
 
@@ -169,7 +169,7 @@ void fn_hero_blit(fn_hero_t * hero,
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   dstrect.x -= dstrect.w;
-  dstrect.y += dstrect.h;
+  dstrect.y += dstrect.h / 2;
   tile = fn_environment_get_tile(env, tilenr+2);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 

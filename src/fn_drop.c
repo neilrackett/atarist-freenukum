@@ -33,7 +33,6 @@
 
 #include "fn_tile.h"
 #include "fn_drop.h"
-#include "fntexture.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -47,10 +46,10 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 
     FnTexture * tile;
 
-    drop = fn_texture_new_with_environment(
+    drop = fn_texture_new_with_params(
         FN_DROP_WIDTH * FN_TILE_WIDTH,
         FN_DROP_HEIGHT * FN_TILE_HEIGHT,
-        env);
+        fn_environment_build_texture_creation_params(env));
 
     size_t num_loads = FN_DROP_WIDTH *  FN_DROP_HEIGHT;
 

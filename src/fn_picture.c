@@ -43,11 +43,10 @@ FnTexture * fn_picture_load(int fd,
     guint i = 0;
     guint j = 0;
 
-    picture = fn_texture_new_with_environment(
+    picture = fn_texture_new_with_params(
         FN_WINDOW_WIDTH,
         FN_WINDOW_HEIGHT,
-        env
-        );
+        fn_environment_build_texture_creation_params(env));
 
     guint num_loads = FN_PICTURE_WIDTH * FN_PICTURE_HEIGHT;
 

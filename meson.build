@@ -23,6 +23,8 @@ rust_src = files(
     'src/text.rs',
     'src/tile.rs',
     'src/transition/geometry.rs',
+    'src/transition/mod.rs',
+    'src/transition/texture.rs',
 )
 
 cargo_build = custom_target(
@@ -77,7 +79,6 @@ c_src = [
     'src/fnactorgroup.c',
     'src/fngraphics.c',
     'src/fnscreen.c',
-    'src/fntexture.c',
     'src/freenukum.c'
 ]
 
@@ -132,7 +133,6 @@ test_tile = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -174,7 +174,6 @@ test_borders = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -215,7 +214,6 @@ test_drop = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -257,7 +255,6 @@ test_effect = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -306,7 +303,6 @@ test_hero = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -346,7 +342,6 @@ test_infobox = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -388,7 +383,6 @@ test_inputbox = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -428,7 +422,6 @@ test_level_loader = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -470,7 +463,6 @@ test_mainmenu = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -511,7 +503,6 @@ test_menu = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -551,7 +542,6 @@ test_msgbox = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -592,7 +582,6 @@ test_picture = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -634,7 +623,6 @@ test_picture_splash = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,
@@ -683,7 +671,6 @@ test_tilecache = executable(
         'src/fn_tile.c',
         'src/fn_tilecache.c',
         'src/fngraphics.c',
-        'src/fntexture.c',
     ],
     dependencies: [
         curl_lib,

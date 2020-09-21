@@ -441,7 +441,7 @@ int fn_data_download(
     char * datapath)
 {
   char temppath[1024] = "";
-  char tempfile[1024] = "";
+  char tempfile[1034] = "";
   DIR * tempdir = NULL;
   int res = 0;
   CURL * curl = NULL;
@@ -459,7 +459,7 @@ int fn_data_download(
   };
 
   snprintf(temppath, 1024, "%s%s", datapath, "/temp");
-  snprintf(tempfile, 1024, "%s%s", temppath, "/1duke.zip");
+  snprintf(tempfile, 1034, "%s%s", temppath, "/1duke.zip");
 
   /* Check if the temp path exists and create it if it does
    * not exist yet. */

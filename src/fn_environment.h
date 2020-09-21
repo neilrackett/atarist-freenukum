@@ -41,11 +41,11 @@ typedef struct fn_environment_t fn_environment_t;
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fntexture.h"
 #include "fngraphics.h"
 #include "fn_settings.h"
 #include "fn_tilecache.h"
 #include "fn_hero.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -328,6 +328,11 @@ Uint8 fn_environment_store_settings(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 fn_hero_t * fn_environment_get_hero(fn_environment_t * env);
+
+/* --------------------------------------------------------------- */
+
+FnTextureCreationParams fn_environment_build_texture_creation_params(
+        fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

@@ -60,7 +60,6 @@
 #include "fn_game.h"
 #include "fn_data.h"
 #include "fn_environment.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 

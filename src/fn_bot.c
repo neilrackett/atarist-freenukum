@@ -109,7 +109,7 @@ void fn_bot_free(fn_bot_t * bot)
 
 void fn_bot_blit(fn_bot_t * bot, SDL_Surface * target)
 {
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
   FnTexture * tile = NULL;
   fn_environment_t * env = bot->environment;
   dstrect.x = bot->x * FN_HALFTILE_WIDTH;

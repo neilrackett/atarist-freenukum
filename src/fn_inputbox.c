@@ -62,11 +62,10 @@ fn_inputbox_answer_t fn_inputbox_show(
   }
   sprintf(walker, "\n\n\nOK (Enter)   Abort (Esc)\n");
 
-  inputfield_surface = fn_texture_new_with_environment(
+  inputfield_surface = fn_texture_new_with_params(
       FN_FONT_WIDTH * answer_len,
       FN_FONT_HEIGHT,
-      env
-      );
+      fn_environment_build_texture_creation_params(env));
 
   msgbox = fn_msgbox(env, buffer);
 

@@ -36,7 +36,6 @@
 #include "fn.h"
 #include "fn_tile.h"
 #include "fn_environment.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 

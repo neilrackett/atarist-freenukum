@@ -46,7 +46,7 @@ typedef struct fn_level_t fn_level_t;
 #include "fn_bot.h"
 #include "fn_list.h"
 #include "fn_environment.h"
-#include "fntexture.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

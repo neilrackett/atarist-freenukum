@@ -33,7 +33,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_tile.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 
@@ -74,7 +73,7 @@ int main(int argc, char ** argv)
  
     screen = fn_environment_get_screen_sdl(env);
 
-    SDL_Rect r;
+    FnGeometry r;
     r.x = 0;
     r.y = 0;
     r.w = h.width * 8;
@@ -97,7 +96,7 @@ int main(int argc, char ** argv)
         res = SDL_WaitEvent(&event);
         if (res == 1)
         {
-            int multiplier = 1;
+            int multiplier = 16;
             switch(event.type)
             {
                 case SDL_QUIT:
@@ -106,11 +105,7 @@ int main(int argc, char ** argv)
                 case SDL_KEYDOWN:
                     if (event.key.keysym.mod & KMOD_CTRL)
                     {
-                        multiplier = 160;
-                    }
-                    else
-                    {
-                        multiplier = 16;
+                        multiplier *= 10;
                     }
                     switch(event.key.keysym.sym)
                     {

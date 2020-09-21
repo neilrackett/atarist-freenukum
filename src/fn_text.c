@@ -33,7 +33,6 @@
 #include "fn_text.h"
 #include "fn_tilecache.h"
 #include "fn_object.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 

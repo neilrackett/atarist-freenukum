@@ -264,7 +264,7 @@ void fn_level_actor_function_simpleanimation_act(fn_level_actor_t * actor)
 void fn_level_actor_function_simpleanimation_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_simpleanimation_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -390,7 +390,7 @@ void fn_level_actor_function_redball_jumping_blit(fn_level_actor_t * actor)
   fn_level_actor_redball_jumping_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile);
@@ -496,7 +496,7 @@ void fn_level_actor_function_redball_lying_blit(fn_level_actor_t * actor)
   fn_level_actor_redball_lying_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile);
@@ -640,7 +640,7 @@ void fn_level_actor_function_robot_blit(fn_level_actor_t * actor)
   fn_level_actor_robot_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
@@ -846,7 +846,7 @@ void fn_level_actor_function_tankbot_blit(fn_level_actor_t * actor)
   fn_level_actor_tankbot_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -1041,7 +1041,7 @@ void fn_level_actor_function_firewheelbot_blit(fn_level_actor_t * actor)
   fn_level_actor_firewheelbot_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = NULL;
   
@@ -1254,7 +1254,7 @@ void fn_level_actor_function_wallcrawler_blit(fn_level_actor_t * actor)
   fn_level_actor_wallcrawler_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
@@ -1471,7 +1471,7 @@ void fn_level_actor_function_lift_act(fn_level_actor_t * actor)
 void fn_level_actor_function_lift_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = NULL;
 
@@ -1629,7 +1629,7 @@ void fn_level_actor_function_acme_blit(fn_level_actor_t * actor)
   fn_level_actor_acme_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile);
@@ -1820,7 +1820,7 @@ void fn_level_actor_function_fire_blit(fn_level_actor_t * actor)
 {
   fn_level_actor_fire_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile0 = NULL;
   FnTexture * tile1 = NULL;
@@ -1963,7 +1963,7 @@ void fn_level_actor_function_mill_blit(fn_level_actor_t * actor)
   fn_level_actor_mill_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
@@ -2130,7 +2130,7 @@ void fn_level_actor_function_accesscard_slot_act(fn_level_actor_t * actor)
 void fn_level_actor_function_accesscard_slot_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_access_card_slot_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -2321,7 +2321,7 @@ void fn_level_actor_function_glove_slot_blit(fn_level_actor_t * actor)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   Uint8 adder = (data->current_frame == 0 ? 0 : 1);
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -2743,7 +2743,7 @@ void fn_level_actor_function_item_act(fn_level_actor_t * actor)
 void fn_level_actor_function_item_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_item_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -2965,7 +2965,7 @@ void fn_level_actor_function_soda_flying_act(fn_level_actor_t * actor)
 void fn_level_actor_function_soda_flying_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc, ANIM_SODAFLY +
       (actor->position.y/FN_HALFTILE_HEIGHT) % 4);
@@ -3063,7 +3063,7 @@ void fn_level_actor_function_balloon_blit(fn_level_actor_t * actor)
   fn_level_actor_balloon_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile;
 
@@ -3166,7 +3166,7 @@ void fn_level_actor_function_teleporter_act(fn_level_actor_t * actor)
 void fn_level_actor_function_teleporter_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile;
 
@@ -3300,7 +3300,7 @@ void fn_level_actor_function_singleanimation_act(fn_level_actor_t * actor)
 void fn_level_actor_function_singleanimation_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_singleanimation_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -3411,7 +3411,7 @@ void fn_level_actor_function_particle_blit(fn_level_actor_t * actor)
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc, data->tile);
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
   destrect.w = actor->position.w;
@@ -3492,7 +3492,7 @@ void fn_level_actor_function_rocket_blit(fn_level_actor_t * actor)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc, OBJ_ROCKET);
   destrect.x = actor->position.x;
@@ -3677,7 +3677,7 @@ void fn_level_actor_bomb_blit(fn_level_actor_t * actor)
   fn_level_actor_bomb_data_t * data = actor->data;
   if (data->counter < data->explode_threshold) {
     SDL_Surface * target = fn_level_get_surface(actor->level);
-    SDL_Rect destrect;
+    FnGeometry destrect;
     fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
     FnTexture * tile = fn_tilecache_get_tile(tc,
         data->tile + data->current_frame);
@@ -3773,7 +3773,7 @@ void fn_level_actor_bombfire_blit(fn_level_actor_t * actor)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
@@ -3867,7 +3867,7 @@ void fn_level_actor_function_explosion_act(fn_level_actor_t * actor)
 void fn_level_actor_function_explosion_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_explosion_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -3903,7 +3903,7 @@ void fn_level_actor_function_camera_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile;
 
@@ -4092,7 +4092,7 @@ void fn_level_actor_function_score_act(fn_level_actor_t * actor)
 void fn_level_actor_function_score_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_score_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -4242,7 +4242,7 @@ void fn_level_actor_function_unstablefloor_blit(fn_level_actor_t * actor)
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = NULL;
 
@@ -4286,7 +4286,7 @@ void fn_level_actor_function_expandingfloor_act(fn_level_actor_t * actor)
 void fn_level_actor_function_expandingfloor_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc, SOLID_EXPANDINGFLOOR);
 
@@ -4415,7 +4415,7 @@ void fn_level_actor_function_conveyor_act(fn_level_actor_t * actor)
 void fn_level_actor_function_conveyor_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_conveyor_data_t * data = actor->data;
 
@@ -4476,7 +4476,7 @@ void fn_level_actor_function_surveillancescreen_interact_start(
 void fn_level_actor_function_surveillancescreen_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   FnTexture * tile = NULL;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
 
@@ -4596,7 +4596,7 @@ void fn_level_actor_function_hostileshot_blit(fn_level_actor_t * actor)
   fn_level_actor_hostileshot_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile);
@@ -4637,7 +4637,7 @@ void fn_level_actor_function_notebook_interact_start(fn_level_actor_t * actor)
 void fn_level_actor_function_notebook_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   FnTexture * tile = NULL;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
 
@@ -4768,7 +4768,7 @@ void fn_level_actor_function_exitdoor_act(fn_level_actor_t * actor)
 void fn_level_actor_function_exitdoor_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_exitdoor_data_t * data = actor->data;
 
@@ -4807,11 +4807,13 @@ void fn_level_actor_function_exitdoor_blit(fn_level_actor_t * actor)
   fn_texture_blit_to_sdl_surface(part, NULL, tile, &destrect);
 
 
-  destrect.x = actor->position.x;
-  destrect.y = actor->position.y;
-  destrect.w = actor->position.w;
-  destrect.h = actor->position.h;
-  SDL_BlitSurface(tile, NULL, target, &destrect);
+  SDL_Rect target_rect;
+  target_rect.x = actor->position.x;
+  target_rect.y = actor->position.y;
+  target_rect.w = actor->position.w;
+  target_rect.h = actor->position.h;
+
+  SDL_BlitSurface(tile, NULL, target, &target_rect);
 
   SDL_FreeSurface(tile); tile = NULL;
 }
@@ -4921,7 +4923,7 @@ void fn_level_actor_function_door_act(fn_level_actor_t * actor)
 void fn_level_actor_function_door_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_door_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -5014,7 +5016,7 @@ void fn_level_actor_function_keyhole_blit(fn_level_actor_t * actor)
 {
   fn_level_actor_keyhole_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile);
@@ -5178,7 +5180,7 @@ void fn_level_actor_function_key_touch_start(fn_level_actor_t * actor)
 void fn_level_actor_function_key_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = NULL;
   destrect.x = actor->position.x;
@@ -5233,7 +5235,7 @@ void fn_level_actor_function_shootable_wall_create(fn_level_actor_t * actor)
 void fn_level_actor_function_shootable_wall_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   FnTexture * tile = NULL;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
 
@@ -5330,7 +5332,7 @@ void fn_level_actor_function_access_card_door_free(fn_level_actor_t * actor)
 void fn_level_actor_function_access_card_door_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_accesscard_door_data_t * data = actor->data;
   FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -5443,7 +5445,7 @@ void fn_level_actor_function_spikes_touch_end(fn_level_actor_t * actor)
 void fn_level_actor_function_spikes_blit(fn_level_actor_t * actor)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
   FnTexture * tile = NULL;
   fn_level_actor_spike_data_t * data = actor->data;
@@ -5613,7 +5615,7 @@ void fn_level_actor_function_fan_blit(fn_level_actor_t * actor)
   fn_level_actor_fan_data_t * data = actor->data;
 
   SDL_Surface * target = fn_level_get_surface(actor->level);
-  SDL_Rect destrect;
+  FnGeometry destrect;
   fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
 
   FnTexture * tile = fn_tilecache_get_tile(tc,

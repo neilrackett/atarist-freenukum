@@ -767,7 +767,7 @@ fn_level_t * fn_level_load(int fd,
   SDL_SetColorKey(lv->surface, SDL_SRCCOLORKEY, transparent);
   SDL_FillRect(lv->surface_fixed, NULL, transparent);
 
-  SDL_Rect r;
+  FnGeometry r;
   r.w = FN_TILE_WIDTH;
   r.h = FN_TILE_HEIGHT;
 

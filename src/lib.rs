@@ -24,3 +24,4 @@ pub use settings::Settings;
 pub mod transition;
 
 pub use transition::geometry::Geometry;
+pub use transition::texture::Texture;

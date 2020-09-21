@@ -42,7 +42,7 @@ typedef struct fn_tile_t fn_tile_t;
 
 #include "fn.h"
 #include "fn_environment.h"
-#include "fntexture.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

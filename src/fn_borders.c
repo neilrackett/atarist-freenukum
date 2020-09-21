@@ -235,11 +235,10 @@ void fn_borders_blit_score(
 
   char scoretext[FN_SCORE_DIGITS+1];
 
-  scoresurface = fn_texture_new_with_environment(
+  scoresurface = fn_texture_new_with_params(
       FN_FONT_WIDTH * FN_SCORE_DIGITS,
       FN_FONT_HEIGHT,
-      env
-      );
+      fn_environment_build_texture_creation_params(env));
 
   sprintf(scoretext, "%08llu",
       (long long unsigned int)fn_environment_get_score(env));

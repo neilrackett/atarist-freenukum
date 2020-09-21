@@ -37,7 +37,7 @@
 
 #include "fn.h"
 #include "fn_environment.h"
-#include "fntexture.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

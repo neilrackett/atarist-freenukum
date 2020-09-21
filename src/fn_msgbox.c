@@ -33,7 +33,6 @@
 #include "fn.h"
 #include "fn_msgbox.h"
 #include "fn_text.h"
-#include "fntexture.h"
 
 /* --------------------------------------------------------------- */
 
@@ -96,11 +95,10 @@ FnTexture * fn_msgbox(
       &columns,
       &rows);
 
-  msgbox = fn_texture_new_with_environment(
+  msgbox = fn_texture_new_with_params(
       FN_FONT_WIDTH * (columns + 2),
       FN_FONT_HEIGHT * (rows + 2),
-      env
-      );
+      fn_environment_build_texture_creation_params(env));
 
   for (i = 0; i <= rows; i++) {
     for (j = 0; j <= columns; j++) {

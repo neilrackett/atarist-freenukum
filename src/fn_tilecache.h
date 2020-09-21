@@ -42,8 +42,8 @@ typedef struct fn_tilecache_t fn_tilecache_t;
 
 #include "fn.h"
 #include "fn_tile.h"
-#include "fntexture.h"
 #include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

@@ -1,0 +1,93 @@
+use crate::ll::video as ll;
+
+pub use ll::SDL_Rect as Rect;
+
+#[repr(transparent)]
+pub struct Surface {
+    pub raw: *mut ll::SDL_Surface,
+}
+
+#[repr(transparent)]
+pub struct PixelFormat {
+    pub raw: *mut ll::SDL_PixelFormat,
+}
+
+impl Surface {
+    pub fn create_rgb(
+        flags: u32,
+        width: u16,
+        height: u16,
+        depth: i32,
+        rmask: u32,
+        gmask: u32,
+        bmask: u32,
+        amask: u32,
+    ) -> Self {
+        Surface {
+            raw: unsafe {
+                ll::SDL_CreateRGBSurface(
+                    flags,
+                    width as i32,
+                    height as i32,
+                    depth,
+                    rmask,
+                    gmask,
+                    bmask,
+                    amask,
+                )
+            },
+        }
+    }
+
+    pub fn set_color_key(&mut self, flag: u32, key: u32) {
+        unsafe {
+            ll::SDL_SetColorKey(self.raw, flag, key);
+        }
+    }
+
+    pub fn format(&self) -> PixelFormat {
+        let raw = unsafe { *self.raw }.format;
+        PixelFormat { raw }
+    }
+
+    pub fn fill_rect(&mut self, dstrect: &Rect, color: u32) {
+        unsafe {
+            let dstrect_ptr: *const Rect = dstrect;
+            let dstrect_mut_ptr = dstrect_ptr as *mut Rect;
+            ll::SDL_FillRect(self.raw, dstrect_mut_ptr, color);
+        }
+    }
+
+    pub fn blit(
+        &self,
+        srcrect: Option<Rect>,
+        dst: &mut Surface,
+        dstrect: Option<Rect>,
+    ) {
+        let srcrect: *mut Rect = if let Some(ref r) = srcrect {
+            r as *const Rect as *mut Rect
+        } else {
+            std::ptr::null_mut()
+        };
+        let dstrect: *mut Rect = if let Some(ref r) = dstrect {
+            r as *const Rect as *mut Rect
+        } else {
+            std::ptr::null_mut()
+        };
+        let dst_raw = dst.raw as *mut ll::SDL_Surface;
+        unsafe {
+            ll::SDL_UpperBlit(self.raw, srcrect, dst_raw, dstrect);
+        }
+    }
+}
+
+impl Drop for Surface {
+    fn drop(&mut self) {
+        // TODO: re-enable once we have migrated everything to rust
+        // unsafe { ll::SDL_FreeSurface(self.raw) }
+    }
+}
+
+pub fn map_rgb(format: &PixelFormat, r: u8, g: u8, b: u8) -> u32 {
+    unsafe { ll::SDL_MapRGB(format.raw, r, g, b) }
+}
