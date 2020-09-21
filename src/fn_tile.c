@@ -49,54 +49,54 @@ FnTexture * fn_tile_load(
     int fd,
     fn_environment_t * env,
     fn_tileheader_t * h,
-    gboolean has_transparency)
+    bool has_transparency)
 {
-  guint width = h->width * 8;
-  guint height = h->height;
+  Uint16 width = h->width * 8;
+  Uint16 height = h->height;
 
   FnTexture * tile = fn_texture_new_with_params(
       width,
       height,
       fn_environment_build_texture_creation_params(env));
 
-  guchar * data = g_new(guchar, width * height * 4);
+  unsigned char * data = malloc(sizeof(unsigned char) * width * height * 4);
 
-  guchar readbuf[5];
+  unsigned char readbuf[5];
 
-  guint num_loads = width * height / 8;
-  guint num_read = 0;
-  guchar * iter = data;
+  size_t num_loads = width * height / 8;
+  size_t num_read = 0;
+  unsigned char * iter = data;
 
   while (num_read < num_loads)
   {
     read(fd, readbuf, 5);
-    guchar opaque_row = readbuf[0];
-    guchar blue_row   = readbuf[1];
-    guchar green_row  = readbuf[2];
-    guchar red_row    = readbuf[3];
-    guchar bright_row = readbuf[4];
+    unsigned char opaque_row = readbuf[0];
+    unsigned char blue_row   = readbuf[1];
+    unsigned char green_row  = readbuf[2];
+    unsigned char red_row    = readbuf[3];
+    unsigned char bright_row = readbuf[4];
 
-    guchar i = 0;
+    unsigned char i = 0;
 
     for (i = 0; i < 8; i++) {
-      guchar bright_pixel = ((bright_row >> (7-i)) & 1);
-      guchar red_pixel    = ((red_row    >> (7-i)) & 1);
-      guchar green_pixel  = ((green_row  >> (7-i)) & 1);
-      guchar blue_pixel   = ((blue_row   >> (7-i)) & 1);
-      guchar opaque_pixel = (
+      unsigned char bright_pixel = ((bright_row >> (7-i)) & 1);
+      unsigned char red_pixel    = ((red_row    >> (7-i)) & 1);
+      unsigned char green_pixel  = ((green_row  >> (7-i)) & 1);
+      unsigned char blue_pixel   = ((blue_row   >> (7-i)) & 1);
+      unsigned char opaque_pixel = (
           has_transparency ?
           ((opaque_row >> (7-i)) & 1) :
           1);
-      guchar ugly_yellow  = (
+      unsigned char ugly_yellow  = (
           red_pixel == 1 &&
           green_pixel == 1 &&
           blue_pixel == 0 &&
           bright_pixel == 0) ? 1 : 0;
 
-      guchar * red    = iter;
-      guchar * green  = iter + 1;
-      guchar * blue   = iter + 2;
-      guchar * opaque = iter + 3;
+      unsigned char * red    = iter;
+      unsigned char * green  = iter + 1;
+      unsigned char * blue   = iter + 2;
+      unsigned char * opaque = iter + 3;
 
       *red =    0x54 * (red_pixel   * 2 + bright_pixel);
       *green =  0x54 * (green_pixel * 2 + bright_pixel - ugly_yellow);
@@ -110,7 +110,7 @@ FnTexture * fn_tile_load(
 
   fn_texture_set_data(tile, data, fn_environment_get_transparent(env));
 
-  g_free(data);
+  free(data);
   return tile;
 }
 

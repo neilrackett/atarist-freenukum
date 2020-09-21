@@ -43,7 +43,6 @@
 #include "fn_environment.h"
 #include "fn_error.h"
 #include "fn_data.h"
-#include "fngraphics.h"
 
 /* --------------------------------------------------------------- */
 
@@ -136,7 +135,6 @@ fn_environment_t * fn_environment_create()
   env->episode = 1;
   env->num_episodes = 0;
   env->hero = fn_hero_create(env);
-  env->graphics = NULL;
 
   /* create all the path variables */
   char * homepath = getenv("HOME");
@@ -219,7 +217,10 @@ fn_environment_t * fn_environment_create()
     env->videoflags |= SDL_FULLSCREEN;
   }
 
-  env->graphics = fn_graphics_new(FALSE);
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
+    fn_error_printf(1024, "Can't initialize SDL: %s", SDL_GetError());
+    return env;
+  }
 
   env->screen = SDL_SetVideoMode(
       FN_WINDOW_WIDTH,
@@ -260,10 +261,6 @@ void fn_environment_delete(fn_environment_t * env)
   }
   if (env->hero != NULL) {
     fn_hero_delete(env->hero); env->hero = NULL;
-  }
-
-  if (env->graphics != NULL) {
-    g_object_unref(env->graphics); env->graphics = NULL;
   }
 
   free(env);

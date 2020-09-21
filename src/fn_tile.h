@@ -62,7 +62,7 @@ FnTexture * fn_tile_load(
     int fd,
     fn_environment_t * env,
     fn_tileheader_t * h,
-    gboolean has_transparency);
+    bool has_transparency);
 
 /* --------------------------------------------------------------- */
 

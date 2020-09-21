@@ -142,8 +142,8 @@ char fn_menu_get_choice(fn_menu_t * menu,
       placeholder);
   free(placeholder);
 
-  guint box_width = fn_texture_get_width(box);
-  guint box_height = fn_texture_get_height(box);
+  unsigned int box_width = fn_texture_get_width(box);
+  unsigned int box_height = fn_texture_get_height(box);
 
   FnTexture * target =
     fn_texture_new_with_params(
@@ -155,7 +155,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
 
   fn_menuentry_t * entry = NULL;
 
-  SDL_Rect destrect;
+  FnGeometry destrect;
   destrect.x = ((fn_environment_get_screen_sdl(env)->w) - box_width) / 2;
   destrect.y = ((fn_environment_get_screen_sdl(env)->h) - box_height) / 2;
   destrect.w = box_width;

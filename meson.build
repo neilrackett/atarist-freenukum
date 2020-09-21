@@ -75,17 +75,12 @@ c_src = [
     'src/fn_text.c',
     'src/fn_tile.c',
     'src/fn_tilecache.c',
-    'src/fnactor.c',
-    'src/fnactorgroup.c',
-    'src/fngraphics.c',
-    'src/fnscreen.c',
     'src/freenukum.c'
 ]
 
 sdl_lib = meson.get_compiler('c').find_library('SDL')
 sdl_ttf_lib = meson.get_compiler('c').find_library('SDL_ttf')
 curl_lib = meson.get_compiler('c').find_library('curl')
-glib = dependency('gobject-2.0', version: '>=2.36')
 zip_lib = meson.get_compiler('c').find_library('zip')
 
 conf = configuration_data()
@@ -132,11 +127,9 @@ test_tile = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -173,11 +166,9 @@ test_borders = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -213,11 +204,9 @@ test_drop = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -254,11 +243,9 @@ test_effect = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -302,11 +289,9 @@ test_hero = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -341,11 +326,9 @@ test_infobox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -382,11 +365,9 @@ test_inputbox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -421,11 +402,9 @@ test_level_loader = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -462,11 +441,9 @@ test_mainmenu = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -502,11 +479,9 @@ test_menu = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -541,11 +516,9 @@ test_msgbox = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -581,11 +554,9 @@ test_picture = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -622,11 +593,9 @@ test_picture_splash = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -670,11 +639,9 @@ test_tilecache = executable(
         'src/fn_text.c',
         'src/fn_tile.c',
         'src/fn_tilecache.c',
-        'src/fngraphics.c',
     ],
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,
@@ -692,7 +659,6 @@ executable(
     c_src,
     dependencies: [
         curl_lib,
-        glib,
         sdl_lib,
         sdl_ttf_lib,
         zip_lib,

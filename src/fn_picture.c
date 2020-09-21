@@ -40,27 +40,27 @@ FnTexture * fn_picture_load(int fd,
     fn_environment_t * env)
 {
     FnTexture * picture;
-    guint i = 0;
-    guint j = 0;
+    unsigned int i = 0;
+    unsigned int j = 0;
 
     picture = fn_texture_new_with_params(
         FN_WINDOW_WIDTH,
         FN_WINDOW_HEIGHT,
         fn_environment_build_texture_creation_params(env));
 
-    guint num_loads = FN_PICTURE_WIDTH * FN_PICTURE_HEIGHT;
+    unsigned int num_loads = FN_PICTURE_WIDTH * FN_PICTURE_HEIGHT;
 
-    guchar * data = g_new0(guchar,
+    unsigned char * data = calloc(1, sizeof(unsigned char) *
         FN_PICTURE_WIDTH * FN_PICTURE_HEIGHT * 4 * 8);
-    guchar * data_pos = data;
-    guchar readbuf[num_loads];
+    unsigned char * data_pos = data;
+    unsigned char readbuf[num_loads];
 
     /* read blue */
     read(fd, readbuf, num_loads);
     data_pos = data + 2;
     for(i = 0; i < num_loads; i++) {
       for (j = 0; j < 8; j++) {
-        guchar blue_pixel = ((readbuf[i] >> (7 -j)) & 1);
+        unsigned char blue_pixel = ((readbuf[i] >> (7 -j)) & 1);
         *data_pos += blue_pixel * 0x54 * 2;
         data_pos += 4;
       }
@@ -71,7 +71,7 @@ FnTexture * fn_picture_load(int fd,
     data_pos = data + 1;
     for(i = 0; i < num_loads; i++) {
       for (j = 0; j < 8; j++) {
-        guchar green_pixel = ((readbuf[i] >> (7 -j)) & 1);
+        unsigned char green_pixel = ((readbuf[i] >> (7 -j)) & 1);
         *data_pos += green_pixel * 0x54 * 2;
         data_pos += 4;
       }
@@ -82,7 +82,7 @@ FnTexture * fn_picture_load(int fd,
     data_pos = data;
     for(i = 0; i < num_loads; i++) {
       for (j = 0; j < 8; j++) {
-        guchar red_pixel = ((readbuf[i] >> (7 -j)) & 1);
+        unsigned char red_pixel = ((readbuf[i] >> (7 -j)) & 1);
         *data_pos += red_pixel * 0x54 * 2;
         data_pos += 4;
       }
@@ -93,7 +93,7 @@ FnTexture * fn_picture_load(int fd,
     data_pos = data;
     for(i = 0; i < num_loads; i++) {
       for (j = 0; j < 8; j++) {
-        guchar bright_pixel = ((readbuf[i] >> (7 -j)) & 1);
+        unsigned char bright_pixel = ((readbuf[i] >> (7 -j)) & 1);
 
         /* brighten red */
         *data_pos += bright_pixel * 0x54;

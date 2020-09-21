@@ -53,10 +53,10 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 
     size_t num_loads = FN_DROP_WIDTH *  FN_DROP_HEIGHT;
 
-    gint  x      = 0;
-    gint  y      = 0;
-    guint width  = FN_TILE_WIDTH;
-    guint height = FN_TILE_HEIGHT;
+    int  x      = 0;
+    int  y      = 0;
+    unsigned int width  = FN_TILE_WIDTH;
+    unsigned int height = FN_TILE_HEIGHT;
 
     h.width = 2;
     h.height = 16;
@@ -68,7 +68,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
         tile = fn_tile_load(fd,
             env,
             &h,
-            FALSE);
+            false);
         fn_texture_clone_to_texture(tile, NULL, drop, &geometry);
         fn_texture_free(tile);
         x += 16;
