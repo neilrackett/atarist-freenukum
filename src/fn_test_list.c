@@ -44,7 +44,7 @@ void printlist(fn_list_t * list)
       iter != fn_list_last(list);
       iter = fn_list_next(iter))
   {
-    printf("element: %d\n", (int)(iter->data));
+    printf("element: %ld\n", (size_t)(iter->data));
   }
 }
 

@@ -56,7 +56,8 @@ int main(int argc, char ** argv) {
   } else {
     printf("Aborted.\n");
   }
-        
+
+  SDL_FreeSurface(screen);
   return 0;
 }
 

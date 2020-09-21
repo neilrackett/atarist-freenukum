@@ -41,14 +41,15 @@ int main(int argc, char ** argv)
 {
   fn_environment_t * env = fn_environment_create();
   fn_environment_load_tilecache(env);
-  int res;
   SDL_Surface * screen;
 
   fn_error_set_handler(fn_error_print_commandline);
 
   screen = fn_environment_get_screen_sdl(env);
 
-  res = fn_picture_splash_show(env, "DN.DN1");
+  fn_picture_splash_show(env, "DN.DN1");
+
+  SDL_FreeSurface(screen);
   
   return 0;
 }

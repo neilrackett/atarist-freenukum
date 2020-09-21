@@ -417,45 +417,6 @@ test_level_loader = executable(
     ],
 )
 
-test_mainmenu = executable(
-    'test_mainmenu',
-    [
-        'src/fn_test_mainmenu.c',
-
-        'src/fn_bot.c',
-        'src/fn_collision.c',
-        'src/fn_data.c',
-        'src/fn_environment.c',
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
-        'src/fn_hero.c',
-        'src/fn_infobox.c',
-        'src/fn_level.c',
-        'src/fn_level_actor.c',
-        'src/fn_list.c',
-        'src/fn_mainmenu.c',
-        'src/fn_menu.c',
-        'src/fn_msgbox.c',
-        'src/fn_settings.c',
-        'src/fn_shot.c',
-        'src/fn_text.c',
-        'src/fn_tile.c',
-        'src/fn_tilecache.c',
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum_rs.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_menu = executable(
     'test_menu',
     [

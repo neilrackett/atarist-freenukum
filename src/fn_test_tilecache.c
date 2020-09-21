@@ -57,7 +57,7 @@ int sumuntil(Uint8 * ar, size_t s)
 /* --------------------------------------------------------------- */
 
 void blithex(SDL_Surface * target,
-    SDL_Rect * r,
+    FnGeometry * r,
     fn_environment_t * env,
     int x)
 {
@@ -147,7 +147,7 @@ int main(int argc, char ** argv)
   }
 
 
-  SDL_Rect r;
+  FnGeometry r;
   r.x = 0;
   r.y = 0;
   r.w = FN_TILE_WIDTH;
@@ -191,21 +191,12 @@ int main(int argc, char ** argv)
     res = SDL_WaitEvent(&event);
     if (res == 1)
     {
-      int multiplier = 1;
       switch(event.type)
       {
         case SDL_QUIT:
           quit = 1;
           break;
         case SDL_KEYDOWN:
-          if (event.key.keysym.mod & KMOD_CTRL)
-          {
-            multiplier = 160;
-          }
-          else
-          {
-            multiplier = 16;
-          }
           switch(event.key.keysym.sym)
           {
             case SDLK_q:

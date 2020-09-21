@@ -142,5 +142,7 @@ int main(int argc, char ** argv)
     }
   }
 
+  SDL_RemoveTimer(timer);
+
   return 0;
 }

@@ -51,5 +51,6 @@ int main(int argc, char ** argv) {
       env);
   printf("Choice: %c\n", choice);
   fn_menu_free(menu);
+  SDL_FreeSurface(screen);
   return 0;
 }

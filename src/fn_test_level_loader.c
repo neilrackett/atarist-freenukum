@@ -43,7 +43,7 @@
 void scroll(
         int xdist,
         int ydist,
-        SDL_Rect * r,
+        FnGeometry * r,
         SDL_Surface * level,
         SDL_Surface * screen)
 {
@@ -59,7 +59,8 @@ void scroll(
     if (r->y + r->h > level->h)
         r->y = level->h - r->h;
 
-    SDL_BlitSurface(level, r, screen, NULL);
+    SDL_Rect rect = fn_geometry_as_sdl_rect(r);
+    SDL_BlitSurface(level, &rect, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
 
@@ -145,7 +146,7 @@ int main(int argc, char ** argv)
 
     SDL_WM_SetCaption("FreeNukum Level Tester", "");
 
-    SDL_Rect r;
+    FnGeometry r;
     r.x = 0;
     r.y = 0;
     r.w = FN_TILE_WIDTH * FN_LEVEL_WIDTH;

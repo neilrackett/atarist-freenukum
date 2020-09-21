@@ -53,6 +53,12 @@ int main(int argc, char ** argv)
 
   int fd;
 
+  char * filename = "BADGUY.DN1";
+  char * datapath = fn_environment_get_datapath(env);
+  char * path = malloc(strlen(datapath) + strlen(filename) + 1);
+  sprintf(path, "%s/%s", datapath, filename);
+  fd = open(path, O_RDONLY);
+
   int quit = 0;
   Uint8 step = 0;
 
