@@ -63,8 +63,6 @@ Uint32 fn_game_timer_triggered(
 void fn_game_start(
     fn_environment_t * env)
 {
-  int res;
-
   /* Initialize Random Number Generator. */
   srand(time(NULL));
 
@@ -83,7 +81,7 @@ void fn_game_start(
 
   snprintf(
       filename, 30, "BADGUY.DN%d", fn_environment_get_episode(env));
-  res = fn_picture_splash_show_with_message(
+  fn_picture_splash_show_with_message(
       env,
       filename,
       msg1,
@@ -92,7 +90,7 @@ void fn_game_start(
 
   snprintf(
       filename, 30, "DUKE.DN%d", fn_environment_get_episode(env));
-  res = fn_picture_splash_show_with_message(
+  fn_picture_splash_show_with_message(
       env,
       filename,
       msg2,

@@ -44,7 +44,7 @@ void fn_borders_blit_tile(
     int x,
     int y)
 {
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
   dstrect.x = FN_HALFTILE_WIDTH * x;
   dstrect.y = FN_HALFTILE_HEIGHT * y;
   fn_texture_blit_to_sdl_surface(
@@ -231,7 +231,7 @@ void fn_borders_blit_score(
     fn_environment_t * env)
 {
   FnTexture * scoresurface;
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
 
   char scoretext[FN_SCORE_DIGITS+1];
 
