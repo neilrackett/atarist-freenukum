@@ -23,6 +23,8 @@
 
 #define TILE_WIDTH (HALFTILE_WIDTH * 2)
 
+typedef struct File File;
+
 typedef struct Texture Texture;
 
 typedef struct {
@@ -33,6 +35,8 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
+
+typedef File FnFile;
 
 typedef Texture FnTexture;
 
@@ -47,6 +51,8 @@ typedef TextureCreationParams FnTextureCreationParams;
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
+
+FnFile *fn_open_file(void);
 
 void fn_texture_blit_to_sdl_surface(const FnTexture *ptr,
                                     const Geometry *srcrect,
