@@ -35,10 +35,6 @@
 
 /* --------------------------------------------------------------- */
 
-typedef struct fn_tile_t fn_tile_t;
-
-/* --------------------------------------------------------------- */
-
 #include "fn.h"
 #include "fn_environment.h"
 #include "rusted.h"
@@ -50,15 +46,6 @@ FnTexture * fn_tile_load(
     fn_environment_t * env,
     FnTileHeader h,
     bool has_transparency);
-
-/* --------------------------------------------------------------- */
-
-SDL_Surface * fn_tile_load_to_sdl(
-        int fd,
-        fn_environment_t * env,
-        FnTileHeader h,
-        Uint8 transparent
-        );
 
 /* --------------------------------------------------------------- */
 
