@@ -56,7 +56,7 @@ fn_tilecache_t * fn_tilecache_create()
 int fn_tilecache_loadtiles(fn_tilecache_t * tc,
     fn_environment_t * env)
 {
-    int fd;
+    FnFile * file = NULL;
     size_t i = 0;
     char * path;
     int res;
@@ -163,21 +163,21 @@ int fn_tilecache_loadtiles(fn_tilecache_t * tc,
     {
         snprintf(path, strlen(directory) + 15, "%s/%s",
             directory, files[i]);
-        fd = open(path, O_RDONLY);
-        if (fd == -1)
+        file = fn_file_open(path);
+        if (file == NULL)
         {
           printf("Failed to open file %s\n", path);
         } else {
 
-          fn_tile_loadheader(fd, &header);
+          fn_tile_loadheader(file, &header);
           res =
             fn_tilecache_loadfile(tc,
                 env,
-                fd,
+                file,
                 size[i],
                 &header,
                 transparent[i]);
-          close(fd);
+          fn_file_free(file);
 
           if (res != 0)
           {
@@ -196,7 +196,7 @@ int fn_tilecache_loadtiles(fn_tilecache_t * tc,
 int fn_tilecache_loadfile(
         fn_tilecache_t * tc,
         fn_environment_t * env,
-        int fd,
+        FnFile * file,
         size_t num_tiles,
         fn_tileheader_t * header,
         Uint8 transparent)
@@ -204,7 +204,7 @@ int fn_tilecache_loadfile(
     while(num_tiles > 0)
     {
         tc->tiles[tc->size] =
-          fn_tile_load(fd,
+          fn_tile_load(file,
               env,
               header,
               transparent);

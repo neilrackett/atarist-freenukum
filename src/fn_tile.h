@@ -54,12 +54,12 @@ struct fn_tileheader_t {
 
 /* --------------------------------------------------------------- */
 
-int fn_tile_loadheader(int fd, fn_tileheader_t * h);
+void fn_tile_loadheader(FnFile * file, fn_tileheader_t * h);
 
 /* --------------------------------------------------------------- */
 
 FnTexture * fn_tile_load(
-    int fd,
+    FnFile * file,
     fn_environment_t * env,
     fn_tileheader_t * h,
     bool has_transparency);

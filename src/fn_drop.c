@@ -37,7 +37,7 @@
 
 /* --------------------------------------------------------------- */
 
-FnTexture * fn_drop_load(int fd, fn_environment_t * env)
+FnTexture * fn_drop_load(FnFile * file, fn_environment_t * env)
 {
     FnTexture * drop;
     FnGeometry geometry;
@@ -65,7 +65,7 @@ FnTexture * fn_drop_load(int fd, fn_environment_t * env)
 
     while(num_read != num_loads)
     {
-        tile = fn_tile_load(fd,
+        tile = fn_tile_load(file,
             env,
             &h,
             false);

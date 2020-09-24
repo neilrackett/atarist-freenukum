@@ -38,15 +38,15 @@
 
 /* --------------------------------------------------------------- */
 
-int fn_tile_loadheader(int fd, fn_tileheader_t * h)
+void fn_tile_loadheader(FnFile * file, fn_tileheader_t * h)
 {
-    return read(fd, h, sizeof(*h)) == sizeof(*h);
+    fn_file_read(file, h, sizeof(*h));
 }
 
 /* --------------------------------------------------------------- */
 
 FnTexture * fn_tile_load(
-    int fd,
+    FnFile * file,
     fn_environment_t * env,
     fn_tileheader_t * h,
     bool has_transparency)
@@ -69,7 +69,7 @@ FnTexture * fn_tile_load(
 
   while (num_read < num_loads)
   {
-    read(fd, readbuf, 5);
+    fn_file_read(file, readbuf, 5);
     unsigned char opaque_row = readbuf[0];
     unsigned char blue_row   = readbuf[1];
     unsigned char green_row  = readbuf[2];

@@ -41,7 +41,7 @@
 
 int main(int argc, char ** argv)
 {
-    int fd;
+    FnFile * file = NULL;
     fn_tileheader_t h;
     int quit = 0;
     int res;
@@ -58,7 +58,7 @@ int main(int argc, char ** argv)
 
     fn_environment_t * env = fn_environment_create();
 
-    fd = open(argv[1], O_RDONLY);
+    file = fn_file_open(argv[1]);
 
     SDL_Surface * screen;
     FnTexture * drop;
@@ -81,9 +81,9 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    fn_tile_loadheader(fd, &h);
+    fn_tile_loadheader(file, &h);
 
-    drop = fn_drop_load(fd, env);
+    drop = fn_drop_load(file, env);
 
     fn_texture_blit_to_sdl_surface(drop, NULL, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);

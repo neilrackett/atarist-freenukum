@@ -43,12 +43,12 @@
 
 /**
  * Loads a backdrop from a file.
- * @param  fd            The file descriptor of the already opened file.
+ * @param  file          The file descriptor of the already opened file.
  * @param  env           The environment.
  *
  * @return The loaded backrdop.
  */
-FnTexture * fn_drop_load(int fd, fn_environment_t * env);
+FnTexture * fn_drop_load(FnFile * file, fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

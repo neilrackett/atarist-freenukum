@@ -36,10 +36,11 @@
 #include "fn_hero.h"
 #include "fn_object.h"
 #include "fn_collision.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
-fn_level_t * fn_level_load(int fd,
+fn_level_t * fn_level_load(FnFile* file,
     fn_environment_t * env)
 {
   size_t i = 0;
@@ -82,8 +83,8 @@ fn_level_t * fn_level_load(int fd,
     /* we don't only want to run on big-endian systems,
      * so we load the bytes separately.
      */
-    read(fd, &lowertile, 1);
-    read(fd, &uppertile, 1);
+    fn_file_read(file, &lowertile, 1);
+    fn_file_read(file, &uppertile, 1);
     tilenr = (uppertile << 8) | lowertile;
 
     lv->raw[y][x] = tilenr;

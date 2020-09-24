@@ -11,7 +11,7 @@ impl File {
 }
 
 pub mod ffi {
-    use libc::c_char;
+    use libc::{c_char, c_void, size_t};
     use std::ffi::CStr;
 
     pub type FnFile = super::File;
@@ -36,6 +36,28 @@ pub mod ffi {
                 std::ptr::null_mut()
             }
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_file_read(
+        ptr: *mut FnFile,
+        buffer: *mut c_void,
+        length: size_t,
+    ) {
+        assert!(!ptr.is_null());
+
+        let file = unsafe { &mut (*ptr) };
+
+        assert!(!buffer.is_null());
+        let mut buffer: &mut [u8] = unsafe {
+            std::slice::from_raw_parts_mut(
+                buffer as *mut u8,
+                length as usize,
+            )
+        };
+
+        use std::io::Read;
+        file.as_ref_mut().read_exact(&mut buffer).ok();
     }
 
     #[no_mangle]

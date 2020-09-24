@@ -38,7 +38,7 @@
 
 int main(int argc, char ** argv)
 {
-    int fd;
+    FnFile * file = NULL;
     fn_environment_t * env = fn_environment_create();
     fn_environment_load_tilecache(env);
     SDL_Event event;
@@ -57,7 +57,7 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    fd = open(argv[1], O_RDONLY);
+    file = fn_file_open(argv[1]);
 
     SDL_Surface * screen;
     FnTexture * tile;
@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
     }
 
     fn_tileheader_t h;
-    fn_tile_loadheader(fd, &h);
+    fn_tile_loadheader(file, &h);
  
     screen = fn_environment_get_screen_sdl(env);
 
@@ -81,8 +81,7 @@ int main(int argc, char ** argv)
     size_t i = 0;
     while (i != h.tiles)
     {
-        tile = fn_tile_load(
-            fd, env, &h, 0);
+        tile = fn_tile_load(file, env, &h, 0);
         fn_texture_blit_to_sdl_surface(tile, NULL, screen, &r);
         fn_texture_free(tile);
         i++;

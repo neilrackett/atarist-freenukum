@@ -155,7 +155,7 @@ int fn_game_start_in_level(
     fn_environment_t * env)
 {
   int returnvalue = 0;
-  int fd = 0;
+  FnFile * file = NULL;
   fn_level_t * lv = NULL;
   FnGeometry dstrect;
   FnGeometry srcrect;
@@ -214,21 +214,20 @@ int fn_game_start_in_level(
       fn_environment_get_datapath(env),
       backdropnumber,
       fn_environment_get_episode(env));
-  fd = open(backdropfile, O_RDONLY);
+  file = fn_file_open(backdropfile);
 
-  if (fd == -1)
+  if (file == NULL)
   {
     fprintf(stderr, "Could not open file %s\n", backdropfile);
     perror("Can't open file");
   } else {
     fn_tileheader_t h;
-    fn_tile_loadheader(fd, &h);
-    backdrop = fn_drop_load(fd,
-        env);
+    fn_tile_loadheader(file, &h);
+    backdrop = fn_drop_load(file, env);
     if (backdrop == NULL) {
       printf("could not load backdrop");
     }
-    close(fd);
+    fn_file_free(file);
   }
 
   char levelfile[1024];
@@ -236,23 +235,23 @@ int fn_game_start_in_level(
       fn_environment_get_datapath(env),
       levelnumber,
       fn_environment_get_episode(env));
-  fd = open(levelfile, O_RDONLY);
+  file = fn_file_open(levelfile);
 
-  if (fd == -1)
+  if (file == NULL)
   {
     fprintf(stderr, "Could not open file %s\n", levelfile);
     perror("Can't open file");
     goto cleanup;
   }
 
-  lv = fn_level_load(fd, env);
+  lv = fn_level_load(file, env);
   if (lv == NULL)
   {
-    close(fd);
+    fn_file_free(file);
     fprintf(stderr, "Could not load level from file %s\n", levelfile);
     goto cleanup;
   }
-  close(fd);
+  fn_file_free(file);
 
   dstrect.x = FN_TILE_WIDTH;
   dstrect.y = FN_TILE_HEIGHT;

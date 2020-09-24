@@ -68,7 +68,7 @@ int fn_tilecache_loadtiles(
 int fn_tilecache_loadfile(
         fn_tilecache_t * tc,
         fn_environment_t * env,
-        int fd,
+        FnFile * file,
         size_t num_tiles,
         fn_tileheader_t * header,
         Uint8 transparent);

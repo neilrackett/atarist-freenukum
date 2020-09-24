@@ -69,7 +69,7 @@ void scroll(
 int main(int argc, char ** argv)
 {
     fn_level_t * lv = NULL;
-    int fd;
+    FnFile * file;
     int quit = 0;
     int res;
     SDL_Surface * screen;
@@ -119,9 +119,9 @@ int main(int argc, char ** argv)
 
     printf("Use the arrow keys to navigate through the level\n");
 
-    fd = open(levelfile, O_RDONLY);
+    file = fn_file_open(levelfile);
 
-    if (fd == -1)
+    if (file == NULL)
     {
         perror("Can't open file");
         return -1;
@@ -129,16 +129,15 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
 
-    lv = fn_level_load(fd, env);
+    lv = fn_level_load(file, env);
     if (lv == NULL)
     {
-        close(fd);
+        fn_file_free(file);
         fprintf(stderr, "Could not load level from file %s\n", levelfile);
         return -1;
     }
 
-    close(fd);
-
+    fn_file_free(file);
 
     level = fn_environment_create_surface(env,
         FN_TILE_WIDTH * FN_LEVEL_WIDTH,
