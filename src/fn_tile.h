@@ -35,7 +35,6 @@
 
 /* --------------------------------------------------------------- */
 
-typedef struct fn_tileheader_t fn_tileheader_t;
 typedef struct fn_tile_t fn_tile_t;
 
 /* --------------------------------------------------------------- */
@@ -46,22 +45,10 @@ typedef struct fn_tile_t fn_tile_t;
 
 /* --------------------------------------------------------------- */
 
-struct fn_tileheader_t {
-    Uint8 tiles;
-    Uint8 width;
-    Uint8 height;
-};
-
-/* --------------------------------------------------------------- */
-
-void fn_tile_loadheader(FnFile * file, fn_tileheader_t * h);
-
-/* --------------------------------------------------------------- */
-
 FnTexture * fn_tile_load(
     FnFile * file,
     fn_environment_t * env,
-    fn_tileheader_t * h,
+    FnTileHeader h,
     bool has_transparency);
 
 /* --------------------------------------------------------------- */
@@ -69,7 +56,7 @@ FnTexture * fn_tile_load(
 SDL_Surface * fn_tile_load_to_sdl(
         int fd,
         fn_environment_t * env,
-        fn_tileheader_t * h,
+        FnTileHeader h,
         Uint8 transparent
         );
 

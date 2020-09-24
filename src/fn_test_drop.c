@@ -42,7 +42,6 @@
 int main(int argc, char ** argv)
 {
     FnFile * file = NULL;
-    fn_tileheader_t h;
     int quit = 0;
     int res;
     SDL_Event event;
@@ -81,7 +80,7 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    fn_tile_loadheader(file, &h);
+    fn_tileheader_load(file);
 
     drop = fn_drop_load(file, env);
 

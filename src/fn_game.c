@@ -42,6 +42,7 @@
 #include "fn_infobox.h"
 #include "fn_level.h"
 #include "fn_drop.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -221,8 +222,7 @@ int fn_game_start_in_level(
     fprintf(stderr, "Could not open file %s\n", backdropfile);
     perror("Can't open file");
   } else {
-    fn_tileheader_t h;
-    fn_tile_loadheader(file, &h);
+    fn_tileheader_load(file);
     backdrop = fn_drop_load(file, env);
     if (backdrop == NULL) {
       printf("could not load backdrop");

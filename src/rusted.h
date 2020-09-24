@@ -56,6 +56,14 @@ typedef struct {
 
 typedef TextureCreationParams FnTextureCreationParams;
 
+typedef struct {
+    uint8_t tiles;
+    uint8_t width;
+    uint8_t height;
+} TileHeader;
+
+typedef TileHeader FnTileHeader;
+
 void fn_file_free(FnFile *ptr);
 
 FnFile *fn_file_open(const char *path);
@@ -97,3 +105,5 @@ FnTexture *fn_texture_new_with_params(uint16_t w,
 void fn_texture_set_data(FnTexture *ptr,
                          const uint8_t *data,
                          uint32_t transparent);
+
+FnTileHeader fn_tileheader_load(FnFile *file);

@@ -60,7 +60,6 @@ int fn_tilecache_loadtiles(fn_tilecache_t * tc,
     size_t i = 0;
     char * path;
     int res;
-    fn_tileheader_t header;
     char * directory = fn_environment_get_datapath(env);
 
     Uint8 transparent[] = {
@@ -169,13 +168,13 @@ int fn_tilecache_loadtiles(fn_tilecache_t * tc,
           printf("Failed to open file %s\n", path);
         } else {
 
-          fn_tile_loadheader(file, &header);
+          FnTileHeader header = fn_tileheader_load(file);
           res =
             fn_tilecache_loadfile(tc,
                 env,
                 file,
                 size[i],
-                &header,
+                header,
                 transparent[i]);
           fn_file_free(file);
 
@@ -198,7 +197,7 @@ int fn_tilecache_loadfile(
         fn_environment_t * env,
         FnFile * file,
         size_t num_tiles,
-        fn_tileheader_t * header,
+        FnTileHeader header,
         Uint8 transparent)
 {
     while(num_tiles > 0)

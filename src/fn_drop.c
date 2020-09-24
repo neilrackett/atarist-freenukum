@@ -42,9 +42,9 @@ FnTexture * fn_drop_load(FnFile * file, fn_environment_t * env)
     FnTexture * drop;
     FnGeometry geometry;
     size_t num_read = 0;
-    fn_tileheader_t h;
 
     FnTexture * tile;
+    FnTileHeader h;
 
     drop = fn_texture_new_with_params(
         FN_DROP_WIDTH * FN_TILE_WIDTH,
@@ -67,7 +67,7 @@ FnTexture * fn_drop_load(FnFile * file, fn_environment_t * env)
     {
         tile = fn_tile_load(file,
             env,
-            &h,
+            h,
             false);
         fn_texture_clone_to_texture(tile, NULL, drop, &geometry);
         fn_texture_free(tile);

@@ -38,21 +38,14 @@
 
 /* --------------------------------------------------------------- */
 
-void fn_tile_loadheader(FnFile * file, fn_tileheader_t * h)
-{
-    fn_file_read(file, h, sizeof(*h));
-}
-
-/* --------------------------------------------------------------- */
-
 FnTexture * fn_tile_load(
     FnFile * file,
     fn_environment_t * env,
-    fn_tileheader_t * h,
+    FnTileHeader h,
     bool has_transparency)
 {
-  Uint16 width = h->width * 8;
-  Uint16 height = h->height;
+  Uint16 width = h.width * 8;
+  Uint16 height = h.height;
 
   FnTexture * tile = fn_texture_new_with_params(
       width,

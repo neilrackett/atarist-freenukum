@@ -70,7 +70,7 @@ int fn_tilecache_loadfile(
         fn_environment_t * env,
         FnFile * file,
         size_t num_tiles,
-        fn_tileheader_t * header,
+        FnTileHeader header,
         Uint8 transparent);
 
 /* --------------------------------------------------------------- */
