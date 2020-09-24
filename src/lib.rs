@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
 
+use anyhow::Result;
+
 mod borders;
 mod game;
 mod settings;
@@ -17,6 +19,10 @@ pub const HEALTH_COUNT: usize = 8;
 pub const INVENTORY_WIDTH: usize = HEALTH_COUNT / 2;
 pub const FONT_WIDTH: usize = 8;
 pub const FONT_HEIGHT: usize = 8;
+pub const WINDOW_WIDTH: usize = 320;
+pub const WINDOW_HEIGHT: usize = 200;
+pub const PICTURE_WIDTH: usize = 40;
+pub const PICTURE_HEIGHT: usize = 200;
 
 pub use game::Game;
 pub use settings::Settings;

@@ -10,9 +10,9 @@ pub struct Texture {
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct TextureCreationParams {
-    flags: u32,
-    bits_per_pixel: i32,
-    transparent: u32,
+    pub flags: u32,
+    pub bits_per_pixel: i32,
+    pub transparent: u32,
 }
 
 impl Texture {
@@ -138,9 +138,9 @@ impl Texture {
     }
 }
 
-mod ffi {
-    type FnTexture = super::Texture;
-    type FnTextureCreationParams = super::TextureCreationParams;
+pub mod ffi {
+    pub type FnTexture = super::Texture;
+    pub type FnTextureCreationParams = super::TextureCreationParams;
     use crate::Geometry;
     use transdl::video::Surface;
 

@@ -26,6 +26,7 @@
  *
  *******************************************************************/
 
+#include <SDL/SDL.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -33,14 +34,15 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_picture.h"
 #include "fn.h"
+#include "rusted.h"
+#include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
 
 int main(int argc, char ** argv)
 {
-    int fd;
+    FnFile * file;
     int res;
     int quit = 0;
     SDL_Event event;
@@ -56,15 +58,15 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    fd = open(argv[1], O_RDONLY);
+    file = fn_file_open(argv[1]);
 
     SDL_Surface * screen;
     FnTexture * picture;
 
     screen = fn_environment_get_screen_sdl(env);
+    FnTextureCreationParams params = fn_environment_build_texture_creation_params(env);
 
-    picture = fn_picture_load(
-        fd, env);
+    picture = fn_picture_load(file, params);
 
     fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);

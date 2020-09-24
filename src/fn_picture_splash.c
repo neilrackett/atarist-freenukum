@@ -37,7 +37,6 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_picture.h"
 #include "fn_picture_splash.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
@@ -67,7 +66,7 @@ int fn_picture_splash_show_with_message(
     Uint8 y)
 {
   char * path;
-  int fd;
+  FnFile * file;
   int res;
   SDL_Event event;
   FnTexture * picture;
@@ -75,9 +74,9 @@ int fn_picture_splash_show_with_message(
   char * datapath = fn_environment_get_datapath(env);
   path = malloc(strlen(datapath) + strlen(filename) + 1);
   sprintf(path, "%s/%s", datapath, filename);
-  fd = open(path, O_RDONLY);
+  file = fn_file_open(path);
 
-  if (fd == -1) {
+  if (file == NULL) {
     fn_error_printf(1024, "Could not open file %s for reading: %s",
         path,strerror(errno));
     free(path);
@@ -85,7 +84,8 @@ int fn_picture_splash_show_with_message(
   }
   free(path);
 
-  picture = fn_picture_load(fd, env);
+  FnTextureCreationParams params = fn_environment_build_texture_creation_params(env);
+  picture = fn_picture_load(file, params);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);

@@ -19,13 +19,23 @@
 
 #define MAX_TILES_PER_FILE 50
 
+#define PICTURE_HEIGHT 200
+
+#define PICTURE_WIDTH 40
+
 #define TILE_HEIGHT (HALFTILE_HEIGHT * 2)
 
 #define TILE_WIDTH (HALFTILE_WIDTH * 2)
 
+#define WINDOW_HEIGHT 200
+
+#define WINDOW_WIDTH 320
+
 typedef struct File File;
 
 typedef struct Texture Texture;
+
+typedef File FnFile;
 
 typedef struct {
     int16_t x;
@@ -35,8 +45,6 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
-
-typedef File FnFile;
 
 typedef Texture FnTexture;
 
@@ -48,11 +56,15 @@ typedef struct {
 
 typedef TextureCreationParams FnTextureCreationParams;
 
+void fn_file_free(FnFile *ptr);
+
+FnFile *fn_file_open(const char *path);
+
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
-FnFile *fn_open_file(void);
+FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
 void fn_texture_blit_to_sdl_surface(const FnTexture *ptr,
                                     const Geometry *srcrect,

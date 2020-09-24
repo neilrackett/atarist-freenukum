@@ -36,7 +36,6 @@
 #include "fn_effect.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
-#include "fn_picture.h"
 #include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
@@ -51,23 +50,25 @@ int main(int argc, char ** argv)
 
   int res;
 
-  int fd;
+  FnFile * file;
 
   char * filename = "BADGUY.DN1";
   char * datapath = fn_environment_get_datapath(env);
   char * path = malloc(strlen(datapath) + strlen(filename) + 1);
   sprintf(path, "%s/%s", datapath, filename);
-  fd = open(path, O_RDONLY);
+  file = fn_file_open(path);
 
   int quit = 0;
   Uint8 step = 0;
 
   fn_error_set_handler(fn_error_print_commandline);
 
+  FnTextureCreationParams params = fn_environment_build_texture_creation_params(env);
+
   picture = fn_picture_load(
-      fd,
-      env);
-  close(fd);
+      file,
+      params);
+  fn_file_free(file);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);
