@@ -109,7 +109,7 @@ impl TileCache {
 }
 
 pub mod ffi {
-    type FnTileCache = super::TileCache;
+    pub type FnTileCache = super::TileCache;
     use super::super::texture::ffi::{FnTexture, FnTextureCreationParams};
     use libc::c_char;
     use std::ffi::CStr;

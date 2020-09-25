@@ -59,8 +59,8 @@ impl Geometry {
     }
 }
 
-mod ffi {
-    type FnGeometry = super::Geometry;
+pub mod ffi {
+    pub type FnGeometry = super::Geometry;
 
     #[no_mangle]
     pub unsafe extern "C" fn fn_geometry_create(

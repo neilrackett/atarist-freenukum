@@ -62,6 +62,8 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
+typedef TileCache FnTileCache;
+
 typedef struct {
     uint8_t tiles;
     uint8_t width;
@@ -69,8 +71,6 @@ typedef struct {
 } TileHeader;
 
 typedef TileHeader FnTileHeader;
-
-typedef TileCache FnTileCache;
 
 FnTexture *fn_backdrop_load(FnFile *ptr, FnTextureCreationParams params);
 
@@ -85,6 +85,11 @@ SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
+
+void fn_text_print(FnTexture *target,
+                   FnGeometry geometry,
+                   const FnTileCache *tilecache,
+                   const char *text);
 
 void fn_texture_blit_to_sdl_surface(const FnTexture *ptr,
                                     const Geometry *srcrect,

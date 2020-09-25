@@ -33,7 +33,6 @@
 #include "fn.h"
 #include "fn_borders.h"
 #include "fn_object.h"
-#include "fn_text.h"
 
 /* --------------------------------------------------------------- */
 
@@ -232,6 +231,8 @@ void fn_borders_blit_score(
 {
   FnTexture * scoresurface;
   FnGeometry dstrect;
+  FnGeometry srcrect = fn_geometry_create(
+      0, 0, FN_FONT_WIDTH * FN_SCORE_DIGITS, FN_FONT_HEIGHT);
 
   char scoretext[FN_SCORE_DIGITS+1];
 
@@ -250,7 +251,7 @@ void fn_borders_blit_score(
 
   fn_text_print(
       scoresurface,
-      NULL,
+      srcrect,
       fn_environment_get_tilecache(env),
       scoretext
       );

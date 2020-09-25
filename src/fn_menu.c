@@ -33,7 +33,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_menu.h"
-#include "fn_text.h"
 #include "fn_object.h"
 
 /* --------------------------------------------------------------- */
@@ -206,7 +205,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         entry = (fn_menuentry_t *)iter->data;
         fn_text_print(
             target,
-            &targetrect,
+            targetrect,
             fn_environment_get_tilecache(env),
             entry->name
             );

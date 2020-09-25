@@ -32,7 +32,6 @@
 
 #include "fn.h"
 #include "fn_msgbox.h"
-#include "fn_text.h"
 
 /* --------------------------------------------------------------- */
 
@@ -132,7 +131,7 @@ FnTexture * fn_msgbox(
   r.h = FN_FONT_HEIGHT;
 
   fn_text_print(msgbox,
-      &r,
+      r,
       fn_environment_get_tilecache(env),
       text);
   

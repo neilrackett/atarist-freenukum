@@ -26,6 +26,11 @@ pub const PICTURE_HEIGHT: usize = 200;
 pub const BACKDROP_WIDTH: usize = 13;
 pub const BACKDROP_HEIGHT: usize = 13;
 
+const FONT_START: usize = 19 * 48 + 3 * 50;
+const FONT_ASCII_UPPERCASE: usize = FONT_START + 10;
+const FONT_ASCII_LOWERCASE: usize = FONT_START + 69;
+const FONT_QUESTIONMARK: usize = FONT_START + 67;
+
 pub use game::Game;
 pub use settings::Settings;
 
