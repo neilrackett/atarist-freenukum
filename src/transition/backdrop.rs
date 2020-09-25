@@ -29,19 +29,15 @@ pub fn load<R: Read>(
         tiles: 0,
     };
 
-    let mut x = 0;
-    let mut y = 0;
-
     for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
         let tile = tile::load(r, params, header.clone(), false)?;
         tile.clone_to_texture(None, &mut backdrop, Some(geometry.clone()));
 
-        if x == 16 * BACKDROP_WIDTH {
-            x = 0;
-            y += 16;
+        geometry.x += 16;
+        if geometry.x == 16 * BACKDROP_WIDTH as i16 {
+            geometry.x = 0;
+            geometry.y += 16;
         }
-        geometry.x = x as i16;
-        geometry.y = y as i16;
     }
 
     Ok(backdrop)

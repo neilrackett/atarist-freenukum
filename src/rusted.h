@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define BACKDROP_HEIGHT 13
+#define BACKDROP_HEIGHT 10
 
 #define BACKDROP_WIDTH 13
 

@@ -24,7 +24,7 @@ pub const WINDOW_HEIGHT: usize = 200;
 pub const PICTURE_WIDTH: usize = 40;
 pub const PICTURE_HEIGHT: usize = 200;
 pub const BACKDROP_WIDTH: usize = 13;
-pub const BACKDROP_HEIGHT: usize = 13;
+pub const BACKDROP_HEIGHT: usize = 10;
 
 const FONT_START: usize = 19 * 48 + 3 * 50;
 const FONT_ASCII_UPPERCASE: usize = FONT_START + 10;
