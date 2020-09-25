@@ -254,7 +254,7 @@ void fn_environment_delete(fn_environment_t * env)
     free(env->datapath); env->datapath = NULL;
   }
   if (env->tilecache != NULL) {
-    fn_tilecache_destroy(env->tilecache); env->tilecache = NULL;
+    fn_tilecache_free(env->tilecache); env->tilecache = NULL;
   }
   if (env->screen != NULL) {
     SDL_FreeSurface(env->screen); env->screen = NULL;
@@ -406,8 +406,10 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 
 Uint8 fn_environment_load_tilecache(fn_environment_t * env)
 {
-  env->tilecache = fn_tilecache_create();
-  return fn_tilecache_loadtiles(env->tilecache, env);
+  env->tilecache = fn_tilecache_load(
+          env->datapath,
+          fn_environment_build_texture_creation_params(env));
+  return env->tilecache != NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -481,7 +483,7 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-FnTexture * fn_environment_get_tile(fn_environment_t * env,
+const FnTexture * fn_environment_get_tile(fn_environment_t * env,
     size_t pos)
 {
   if (env->tilecache == NULL) {
@@ -535,7 +537,7 @@ char * fn_environment_get_datapath(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-fn_tilecache_t * fn_environment_get_tilecache(fn_environment_t * env)
+const FnTileCache * fn_environment_get_tilecache(fn_environment_t * env)
 {
   return env->tilecache;
 }

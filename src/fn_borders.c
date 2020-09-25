@@ -40,7 +40,7 @@
 void fn_borders_blit_tile(
     fn_environment_t * env,
     SDL_Surface * target,
-    FnTexture * tile,
+    const FnTexture * tile,
     int x,
     int y)
 {

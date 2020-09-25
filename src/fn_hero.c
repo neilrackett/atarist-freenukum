@@ -136,7 +136,7 @@ void fn_hero_blit(fn_hero_t * hero,
 {
   FnGeometry dstrect;
   int tilenr;
-  FnTexture * tile;
+  const FnTexture * tile;
 
   if (hero->hidden) {
     return;

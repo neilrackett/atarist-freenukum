@@ -35,6 +35,8 @@ typedef struct File File;
 
 typedef struct Texture Texture;
 
+typedef struct TileCache TileCache;
+
 typedef File FnFile;
 
 typedef struct {
@@ -63,6 +65,8 @@ typedef struct {
 } TileHeader;
 
 typedef TileHeader FnTileHeader;
+
+typedef TileCache FnTileCache;
 
 void fn_file_free(FnFile *ptr);
 
@@ -112,5 +116,13 @@ FnTexture *fn_tile_load(FnFile *file,
                         FnTextureCreationParams params,
                         FnTileHeader header,
                         bool has_transparency);
+
+void fn_tilecache_free(FnTileCache *ptr);
+
+const FnTexture *fn_tilecache_get_tile(const FnTileCache *ptr,
+                                       uintptr_t index);
+
+FnTileCache *fn_tilecache_load(const char *path,
+                               FnTextureCreationParams params);
 
 FnTileHeader fn_tileheader_load(FnFile *file);

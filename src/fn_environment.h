@@ -42,7 +42,6 @@ typedef struct fn_environment_t fn_environment_t;
 
 #include "fn.h"
 #include "fn_settings.h"
-#include "fn_tilecache.h"
 #include "fn_hero.h"
 #include "rusted.h"
 
@@ -97,7 +96,7 @@ struct fn_environment_t {
   /**
    * The tilecache.
    */
-  fn_tilecache_t * tilecache;
+  FnTileCache * tilecache;
 
   /**
    * The episode number.
@@ -248,7 +247,7 @@ void fn_environment_set_episode(fn_environment_t * env,
  * @return  The tile. If no tile exists at pos, or no tilecache is
  *          loaded, NULL is returned.
  */
-FnTexture * fn_environment_get_tile(fn_environment_t * env,
+const FnTexture * fn_environment_get_tile(fn_environment_t * env,
     size_t pos);
 
 /* --------------------------------------------------------------- */
@@ -309,7 +308,7 @@ char * fn_environment_get_datapath(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
-fn_tilecache_t * fn_environment_get_tilecache(fn_environment_t * env);
+const FnTileCache * fn_environment_get_tilecache(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

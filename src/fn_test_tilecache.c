@@ -35,8 +35,8 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_tilecache.h"
 #include "fn_object.h"
+#include "fn_environment.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
 #include "rusted.h"
@@ -177,7 +177,7 @@ int main(int argc, char ** argv)
     {
       r.x = (i+1) * FN_TILE_WIDTH;
       r.y = (j+1) * FN_TILE_HEIGHT;
-      FnTexture * tile =
+      const FnTexture * tile =
         fn_environment_get_tile(env, sumuntil(size, j)+i);
       fn_texture_blit_to_sdl_surface(
           tile, NULL,

@@ -95,8 +95,8 @@ void fn_shot_blit(fn_shot_t * shot)
   if (shot->is_alive) {
     SDL_Surface * target = fn_level_get_surface(shot->level);
     FnGeometry destrect;
-    fn_tilecache_t * tc = fn_level_get_tilecache(shot->level);
-    FnTexture * tile = fn_tilecache_get_tile(tc,
+    const FnTileCache * tc = fn_level_get_tilecache(shot->level);
+    const FnTexture * tile = fn_tilecache_get_tile(tc,
         OBJ_SHOT+shot->counter);
     destrect.x =
       (shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH);

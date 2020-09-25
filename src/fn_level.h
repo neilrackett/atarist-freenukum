@@ -256,7 +256,7 @@ SDL_Surface * fn_level_get_surface(fn_level_t * lv);
  *
  * @return The tilecache.
  */
-fn_tilecache_t * fn_level_get_tilecache(fn_level_t * lv);
+const FnTileCache * fn_level_get_tilecache(fn_level_t * lv);
 
 /* --------------------------------------------------------------- */
 

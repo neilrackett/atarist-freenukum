@@ -32,7 +32,6 @@
 
 #include "fn.h"
 #include "fn_environment.h"
-#include "fn_tilecache.h"
 
 /* --------------------------------------------------------------- */
 

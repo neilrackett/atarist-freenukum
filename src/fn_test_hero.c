@@ -31,7 +31,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_tilecache.h"
 #include "fn_hero.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"

@@ -774,7 +774,7 @@ fn_level_t * fn_level_load(FnFile* file,
 
   Uint16 y = 0;
   Uint16 x = 0;
-  FnTexture * tile = NULL;
+  const FnTexture * tile = NULL;
   for (y = 0; y < FN_LEVEL_HEIGHT; y++) {
     for (x = 0; x < FN_LEVEL_WIDTH; x++) {
       tilenr = fn_level_get_tile(lv, x, y);
@@ -1023,7 +1023,7 @@ SDL_Surface * fn_level_get_surface(fn_level_t * lv)
 /* --------------------------------------------------------------- */
 
 /* TODO this is deprecated! remove it. */
-fn_tilecache_t * fn_level_get_tilecache(fn_level_t * lv)
+const FnTileCache * fn_level_get_tilecache(fn_level_t * lv)
 {
   return fn_environment_get_tilecache(lv->environment);
 }

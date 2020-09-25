@@ -50,7 +50,6 @@
 
 #include "fn.h"
 #include "fn_msgbox.h"
-#include "fn_tilecache.h"
 #include "fn_error_cmdline.h"
 #include "fn_error.h"
 #include "fn_picture_splash.h"

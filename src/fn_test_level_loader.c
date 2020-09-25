@@ -35,7 +35,6 @@
 
 #include "fn.h"
 #include "fn_level.h"
-#include "fn_tilecache.h"
 #include "fn_hero.h"
 
 /* --------------------------------------------------------------- */
