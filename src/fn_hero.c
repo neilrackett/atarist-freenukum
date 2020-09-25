@@ -695,8 +695,6 @@ int fn_hero_would_collide(fn_hero_t * hero, void * level,
     }
   }
   return 0;
-
-  return 0;
 }
 
 /* --------------------------------------------------------------- */

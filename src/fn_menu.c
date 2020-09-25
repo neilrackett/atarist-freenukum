@@ -207,7 +207,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         fn_text_print(
             target,
             &targetrect,
-            env,
+            fn_environment_get_tilecache(env),
             entry->name
             );
         if (i == menu->currententry) {

@@ -43,7 +43,7 @@
 void fn_text_printletter(
     FnTexture * target,
     FnGeometry * r,
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     char c);
 
 /* --------------------------------------------------------------- */
@@ -51,7 +51,7 @@ void fn_text_printletter(
 void fn_text_print(
     FnTexture * target,
     FnGeometry * r,
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     char * text);
 
 /* --------------------------------------------------------------- */

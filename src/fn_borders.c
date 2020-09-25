@@ -251,7 +251,7 @@ void fn_borders_blit_score(
   fn_text_print(
       scoresurface,
       NULL,
-      env,
+      fn_environment_get_tilecache(env),
       scoretext
       );
 

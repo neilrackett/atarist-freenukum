@@ -38,7 +38,7 @@
 void fn_text_printletter(
     FnTexture * target,
     FnGeometry * r,
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     char c)
 {
   int tilenr;
@@ -48,7 +48,7 @@ void fn_text_printletter(
   else
     tilenr = c - 'a' + FONT_ASCII_LOWERCASE;
   fn_texture_clone_to_texture(
-      fn_environment_get_tile(env, tilenr),
+      fn_tilecache_get_tile(tilecache, tilenr),
       NULL,
       target,
       r);
@@ -59,7 +59,7 @@ void fn_text_printletter(
 void fn_text_print(
     FnTexture * target,
     FnGeometry * r,
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     char * text)
 {
   FnGeometry dstrect;
@@ -86,7 +86,7 @@ void fn_text_print(
       fn_text_printletter(
           target,
           &dstrect,
-          env,
+          tilecache,
           *walker);
       dstrect.x = dstrect.x + FN_FONT_WIDTH;
     }

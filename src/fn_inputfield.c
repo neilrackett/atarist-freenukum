@@ -131,7 +131,7 @@ void fn_inputfield_blit(fn_inputfield_t * field,
     )
 {
   fn_texture_fill_area(target, NULL, 0, 0, 0);
-  fn_text_print(target, NULL, env,
+  fn_text_print(target, NULL, fn_environment_get_tilecache(env),
       field->data);
   FnGeometry cursorrect =
     fn_geometry_create(

@@ -133,7 +133,7 @@ FnTexture * fn_msgbox(
 
   fn_text_print(msgbox,
       &r,
-      env,
+      fn_environment_get_tilecache(env),
       text);
   
   return msgbox;
