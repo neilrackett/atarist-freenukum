@@ -124,7 +124,7 @@ int main(int argc, char ** argv)
     50,
     50,
     48,
-    48,
+    44,
     0
   };
 

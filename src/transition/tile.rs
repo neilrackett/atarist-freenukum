@@ -43,9 +43,7 @@ pub fn load<R: Read>(
     let num_loads = width as usize * height as usize / 8;
 
     for _ in 0..num_loads {
-        // TODO: this crashes when attempting to read NUMBERS.DN1.
-        // We'll have to load less tiles in the future.
-        r.read_exact(&mut readbuf).ok();
+        r.read_exact(&mut readbuf)?;
 
         let opaque_row = readbuf[0];
         let blue_row = readbuf[1];

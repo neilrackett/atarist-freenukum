@@ -57,7 +57,7 @@ pub mod ffi {
         };
 
         use std::io::Read;
-        file.as_ref_mut().read_exact(&mut buffer).ok();
+        file.as_ref_mut().read_exact(&mut buffer).unwrap();
     }
 
     #[no_mangle]

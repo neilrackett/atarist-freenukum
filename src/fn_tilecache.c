@@ -147,7 +147,7 @@ int fn_tilecache_loadtiles(fn_tilecache_t * tc,
         50,
         50,
         48,
-        48,
+        44,
         0
     };
 
