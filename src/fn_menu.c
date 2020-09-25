@@ -115,7 +115,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
   Uint16 textrows = 0;
   Uint16 textcols = 0;
 
-  fn_msgbox_get_text_information(menu->text, &textcols, &textrows);
+  fn_messagebox_get_text_information(menu->text, &textcols, &textrows);
 
   textcols = MAXVAL(textcols, menu->width);
 
@@ -136,9 +136,10 @@ char fn_menu_get_choice(fn_menu_t * menu,
   }
   *walker = '\0';
 
-  FnTexture * box = fn_msgbox(
-      env,
-      placeholder);
+  FnTexture * box = fn_messagebox(
+          placeholder,
+          fn_environment_get_tilecache(env),
+          fn_environment_build_texture_creation_params(env));
   free(placeholder);
 
   unsigned int box_width = fn_texture_get_width(box);

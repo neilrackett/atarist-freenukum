@@ -41,7 +41,6 @@
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
 #include "fn.h"
-#include "fn_msgbox.h"
 
 /* --------------------------------------------------------------- */
 
@@ -95,7 +94,10 @@ int fn_picture_splash_show_with_message(
     FnTexture * msgbox;
     FnGeometry dstrect;
 
-    msgbox = fn_msgbox(env, msg);
+    msgbox = fn_messagebox(
+            msg,
+            fn_environment_get_tilecache(env),
+            fn_environment_build_texture_creation_params(env));
 
     dstrect.x = x;
     dstrect.y = y;

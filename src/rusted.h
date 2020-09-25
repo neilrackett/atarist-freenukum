@@ -84,6 +84,14 @@ SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
+FnTexture *fn_messagebox(const char *text,
+                         const FnTileCache *tilecache,
+                         FnTextureCreationParams params);
+
+void fn_messagebox_get_text_information(const char *text,
+                                        uint16_t *cols,
+                                        uint16_t *rows);
+
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
 void fn_text_print(FnTexture *target,

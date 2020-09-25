@@ -27,7 +27,6 @@
  *******************************************************************/
 
 #include "fn_inputbox.h"
-#include "fn_msgbox.h"
 #include "fn_inputfield.h"
 
 /* --------------------------------------------------------------- */
@@ -67,7 +66,10 @@ fn_inputbox_answer_t fn_inputbox_show(
       FN_FONT_HEIGHT,
       fn_environment_build_texture_creation_params(env));
 
-  msgbox = fn_msgbox(env, buffer);
+  msgbox = fn_messagebox(
+          buffer,
+          fn_environment_get_tilecache(env),
+          fn_environment_build_texture_creation_params(env));
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
 

@@ -30,6 +30,16 @@ const FONT_START: usize = 19 * 48 + 3 * 50;
 const FONT_ASCII_UPPERCASE: usize = FONT_START + 10;
 const FONT_ASCII_LOWERCASE: usize = FONT_START + 69;
 const FONT_QUESTIONMARK: usize = FONT_START + 67;
+const BORDER_START: usize = 19 * 48 + 5 * 50;
+const BORDER_BLUE_MIDDLE: usize = BORDER_START + 17;
+const BORDER_BLUE_TOPLEFT: usize = BORDER_START + 18;
+const BORDER_BLUE_TOPRIGHT: usize = BORDER_START + 19;
+const BORDER_BLUE_BOTTOMLEFT: usize = BORDER_START + 20;
+const BORDER_BLUE_BOTTOMRIGHT: usize = BORDER_START + 21;
+const BORDER_BLUE_LEFT: usize = BORDER_START + 22;
+const BORDER_BLUE_RIGHT: usize = BORDER_START + 23;
+const BORDER_BLUE_TOP: usize = BORDER_START + 24;
+const BORDER_BLUE_BOTTOM: usize = BORDER_START + 25;
 
 pub use game::Game;
 pub use settings::Settings;

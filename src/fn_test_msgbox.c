@@ -32,7 +32,7 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_msgbox.h"
+#include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
 
@@ -76,9 +76,10 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
 
-    msgbox = fn_msgbox(
-        env,
-        msg);
+    msgbox = fn_messagebox(
+            msg,
+            fn_environment_get_tilecache(env),
+            fn_environment_build_texture_creation_params(env));
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, NULL);
     fn_texture_free(msgbox);

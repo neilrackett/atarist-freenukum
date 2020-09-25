@@ -1,6 +1,7 @@
 pub mod backdrop;
 pub mod file;
 pub mod geometry;
+pub mod messagebox;
 pub mod picture;
 pub mod text;
 pub mod texture;

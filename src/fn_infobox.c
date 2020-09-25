@@ -27,7 +27,6 @@
  *******************************************************************/
 
 #include "fn_infobox.h"
-#include "fn_msgbox.h"
 
 /* --------------------------------------------------------------- */
 
@@ -43,9 +42,10 @@ void fn_infobox_show(
 
   SDL_Event event;
 
-  msgbox = fn_msgbox(
-      env,
-      msg);
+  msgbox = fn_messagebox(
+          msg,
+          fn_environment_get_tilecache(env),
+          fn_environment_build_texture_creation_params(env));
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   destrect.x = ((screen->w) - fn_texture_get_width(msgbox)) / 2;
