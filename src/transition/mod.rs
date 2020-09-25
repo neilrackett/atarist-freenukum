@@ -1,3 +1,4 @@
+pub mod backdrop;
 pub mod file;
 pub mod geometry;
 pub mod picture;

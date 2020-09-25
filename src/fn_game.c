@@ -41,7 +41,6 @@
 #include "fn_picture_splash.h"
 #include "fn_infobox.h"
 #include "fn_level.h"
-#include "fn_drop.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -223,7 +222,8 @@ int fn_game_start_in_level(
     perror("Can't open file");
   } else {
     fn_tileheader_load(file);
-    backdrop = fn_drop_load(file, env);
+    backdrop = fn_backdrop_load(
+            file, fn_environment_build_texture_creation_params(env));
     if (backdrop == NULL) {
       printf("could not load backdrop");
     }

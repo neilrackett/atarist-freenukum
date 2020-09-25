@@ -23,6 +23,8 @@ pub const WINDOW_WIDTH: usize = 320;
 pub const WINDOW_HEIGHT: usize = 200;
 pub const PICTURE_WIDTH: usize = 40;
 pub const PICTURE_HEIGHT: usize = 200;
+pub const BACKDROP_WIDTH: usize = 13;
+pub const BACKDROP_HEIGHT: usize = 13;
 
 pub use game::Game;
 pub use settings::Settings;

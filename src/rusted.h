@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define BACKDROP_HEIGHT 13
+
+#define BACKDROP_WIDTH 13
+
 #define FONT_HEIGHT 8
 
 #define FONT_WIDTH 8
@@ -37,18 +41,9 @@ typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
 
-typedef File FnFile;
-
-typedef struct {
-    int16_t x;
-    int16_t y;
-    uint16_t w;
-    uint16_t h;
-} Geometry;
-
-typedef Geometry FnGeometry;
-
 typedef Texture FnTexture;
+
+typedef File FnFile;
 
 typedef struct {
     uint32_t flags;
@@ -59,6 +54,15 @@ typedef struct {
 typedef TextureCreationParams FnTextureCreationParams;
 
 typedef struct {
+    int16_t x;
+    int16_t y;
+    uint16_t w;
+    uint16_t h;
+} Geometry;
+
+typedef Geometry FnGeometry;
+
+typedef struct {
     uint8_t tiles;
     uint8_t width;
     uint8_t height;
@@ -67,6 +71,8 @@ typedef struct {
 typedef TileHeader FnTileHeader;
 
 typedef TileCache FnTileCache;
+
+FnTexture *fn_backdrop_load(FnFile *ptr, FnTextureCreationParams params);
 
 void fn_file_free(FnFile *ptr);
 

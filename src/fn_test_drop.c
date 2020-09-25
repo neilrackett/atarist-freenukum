@@ -32,7 +32,6 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_drop.h"
 #include "fn.h"
 #include "fn_environment.h"
 #include "rusted.h"
@@ -82,7 +81,8 @@ int main(int argc, char ** argv)
 
     fn_tileheader_load(file);
 
-    drop = fn_drop_load(file, env);
+    drop = fn_backdrop_load(
+            file, fn_environment_build_texture_creation_params(env));
 
     fn_texture_blit_to_sdl_surface(drop, NULL, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);
