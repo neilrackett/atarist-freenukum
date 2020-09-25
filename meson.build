@@ -72,7 +72,6 @@ c_src = [
     'src/fn_settings.c',
     'src/fn_shot.c',
     'src/fn_text.c',
-    'src/fn_tile.c',
     'src/fn_tilecache.c',
     'src/freenukum.c'
 ]
@@ -124,7 +123,6 @@ test_tile = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -163,7 +161,6 @@ test_borders = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -201,7 +198,6 @@ test_drop = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -239,7 +235,6 @@ test_effect = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -285,7 +280,6 @@ test_hero = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -322,7 +316,6 @@ test_infobox = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -361,7 +354,6 @@ test_inputbox = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -398,7 +390,6 @@ test_level_loader = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -436,7 +427,6 @@ test_menu = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -473,7 +463,6 @@ test_msgbox = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -510,7 +499,6 @@ test_picture = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -548,7 +536,6 @@ test_picture_splash = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [
@@ -594,7 +581,6 @@ test_tilecache = executable(
         'src/fn_settings.c',
         'src/fn_shot.c',
         'src/fn_text.c',
-        'src/fn_tile.c',
         'src/fn_tilecache.c',
     ],
     dependencies: [

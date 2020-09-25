@@ -35,11 +35,11 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_tile.h"
 #include "fn_tilecache.h"
 #include "fn_object.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

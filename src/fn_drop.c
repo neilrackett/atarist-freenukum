@@ -31,7 +31,6 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_tile.h"
 #include "fn_drop.h"
 #include "rusted.h"
 
@@ -65,8 +64,9 @@ FnTexture * fn_drop_load(FnFile * file, fn_environment_t * env)
 
     while(num_read != num_loads)
     {
-        tile = fn_tile_load(file,
-            env,
+        tile = fn_tile_load(
+            file,
+            fn_environment_build_texture_creation_params(env),
             h,
             false);
         fn_texture_clone_to_texture(tile, NULL, drop, &geometry);

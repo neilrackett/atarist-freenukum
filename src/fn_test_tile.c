@@ -32,7 +32,8 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_tile.h"
+#include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -80,7 +81,11 @@ int main(int argc, char ** argv)
     size_t i = 0;
     while (i != h.tiles)
     {
-        tile = fn_tile_load(file, env, h, 0);
+        tile = fn_tile_load(
+            file,
+            fn_environment_build_texture_creation_params(env),
+            h,
+            0);
         fn_texture_blit_to_sdl_surface(tile, NULL, screen, &r);
         fn_texture_free(tile);
         i++;

@@ -204,7 +204,7 @@ int fn_tilecache_loadfile(
     {
         tc->tiles[tc->size] =
           fn_tile_load(file,
-              env,
+              fn_environment_build_texture_creation_params(env),
               header,
               transparent);
         if (tc->tiles[tc->size] == NULL)

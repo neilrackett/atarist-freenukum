@@ -106,4 +106,11 @@ void fn_texture_set_data(FnTexture *ptr,
                          const uint8_t *data,
                          uint32_t transparent);
 
+bool fn_tile_is_solid(uint16_t index);
+
+FnTexture *fn_tile_load(FnFile *file,
+                        FnTextureCreationParams params,
+                        FnTileHeader header,
+                        bool has_transparency);
+
 FnTileHeader fn_tileheader_load(FnFile *file);
