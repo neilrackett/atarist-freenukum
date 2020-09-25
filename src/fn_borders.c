@@ -37,7 +37,6 @@
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_tile(
-    fn_environment_t * env,
     SDL_Surface * target,
     const FnTexture * tile,
     int x,
@@ -56,7 +55,7 @@ void fn_borders_blit_tile(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_array(
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     SDL_Surface * target,
     int * borders,
     Uint8 width,
@@ -69,9 +68,8 @@ void fn_borders_blit_array(
   for (i = 0; i < width * height; i++) {
     if ((pos = borders [i]) >= 0) {
       fn_borders_blit_tile(
-          env,
           target,
-          fn_environment_get_tile(env, tile_base + pos),
+          fn_tilecache_get_tile(tilecache, tile_base + pos),
           i % width,
           i / width);
     }
@@ -167,7 +165,7 @@ void fn_borders_blit(
   };
 
   fn_borders_blit_array(
-      env,
+      fn_environment_get_tilecache(env),
       env->screen,
       borders,
       2 * FN_WINDOW_WIDTH / FN_TILE_WIDTH,
@@ -212,7 +210,8 @@ void fn_borders_blit_life(
       0);
 
   fn_borders_blit_array(
-      env, lifesurface, lifetiles, FN_NUM_MAXLIFE, 1, 0
+      fn_environment_get_tilecache(env),
+      lifesurface, lifetiles, FN_NUM_MAXLIFE, 1, 0
       );
 
   dstrect.x = 30 * FN_FONT_WIDTH;
@@ -295,7 +294,7 @@ void fn_borders_blit_firepower(
       FN_TILE_HEIGHT * 2);
 
   fn_borders_blit_array(
-      env,
+      fn_environment_get_tilecache(env),
       firepowersurface, firepowertiles,
       FN_NUM_MAXFIREPOWER * 2, 4, 0
       );
@@ -353,7 +352,7 @@ void fn_borders_blit_inventory(
       FN_TILE_HEIGHT * 2);
 
   fn_borders_blit_array(
-      env,
+      fn_environment_get_tilecache(env),
       inventorysurface, inventorytiles,
       FN_NUM_MAXFIREPOWER * 2, 4, 0
       );
