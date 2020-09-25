@@ -37,6 +37,8 @@
 
 typedef struct File File;
 
+typedef struct InputField InputField;
+
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
@@ -62,6 +64,8 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
+typedef InputField FnInputField;
+
 typedef TileCache FnTileCache;
 
 typedef struct {
@@ -83,6 +87,30 @@ void fn_file_read(FnFile *ptr, void *buffer, size_t length);
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
+
+void fn_inputfield_backspace_pressed(FnInputField *ptr);
+
+void fn_inputfield_blit(const FnInputField *ptr,
+                        FnTexture *target,
+                        const FnTileCache *tilecache);
+
+uintptr_t fn_inputfield_copy_text_to(const FnInputField *ptr,
+                                     char *buffer,
+                                     uintptr_t max_length);
+
+FnInputField *fn_inputfield_create(uint8_t max_length);
+
+void fn_inputfield_delete_pressed(FnInputField *ptr);
+
+void fn_inputfield_free(FnInputField *ptr);
+
+void fn_inputfield_left_pressed(FnInputField *ptr);
+
+void fn_inputfield_right_pressed(FnInputField *ptr);
+
+void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
+
+uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 
 FnTexture *fn_messagebox(const char *text,
                          const FnTileCache *tilecache,

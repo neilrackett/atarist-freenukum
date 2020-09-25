@@ -27,7 +27,6 @@
  *******************************************************************/
 
 #include "fn_inputbox.h"
-#include "fn_inputfield.h"
 
 /* --------------------------------------------------------------- */
 
@@ -93,12 +92,10 @@ fn_inputbox_answer_t fn_inputbox_show(
   SDL_Rect dstrect = fn_geometry_as_sdl_rect(&destrect);
   SDL_BlitSurface(screen, &dstrect, temp, NULL);
 
-  fn_inputfield_t * inputfield = fn_inputfield_new(
-      answer,
-      answer_len);
+  FnInputField * inputfield = fn_inputfield_create(answer_len);
 
   fn_inputfield_blit(inputfield, inputfield_surface,
-      env);
+      fn_environment_get_tilecache(env));
   fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
       &inputfield_rect);
   fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);
@@ -111,16 +108,16 @@ fn_inputbox_answer_t fn_inputbox_show(
         case SDL_KEYDOWN:
           switch(event.key.keysym.sym) {
             case SDLK_BACKSPACE:
-              fn_inputfield_pressed_backspace(inputfield);
+              fn_inputfield_backspace_pressed(inputfield);
               break;
             case SDLK_DELETE:
-              fn_inputfield_pressed_delete(inputfield);
+              fn_inputfield_delete_pressed(inputfield);
               break;
             case SDLK_LEFT:
-              fn_inputfield_pressed_left(inputfield);
+              fn_inputfield_left_pressed(inputfield);
               break;
             case SDLK_RIGHT:
-              fn_inputfield_pressed_right(inputfield);
+              fn_inputfield_right_pressed(inputfield);
               break;
             case SDLK_SPACE:
             case SDLK_EXCLAIM:
@@ -180,13 +177,14 @@ fn_inputbox_answer_t fn_inputbox_show(
             case SDLK_x:
             case SDLK_y:
             case SDLK_z:
-              fn_inputfield_pressed_symbol(inputfield,
+              fn_inputfield_symbol_pressed(inputfield,
                   event.key.keysym.sym);
               break;
             case SDLK_RETURN:
               SDL_BlitSurface(temp, NULL, screen, &dstrect);
               SDL_FreeSurface(temp);
               fn_texture_free(msgbox);
+              fn_inputfield_copy_text_to(inputfield, answer, answer_len);
               fn_inputfield_free(inputfield);
               fn_texture_free(inputfield_surface);
               return fn_inputbox_answer_ok;
@@ -196,6 +194,7 @@ fn_inputbox_answer_t fn_inputbox_show(
               SDL_FreeSurface(temp);
               fn_texture_free(msgbox);
               fn_texture_free(inputfield_surface);
+              fn_inputfield_copy_text_to(inputfield, answer, answer_len);
               fn_inputfield_free(inputfield);
               return fn_inputbox_answer_quit;
               break;
@@ -204,7 +203,7 @@ fn_inputbox_answer_t fn_inputbox_show(
               break;
           }
           fn_inputfield_blit(inputfield, inputfield_surface,
-              env);
+              fn_environment_get_tilecache(env));
           fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
               &inputfield_rect);
           fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);

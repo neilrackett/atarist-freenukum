@@ -1,6 +1,7 @@
 pub mod backdrop;
 pub mod file;
 pub mod geometry;
+pub mod inputfield;
 pub mod messagebox;
 pub mod picture;
 pub mod text;
