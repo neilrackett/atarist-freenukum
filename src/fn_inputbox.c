@@ -31,7 +31,9 @@
 /* --------------------------------------------------------------- */
 
 fn_inputbox_answer_t fn_inputbox_show(
-    fn_environment_t * env,
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    FnTextureCreationParams texture_creation_params,
     char * msg,
     char * answer,
     Uint8 answer_len)
@@ -63,14 +65,12 @@ fn_inputbox_answer_t fn_inputbox_show(
   inputfield_surface = fn_texture_new_with_params(
       FN_FONT_WIDTH * answer_len,
       FN_FONT_HEIGHT,
-      fn_environment_build_texture_creation_params(env));
+      texture_creation_params);
 
   msgbox = fn_messagebox(
           buffer,
-          fn_environment_get_tilecache(env),
-          fn_environment_build_texture_creation_params(env));
-
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
+          tilecache,
+          texture_creation_params);
 
   destrect.x = ((screen->w) - (fn_texture_get_width(msgbox)))/2;
   destrect.y = ((screen->h) - (fn_texture_get_height(msgbox)))/2;
@@ -94,8 +94,7 @@ fn_inputbox_answer_t fn_inputbox_show(
 
   FnInputField * inputfield = fn_inputfield_create(answer_len);
 
-  fn_inputfield_blit(inputfield, inputfield_surface,
-      fn_environment_get_tilecache(env));
+  fn_inputfield_blit(inputfield, inputfield_surface, tilecache);
   fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
       &inputfield_rect);
   fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);
@@ -202,8 +201,7 @@ fn_inputbox_answer_t fn_inputbox_show(
               /* ignore other keys */
               break;
           }
-          fn_inputfield_blit(inputfield, inputfield_surface,
-              fn_environment_get_tilecache(env));
+          fn_inputfield_blit(inputfield, inputfield_surface, tilecache);
           fn_texture_clone_to_texture(inputfield_surface, NULL, msgbox,
               &inputfield_rect);
           fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);

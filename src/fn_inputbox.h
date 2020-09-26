@@ -35,8 +35,8 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_inputbox.h"
 #include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -51,6 +51,7 @@ typedef enum fn_inputbox_answer_t {
  * Display an inputbox and get the result.
  *
  * @param  env         The environment.
+ * @param  tilecache   The tile cache.
  * @param  msg         The message to display.
  * @param  answer      The buffer for the answer.
  *                     This must be already allocated with
@@ -61,7 +62,9 @@ typedef enum fn_inputbox_answer_t {
  *          fn_inputbox_answer_quit if the user pressed escape.
  */
 fn_inputbox_answer_t fn_inputbox_show(
-    fn_environment_t * env,
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    FnTextureCreationParams texture_creation_params,
     char * msg,
     char * answer,
     Uint8 answer_len);

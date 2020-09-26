@@ -44,7 +44,10 @@ int main(int argc, char ** argv) {
 
   char answer[30] = "";
   fn_inputbox_answer_t entered =
-    fn_inputbox_show(env,
+    fn_inputbox_show(
+        screen,
+        fn_environment_get_tilecache(env),
+        fn_environment_build_texture_creation_params(env),
         "Please enter your name:",
         answer,
         30);
