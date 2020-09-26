@@ -41,7 +41,6 @@ typedef struct fn_environment_t fn_environment_t;
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_settings.h"
 #include "fn_hero.h"
 #include "rusted.h"
 
@@ -64,21 +63,6 @@ struct fn_environment_t {
   Uint32 transparent;
 
   /**
-   * Are we playing fullscreen?
-   */
-  Uint8 fullscreen;
-
-  /**
-   * Draw collision bounds for debugging?
-   */
-  Uint8 draw_collision_bounds;
-
-  /**
-   * The path where the config file is stored.
-   */
-  char * configfilepath;
-
-  /**
    * The path where the data can be found.
    */
   char * datapath;
@@ -86,7 +70,7 @@ struct fn_environment_t {
   /**
    * The game settings.
    */
-  fn_settings_t * settings;
+  FnSettings settings;
 
   /**
    * SDL screen
@@ -316,7 +300,7 @@ Uint8 fn_environment_tilecache_loaded(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_store_settings(fn_environment_t * env);
+void fn_environment_store_settings(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

@@ -48,3 +48,10 @@ pub mod transition;
 
 pub use transition::geometry::Geometry;
 pub use transition::texture::Texture;
+
+fn config_dir() -> std::path::PathBuf {
+    directories::ProjectDirs::from("", "", "freenukum")
+        .unwrap()
+        .config_dir()
+        .to_path_buf()
+}

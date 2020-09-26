@@ -54,7 +54,6 @@
 #include "fn_picture_splash.h"
 #include "fn_mainmenu.h"
 #include "fn_infobox.h"
-#include "fn_settings.h"
 #include "fn_game.h"
 #include "fn_data.h"
 #include "fn_environment.h"

@@ -69,6 +69,14 @@ typedef InputField FnInputField;
 typedef TileCache FnTileCache;
 
 typedef struct {
+    uint8_t pixelsize;
+    bool fullscreen;
+    bool draw_collision_bounds;
+} Settings;
+
+typedef Settings FnSettings;
+
+typedef struct {
     uint8_t tiles;
     uint8_t width;
     uint8_t height;
@@ -121,6 +129,10 @@ void fn_messagebox_get_text_information(const char *text,
                                         uint16_t *rows);
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
+
+FnSettings fn_settings_load_or_create(void);
+
+void fn_settings_save(FnSettings settings);
 
 void fn_text_print(FnTexture *target,
                    FnGeometry geometry,

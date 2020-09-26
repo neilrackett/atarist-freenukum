@@ -8,14 +8,16 @@ edition = "2018"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]
+anyhow = "1.0.32"
 bitvec = "0.17"
+directories = "3.0.1"
 dirs = "2"
+libc = "0.2.77"
 sdl2 = "0.33"
 serde = "1"
 serde_derive = "1"
+toml = "0.5.6"
 transdl = { path = "transdl" }
-libc = "0.2.77"
-anyhow = "1.0.32"
 
 [build-dependencies]
 cbindgen = "0.14.4"

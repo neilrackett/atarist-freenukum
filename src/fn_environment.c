@@ -125,11 +125,7 @@ fn_environment_t * fn_environment_create()
   /* fill with default values */
   env->videoflags = FN_SURFACE_FLAGS;
   env->transparent = 0;
-  env->fullscreen = 0;
-  env->draw_collision_bounds = 0;
-  env->configfilepath = NULL;
   env->datapath = NULL;
-  env->settings = NULL;
   env->screen = NULL;
   env->tilecache = NULL;
   env->episode = 1;
@@ -150,14 +146,6 @@ fn_environment_t * fn_environment_create()
   char * configpath = malloc(configpath_size);
   snprintf(configpath, configpath_size, "%s%s",
       homepath, subpath_config);
-
-  size_t configfilepath_size =
-    strlen(configpath) +
-    strlen(subpath_configfile) +
-    2;
-  env->configfilepath = malloc(configfilepath_size);
-  snprintf(env->configfilepath, configfilepath_size, "%s%s",
-      configpath, subpath_configfile);
 
   size_t datapath_size =
     strlen(configpath) +
@@ -192,28 +180,9 @@ fn_environment_t * fn_environment_create()
     }
   }
 
-  /* load the settings from the config file and
-   * create the file if it does not exist. */
-  env->settings = fn_settings_new_from_file(env->configfilepath);
-  if (env->settings == NULL) {
-    env->settings = fn_settings_new();
-    int res = fn_settings_store(env->settings, env->configfilepath);
-    if (!res) {
-      fn_error_printf(1024, "Could not create the settings file %s: %s",
-          env->configfilepath, strerror(errno));
-      return env;
-    }
-  }
+  env->settings = fn_settings_load_or_create();
 
-  fn_settings_get_bool_with_default(env->settings,
-      "fullscreen",
-      &(env->fullscreen), FN_DEFAULT_FULLSCREEN);
-
-  fn_settings_get_bool_with_default(env->settings,
-      "draw_collision_bounds",
-      &(env->draw_collision_bounds), FN_DEFAULT_DRAWCOLLISIONBOUNDS);
-
-  if (env->fullscreen) {
+  if (env->settings.fullscreen) {
     env->videoflags |= SDL_FULLSCREEN;
   }
 
@@ -244,12 +213,6 @@ fn_environment_t * fn_environment_create()
 
 void fn_environment_delete(fn_environment_t * env)
 {
-  if (env->settings != NULL) {
-    fn_settings_free(env->settings); env->settings = NULL;
-  }
-  if (env->configfilepath != NULL) {
-    free(env->configfilepath); env->configfilepath = NULL;
-  }
   if (env->datapath != NULL) {
     free(env->datapath); env->datapath = NULL;
   }
@@ -416,7 +379,7 @@ Uint8 fn_environment_load_tilecache(fn_environment_t * env)
 
 Uint8 fn_environment_get_fullscreen(fn_environment_t * env)
 {
-  return env->fullscreen;
+  return env->settings.fullscreen;
 }
 
 /* --------------------------------------------------------------- */
@@ -425,8 +388,7 @@ void fn_environment_toggle_fullscreen(fn_environment_t * env)
 {
   int res = SDL_WM_ToggleFullScreen(env->screen);
   if (res) {
-    env->fullscreen = (env->fullscreen + 1) % 2;
-    fn_settings_set_bool(env->settings, "fullscreen", env->fullscreen);
+    env->settings.fullscreen = (env->settings.fullscreen + 1) % 2;
   }
 }
 
@@ -525,7 +487,7 @@ Uint32 fn_environment_get_score(fn_environment_t * env)
 Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env)
 {
-  return env->draw_collision_bounds;
+  return env->settings.draw_collision_bounds;
 }
 
 /* --------------------------------------------------------------- */
@@ -551,15 +513,9 @@ Uint8 fn_environment_tilecache_loaded(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_store_settings(fn_environment_t * env)
+void fn_environment_store_settings(fn_environment_t * env)
 {
-  int res = 0;
-  res = fn_settings_store(env->settings, env->configfilepath);
-  if (!res) {
-    fn_error_printf(1024, "Could not store settings to %s: %s",
-        env->configfilepath, strerror(errno));
-  }
-  return res;
+  fn_settings_save(env->settings);
 }
 
 /* --------------------------------------------------------------- */
