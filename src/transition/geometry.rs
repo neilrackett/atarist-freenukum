@@ -75,7 +75,7 @@ pub mod ffi {
     #[no_mangle]
     pub unsafe extern "C" fn fn_geometry_as_sdl_rect(
         ptr: *const FnGeometry,
-    ) -> transdl::ll::video::SDL_Rect {
+    ) -> transdl::ll::SDL_Rect {
         let g: &FnGeometry = &(*ptr);
         g.as_sdl_rect()
     }

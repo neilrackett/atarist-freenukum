@@ -1,5 +1,6 @@
-use crate::ll::video as ll;
+use crate::ll;
 
+pub use ll::SDL_Color as Color;
 pub use ll::SDL_Rect as Rect;
 
 #[repr(transparent)]

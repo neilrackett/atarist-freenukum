@@ -534,33 +534,9 @@ pub const SCNuPTR: &'static [u8; 3usize] = b"lu\0";
 pub const SCNxPTR: &'static [u8; 3usize] = b"lx\0";
 pub const _CTYPE_H: u32 = 1;
 pub const _ICONV_H: u32 = 1;
-pub const SDL_LIL_ENDIAN: u32 = 1234;
-pub const SDL_BIG_ENDIAN: u32 = 4321;
-pub const SDL_MUTEX_TIMEDOUT: u32 = 1;
 pub const RW_SEEK_SET: u32 = 0;
 pub const RW_SEEK_CUR: u32 = 1;
 pub const RW_SEEK_END: u32 = 2;
-pub const AUDIO_U8: u32 = 8;
-pub const AUDIO_S8: u32 = 32776;
-pub const AUDIO_U16LSB: u32 = 16;
-pub const AUDIO_S16LSB: u32 = 32784;
-pub const AUDIO_U16MSB: u32 = 4112;
-pub const AUDIO_S16MSB: u32 = 36880;
-pub const AUDIO_U16: u32 = 16;
-pub const AUDIO_S16: u32 = 32784;
-pub const AUDIO_U16SYS: u32 = 16;
-pub const AUDIO_S16SYS: u32 = 32784;
-pub const SDL_MIX_MAXVOLUME: u32 = 128;
-pub const SDL_MAX_TRACKS: u32 = 99;
-pub const SDL_AUDIO_TRACK: u32 = 0;
-pub const SDL_DATA_TRACK: u32 = 4;
-pub const CD_FPS: u32 = 75;
-pub const SDL_APPMOUSEFOCUS: u32 = 1;
-pub const SDL_APPINPUTFOCUS: u32 = 2;
-pub const SDL_APPACTIVE: u32 = 4;
-pub const SDL_ALL_HOTKEYS: u32 = 4294967295;
-pub const SDL_DEFAULT_REPEAT_DELAY: u32 = 500;
-pub const SDL_DEFAULT_REPEAT_INTERVAL: u32 = 30;
 pub const SDL_ALPHA_OPAQUE: u32 = 255;
 pub const SDL_ALPHA_TRANSPARENT: u32 = 0;
 pub const SDL_SWSURFACE: u32 = 0;
@@ -587,6 +563,30 @@ pub const SDL_UYVY_OVERLAY: u32 = 1498831189;
 pub const SDL_YVYU_OVERLAY: u32 = 1431918169;
 pub const SDL_LOGPAL: u32 = 1;
 pub const SDL_PHYSPAL: u32 = 2;
+pub const SDL_LIL_ENDIAN: u32 = 1234;
+pub const SDL_BIG_ENDIAN: u32 = 4321;
+pub const SDL_MUTEX_TIMEDOUT: u32 = 1;
+pub const AUDIO_U8: u32 = 8;
+pub const AUDIO_S8: u32 = 32776;
+pub const AUDIO_U16LSB: u32 = 16;
+pub const AUDIO_S16LSB: u32 = 32784;
+pub const AUDIO_U16MSB: u32 = 4112;
+pub const AUDIO_S16MSB: u32 = 36880;
+pub const AUDIO_U16: u32 = 16;
+pub const AUDIO_S16: u32 = 32784;
+pub const AUDIO_U16SYS: u32 = 16;
+pub const AUDIO_S16SYS: u32 = 32784;
+pub const SDL_MIX_MAXVOLUME: u32 = 128;
+pub const SDL_MAX_TRACKS: u32 = 99;
+pub const SDL_AUDIO_TRACK: u32 = 0;
+pub const SDL_DATA_TRACK: u32 = 4;
+pub const CD_FPS: u32 = 75;
+pub const SDL_APPMOUSEFOCUS: u32 = 1;
+pub const SDL_APPINPUTFOCUS: u32 = 2;
+pub const SDL_APPACTIVE: u32 = 4;
+pub const SDL_ALL_HOTKEYS: u32 = 4294967295;
+pub const SDL_DEFAULT_REPEAT_DELAY: u32 = 500;
+pub const SDL_DEFAULT_REPEAT_INTERVAL: u32 = 30;
 pub const SDL_BUTTON_LEFT: u32 = 1;
 pub const SDL_BUTTON_MIDDLE: u32 = 2;
 pub const SDL_BUTTON_RIGHT: u32 = 3;
@@ -4906,8 +4906,6 @@ extern "C" {
     ) -> usize;
 }
 extern "C" {
-    #[doc = " This function converts a string between encodings in one pass, returning a"]
-    #[doc = "  string that must be freed with SDL_free() or NULL on error."]
     pub fn SDL_iconv_string(
         tocode: *const ::std::os::raw::c_char,
         fromcode: *const ::std::os::raw::c_char,
@@ -4934,173 +4932,9 @@ pub type SDL_errorcode = u32;
 extern "C" {
     pub fn SDL_Error(code: SDL_errorcode);
 }
-#[doc = " The SDL mutex structure, defined in SDL_mutex.c"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_mutex {
-    _unused: [u8; 0],
-}
-extern "C" {
-    #[doc = " Create a mutex, initialized unlocked"]
-    pub fn SDL_CreateMutex() -> *mut SDL_mutex;
-}
-extern "C" {
-    #[doc = " Lock the mutex"]
-    #[doc = "  @return 0, or -1 on error"]
-    pub fn SDL_mutexP(mutex: *mut SDL_mutex) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Unlock the mutex"]
-    #[doc = "  @return 0, or -1 on error"]
-    #[doc = ""]
-    #[doc = "  It is an error to unlock a mutex that has not been locked by"]
-    #[doc = "  the current thread, and doing so results in undefined behavior."]
-    pub fn SDL_mutexV(mutex: *mut SDL_mutex) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Destroy a mutex"]
-    pub fn SDL_DestroyMutex(mutex: *mut SDL_mutex);
-}
-#[doc = " The SDL semaphore structure, defined in SDL_sem.c"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_semaphore {
-    _unused: [u8; 0],
-}
-pub type SDL_sem = SDL_semaphore;
-extern "C" {
-    #[doc = " Create a semaphore, initialized with value, returns NULL on failure."]
-    pub fn SDL_CreateSemaphore(initial_value: Uint32) -> *mut SDL_sem;
-}
-extern "C" {
-    #[doc = " Destroy a semaphore"]
-    pub fn SDL_DestroySemaphore(sem: *mut SDL_sem);
-}
-extern "C" {
-    #[doc = " This function suspends the calling thread until the semaphore pointed"]
-    #[doc = " to by sem has a positive count. It then atomically decreases the semaphore"]
-    #[doc = " count."]
-    pub fn SDL_SemWait(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Non-blocking variant of SDL_SemWait()."]
-    #[doc = "  @return 0 if the wait succeeds,"]
-    #[doc = "  SDL_MUTEX_TIMEDOUT if the wait would block, and -1 on error."]
-    pub fn SDL_SemTryWait(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Variant of SDL_SemWait() with a timeout in milliseconds, returns 0 if"]
-    #[doc = "  the wait succeeds, SDL_MUTEX_TIMEDOUT if the wait does not succeed in"]
-    #[doc = "  the allotted time, and -1 on error."]
-    #[doc = ""]
-    #[doc = "  On some platforms this function is implemented by looping with a delay"]
-    #[doc = "  of 1 ms, and so should be avoided if possible."]
-    pub fn SDL_SemWaitTimeout(
-        sem: *mut SDL_sem,
-        ms: Uint32,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Atomically increases the semaphore's count (not blocking)."]
-    #[doc = "  @return 0, or -1 on error."]
-    pub fn SDL_SemPost(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Returns the current count of the semaphore"]
-    pub fn SDL_SemValue(sem: *mut SDL_sem) -> Uint32;
-}
-#[doc = " The SDL condition variable structure, defined in SDL_cond.c"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_cond {
-    _unused: [u8; 0],
-}
-extern "C" {
-    #[doc = " Create a condition variable"]
-    pub fn SDL_CreateCond() -> *mut SDL_cond;
-}
-extern "C" {
-    #[doc = " Destroy a condition variable"]
-    pub fn SDL_DestroyCond(cond: *mut SDL_cond);
-}
-extern "C" {
-    #[doc = " Restart one of the threads that are waiting on the condition variable,"]
-    #[doc = "  @return 0 or -1 on error."]
-    pub fn SDL_CondSignal(cond: *mut SDL_cond) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Restart all threads that are waiting on the condition variable,"]
-    #[doc = "  @return 0 or -1 on error."]
-    pub fn SDL_CondBroadcast(cond: *mut SDL_cond)
-        -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Wait on the condition variable, unlocking the provided mutex."]
-    #[doc = "  The mutex must be locked before entering this function!"]
-    #[doc = "  The mutex is re-locked once the condition variable is signaled."]
-    #[doc = "  @return 0 when it is signaled, or -1 on error."]
-    pub fn SDL_CondWait(
-        cond: *mut SDL_cond,
-        mut_: *mut SDL_mutex,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Waits for at most 'ms' milliseconds, and returns 0 if the condition"]
-    #[doc = "  variable is signaled, SDL_MUTEX_TIMEDOUT if the condition is not"]
-    #[doc = "  signaled in the allotted time, and -1 on error."]
-    #[doc = "  On some platforms this function is implemented by looping with a delay"]
-    #[doc = "  of 1 ms, and so should be avoided if possible."]
-    pub fn SDL_CondWaitTimeout(
-        cond: *mut SDL_cond,
-        mutex: *mut SDL_mutex,
-        ms: Uint32,
-    ) -> ::std::os::raw::c_int;
-}
-#[doc = " The SDL thread structure, defined in SDL_thread.c"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_Thread {
-    _unused: [u8; 0],
-}
-extern "C" {
-    pub fn SDL_CreateThread(
-        fn_: ::std::option::Option<
-            unsafe extern "C" fn(
-                arg1: *mut ::std::os::raw::c_void,
-            ) -> ::std::os::raw::c_int,
-        >,
-        data: *mut ::std::os::raw::c_void,
-    ) -> *mut SDL_Thread;
-}
-extern "C" {
-    #[doc = " Get the 32-bit thread identifier for the current thread"]
-    pub fn SDL_ThreadID() -> Uint32;
-}
-extern "C" {
-    #[doc = " Get the 32-bit thread identifier for the specified thread,"]
-    #[doc = "  equivalent to SDL_ThreadID() if the specified thread is NULL."]
-    pub fn SDL_GetThreadID(thread: *mut SDL_Thread) -> Uint32;
-}
-extern "C" {
-    #[doc = " Wait for a thread to finish."]
-    #[doc = "  The return code for the thread function is placed in the area"]
-    #[doc = "  pointed to by 'status', if 'status' is not NULL."]
-    pub fn SDL_WaitThread(
-        thread: *mut SDL_Thread,
-        status: *mut ::std::os::raw::c_int,
-    );
-}
-extern "C" {
-    #[doc = " Forcefully kill a thread without worrying about its state"]
-    pub fn SDL_KillThread(thread: *mut SDL_Thread);
-}
-#[doc = " This is the read/write operation structure -- very basic"]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct SDL_RWops {
-    #[doc = " Seek to 'offset' relative to whence, one of stdio's whence values:"]
-    #[doc = "\tSEEK_SET, SEEK_CUR, SEEK_END"]
-    #[doc = "  Returns the final offset in the data source."]
     pub seek: ::std::option::Option<
         unsafe extern "C" fn(
             context: *mut SDL_RWops,
@@ -5108,9 +4942,6 @@ pub struct SDL_RWops {
             whence: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    #[doc = " Read up to 'maxnum' objects each of size 'size' from the data"]
-    #[doc = "  source to the area pointed at by 'ptr'."]
-    #[doc = "  Returns the number of objects read, or -1 if the read failed."]
     pub read: ::std::option::Option<
         unsafe extern "C" fn(
             context: *mut SDL_RWops,
@@ -5119,9 +4950,6 @@ pub struct SDL_RWops {
             maxnum: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    #[doc = " Write exactly 'num' objects each of size 'objsize' from the area"]
-    #[doc = "  pointed at by 'ptr' to data source."]
-    #[doc = "  Returns 'num', or -1 if the write failed."]
     pub write: ::std::option::Option<
         unsafe extern "C" fn(
             context: *mut SDL_RWops,
@@ -5130,7 +4958,6 @@ pub struct SDL_RWops {
             num: ::std::os::raw::c_int,
         ) -> ::std::os::raw::c_int,
     >,
-    #[doc = " Close and free an allocated SDL_FSops structure"]
     pub close: ::std::option::Option<
         unsafe extern "C" fn(
             context: *mut SDL_RWops,
@@ -5531,1263 +5358,6 @@ extern "C" {
         value: Uint64,
     ) -> ::std::os::raw::c_int;
 }
-#[doc = " When filling in the desired audio spec structure,"]
-#[doc = " - 'desired->freq' should be the desired audio frequency in samples-per-second."]
-#[doc = " - 'desired->format' should be the desired audio format."]
-#[doc = " - 'desired->samples' is the desired size of the audio buffer, in samples."]
-#[doc = "     This number should be a power of two, and may be adjusted by the audio"]
-#[doc = "     driver to a value more suitable for the hardware.  Good values seem to"]
-#[doc = "     range between 512 and 8096 inclusive, depending on the application and"]
-#[doc = "     CPU speed.  Smaller values yield faster response time, but can lead"]
-#[doc = "     to underflow if the application is doing heavy processing and cannot"]
-#[doc = "     fill the audio buffer in time.  A stereo sample consists of both right"]
-#[doc = "     and left channels in LR ordering."]
-#[doc = "     Note that the number of samples is directly related to time by the"]
-#[doc = "     following formula:  ms = (samples*1000)/freq"]
-#[doc = " - 'desired->size' is the size in bytes of the audio buffer, and is"]
-#[doc = "     calculated by SDL_OpenAudio()."]
-#[doc = " - 'desired->silence' is the value used to set the buffer to silence,"]
-#[doc = "     and is calculated by SDL_OpenAudio()."]
-#[doc = " - 'desired->callback' should be set to a function that will be called"]
-#[doc = "     when the audio device is ready for more data.  It is passed a pointer"]
-#[doc = "     to the audio buffer, and the length in bytes of the audio buffer."]
-#[doc = "     This function usually runs in a separate thread, and so you should"]
-#[doc = "     protect data structures that it accesses by calling SDL_LockAudio()"]
-#[doc = "     and SDL_UnlockAudio() in your code."]
-#[doc = " - 'desired->userdata' is passed as the first parameter to your callback"]
-#[doc = "     function."]
-#[doc = ""]
-#[doc = " @note The calculated values in this structure are calculated by SDL_OpenAudio()"]
-#[doc = ""]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_AudioSpec {
-    #[doc = "< DSP frequency -- samples per second"]
-    pub freq: ::std::os::raw::c_int,
-    #[doc = "< Audio data format"]
-    pub format: Uint16,
-    #[doc = "< Number of channels: 1 mono, 2 stereo"]
-    pub channels: Uint8,
-    #[doc = "< Audio buffer silence value (calculated)"]
-    pub silence: Uint8,
-    #[doc = "< Audio buffer size in samples (power of 2)"]
-    pub samples: Uint16,
-    #[doc = "< Necessary for some compile environments"]
-    pub padding: Uint16,
-    #[doc = "< Audio buffer size in bytes (calculated)"]
-    pub size: Uint32,
-    #[doc = "  This function is called when the audio device needs more data."]
-    #[doc = ""]
-    #[doc = "  @param[out] stream\tA pointer to the audio data buffer"]
-    #[doc = "  @param[in]  len\tThe length of the audio buffer in bytes."]
-    #[doc = ""]
-    #[doc = "  Once the callback returns, the buffer will no longer be valid."]
-    #[doc = "  Stereo samples are stored in a LRLRLR ordering."]
-    pub callback: ::std::option::Option<
-        unsafe extern "C" fn(
-            userdata: *mut ::std::os::raw::c_void,
-            stream: *mut Uint8,
-            len: ::std::os::raw::c_int,
-        ),
-    >,
-    pub userdata: *mut ::std::os::raw::c_void,
-}
-#[test]
-fn bindgen_test_layout_SDL_AudioSpec() {
-    assert_eq!(
-        ::std::mem::size_of::<SDL_AudioSpec>(),
-        32usize,
-        concat!("Size of: ", stringify!(SDL_AudioSpec))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<SDL_AudioSpec>(),
-        8usize,
-        concat!("Alignment of ", stringify!(SDL_AudioSpec))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).freq as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(freq)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).format as *const _
-                as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(format)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).channels as *const _
-                as usize
-        },
-        6usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(channels)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).silence as *const _
-                as usize
-        },
-        7usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(silence)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).samples as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(samples)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).padding as *const _
-                as usize
-        },
-        10usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(padding)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).size as *const _
-                as usize
-        },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(size)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).callback as *const _
-                as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(callback)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioSpec>())).userdata as *const _
-                as usize
-        },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioSpec),
-            "::",
-            stringify!(userdata)
-        )
-    );
-}
-#[doc = " A structure to hold a set of audio conversion filters and buffers"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_AudioCVT {
-    #[doc = "< Set to 1 if conversion possible"]
-    pub needed: ::std::os::raw::c_int,
-    #[doc = "< Source audio format"]
-    pub src_format: Uint16,
-    #[doc = "< Target audio format"]
-    pub dst_format: Uint16,
-    #[doc = "< Rate conversion increment"]
-    pub rate_incr: f64,
-    #[doc = "< Buffer to hold entire audio data"]
-    pub buf: *mut Uint8,
-    #[doc = "< Length of original audio buffer"]
-    pub len: ::std::os::raw::c_int,
-    #[doc = "< Length of converted audio buffer"]
-    pub len_cvt: ::std::os::raw::c_int,
-    #[doc = "< buffer must be len*len_mult big"]
-    pub len_mult: ::std::os::raw::c_int,
-    #[doc = "< Given len, final size is len*len_ratio"]
-    pub len_ratio: f64,
-    pub filters: [::std::option::Option<
-        unsafe extern "C" fn(cvt: *mut SDL_AudioCVT, format: Uint16),
-    >; 10usize],
-    #[doc = "< Current audio conversion function"]
-    pub filter_index: ::std::os::raw::c_int,
-}
-#[test]
-fn bindgen_test_layout_SDL_AudioCVT() {
-    assert_eq!(
-        ::std::mem::size_of::<SDL_AudioCVT>(),
-        136usize,
-        concat!("Size of: ", stringify!(SDL_AudioCVT))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<SDL_AudioCVT>(),
-        8usize,
-        concat!("Alignment of ", stringify!(SDL_AudioCVT))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).needed as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(needed)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).src_format as *const _
-                as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(src_format)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).dst_format as *const _
-                as usize
-        },
-        6usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(dst_format)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).rate_incr as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(rate_incr)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).buf as *const _
-                as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(buf)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).len as *const _
-                as usize
-        },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(len)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_cvt as *const _
-                as usize
-        },
-        28usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(len_cvt)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_mult as *const _
-                as usize
-        },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(len_mult)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_ratio as *const _
-                as usize
-        },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(len_ratio)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).filters as *const _
-                as usize
-        },
-        48usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(filters)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_AudioCVT>())).filter_index
-                as *const _ as usize
-        },
-        128usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_AudioCVT),
-            "::",
-            stringify!(filter_index)
-        )
-    );
-}
-extern "C" {
-    pub fn SDL_AudioInit(
-        driver_name: *const ::std::os::raw::c_char,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SDL_AudioQuit();
-}
-extern "C" {
-    #[doc = " This function fills the given character buffer with the name of the"]
-    #[doc = " current audio driver, and returns a pointer to it if the audio driver has"]
-    #[doc = " been initialized.  It returns NULL if no driver has been initialized."]
-    pub fn SDL_AudioDriverName(
-        namebuf: *mut ::std::os::raw::c_char,
-        maxlen: ::std::os::raw::c_int,
-    ) -> *mut ::std::os::raw::c_char;
-}
-extern "C" {
-    #[doc = " This function opens the audio device with the desired parameters, and"]
-    #[doc = " returns 0 if successful, placing the actual hardware parameters in the"]
-    #[doc = " structure pointed to by 'obtained'.  If 'obtained' is NULL, the audio"]
-    #[doc = " data passed to the callback function will be guaranteed to be in the"]
-    #[doc = " requested format, and will be automatically converted to the hardware"]
-    #[doc = " audio format if necessary.  This function returns -1 if it failed"]
-    #[doc = " to open the audio device, or couldn't set up the audio thread."]
-    #[doc = ""]
-    #[doc = " The audio device starts out playing silence when it's opened, and should"]
-    #[doc = " be enabled for playing by calling SDL_PauseAudio(0) when you are ready"]
-    #[doc = " for your audio callback function to be called.  Since the audio driver"]
-    #[doc = " may modify the requested size of the audio buffer, you should allocate"]
-    #[doc = " any local mixing buffers after you open the audio device."]
-    #[doc = ""]
-    #[doc = " @sa SDL_AudioSpec"]
-    pub fn SDL_OpenAudio(
-        desired: *mut SDL_AudioSpec,
-        obtained: *mut SDL_AudioSpec,
-    ) -> ::std::os::raw::c_int;
-}
-pub const SDL_audiostatus_SDL_AUDIO_STOPPED: SDL_audiostatus = 0;
-pub const SDL_audiostatus_SDL_AUDIO_PLAYING: SDL_audiostatus = 1;
-pub const SDL_audiostatus_SDL_AUDIO_PAUSED: SDL_audiostatus = 2;
-pub type SDL_audiostatus = u32;
-extern "C" {
-    #[doc = " Get the current audio state"]
-    pub fn SDL_GetAudioStatus() -> SDL_audiostatus;
-}
-extern "C" {
-    #[doc = " This function pauses and unpauses the audio callback processing."]
-    #[doc = " It should be called with a parameter of 0 after opening the audio"]
-    #[doc = " device to start playing sound.  This is so you can safely initialize"]
-    #[doc = " data for your callback function after opening the audio device."]
-    #[doc = " Silence will be written to the audio device during the pause."]
-    pub fn SDL_PauseAudio(pause_on: ::std::os::raw::c_int);
-}
-extern "C" {
-    #[doc = " This function loads a WAVE from the data source, automatically freeing"]
-    #[doc = " that source if 'freesrc' is non-zero.  For example, to load a WAVE file,"]
-    #[doc = " you could do:"]
-    #[doc = "\t@code SDL_LoadWAV_RW(SDL_RWFromFile(\"sample.wav\", \"rb\"), 1, ...); @endcode"]
-    #[doc = ""]
-    #[doc = " If this function succeeds, it returns the given SDL_AudioSpec,"]
-    #[doc = " filled with the audio data format of the wave data, and sets"]
-    #[doc = " 'audio_buf' to a malloc()'d buffer containing the audio data,"]
-    #[doc = " and sets 'audio_len' to the length of that audio buffer, in bytes."]
-    #[doc = " You need to free the audio buffer with SDL_FreeWAV() when you are"]
-    #[doc = " done with it."]
-    #[doc = ""]
-    #[doc = " This function returns NULL and sets the SDL error message if the"]
-    #[doc = " wave file cannot be opened, uses an unknown data format, or is"]
-    #[doc = " corrupt.  Currently raw and MS-ADPCM WAVE files are supported."]
-    pub fn SDL_LoadWAV_RW(
-        src: *mut SDL_RWops,
-        freesrc: ::std::os::raw::c_int,
-        spec: *mut SDL_AudioSpec,
-        audio_buf: *mut *mut Uint8,
-        audio_len: *mut Uint32,
-    ) -> *mut SDL_AudioSpec;
-}
-extern "C" {
-    #[doc = " This function frees data previously allocated with SDL_LoadWAV_RW()"]
-    pub fn SDL_FreeWAV(audio_buf: *mut Uint8);
-}
-extern "C" {
-    #[doc = " This function takes a source format and rate and a destination format"]
-    #[doc = " and rate, and initializes the 'cvt' structure with information needed"]
-    #[doc = " by SDL_ConvertAudio() to convert a buffer of audio data from one format"]
-    #[doc = " to the other."]
-    #[doc = ""]
-    #[doc = " @return This function returns 0, or -1 if there was an error."]
-    pub fn SDL_BuildAudioCVT(
-        cvt: *mut SDL_AudioCVT,
-        src_format: Uint16,
-        src_channels: Uint8,
-        src_rate: ::std::os::raw::c_int,
-        dst_format: Uint16,
-        dst_channels: Uint8,
-        dst_rate: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Once you have initialized the 'cvt' structure using SDL_BuildAudioCVT(),"]
-    #[doc = " created an audio buffer cvt->buf, and filled it with cvt->len bytes of"]
-    #[doc = " audio data in the source format, this function will convert it in-place"]
-    #[doc = " to the desired format."]
-    #[doc = " The data conversion may expand the size of the audio data, so the buffer"]
-    #[doc = " cvt->buf should be allocated after the cvt structure is initialized by"]
-    #[doc = " SDL_BuildAudioCVT(), and should be cvt->len*cvt->len_mult bytes long."]
-    pub fn SDL_ConvertAudio(
-        cvt: *mut SDL_AudioCVT,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " This takes two audio buffers of the playing audio format and mixes"]
-    #[doc = " them, performing addition, volume adjustment, and overflow clipping."]
-    #[doc = " The volume ranges from 0 - 128, and should be set to SDL_MIX_MAXVOLUME"]
-    #[doc = " for full audio volume.  Note this does not change hardware volume."]
-    #[doc = " This is provided for convenience -- you can mix your own audio data."]
-    pub fn SDL_MixAudio(
-        dst: *mut Uint8,
-        src: *const Uint8,
-        len: Uint32,
-        volume: ::std::os::raw::c_int,
-    );
-}
-extern "C" {
-    pub fn SDL_LockAudio();
-}
-extern "C" {
-    pub fn SDL_UnlockAudio();
-}
-extern "C" {
-    #[doc = " This function shuts down audio processing and closes the audio device."]
-    pub fn SDL_CloseAudio();
-}
-pub const CDstatus_CD_TRAYEMPTY: CDstatus = 0;
-pub const CDstatus_CD_STOPPED: CDstatus = 1;
-pub const CDstatus_CD_PLAYING: CDstatus = 2;
-pub const CDstatus_CD_PAUSED: CDstatus = 3;
-pub const CDstatus_CD_ERROR: CDstatus = -1;
-#[doc = " The possible states which a CD-ROM drive can be in."]
-pub type CDstatus = i32;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_CDtrack {
-    #[doc = "< Track number"]
-    pub id: Uint8,
-    #[doc = "< Data or audio track"]
-    pub type_: Uint8,
-    pub unused: Uint16,
-    #[doc = "< Length, in frames, of this track"]
-    pub length: Uint32,
-    #[doc = "< Offset, in frames, from start of disk"]
-    pub offset: Uint32,
-}
-#[test]
-fn bindgen_test_layout_SDL_CDtrack() {
-    assert_eq!(
-        ::std::mem::size_of::<SDL_CDtrack>(),
-        12usize,
-        concat!("Size of: ", stringify!(SDL_CDtrack))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<SDL_CDtrack>(),
-        4usize,
-        concat!("Alignment of ", stringify!(SDL_CDtrack))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CDtrack>())).id as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CDtrack),
-            "::",
-            stringify!(id)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CDtrack>())).type_ as *const _
-                as usize
-        },
-        1usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CDtrack),
-            "::",
-            stringify!(type_)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CDtrack>())).unused as *const _
-                as usize
-        },
-        2usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CDtrack),
-            "::",
-            stringify!(unused)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CDtrack>())).length as *const _
-                as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CDtrack),
-            "::",
-            stringify!(length)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CDtrack>())).offset as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CDtrack),
-            "::",
-            stringify!(offset)
-        )
-    );
-}
-#[doc = " This structure is only current as of the last call to SDL_CDStatus()"]
-#[repr(C)]
-#[derive(Copy, Clone)]
-pub struct SDL_CD {
-    #[doc = "< Private drive identifier"]
-    pub id: ::std::os::raw::c_int,
-    #[doc = "< Current drive status"]
-    pub status: CDstatus,
-    #[doc = "< Number of tracks on disk"]
-    pub numtracks: ::std::os::raw::c_int,
-    #[doc = "< Current track position"]
-    pub cur_track: ::std::os::raw::c_int,
-    #[doc = "< Current frame offset within current track"]
-    pub cur_frame: ::std::os::raw::c_int,
-    pub track: [SDL_CDtrack; 100usize],
-}
-#[test]
-fn bindgen_test_layout_SDL_CD() {
-    assert_eq!(
-        ::std::mem::size_of::<SDL_CD>(),
-        1220usize,
-        concat!("Size of: ", stringify!(SDL_CD))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<SDL_CD>(),
-        4usize,
-        concat!("Alignment of ", stringify!(SDL_CD))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).id as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(id)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).status as *const _ as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(status)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).numtracks as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(numtracks)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).cur_track as *const _
-                as usize
-        },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(cur_track)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).cur_frame as *const _
-                as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(cur_frame)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_CD>())).track as *const _ as usize
-        },
-        20usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_CD),
-            "::",
-            stringify!(track)
-        )
-    );
-}
-extern "C" {
-    #[doc = "  Returns the number of CD-ROM drives on the system, or -1 if"]
-    #[doc = "  SDL_Init() has not been called with the SDL_INIT_CDROM flag."]
-    pub fn SDL_CDNumDrives() -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = "  Returns a human-readable, system-dependent identifier for the CD-ROM."]
-    #[doc = "  Example:"]
-    #[doc = "   - \"/dev/cdrom\""]
-    #[doc = "   - \"E:\""]
-    #[doc = "   - \"/dev/disk/ide/1/master\""]
-    pub fn SDL_CDName(
-        drive: ::std::os::raw::c_int,
-    ) -> *const ::std::os::raw::c_char;
-}
-extern "C" {
-    #[doc = "  Opens a CD-ROM drive for access.  It returns a drive handle on success,"]
-    #[doc = "  or NULL if the drive was invalid or busy.  This newly opened CD-ROM"]
-    #[doc = "  becomes the default CD used when other CD functions are passed a NULL"]
-    #[doc = "  CD-ROM handle."]
-    #[doc = "  Drives are numbered starting with 0.  Drive 0 is the system default CD-ROM."]
-    pub fn SDL_CDOpen(drive: ::std::os::raw::c_int) -> *mut SDL_CD;
-}
-extern "C" {
-    #[doc = "  This function returns the current status of the given drive."]
-    #[doc = "  If the drive has a CD in it, the table of contents of the CD and current"]
-    #[doc = "  play position of the CD will be stored in the SDL_CD structure."]
-    pub fn SDL_CDStatus(cdrom: *mut SDL_CD) -> CDstatus;
-}
-extern "C" {
-    #[doc = "  Play the given CD starting at 'start_track' and 'start_frame' for 'ntracks'"]
-    #[doc = "  tracks and 'nframes' frames.  If both 'ntrack' and 'nframe' are 0, play"]
-    #[doc = "  until the end of the CD.  This function will skip data tracks."]
-    #[doc = "  This function should only be called after calling SDL_CDStatus() to"]
-    #[doc = "  get track information about the CD."]
-    #[doc = "  For example:"]
-    #[doc = "      @code"]
-    #[doc = "\t// Play entire CD:"]
-    #[doc = "\tif ( CD_INDRIVE(SDL_CDStatus(cdrom)) )"]
-    #[doc = "\t\tSDL_CDPlayTracks(cdrom, 0, 0, 0, 0);"]
-    #[doc = "\t// Play last track:"]
-    #[doc = "\tif ( CD_INDRIVE(SDL_CDStatus(cdrom)) ) {"]
-    #[doc = "\t\tSDL_CDPlayTracks(cdrom, cdrom->numtracks-1, 0, 0, 0);"]
-    #[doc = "\t}"]
-    #[doc = "\t// Play first and second track and 10 seconds of third track:"]
-    #[doc = "\tif ( CD_INDRIVE(SDL_CDStatus(cdrom)) )"]
-    #[doc = "\t\tSDL_CDPlayTracks(cdrom, 0, 0, 2, 10);"]
-    #[doc = "      @endcode"]
-    #[doc = ""]
-    #[doc = "  @return This function returns 0, or -1 if there was an error."]
-    pub fn SDL_CDPlayTracks(
-        cdrom: *mut SDL_CD,
-        start_track: ::std::os::raw::c_int,
-        start_frame: ::std::os::raw::c_int,
-        ntracks: ::std::os::raw::c_int,
-        nframes: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = "  Play the given CD starting at 'start' frame for 'length' frames."]
-    #[doc = "  @return It returns 0, or -1 if there was an error."]
-    pub fn SDL_CDPlay(
-        cdrom: *mut SDL_CD,
-        start: ::std::os::raw::c_int,
-        length: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Pause play"]
-    #[doc = "  @return returns 0, or -1 on error"]
-    pub fn SDL_CDPause(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Resume play"]
-    #[doc = "  @return returns 0, or -1 on error"]
-    pub fn SDL_CDResume(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Stop play"]
-    #[doc = "  @return returns 0, or -1 on error"]
-    pub fn SDL_CDStop(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Eject CD-ROM"]
-    #[doc = "  @return returns 0, or -1 on error"]
-    pub fn SDL_CDEject(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Closes the handle for the CD-ROM drive"]
-    pub fn SDL_CDClose(cdrom: *mut SDL_CD);
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has the RDTSC instruction"]
-    pub fn SDL_HasRDTSC() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has MMX features"]
-    pub fn SDL_HasMMX() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has MMX Ext. features"]
-    pub fn SDL_HasMMXExt() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has 3DNow features"]
-    pub fn SDL_Has3DNow() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has 3DNow! Ext. features"]
-    pub fn SDL_Has3DNowExt() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has SSE features"]
-    pub fn SDL_HasSSE() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has SSE2 features"]
-    pub fn SDL_HasSSE2() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns true if the CPU has AltiVec features"]
-    pub fn SDL_HasAltiVec() -> SDL_bool;
-}
-extern "C" {
-    #[doc = " This function returns the current state of the application, which is a"]
-    #[doc = " bitwise combination of SDL_APPMOUSEFOCUS, SDL_APPINPUTFOCUS, and"]
-    #[doc = " SDL_APPACTIVE.  If SDL_APPACTIVE is set, then the user is able to"]
-    #[doc = " see your application, otherwise it has been iconified or disabled."]
-    pub fn SDL_GetAppState() -> Uint8;
-}
-pub const SDLKey_SDLK_UNKNOWN: SDLKey = 0;
-pub const SDLKey_SDLK_FIRST: SDLKey = 0;
-pub const SDLKey_SDLK_BACKSPACE: SDLKey = 8;
-pub const SDLKey_SDLK_TAB: SDLKey = 9;
-pub const SDLKey_SDLK_CLEAR: SDLKey = 12;
-pub const SDLKey_SDLK_RETURN: SDLKey = 13;
-pub const SDLKey_SDLK_PAUSE: SDLKey = 19;
-pub const SDLKey_SDLK_ESCAPE: SDLKey = 27;
-pub const SDLKey_SDLK_SPACE: SDLKey = 32;
-pub const SDLKey_SDLK_EXCLAIM: SDLKey = 33;
-pub const SDLKey_SDLK_QUOTEDBL: SDLKey = 34;
-pub const SDLKey_SDLK_HASH: SDLKey = 35;
-pub const SDLKey_SDLK_DOLLAR: SDLKey = 36;
-pub const SDLKey_SDLK_AMPERSAND: SDLKey = 38;
-pub const SDLKey_SDLK_QUOTE: SDLKey = 39;
-pub const SDLKey_SDLK_LEFTPAREN: SDLKey = 40;
-pub const SDLKey_SDLK_RIGHTPAREN: SDLKey = 41;
-pub const SDLKey_SDLK_ASTERISK: SDLKey = 42;
-pub const SDLKey_SDLK_PLUS: SDLKey = 43;
-pub const SDLKey_SDLK_COMMA: SDLKey = 44;
-pub const SDLKey_SDLK_MINUS: SDLKey = 45;
-pub const SDLKey_SDLK_PERIOD: SDLKey = 46;
-pub const SDLKey_SDLK_SLASH: SDLKey = 47;
-pub const SDLKey_SDLK_0: SDLKey = 48;
-pub const SDLKey_SDLK_1: SDLKey = 49;
-pub const SDLKey_SDLK_2: SDLKey = 50;
-pub const SDLKey_SDLK_3: SDLKey = 51;
-pub const SDLKey_SDLK_4: SDLKey = 52;
-pub const SDLKey_SDLK_5: SDLKey = 53;
-pub const SDLKey_SDLK_6: SDLKey = 54;
-pub const SDLKey_SDLK_7: SDLKey = 55;
-pub const SDLKey_SDLK_8: SDLKey = 56;
-pub const SDLKey_SDLK_9: SDLKey = 57;
-pub const SDLKey_SDLK_COLON: SDLKey = 58;
-pub const SDLKey_SDLK_SEMICOLON: SDLKey = 59;
-pub const SDLKey_SDLK_LESS: SDLKey = 60;
-pub const SDLKey_SDLK_EQUALS: SDLKey = 61;
-pub const SDLKey_SDLK_GREATER: SDLKey = 62;
-pub const SDLKey_SDLK_QUESTION: SDLKey = 63;
-pub const SDLKey_SDLK_AT: SDLKey = 64;
-pub const SDLKey_SDLK_LEFTBRACKET: SDLKey = 91;
-pub const SDLKey_SDLK_BACKSLASH: SDLKey = 92;
-pub const SDLKey_SDLK_RIGHTBRACKET: SDLKey = 93;
-pub const SDLKey_SDLK_CARET: SDLKey = 94;
-pub const SDLKey_SDLK_UNDERSCORE: SDLKey = 95;
-pub const SDLKey_SDLK_BACKQUOTE: SDLKey = 96;
-pub const SDLKey_SDLK_a: SDLKey = 97;
-pub const SDLKey_SDLK_b: SDLKey = 98;
-pub const SDLKey_SDLK_c: SDLKey = 99;
-pub const SDLKey_SDLK_d: SDLKey = 100;
-pub const SDLKey_SDLK_e: SDLKey = 101;
-pub const SDLKey_SDLK_f: SDLKey = 102;
-pub const SDLKey_SDLK_g: SDLKey = 103;
-pub const SDLKey_SDLK_h: SDLKey = 104;
-pub const SDLKey_SDLK_i: SDLKey = 105;
-pub const SDLKey_SDLK_j: SDLKey = 106;
-pub const SDLKey_SDLK_k: SDLKey = 107;
-pub const SDLKey_SDLK_l: SDLKey = 108;
-pub const SDLKey_SDLK_m: SDLKey = 109;
-pub const SDLKey_SDLK_n: SDLKey = 110;
-pub const SDLKey_SDLK_o: SDLKey = 111;
-pub const SDLKey_SDLK_p: SDLKey = 112;
-pub const SDLKey_SDLK_q: SDLKey = 113;
-pub const SDLKey_SDLK_r: SDLKey = 114;
-pub const SDLKey_SDLK_s: SDLKey = 115;
-pub const SDLKey_SDLK_t: SDLKey = 116;
-pub const SDLKey_SDLK_u: SDLKey = 117;
-pub const SDLKey_SDLK_v: SDLKey = 118;
-pub const SDLKey_SDLK_w: SDLKey = 119;
-pub const SDLKey_SDLK_x: SDLKey = 120;
-pub const SDLKey_SDLK_y: SDLKey = 121;
-pub const SDLKey_SDLK_z: SDLKey = 122;
-pub const SDLKey_SDLK_DELETE: SDLKey = 127;
-pub const SDLKey_SDLK_WORLD_0: SDLKey = 160;
-pub const SDLKey_SDLK_WORLD_1: SDLKey = 161;
-pub const SDLKey_SDLK_WORLD_2: SDLKey = 162;
-pub const SDLKey_SDLK_WORLD_3: SDLKey = 163;
-pub const SDLKey_SDLK_WORLD_4: SDLKey = 164;
-pub const SDLKey_SDLK_WORLD_5: SDLKey = 165;
-pub const SDLKey_SDLK_WORLD_6: SDLKey = 166;
-pub const SDLKey_SDLK_WORLD_7: SDLKey = 167;
-pub const SDLKey_SDLK_WORLD_8: SDLKey = 168;
-pub const SDLKey_SDLK_WORLD_9: SDLKey = 169;
-pub const SDLKey_SDLK_WORLD_10: SDLKey = 170;
-pub const SDLKey_SDLK_WORLD_11: SDLKey = 171;
-pub const SDLKey_SDLK_WORLD_12: SDLKey = 172;
-pub const SDLKey_SDLK_WORLD_13: SDLKey = 173;
-pub const SDLKey_SDLK_WORLD_14: SDLKey = 174;
-pub const SDLKey_SDLK_WORLD_15: SDLKey = 175;
-pub const SDLKey_SDLK_WORLD_16: SDLKey = 176;
-pub const SDLKey_SDLK_WORLD_17: SDLKey = 177;
-pub const SDLKey_SDLK_WORLD_18: SDLKey = 178;
-pub const SDLKey_SDLK_WORLD_19: SDLKey = 179;
-pub const SDLKey_SDLK_WORLD_20: SDLKey = 180;
-pub const SDLKey_SDLK_WORLD_21: SDLKey = 181;
-pub const SDLKey_SDLK_WORLD_22: SDLKey = 182;
-pub const SDLKey_SDLK_WORLD_23: SDLKey = 183;
-pub const SDLKey_SDLK_WORLD_24: SDLKey = 184;
-pub const SDLKey_SDLK_WORLD_25: SDLKey = 185;
-pub const SDLKey_SDLK_WORLD_26: SDLKey = 186;
-pub const SDLKey_SDLK_WORLD_27: SDLKey = 187;
-pub const SDLKey_SDLK_WORLD_28: SDLKey = 188;
-pub const SDLKey_SDLK_WORLD_29: SDLKey = 189;
-pub const SDLKey_SDLK_WORLD_30: SDLKey = 190;
-pub const SDLKey_SDLK_WORLD_31: SDLKey = 191;
-pub const SDLKey_SDLK_WORLD_32: SDLKey = 192;
-pub const SDLKey_SDLK_WORLD_33: SDLKey = 193;
-pub const SDLKey_SDLK_WORLD_34: SDLKey = 194;
-pub const SDLKey_SDLK_WORLD_35: SDLKey = 195;
-pub const SDLKey_SDLK_WORLD_36: SDLKey = 196;
-pub const SDLKey_SDLK_WORLD_37: SDLKey = 197;
-pub const SDLKey_SDLK_WORLD_38: SDLKey = 198;
-pub const SDLKey_SDLK_WORLD_39: SDLKey = 199;
-pub const SDLKey_SDLK_WORLD_40: SDLKey = 200;
-pub const SDLKey_SDLK_WORLD_41: SDLKey = 201;
-pub const SDLKey_SDLK_WORLD_42: SDLKey = 202;
-pub const SDLKey_SDLK_WORLD_43: SDLKey = 203;
-pub const SDLKey_SDLK_WORLD_44: SDLKey = 204;
-pub const SDLKey_SDLK_WORLD_45: SDLKey = 205;
-pub const SDLKey_SDLK_WORLD_46: SDLKey = 206;
-pub const SDLKey_SDLK_WORLD_47: SDLKey = 207;
-pub const SDLKey_SDLK_WORLD_48: SDLKey = 208;
-pub const SDLKey_SDLK_WORLD_49: SDLKey = 209;
-pub const SDLKey_SDLK_WORLD_50: SDLKey = 210;
-pub const SDLKey_SDLK_WORLD_51: SDLKey = 211;
-pub const SDLKey_SDLK_WORLD_52: SDLKey = 212;
-pub const SDLKey_SDLK_WORLD_53: SDLKey = 213;
-pub const SDLKey_SDLK_WORLD_54: SDLKey = 214;
-pub const SDLKey_SDLK_WORLD_55: SDLKey = 215;
-pub const SDLKey_SDLK_WORLD_56: SDLKey = 216;
-pub const SDLKey_SDLK_WORLD_57: SDLKey = 217;
-pub const SDLKey_SDLK_WORLD_58: SDLKey = 218;
-pub const SDLKey_SDLK_WORLD_59: SDLKey = 219;
-pub const SDLKey_SDLK_WORLD_60: SDLKey = 220;
-pub const SDLKey_SDLK_WORLD_61: SDLKey = 221;
-pub const SDLKey_SDLK_WORLD_62: SDLKey = 222;
-pub const SDLKey_SDLK_WORLD_63: SDLKey = 223;
-pub const SDLKey_SDLK_WORLD_64: SDLKey = 224;
-pub const SDLKey_SDLK_WORLD_65: SDLKey = 225;
-pub const SDLKey_SDLK_WORLD_66: SDLKey = 226;
-pub const SDLKey_SDLK_WORLD_67: SDLKey = 227;
-pub const SDLKey_SDLK_WORLD_68: SDLKey = 228;
-pub const SDLKey_SDLK_WORLD_69: SDLKey = 229;
-pub const SDLKey_SDLK_WORLD_70: SDLKey = 230;
-pub const SDLKey_SDLK_WORLD_71: SDLKey = 231;
-pub const SDLKey_SDLK_WORLD_72: SDLKey = 232;
-pub const SDLKey_SDLK_WORLD_73: SDLKey = 233;
-pub const SDLKey_SDLK_WORLD_74: SDLKey = 234;
-pub const SDLKey_SDLK_WORLD_75: SDLKey = 235;
-pub const SDLKey_SDLK_WORLD_76: SDLKey = 236;
-pub const SDLKey_SDLK_WORLD_77: SDLKey = 237;
-pub const SDLKey_SDLK_WORLD_78: SDLKey = 238;
-pub const SDLKey_SDLK_WORLD_79: SDLKey = 239;
-pub const SDLKey_SDLK_WORLD_80: SDLKey = 240;
-pub const SDLKey_SDLK_WORLD_81: SDLKey = 241;
-pub const SDLKey_SDLK_WORLD_82: SDLKey = 242;
-pub const SDLKey_SDLK_WORLD_83: SDLKey = 243;
-pub const SDLKey_SDLK_WORLD_84: SDLKey = 244;
-pub const SDLKey_SDLK_WORLD_85: SDLKey = 245;
-pub const SDLKey_SDLK_WORLD_86: SDLKey = 246;
-pub const SDLKey_SDLK_WORLD_87: SDLKey = 247;
-pub const SDLKey_SDLK_WORLD_88: SDLKey = 248;
-pub const SDLKey_SDLK_WORLD_89: SDLKey = 249;
-pub const SDLKey_SDLK_WORLD_90: SDLKey = 250;
-pub const SDLKey_SDLK_WORLD_91: SDLKey = 251;
-pub const SDLKey_SDLK_WORLD_92: SDLKey = 252;
-pub const SDLKey_SDLK_WORLD_93: SDLKey = 253;
-pub const SDLKey_SDLK_WORLD_94: SDLKey = 254;
-pub const SDLKey_SDLK_WORLD_95: SDLKey = 255;
-pub const SDLKey_SDLK_KP0: SDLKey = 256;
-pub const SDLKey_SDLK_KP1: SDLKey = 257;
-pub const SDLKey_SDLK_KP2: SDLKey = 258;
-pub const SDLKey_SDLK_KP3: SDLKey = 259;
-pub const SDLKey_SDLK_KP4: SDLKey = 260;
-pub const SDLKey_SDLK_KP5: SDLKey = 261;
-pub const SDLKey_SDLK_KP6: SDLKey = 262;
-pub const SDLKey_SDLK_KP7: SDLKey = 263;
-pub const SDLKey_SDLK_KP8: SDLKey = 264;
-pub const SDLKey_SDLK_KP9: SDLKey = 265;
-pub const SDLKey_SDLK_KP_PERIOD: SDLKey = 266;
-pub const SDLKey_SDLK_KP_DIVIDE: SDLKey = 267;
-pub const SDLKey_SDLK_KP_MULTIPLY: SDLKey = 268;
-pub const SDLKey_SDLK_KP_MINUS: SDLKey = 269;
-pub const SDLKey_SDLK_KP_PLUS: SDLKey = 270;
-pub const SDLKey_SDLK_KP_ENTER: SDLKey = 271;
-pub const SDLKey_SDLK_KP_EQUALS: SDLKey = 272;
-pub const SDLKey_SDLK_UP: SDLKey = 273;
-pub const SDLKey_SDLK_DOWN: SDLKey = 274;
-pub const SDLKey_SDLK_RIGHT: SDLKey = 275;
-pub const SDLKey_SDLK_LEFT: SDLKey = 276;
-pub const SDLKey_SDLK_INSERT: SDLKey = 277;
-pub const SDLKey_SDLK_HOME: SDLKey = 278;
-pub const SDLKey_SDLK_END: SDLKey = 279;
-pub const SDLKey_SDLK_PAGEUP: SDLKey = 280;
-pub const SDLKey_SDLK_PAGEDOWN: SDLKey = 281;
-pub const SDLKey_SDLK_F1: SDLKey = 282;
-pub const SDLKey_SDLK_F2: SDLKey = 283;
-pub const SDLKey_SDLK_F3: SDLKey = 284;
-pub const SDLKey_SDLK_F4: SDLKey = 285;
-pub const SDLKey_SDLK_F5: SDLKey = 286;
-pub const SDLKey_SDLK_F6: SDLKey = 287;
-pub const SDLKey_SDLK_F7: SDLKey = 288;
-pub const SDLKey_SDLK_F8: SDLKey = 289;
-pub const SDLKey_SDLK_F9: SDLKey = 290;
-pub const SDLKey_SDLK_F10: SDLKey = 291;
-pub const SDLKey_SDLK_F11: SDLKey = 292;
-pub const SDLKey_SDLK_F12: SDLKey = 293;
-pub const SDLKey_SDLK_F13: SDLKey = 294;
-pub const SDLKey_SDLK_F14: SDLKey = 295;
-pub const SDLKey_SDLK_F15: SDLKey = 296;
-pub const SDLKey_SDLK_NUMLOCK: SDLKey = 300;
-pub const SDLKey_SDLK_CAPSLOCK: SDLKey = 301;
-pub const SDLKey_SDLK_SCROLLOCK: SDLKey = 302;
-pub const SDLKey_SDLK_RSHIFT: SDLKey = 303;
-pub const SDLKey_SDLK_LSHIFT: SDLKey = 304;
-pub const SDLKey_SDLK_RCTRL: SDLKey = 305;
-pub const SDLKey_SDLK_LCTRL: SDLKey = 306;
-pub const SDLKey_SDLK_RALT: SDLKey = 307;
-pub const SDLKey_SDLK_LALT: SDLKey = 308;
-pub const SDLKey_SDLK_RMETA: SDLKey = 309;
-pub const SDLKey_SDLK_LMETA: SDLKey = 310;
-#[doc = "< Left \"Windows\" key"]
-pub const SDLKey_SDLK_LSUPER: SDLKey = 311;
-#[doc = "< Right \"Windows\" key"]
-pub const SDLKey_SDLK_RSUPER: SDLKey = 312;
-#[doc = "< \"Alt Gr\" key"]
-pub const SDLKey_SDLK_MODE: SDLKey = 313;
-#[doc = "< Multi-key compose key"]
-pub const SDLKey_SDLK_COMPOSE: SDLKey = 314;
-pub const SDLKey_SDLK_HELP: SDLKey = 315;
-pub const SDLKey_SDLK_PRINT: SDLKey = 316;
-pub const SDLKey_SDLK_SYSREQ: SDLKey = 317;
-pub const SDLKey_SDLK_BREAK: SDLKey = 318;
-pub const SDLKey_SDLK_MENU: SDLKey = 319;
-#[doc = "< Power Macintosh power key"]
-pub const SDLKey_SDLK_POWER: SDLKey = 320;
-#[doc = "< Some european keyboards"]
-pub const SDLKey_SDLK_EURO: SDLKey = 321;
-#[doc = "< Atari keyboard has Undo"]
-pub const SDLKey_SDLK_UNDO: SDLKey = 322;
-pub const SDLKey_SDLK_LAST: SDLKey = 323;
-#[doc = " What we really want is a mapping of every raw key on the keyboard."]
-#[doc = "  To support international keyboards, we use the range 0xA1 - 0xFF"]
-#[doc = "  as international virtual keycodes.  We'll follow in the footsteps of X11..."]
-#[doc = "  @brief The names of the keys"]
-pub type SDLKey = u32;
-pub const SDLMod_KMOD_NONE: SDLMod = 0;
-pub const SDLMod_KMOD_LSHIFT: SDLMod = 1;
-pub const SDLMod_KMOD_RSHIFT: SDLMod = 2;
-pub const SDLMod_KMOD_LCTRL: SDLMod = 64;
-pub const SDLMod_KMOD_RCTRL: SDLMod = 128;
-pub const SDLMod_KMOD_LALT: SDLMod = 256;
-pub const SDLMod_KMOD_RALT: SDLMod = 512;
-pub const SDLMod_KMOD_LMETA: SDLMod = 1024;
-pub const SDLMod_KMOD_RMETA: SDLMod = 2048;
-pub const SDLMod_KMOD_NUM: SDLMod = 4096;
-pub const SDLMod_KMOD_CAPS: SDLMod = 8192;
-pub const SDLMod_KMOD_MODE: SDLMod = 16384;
-pub const SDLMod_KMOD_RESERVED: SDLMod = 32768;
-#[doc = " Enumeration of valid key mods (possibly OR'd together)"]
-pub type SDLMod = u32;
-#[doc = " Keysym structure"]
-#[doc = ""]
-#[doc = "  - The scancode is hardware dependent, and should not be used by general"]
-#[doc = "    applications.  If no hardware scancode is available, it will be 0."]
-#[doc = ""]
-#[doc = "  - The 'unicode' translated character is only available when character"]
-#[doc = "    translation is enabled by the SDL_EnableUNICODE() API.  If non-zero,"]
-#[doc = "    this is a UNICODE character corresponding to the keypress.  If the"]
-#[doc = "    high 9 bits of the character are 0, then this maps to the equivalent"]
-#[doc = "    ASCII character:"]
-#[doc = "      @code"]
-#[doc = "\tchar ch;"]
-#[doc = "\tif ( (keysym.unicode & 0xFF80) == 0 ) {"]
-#[doc = "\t\tch = keysym.unicode & 0x7F;"]
-#[doc = "\t} else {"]
-#[doc = "\t\tAn international character.."]
-#[doc = "\t}"]
-#[doc = "      @endcode"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct SDL_keysym {
-    #[doc = "< hardware specific scancode"]
-    pub scancode: Uint8,
-    #[doc = "< SDL virtual keysym"]
-    pub sym: SDLKey,
-    #[doc = "< current key modifiers"]
-    pub mod_: SDLMod,
-    #[doc = "< translated character"]
-    pub unicode: Uint16,
-}
-#[test]
-fn bindgen_test_layout_SDL_keysym() {
-    assert_eq!(
-        ::std::mem::size_of::<SDL_keysym>(),
-        16usize,
-        concat!("Size of: ", stringify!(SDL_keysym))
-    );
-    assert_eq!(
-        ::std::mem::align_of::<SDL_keysym>(),
-        4usize,
-        concat!("Alignment of ", stringify!(SDL_keysym))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_keysym>())).scancode as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_keysym),
-            "::",
-            stringify!(scancode)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_keysym>())).sym as *const _ as usize
-        },
-        4usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_keysym),
-            "::",
-            stringify!(sym)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_keysym>())).mod_ as *const _
-                as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_keysym),
-            "::",
-            stringify!(mod_)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::std::ptr::null::<SDL_keysym>())).unicode as *const _
-                as usize
-        },
-        12usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(SDL_keysym),
-            "::",
-            stringify!(unicode)
-        )
-    );
-}
-extern "C" {
-    #[doc = " Enable/Disable UNICODE translation of keyboard input."]
-    #[doc = ""]
-    #[doc = " This translation has some overhead, so translation defaults off."]
-    #[doc = ""]
-    #[doc = " @param[in] enable"]
-    #[doc = " If 'enable' is 1, translation is enabled."]
-    #[doc = " If 'enable' is 0, translation is disabled."]
-    #[doc = " If 'enable' is -1, the translation state is not changed."]
-    #[doc = ""]
-    #[doc = " @return It returns the previous state of keyboard translation."]
-    pub fn SDL_EnableUNICODE(
-        enable: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    #[doc = " Enable/Disable keyboard repeat.  Keyboard repeat defaults to off."]
-    #[doc = ""]
-    #[doc = "  @param[in] delay"]
-    #[doc = "  'delay' is the initial delay in ms between the time when a key is"]
-    #[doc = "  pressed, and keyboard repeat begins."]
-    #[doc = ""]
-    #[doc = "  @param[in] interval"]
-    #[doc = "  'interval' is the time in ms between keyboard repeat events."]
-    #[doc = ""]
-    #[doc = "  If 'delay' is set to 0, keyboard repeat is disabled."]
-    pub fn SDL_EnableKeyRepeat(
-        delay: ::std::os::raw::c_int,
-        interval: ::std::os::raw::c_int,
-    ) -> ::std::os::raw::c_int;
-}
-extern "C" {
-    pub fn SDL_GetKeyRepeat(
-        delay: *mut ::std::os::raw::c_int,
-        interval: *mut ::std::os::raw::c_int,
-    );
-}
-extern "C" {
-    #[doc = " Get a snapshot of the current state of the keyboard."]
-    #[doc = " Returns an array of keystates, indexed by the SDLK_* syms."]
-    #[doc = " Usage:"]
-    #[doc = "\t@code"]
-    #[doc = " \tUint8 *keystate = SDL_GetKeyState(NULL);"]
-    #[doc = "\tif ( keystate[SDLK_RETURN] ) //... \\<RETURN> is pressed."]
-    #[doc = "\t@endcode"]
-    pub fn SDL_GetKeyState(
-        numkeys: *mut ::std::os::raw::c_int,
-    ) -> *mut Uint8;
-}
-extern "C" {
-    #[doc = " Get the current key modifier state"]
-    pub fn SDL_GetModState() -> SDLMod;
-}
-extern "C" {
-    #[doc = " Set the current key modifier state."]
-    #[doc = " This does not change the keyboard state, only the key modifier flags."]
-    pub fn SDL_SetModState(modstate: SDLMod);
-}
-extern "C" {
-    #[doc = " Get the name of an SDL virtual keysym"]
-    pub fn SDL_GetKeyName(key: SDLKey) -> *mut ::std::os::raw::c_char;
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_Rect {
@@ -6972,7 +5542,6 @@ fn bindgen_test_layout_SDL_Palette() {
         )
     );
 }
-#[doc = " Everything in the pixel format structure is read-only"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_PixelFormat {
@@ -6991,9 +5560,7 @@ pub struct SDL_PixelFormat {
     pub Gmask: Uint32,
     pub Bmask: Uint32,
     pub Amask: Uint32,
-    #[doc = " RGB color key information"]
     pub colorkey: Uint32,
-    #[doc = " Alpha value information (per-surface alpha)"]
     pub alpha: Uint8,
 }
 #[test]
@@ -7230,38 +5797,22 @@ fn bindgen_test_layout_SDL_PixelFormat() {
         )
     );
 }
-#[doc = " This structure should be treated as read-only, except for 'pixels',"]
-#[doc = "  which, if not NULL, contains the raw pixel data for the surface."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_Surface {
-    #[doc = "< Read-only"]
     pub flags: Uint32,
-    #[doc = "< Read-only"]
     pub format: *mut SDL_PixelFormat,
-    #[doc = "< Read-only"]
     pub w: ::std::os::raw::c_int,
-    #[doc = "< Read-only"]
     pub h: ::std::os::raw::c_int,
-    #[doc = "< Read-only"]
     pub pitch: Uint16,
-    #[doc = "< Read-write"]
     pub pixels: *mut ::std::os::raw::c_void,
-    #[doc = "< Private"]
     pub offset: ::std::os::raw::c_int,
-    #[doc = " Hardware-specific surface info"]
     pub hwdata: *mut private_hwdata,
-    #[doc = "< Read-only"]
     pub clip_rect: SDL_Rect,
-    #[doc = "< for binary compatibility"]
     pub unused1: Uint32,
-    #[doc = "< Private"]
     pub locked: Uint32,
-    #[doc = "< Private"]
     pub map: *mut SDL_BlitMap,
-    #[doc = "< Private"]
     pub format_version: ::std::os::raw::c_uint,
-    #[doc = "< Read-mostly"]
     pub refcount: ::std::os::raw::c_int,
 }
 #[test]
@@ -7457,7 +6008,6 @@ fn bindgen_test_layout_SDL_Surface() {
         )
     );
 }
-#[doc = " typedef for private surface blitting functions"]
 pub type SDL_blit = ::std::option::Option<
     unsafe extern "C" fn(
         src: *mut SDL_Surface,
@@ -7466,18 +6016,13 @@ pub type SDL_blit = ::std::option::Option<
         dstrect: *mut SDL_Rect,
     ) -> ::std::os::raw::c_int,
 >;
-#[doc = " Useful for determining the video hardware capabilities"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_VideoInfo {
     pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize], u16>,
-    #[doc = "< The total amount of video memory (in K)"]
     pub video_mem: Uint32,
-    #[doc = "< Value: The format of the video surface"]
     pub vfmt: *mut SDL_PixelFormat,
-    #[doc = "< Value: The current video mode width"]
     pub current_w: ::std::os::raw::c_int,
-    #[doc = "< Value: The current video mode height"]
     pub current_h: ::std::os::raw::c_int,
 }
 #[test]
@@ -7784,21 +6329,14 @@ impl SDL_VideoInfo {
         __bindgen_bitfield_unit
     }
 }
-#[doc = " The YUV hardware video overlay"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_Overlay {
-    #[doc = "< Read-only"]
     pub format: Uint32,
-    #[doc = "< Read-only"]
     pub w: ::std::os::raw::c_int,
-    #[doc = "< Read-only"]
     pub h: ::std::os::raw::c_int,
-    #[doc = "< Read-only"]
     pub planes: ::std::os::raw::c_int,
-    #[doc = "< Read-only"]
     pub pitches: *mut Uint16,
-    #[doc = "< Read-write"]
     pub pixels: *mut *mut Uint8,
     pub hwfuncs: *mut private_yuvhwfuncs,
     pub hwdata: *mut private_yuvhwdata,
@@ -7986,17 +6524,8 @@ pub const SDL_GLattr_SDL_GL_MULTISAMPLEBUFFERS: SDL_GLattr = 13;
 pub const SDL_GLattr_SDL_GL_MULTISAMPLESAMPLES: SDL_GLattr = 14;
 pub const SDL_GLattr_SDL_GL_ACCELERATED_VISUAL: SDL_GLattr = 15;
 pub const SDL_GLattr_SDL_GL_SWAP_CONTROL: SDL_GLattr = 16;
-#[doc = " Public enumeration for setting the OpenGL window attributes."]
 pub type SDL_GLattr = u32;
 extern "C" {
-    #[doc = " Initializes the video subsystem. Sets up a connection"]
-    #[doc = " to the window manager, etc, and determines the current video mode and"]
-    #[doc = " pixel format, but does not initialize a window or graphics mode."]
-    #[doc = " Note that event handling is activated by this routine."]
-    #[doc = ""]
-    #[doc = " If you use both sound and video in your application, you need to call"]
-    #[doc = " SDL_Init() before opening the sound device, otherwise under Win32 DirectX,"]
-    #[doc = " you won't be able to set full-screen display modes."]
     pub fn SDL_VideoInit(
         driver_name: *const ::std::os::raw::c_char,
         flags: Uint32,
@@ -8006,38 +6535,18 @@ extern "C" {
     pub fn SDL_VideoQuit();
 }
 extern "C" {
-    #[doc = " This function fills the given character buffer with the name of the"]
-    #[doc = " video driver, and returns a pointer to it if the video driver has"]
-    #[doc = " been initialized.  It returns NULL if no driver has been initialized."]
     pub fn SDL_VideoDriverName(
         namebuf: *mut ::std::os::raw::c_char,
         maxlen: ::std::os::raw::c_int,
     ) -> *mut ::std::os::raw::c_char;
 }
 extern "C" {
-    #[doc = " This function returns a pointer to the current display surface."]
-    #[doc = " If SDL is doing format conversion on the display surface, this"]
-    #[doc = " function returns the publicly visible surface, not the real video"]
-    #[doc = " surface."]
     pub fn SDL_GetVideoSurface() -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " This function returns a read-only pointer to information about the"]
-    #[doc = " video hardware.  If this is called before SDL_SetVideoMode(), the 'vfmt'"]
-    #[doc = " member of the returned structure will contain the pixel format of the"]
-    #[doc = " \"best\" video mode."]
     pub fn SDL_GetVideoInfo() -> *const SDL_VideoInfo;
 }
 extern "C" {
-    #[doc = " Check to see if a particular video mode is supported."]
-    #[doc = " It returns 0 if the requested mode is not supported under any bit depth,"]
-    #[doc = " or returns the bits-per-pixel of the closest available mode with the"]
-    #[doc = " given width and height.  If this bits-per-pixel is different from the"]
-    #[doc = " one used when setting the video mode, SDL_SetVideoMode() will succeed,"]
-    #[doc = " but will emulate the requested bits-per-pixel with a shadow surface."]
-    #[doc = ""]
-    #[doc = " The arguments to SDL_VideoModeOK() are the same ones you would pass to"]
-    #[doc = " SDL_SetVideoMode()"]
     pub fn SDL_VideoModeOK(
         width: ::std::os::raw::c_int,
         height: ::std::os::raw::c_int,
@@ -8046,75 +6555,12 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Return a pointer to an array of available screen dimensions for the"]
-    #[doc = " given format and video flags, sorted largest to smallest.  Returns"]
-    #[doc = " NULL if there are no dimensions available for a particular format,"]
-    #[doc = " or (SDL_Rect **)-1 if any dimension is okay for the given format."]
-    #[doc = ""]
-    #[doc = " If 'format' is NULL, the mode list will be for the format given"]
-    #[doc = " by SDL_GetVideoInfo()->vfmt"]
     pub fn SDL_ListModes(
         format: *mut SDL_PixelFormat,
         flags: Uint32,
     ) -> *mut *mut SDL_Rect;
 }
 extern "C" {
-    #[doc = " Set up a video mode with the specified width, height and bits-per-pixel."]
-    #[doc = ""]
-    #[doc = " If 'bpp' is 0, it is treated as the current display bits per pixel."]
-    #[doc = ""]
-    #[doc = " If SDL_ANYFORMAT is set in 'flags', the SDL library will try to set the"]
-    #[doc = " requested bits-per-pixel, but will return whatever video pixel format is"]
-    #[doc = " available.  The default is to emulate the requested pixel format if it"]
-    #[doc = " is not natively available."]
-    #[doc = ""]
-    #[doc = " If SDL_HWSURFACE is set in 'flags', the video surface will be placed in"]
-    #[doc = " video memory, if possible, and you may have to call SDL_LockSurface()"]
-    #[doc = " in order to access the raw framebuffer.  Otherwise, the video surface"]
-    #[doc = " will be created in system memory."]
-    #[doc = ""]
-    #[doc = " If SDL_ASYNCBLIT is set in 'flags', SDL will try to perform rectangle"]
-    #[doc = " updates asynchronously, but you must always lock before accessing pixels."]
-    #[doc = " SDL will wait for updates to complete before returning from the lock."]
-    #[doc = ""]
-    #[doc = " If SDL_HWPALETTE is set in 'flags', the SDL library will guarantee"]
-    #[doc = " that the colors set by SDL_SetColors() will be the colors you get."]
-    #[doc = " Otherwise, in 8-bit mode, SDL_SetColors() may not be able to set all"]
-    #[doc = " of the colors exactly the way they are requested, and you should look"]
-    #[doc = " at the video surface structure to determine the actual palette."]
-    #[doc = " If SDL cannot guarantee that the colors you request can be set,"]
-    #[doc = " i.e. if the colormap is shared, then the video surface may be created"]
-    #[doc = " under emulation in system memory, overriding the SDL_HWSURFACE flag."]
-    #[doc = ""]
-    #[doc = " If SDL_FULLSCREEN is set in 'flags', the SDL library will try to set"]
-    #[doc = " a fullscreen video mode.  The default is to create a windowed mode"]
-    #[doc = " if the current graphics system has a window manager."]
-    #[doc = " If the SDL library is able to set a fullscreen video mode, this flag"]
-    #[doc = " will be set in the surface that is returned."]
-    #[doc = ""]
-    #[doc = " If SDL_DOUBLEBUF is set in 'flags', the SDL library will try to set up"]
-    #[doc = " two surfaces in video memory and swap between them when you call"]
-    #[doc = " SDL_Flip().  This is usually slower than the normal single-buffering"]
-    #[doc = " scheme, but prevents \"tearing\" artifacts caused by modifying video"]
-    #[doc = " memory while the monitor is refreshing.  It should only be used by"]
-    #[doc = " applications that redraw the entire screen on every update."]
-    #[doc = ""]
-    #[doc = " If SDL_RESIZABLE is set in 'flags', the SDL library will allow the"]
-    #[doc = " window manager, if any, to resize the window at runtime.  When this"]
-    #[doc = " occurs, SDL will send a SDL_VIDEORESIZE event to you application,"]
-    #[doc = " and you must respond to the event by re-calling SDL_SetVideoMode()"]
-    #[doc = " with the requested size (or another size that suits the application)."]
-    #[doc = ""]
-    #[doc = " If SDL_NOFRAME is set in 'flags', the SDL library will create a window"]
-    #[doc = " without any title bar or frame decoration.  Fullscreen video modes have"]
-    #[doc = " this flag set automatically."]
-    #[doc = ""]
-    #[doc = " This function returns the video framebuffer surface, or NULL if it fails."]
-    #[doc = ""]
-    #[doc = " If you rely on functionality provided by certain video flags, check the"]
-    #[doc = " flags of the returned surface to make sure that functionality is available."]
-    #[doc = " SDL will fall back to reduced functionality if the exact flags you wanted"]
-    #[doc = " are not available."]
     pub fn SDL_SetVideoMode(
         width: ::std::os::raw::c_int,
         height: ::std::os::raw::c_int,
@@ -8123,7 +6569,6 @@ extern "C" {
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " Makes sure the given list of rectangles is updated on the given screen."]
     pub fn SDL_UpdateRects(
         screen: *mut SDL_Surface,
         numrects: ::std::os::raw::c_int,
@@ -8131,8 +6576,6 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " If 'x', 'y', 'w' and 'h' are all 0, SDL_UpdateRect will update the entire"]
-    #[doc = " screen."]
     pub fn SDL_UpdateRect(
         screen: *mut SDL_Surface,
         x: Sint32,
@@ -8142,23 +6585,9 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " On hardware that supports double-buffering, this function sets up a flip"]
-    #[doc = " and returns.  The hardware will wait for vertical retrace, and then swap"]
-    #[doc = " video buffers before the next video surface blit or lock will return."]
-    #[doc = " On hardware that doesn not support double-buffering, this is equivalent"]
-    #[doc = " to calling SDL_UpdateRect(screen, 0, 0, 0, 0);"]
-    #[doc = " The SDL_DOUBLEBUF flag must have been passed to SDL_SetVideoMode() when"]
-    #[doc = " setting the video mode for this function to perform hardware flipping."]
-    #[doc = " This function returns 0 if successful, or -1 if there was an error."]
     pub fn SDL_Flip(screen: *mut SDL_Surface) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Set the gamma correction for each of the color channels."]
-    #[doc = " The gamma values range (approximately) between 0.1 and 10.0"]
-    #[doc = ""]
-    #[doc = " If this function isn't supported directly by the hardware, it will"]
-    #[doc = " be emulated using gamma ramps, if available.  If successful, this"]
-    #[doc = " function returns 0, otherwise it returns -1."]
     pub fn SDL_SetGamma(
         red: f32,
         green: f32,
@@ -8166,16 +6595,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Set the gamma translation table for the red, green, and blue channels"]
-    #[doc = " of the video hardware.  Each table is an array of 256 16-bit quantities,"]
-    #[doc = " representing a mapping between the input and output for that channel."]
-    #[doc = " The input is the index into the array, and the output is the 16-bit"]
-    #[doc = " gamma value at that index, scaled to the output color precision."]
-    #[doc = ""]
-    #[doc = " You may pass NULL for any of the channels to leave it unchanged."]
-    #[doc = " If the call succeeds, it will return 0.  If the display driver or"]
-    #[doc = " hardware does not support gamma translation, or otherwise fails,"]
-    #[doc = " this function will return -1."]
     pub fn SDL_SetGammaRamp(
         red: *const Uint16,
         green: *const Uint16,
@@ -8183,13 +6602,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Retrieve the current values of the gamma translation tables."]
-    #[doc = ""]
-    #[doc = " You must pass in valid pointers to arrays of 256 16-bit quantities."]
-    #[doc = " Any of the pointers may be NULL to ignore that channel."]
-    #[doc = " If the call succeeds, it will return 0.  If the display driver or"]
-    #[doc = " hardware does not support gamma translation, or otherwise fails,"]
-    #[doc = " this function will return -1."]
     pub fn SDL_GetGammaRamp(
         red: *mut Uint16,
         green: *mut Uint16,
@@ -8197,19 +6609,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Sets a portion of the colormap for the given 8-bit surface.  If 'surface'"]
-    #[doc = " is not a palettized surface, this function does nothing, returning 0."]
-    #[doc = " If all of the colors were set as passed to SDL_SetColors(), it will"]
-    #[doc = " return 1.  If not all the color entries were set exactly as given,"]
-    #[doc = " it will return 0, and you should look at the surface palette to"]
-    #[doc = " determine the actual color palette."]
-    #[doc = ""]
-    #[doc = " When 'surface' is the surface associated with the current display, the"]
-    #[doc = " display colormap will be updated with the requested colors.  If"]
-    #[doc = " SDL_HWPALETTE was set in SDL_SetVideoMode() flags, SDL_SetColors()"]
-    #[doc = " will always return 1, and the palette is guaranteed to be set the way"]
-    #[doc = " you desire, even if the window colormap has to be warped or run under"]
-    #[doc = " emulation."]
     pub fn SDL_SetColors(
         surface: *mut SDL_Surface,
         colors: *mut SDL_Color,
@@ -8218,20 +6617,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Sets a portion of the colormap for a given 8-bit surface."]
-    #[doc = " 'flags' is one or both of:"]
-    #[doc = " SDL_LOGPAL  -- set logical palette, which controls how blits are mapped"]
-    #[doc = "                to/from the surface,"]
-    #[doc = " SDL_PHYSPAL -- set physical palette, which controls how pixels look on"]
-    #[doc = "                the screen"]
-    #[doc = " Only screens have physical palettes. Separate change of physical/logical"]
-    #[doc = " palettes is only possible if the screen has SDL_HWPALETTE set."]
-    #[doc = ""]
-    #[doc = " The return value is 1 if all colours could be set as requested, and 0"]
-    #[doc = " otherwise."]
-    #[doc = ""]
-    #[doc = " SDL_SetColors() is equivalent to calling this function with"]
-    #[doc = "     flags = (SDL_LOGPAL|SDL_PHYSPAL)."]
     pub fn SDL_SetPalette(
         surface: *mut SDL_Surface,
         flags: ::std::os::raw::c_int,
@@ -8241,7 +6626,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Maps an RGB triple to an opaque pixel value for a given pixel format"]
     pub fn SDL_MapRGB(
         format: *const SDL_PixelFormat,
         r: Uint8,
@@ -8250,7 +6634,6 @@ extern "C" {
     ) -> Uint32;
 }
 extern "C" {
-    #[doc = " Maps an RGBA quadruple to a pixel value for a given pixel format"]
     pub fn SDL_MapRGBA(
         format: *const SDL_PixelFormat,
         r: Uint8,
@@ -8260,7 +6643,6 @@ extern "C" {
     ) -> Uint32;
 }
 extern "C" {
-    #[doc = " Maps a pixel value into the RGB components for a given pixel format"]
     pub fn SDL_GetRGB(
         pixel: Uint32,
         fmt: *const SDL_PixelFormat,
@@ -8270,7 +6652,6 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " Maps a pixel value into the RGBA components for a given pixel format"]
     pub fn SDL_GetRGBA(
         pixel: Uint32,
         fmt: *const SDL_PixelFormat,
@@ -8281,38 +6662,6 @@ extern "C" {
     );
 }
 extern "C" {
-    #[doc = " Allocate and free an RGB surface (must be called after SDL_SetVideoMode)"]
-    #[doc = " If the depth is 4 or 8 bits, an empty palette is allocated for the surface."]
-    #[doc = " If the depth is greater than 8 bits, the pixel format is set using the"]
-    #[doc = " flags '[RGB]mask'."]
-    #[doc = " If the function runs out of memory, it will return NULL."]
-    #[doc = ""]
-    #[doc = " The 'flags' tell what kind of surface to create."]
-    #[doc = " SDL_SWSURFACE means that the surface should be created in system memory."]
-    #[doc = " SDL_HWSURFACE means that the surface should be created in video memory,"]
-    #[doc = " with the same format as the display surface.  This is useful for surfaces"]
-    #[doc = " that will not change much, to take advantage of hardware acceleration"]
-    #[doc = " when being blitted to the display surface."]
-    #[doc = " SDL_ASYNCBLIT means that SDL will try to perform asynchronous blits with"]
-    #[doc = " this surface, but you must always lock it before accessing the pixels."]
-    #[doc = " SDL will wait for current blits to finish before returning from the lock."]
-    #[doc = " SDL_SRCCOLORKEY indicates that the surface will be used for colorkey blits."]
-    #[doc = " If the hardware supports acceleration of colorkey blits between"]
-    #[doc = " two surfaces in video memory, SDL will try to place the surface in"]
-    #[doc = " video memory. If this isn't possible or if there is no hardware"]
-    #[doc = " acceleration available, the surface will be placed in system memory."]
-    #[doc = " SDL_SRCALPHA means that the surface will be used for alpha blits and"]
-    #[doc = " if the hardware supports hardware acceleration of alpha blits between"]
-    #[doc = " two surfaces in video memory, to place the surface in video memory"]
-    #[doc = " if possible, otherwise it will be placed in system memory."]
-    #[doc = " If the surface is created in video memory, blits will be _much_ faster,"]
-    #[doc = " but the surface format must be identical to the video surface format,"]
-    #[doc = " and the only way to access the pixels member of the surface is to use"]
-    #[doc = " the SDL_LockSurface() and SDL_UnlockSurface() calls."]
-    #[doc = " If the requested surface actually resides in video memory, SDL_HWSURFACE"]
-    #[doc = " will be set in the flags member of the returned surface.  If for some"]
-    #[doc = " reason the surface could not be placed in video memory, it will not have"]
-    #[doc = " the SDL_HWSURFACE flag set, and will be created in system memory instead."]
     pub fn SDL_CreateRGBSurface(
         flags: Uint32,
         width: ::std::os::raw::c_int,
@@ -8325,7 +6674,6 @@ extern "C" {
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " @sa SDL_CreateRGBSurface"]
     pub fn SDL_CreateRGBSurfaceFrom(
         pixels: *mut ::std::os::raw::c_void,
         width: ::std::os::raw::c_int,
@@ -8342,22 +6690,6 @@ extern "C" {
     pub fn SDL_FreeSurface(surface: *mut SDL_Surface);
 }
 extern "C" {
-    #[doc = " SDL_LockSurface() sets up a surface for directly accessing the pixels."]
-    #[doc = " Between calls to SDL_LockSurface()/SDL_UnlockSurface(), you can write"]
-    #[doc = " to and read from 'surface->pixels', using the pixel format stored in"]
-    #[doc = " 'surface->format'.  Once you are done accessing the surface, you should"]
-    #[doc = " use SDL_UnlockSurface() to release it."]
-    #[doc = ""]
-    #[doc = " Not all surfaces require locking.  If SDL_MUSTLOCK(surface) evaluates"]
-    #[doc = " to 0, then you can read and write to the surface at any time, and the"]
-    #[doc = " pixel format of the surface will not change.  In particular, if the"]
-    #[doc = " SDL_HWSURFACE flag is not given when calling SDL_SetVideoMode(), you"]
-    #[doc = " will not need to lock the display surface before accessing it."]
-    #[doc = ""]
-    #[doc = " No operating system or library calls should be made between lock/unlock"]
-    #[doc = " pairs, as critical system locks may be held during this time."]
-    #[doc = ""]
-    #[doc = " SDL_LockSurface() returns 0, or -1 if the surface couldn't be locked."]
     pub fn SDL_LockSurface(
         surface: *mut SDL_Surface,
     ) -> ::std::os::raw::c_int;
@@ -8366,19 +6698,12 @@ extern "C" {
     pub fn SDL_UnlockSurface(surface: *mut SDL_Surface);
 }
 extern "C" {
-    #[doc = " Load a surface from a seekable SDL data source (memory or file.)"]
-    #[doc = " If 'freesrc' is non-zero, the source will be closed after being read."]
-    #[doc = " Returns the new surface, or NULL if there was an error."]
-    #[doc = " The new surface should be freed with SDL_FreeSurface()."]
     pub fn SDL_LoadBMP_RW(
         src: *mut SDL_RWops,
         freesrc: ::std::os::raw::c_int,
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " Save a surface to a seekable SDL data source (memory or file.)"]
-    #[doc = " If 'freedst' is non-zero, the source will be closed after being written."]
-    #[doc = " Returns 0 if successful or -1 if there was an error."]
     pub fn SDL_SaveBMP_RW(
         surface: *mut SDL_Surface,
         dst: *mut SDL_RWops,
@@ -8386,13 +6711,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Sets the color key (transparent pixel) in a blittable surface."]
-    #[doc = " If 'flag' is SDL_SRCCOLORKEY (optionally OR'd with SDL_RLEACCEL),"]
-    #[doc = " 'key' will be the transparent pixel in the source image of a blit."]
-    #[doc = " SDL_RLEACCEL requests RLE acceleration for the surface if present,"]
-    #[doc = " and removes RLE acceleration if absent."]
-    #[doc = " If 'flag' is 0, this function clears any current color key."]
-    #[doc = " This function returns 0, or -1 if there was an error."]
     pub fn SDL_SetColorKey(
         surface: *mut SDL_Surface,
         flag: Uint32,
@@ -8400,19 +6718,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This function sets the alpha value for the entire surface, as opposed to"]
-    #[doc = " using the alpha component of each pixel. This value measures the range"]
-    #[doc = " of transparency of the surface, 0 being completely transparent to 255"]
-    #[doc = " being completely opaque. An 'alpha' value of 255 causes blits to be"]
-    #[doc = " opaque, the source pixels copied to the destination (the default). Note"]
-    #[doc = " that per-surface alpha can be combined with colorkey transparency."]
-    #[doc = ""]
-    #[doc = " If 'flag' is 0, alpha blending is disabled for the surface."]
-    #[doc = " If 'flag' is SDL_SRCALPHA, alpha blending is enabled for the surface."]
-    #[doc = " OR:ing the flag with SDL_RLEACCEL requests RLE acceleration for the"]
-    #[doc = " surface; if SDL_RLEACCEL is not specified, the RLE accel will be removed."]
-    #[doc = ""]
-    #[doc = " The 'alpha' parameter is ignored for surfaces that have an alpha channel."]
     pub fn SDL_SetAlpha(
         surface: *mut SDL_Surface,
         flag: Uint32,
@@ -8420,38 +6725,15 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Sets the clipping rectangle for the destination surface in a blit."]
-    #[doc = ""]
-    #[doc = " If the clip rectangle is NULL, clipping will be disabled."]
-    #[doc = " If the clip rectangle doesn't intersect the surface, the function will"]
-    #[doc = " return SDL_FALSE and blits will be completely clipped.  Otherwise the"]
-    #[doc = " function returns SDL_TRUE and blits to the surface will be clipped to"]
-    #[doc = " the intersection of the surface area and the clipping rectangle."]
-    #[doc = ""]
-    #[doc = " Note that blits are automatically clipped to the edges of the source"]
-    #[doc = " and destination surfaces."]
     pub fn SDL_SetClipRect(
         surface: *mut SDL_Surface,
         rect: *const SDL_Rect,
     ) -> SDL_bool;
 }
 extern "C" {
-    #[doc = " Gets the clipping rectangle for the destination surface in a blit."]
-    #[doc = " 'rect' must be a pointer to a valid rectangle which will be filled"]
-    #[doc = " with the correct values."]
     pub fn SDL_GetClipRect(surface: *mut SDL_Surface, rect: *mut SDL_Rect);
 }
 extern "C" {
-    #[doc = " Creates a new surface of the specified format, and then copies and maps"]
-    #[doc = " the given surface to it so the blit of the converted surface will be as"]
-    #[doc = " fast as possible.  If this function fails, it returns NULL."]
-    #[doc = ""]
-    #[doc = " The 'flags' parameter is passed to SDL_CreateRGBSurface() and has those"]
-    #[doc = " semantics.  You can also pass SDL_RLEACCEL in the flags parameter and"]
-    #[doc = " SDL will try to RLE accelerate colorkey and alpha blits in the resulting"]
-    #[doc = " surface."]
-    #[doc = ""]
-    #[doc = " This function is used internally by SDL_DisplayFormat()."]
     pub fn SDL_ConvertSurface(
         src: *mut SDL_Surface,
         fmt: *mut SDL_PixelFormat,
@@ -8459,8 +6741,6 @@ extern "C" {
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " This is the public blit function, SDL_BlitSurface(), and it performs"]
-    #[doc = "  rectangle validation and clipping before passing it to SDL_LowerBlit()"]
     pub fn SDL_UpperBlit(
         src: *mut SDL_Surface,
         srcrect: *mut SDL_Rect,
@@ -8469,8 +6749,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This is a semi-private blit function and it performs low-level surface"]
-    #[doc = "  blitting only."]
     pub fn SDL_LowerBlit(
         src: *mut SDL_Surface,
         srcrect: *mut SDL_Rect,
@@ -8479,13 +6757,6 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This function performs a fast fill of the given rectangle with 'color'"]
-    #[doc = " The given rectangle is clipped to the destination surface clip area"]
-    #[doc = " and the final fill rectangle is saved in the passed in pointer."]
-    #[doc = " If 'dstrect' is NULL, the whole surface will be filled with 'color'"]
-    #[doc = " The color should be a pixel of the format used by the surface, and"]
-    #[doc = " can be generated by the SDL_MapRGB() function."]
-    #[doc = " This function returns 0 on success, or -1 on error."]
     pub fn SDL_FillRect(
         dst: *mut SDL_Surface,
         dstrect: *mut SDL_Rect,
@@ -8493,39 +6764,16 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This function takes a surface and copies it to a new surface of the"]
-    #[doc = " pixel format and colors of the video framebuffer, suitable for fast"]
-    #[doc = " blitting onto the display surface.  It calls SDL_ConvertSurface()"]
-    #[doc = ""]
-    #[doc = " If you want to take advantage of hardware colorkey or alpha blit"]
-    #[doc = " acceleration, you should set the colorkey and alpha value before"]
-    #[doc = " calling this function."]
-    #[doc = ""]
-    #[doc = " If the conversion fails or runs out of memory, it returns NULL"]
     pub fn SDL_DisplayFormat(
         surface: *mut SDL_Surface,
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " This function takes a surface and copies it to a new surface of the"]
-    #[doc = " pixel format and colors of the video framebuffer (if possible),"]
-    #[doc = " suitable for fast alpha blitting onto the display surface."]
-    #[doc = " The new surface will always have an alpha channel."]
-    #[doc = ""]
-    #[doc = " If you want to take advantage of hardware colorkey or alpha blit"]
-    #[doc = " acceleration, you should set the colorkey and alpha value before"]
-    #[doc = " calling this function."]
-    #[doc = ""]
-    #[doc = " If the conversion fails or runs out of memory, it returns NULL"]
     pub fn SDL_DisplayFormatAlpha(
         surface: *mut SDL_Surface,
     ) -> *mut SDL_Surface;
 }
 extern "C" {
-    #[doc = " This function creates a video output overlay"]
-    #[doc = "  Calling the returned surface an overlay is something of a misnomer because"]
-    #[doc = "  the contents of the display surface underneath the area where the overlay"]
-    #[doc = "  is shown is undefined - it may be overwritten with the converted YUV data."]
     pub fn SDL_CreateYUVOverlay(
         width: ::std::os::raw::c_int,
         height: ::std::os::raw::c_int,
@@ -8534,7 +6782,6 @@ extern "C" {
     ) -> *mut SDL_Overlay;
 }
 extern "C" {
-    #[doc = " Lock an overlay for direct access, and unlock it when you are done"]
     pub fn SDL_LockYUVOverlay(
         overlay: *mut SDL_Overlay,
     ) -> ::std::os::raw::c_int;
@@ -8543,57 +6790,37 @@ extern "C" {
     pub fn SDL_UnlockYUVOverlay(overlay: *mut SDL_Overlay);
 }
 extern "C" {
-    #[doc = " Blit a video overlay to the display surface."]
-    #[doc = "  The contents of the video surface underneath the blit destination are"]
-    #[doc = "  not defined."]
-    #[doc = "  The width and height of the destination rectangle may be different from"]
-    #[doc = "  that of the overlay, but currently only 2x scaling is supported."]
     pub fn SDL_DisplayYUVOverlay(
         overlay: *mut SDL_Overlay,
         dstrect: *mut SDL_Rect,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Free a video overlay"]
     pub fn SDL_FreeYUVOverlay(overlay: *mut SDL_Overlay);
 }
 extern "C" {
-    #[doc = " Dynamically load an OpenGL library, or the default one if path is NULL"]
-    #[doc = ""]
-    #[doc = " If you do this, you need to retrieve all of the GL functions used in"]
-    #[doc = " your program from the dynamic library using SDL_GL_GetProcAddress()."]
     pub fn SDL_GL_LoadLibrary(
         path: *const ::std::os::raw::c_char,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the address of a GL function"]
     pub fn SDL_GL_GetProcAddress(
         proc_: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[doc = " Set an attribute of the OpenGL subsystem before intialization."]
     pub fn SDL_GL_SetAttribute(
         attr: SDL_GLattr,
         value: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get an attribute of the OpenGL subsystem from the windowing"]
-    #[doc = " interface, such as glX. This is of course different from getting"]
-    #[doc = " the values from SDL's internal OpenGL subsystem, which only"]
-    #[doc = " stores the values you request before initialization."]
-    #[doc = ""]
-    #[doc = " Developers should track the values they pass into SDL_GL_SetAttribute"]
-    #[doc = " themselves if they want to retrieve these values."]
     pub fn SDL_GL_GetAttribute(
         attr: SDL_GLattr,
         value: *mut ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Swap the OpenGL buffers, if double-buffering is supported."]
     pub fn SDL_GL_SwapBuffers();
 }
 extern "C" {
@@ -8609,46 +6836,24 @@ extern "C" {
     pub fn SDL_GL_Unlock();
 }
 extern "C" {
-    #[doc = " Sets the title and icon text of the display window (UTF-8 encoded)"]
     pub fn SDL_WM_SetCaption(
         title: *const ::std::os::raw::c_char,
         icon: *const ::std::os::raw::c_char,
     );
 }
 extern "C" {
-    #[doc = " Gets the title and icon text of the display window (UTF-8 encoded)"]
     pub fn SDL_WM_GetCaption(
         title: *mut *mut ::std::os::raw::c_char,
         icon: *mut *mut ::std::os::raw::c_char,
     );
 }
 extern "C" {
-    #[doc = " Sets the icon for the display window."]
-    #[doc = " This function must be called before the first call to SDL_SetVideoMode()."]
-    #[doc = " It takes an icon surface, and a mask in MSB format."]
-    #[doc = " If 'mask' is NULL, the entire icon surface will be used as the icon."]
     pub fn SDL_WM_SetIcon(icon: *mut SDL_Surface, mask: *mut Uint8);
 }
 extern "C" {
-    #[doc = " This function iconifies the window, and returns 1 if it succeeded."]
-    #[doc = " If the function succeeds, it generates an SDL_APPACTIVE loss event."]
-    #[doc = " This function is a noop and returns 0 in non-windowed environments."]
     pub fn SDL_WM_IconifyWindow() -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Toggle fullscreen mode without changing the contents of the screen."]
-    #[doc = " If the display surface does not require locking before accessing"]
-    #[doc = " the pixel information, then the memory pointers will not change."]
-    #[doc = ""]
-    #[doc = " If this function was able to toggle fullscreen mode (change from"]
-    #[doc = " running in a window to fullscreen, or vice-versa), it will return 1."]
-    #[doc = " If it is not implemented, or fails, it returns 0."]
-    #[doc = ""]
-    #[doc = " The next call to SDL_SetVideoMode() will set the mode fullscreen"]
-    #[doc = " attribute based on the flags parameter - if SDL_FULLSCREEN is not"]
-    #[doc = " set, then the display will be windowed by default where supported."]
-    #[doc = ""]
-    #[doc = " This is currently only implemented in the X11 video driver."]
     pub fn SDL_WM_ToggleFullScreen(
         surface: *mut SDL_Surface,
     ) -> ::std::os::raw::c_int;
@@ -8656,20 +6861,12 @@ extern "C" {
 pub const SDL_GrabMode_SDL_GRAB_QUERY: SDL_GrabMode = -1;
 pub const SDL_GrabMode_SDL_GRAB_OFF: SDL_GrabMode = 0;
 pub const SDL_GrabMode_SDL_GRAB_ON: SDL_GrabMode = 1;
-#[doc = "< Used internally"]
 pub const SDL_GrabMode_SDL_GRAB_FULLSCREEN: SDL_GrabMode = 2;
 pub type SDL_GrabMode = i32;
 extern "C" {
-    #[doc = " This function allows you to set and query the input grab state of"]
-    #[doc = " the application.  It returns the new input grab state."]
-    #[doc = ""]
-    #[doc = " Grabbing means that the mouse is confined to the application window,"]
-    #[doc = " and nearly all keyboard input is passed directly to the application,"]
-    #[doc = " and not interpreted by a window manager, if any."]
     pub fn SDL_WM_GrabInput(mode: SDL_GrabMode) -> SDL_GrabMode;
 }
 extern "C" {
-    #[doc = " @internal Not in public API at the moment - do not use!"]
     pub fn SDL_SoftStretch(
         src: *mut SDL_Surface,
         srcrect: *mut SDL_Rect,
@@ -8679,25 +6876,1137 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct SDL_mutex {
+    _unused: [u8; 0],
+}
+extern "C" {
+    pub fn SDL_CreateMutex() -> *mut SDL_mutex;
+}
+extern "C" {
+    pub fn SDL_mutexP(mutex: *mut SDL_mutex) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_mutexV(mutex: *mut SDL_mutex) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_DestroyMutex(mutex: *mut SDL_mutex);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_semaphore {
+    _unused: [u8; 0],
+}
+pub type SDL_sem = SDL_semaphore;
+extern "C" {
+    pub fn SDL_CreateSemaphore(initial_value: Uint32) -> *mut SDL_sem;
+}
+extern "C" {
+    pub fn SDL_DestroySemaphore(sem: *mut SDL_sem);
+}
+extern "C" {
+    pub fn SDL_SemWait(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_SemTryWait(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_SemWaitTimeout(
+        sem: *mut SDL_sem,
+        ms: Uint32,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_SemPost(sem: *mut SDL_sem) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_SemValue(sem: *mut SDL_sem) -> Uint32;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_cond {
+    _unused: [u8; 0],
+}
+extern "C" {
+    pub fn SDL_CreateCond() -> *mut SDL_cond;
+}
+extern "C" {
+    pub fn SDL_DestroyCond(cond: *mut SDL_cond);
+}
+extern "C" {
+    pub fn SDL_CondSignal(cond: *mut SDL_cond) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CondBroadcast(cond: *mut SDL_cond)
+        -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CondWait(
+        cond: *mut SDL_cond,
+        mut_: *mut SDL_mutex,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CondWaitTimeout(
+        cond: *mut SDL_cond,
+        mutex: *mut SDL_mutex,
+        ms: Uint32,
+    ) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_Thread {
+    _unused: [u8; 0],
+}
+extern "C" {
+    pub fn SDL_CreateThread(
+        fn_: ::std::option::Option<
+            unsafe extern "C" fn(
+                arg1: *mut ::std::os::raw::c_void,
+            ) -> ::std::os::raw::c_int,
+        >,
+        data: *mut ::std::os::raw::c_void,
+    ) -> *mut SDL_Thread;
+}
+extern "C" {
+    pub fn SDL_ThreadID() -> Uint32;
+}
+extern "C" {
+    pub fn SDL_GetThreadID(thread: *mut SDL_Thread) -> Uint32;
+}
+extern "C" {
+    pub fn SDL_WaitThread(
+        thread: *mut SDL_Thread,
+        status: *mut ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn SDL_KillThread(thread: *mut SDL_Thread);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_AudioSpec {
+    pub freq: ::std::os::raw::c_int,
+    pub format: Uint16,
+    pub channels: Uint8,
+    pub silence: Uint8,
+    pub samples: Uint16,
+    pub padding: Uint16,
+    pub size: Uint32,
+    pub callback: ::std::option::Option<
+        unsafe extern "C" fn(
+            userdata: *mut ::std::os::raw::c_void,
+            stream: *mut Uint8,
+            len: ::std::os::raw::c_int,
+        ),
+    >,
+    pub userdata: *mut ::std::os::raw::c_void,
+}
+#[test]
+fn bindgen_test_layout_SDL_AudioSpec() {
+    assert_eq!(
+        ::std::mem::size_of::<SDL_AudioSpec>(),
+        32usize,
+        concat!("Size of: ", stringify!(SDL_AudioSpec))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<SDL_AudioSpec>(),
+        8usize,
+        concat!("Alignment of ", stringify!(SDL_AudioSpec))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).freq as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(freq)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).format as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).channels as *const _
+                as usize
+        },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(channels)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).silence as *const _
+                as usize
+        },
+        7usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(silence)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).samples as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(samples)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).padding as *const _
+                as usize
+        },
+        10usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(padding)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).size as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).callback as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(callback)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioSpec>())).userdata as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioSpec),
+            "::",
+            stringify!(userdata)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_AudioCVT {
+    pub needed: ::std::os::raw::c_int,
+    pub src_format: Uint16,
+    pub dst_format: Uint16,
+    pub rate_incr: f64,
+    pub buf: *mut Uint8,
+    pub len: ::std::os::raw::c_int,
+    pub len_cvt: ::std::os::raw::c_int,
+    pub len_mult: ::std::os::raw::c_int,
+    pub len_ratio: f64,
+    pub filters: [::std::option::Option<
+        unsafe extern "C" fn(cvt: *mut SDL_AudioCVT, format: Uint16),
+    >; 10usize],
+    pub filter_index: ::std::os::raw::c_int,
+}
+#[test]
+fn bindgen_test_layout_SDL_AudioCVT() {
+    assert_eq!(
+        ::std::mem::size_of::<SDL_AudioCVT>(),
+        136usize,
+        concat!("Size of: ", stringify!(SDL_AudioCVT))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<SDL_AudioCVT>(),
+        8usize,
+        concat!("Alignment of ", stringify!(SDL_AudioCVT))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).needed as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(needed)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).src_format as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(src_format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).dst_format as *const _
+                as usize
+        },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(dst_format)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).rate_incr as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(rate_incr)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).buf as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(buf)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).len as *const _
+                as usize
+        },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(len)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_cvt as *const _
+                as usize
+        },
+        28usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(len_cvt)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_mult as *const _
+                as usize
+        },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(len_mult)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).len_ratio as *const _
+                as usize
+        },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(len_ratio)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).filters as *const _
+                as usize
+        },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(filters)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_AudioCVT>())).filter_index
+                as *const _ as usize
+        },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_AudioCVT),
+            "::",
+            stringify!(filter_index)
+        )
+    );
+}
+extern "C" {
+    pub fn SDL_AudioInit(
+        driver_name: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_AudioQuit();
+}
+extern "C" {
+    pub fn SDL_AudioDriverName(
+        namebuf: *mut ::std::os::raw::c_char,
+        maxlen: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn SDL_OpenAudio(
+        desired: *mut SDL_AudioSpec,
+        obtained: *mut SDL_AudioSpec,
+    ) -> ::std::os::raw::c_int;
+}
+pub const SDL_audiostatus_SDL_AUDIO_STOPPED: SDL_audiostatus = 0;
+pub const SDL_audiostatus_SDL_AUDIO_PLAYING: SDL_audiostatus = 1;
+pub const SDL_audiostatus_SDL_AUDIO_PAUSED: SDL_audiostatus = 2;
+pub type SDL_audiostatus = u32;
+extern "C" {
+    pub fn SDL_GetAudioStatus() -> SDL_audiostatus;
+}
+extern "C" {
+    pub fn SDL_PauseAudio(pause_on: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn SDL_LoadWAV_RW(
+        src: *mut SDL_RWops,
+        freesrc: ::std::os::raw::c_int,
+        spec: *mut SDL_AudioSpec,
+        audio_buf: *mut *mut Uint8,
+        audio_len: *mut Uint32,
+    ) -> *mut SDL_AudioSpec;
+}
+extern "C" {
+    pub fn SDL_FreeWAV(audio_buf: *mut Uint8);
+}
+extern "C" {
+    pub fn SDL_BuildAudioCVT(
+        cvt: *mut SDL_AudioCVT,
+        src_format: Uint16,
+        src_channels: Uint8,
+        src_rate: ::std::os::raw::c_int,
+        dst_format: Uint16,
+        dst_channels: Uint8,
+        dst_rate: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_ConvertAudio(
+        cvt: *mut SDL_AudioCVT,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_MixAudio(
+        dst: *mut Uint8,
+        src: *const Uint8,
+        len: Uint32,
+        volume: ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn SDL_LockAudio();
+}
+extern "C" {
+    pub fn SDL_UnlockAudio();
+}
+extern "C" {
+    pub fn SDL_CloseAudio();
+}
+pub const CDstatus_CD_TRAYEMPTY: CDstatus = 0;
+pub const CDstatus_CD_STOPPED: CDstatus = 1;
+pub const CDstatus_CD_PLAYING: CDstatus = 2;
+pub const CDstatus_CD_PAUSED: CDstatus = 3;
+pub const CDstatus_CD_ERROR: CDstatus = -1;
+pub type CDstatus = i32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_CDtrack {
+    pub id: Uint8,
+    pub type_: Uint8,
+    pub unused: Uint16,
+    pub length: Uint32,
+    pub offset: Uint32,
+}
+#[test]
+fn bindgen_test_layout_SDL_CDtrack() {
+    assert_eq!(
+        ::std::mem::size_of::<SDL_CDtrack>(),
+        12usize,
+        concat!("Size of: ", stringify!(SDL_CDtrack))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<SDL_CDtrack>(),
+        4usize,
+        concat!("Alignment of ", stringify!(SDL_CDtrack))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CDtrack>())).id as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CDtrack),
+            "::",
+            stringify!(id)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CDtrack>())).type_ as *const _
+                as usize
+        },
+        1usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CDtrack),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CDtrack>())).unused as *const _
+                as usize
+        },
+        2usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CDtrack),
+            "::",
+            stringify!(unused)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CDtrack>())).length as *const _
+                as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CDtrack),
+            "::",
+            stringify!(length)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CDtrack>())).offset as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CDtrack),
+            "::",
+            stringify!(offset)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct SDL_CD {
+    pub id: ::std::os::raw::c_int,
+    pub status: CDstatus,
+    pub numtracks: ::std::os::raw::c_int,
+    pub cur_track: ::std::os::raw::c_int,
+    pub cur_frame: ::std::os::raw::c_int,
+    pub track: [SDL_CDtrack; 100usize],
+}
+#[test]
+fn bindgen_test_layout_SDL_CD() {
+    assert_eq!(
+        ::std::mem::size_of::<SDL_CD>(),
+        1220usize,
+        concat!("Size of: ", stringify!(SDL_CD))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<SDL_CD>(),
+        4usize,
+        concat!("Alignment of ", stringify!(SDL_CD))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).id as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(id)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).status as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(status)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).numtracks as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(numtracks)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).cur_track as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(cur_track)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).cur_frame as *const _
+                as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(cur_frame)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_CD>())).track as *const _ as usize
+        },
+        20usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_CD),
+            "::",
+            stringify!(track)
+        )
+    );
+}
+extern "C" {
+    pub fn SDL_CDNumDrives() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDName(
+        drive: ::std::os::raw::c_int,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn SDL_CDOpen(drive: ::std::os::raw::c_int) -> *mut SDL_CD;
+}
+extern "C" {
+    pub fn SDL_CDStatus(cdrom: *mut SDL_CD) -> CDstatus;
+}
+extern "C" {
+    pub fn SDL_CDPlayTracks(
+        cdrom: *mut SDL_CD,
+        start_track: ::std::os::raw::c_int,
+        start_frame: ::std::os::raw::c_int,
+        ntracks: ::std::os::raw::c_int,
+        nframes: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDPlay(
+        cdrom: *mut SDL_CD,
+        start: ::std::os::raw::c_int,
+        length: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDPause(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDResume(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDStop(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDEject(cdrom: *mut SDL_CD) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_CDClose(cdrom: *mut SDL_CD);
+}
+extern "C" {
+    pub fn SDL_HasRDTSC() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_HasMMX() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_HasMMXExt() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_Has3DNow() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_Has3DNowExt() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_HasSSE() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_HasSSE2() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_HasAltiVec() -> SDL_bool;
+}
+extern "C" {
+    pub fn SDL_GetAppState() -> Uint8;
+}
+pub const SDLKey_SDLK_UNKNOWN: SDLKey = 0;
+pub const SDLKey_SDLK_FIRST: SDLKey = 0;
+pub const SDLKey_SDLK_BACKSPACE: SDLKey = 8;
+pub const SDLKey_SDLK_TAB: SDLKey = 9;
+pub const SDLKey_SDLK_CLEAR: SDLKey = 12;
+pub const SDLKey_SDLK_RETURN: SDLKey = 13;
+pub const SDLKey_SDLK_PAUSE: SDLKey = 19;
+pub const SDLKey_SDLK_ESCAPE: SDLKey = 27;
+pub const SDLKey_SDLK_SPACE: SDLKey = 32;
+pub const SDLKey_SDLK_EXCLAIM: SDLKey = 33;
+pub const SDLKey_SDLK_QUOTEDBL: SDLKey = 34;
+pub const SDLKey_SDLK_HASH: SDLKey = 35;
+pub const SDLKey_SDLK_DOLLAR: SDLKey = 36;
+pub const SDLKey_SDLK_AMPERSAND: SDLKey = 38;
+pub const SDLKey_SDLK_QUOTE: SDLKey = 39;
+pub const SDLKey_SDLK_LEFTPAREN: SDLKey = 40;
+pub const SDLKey_SDLK_RIGHTPAREN: SDLKey = 41;
+pub const SDLKey_SDLK_ASTERISK: SDLKey = 42;
+pub const SDLKey_SDLK_PLUS: SDLKey = 43;
+pub const SDLKey_SDLK_COMMA: SDLKey = 44;
+pub const SDLKey_SDLK_MINUS: SDLKey = 45;
+pub const SDLKey_SDLK_PERIOD: SDLKey = 46;
+pub const SDLKey_SDLK_SLASH: SDLKey = 47;
+pub const SDLKey_SDLK_0: SDLKey = 48;
+pub const SDLKey_SDLK_1: SDLKey = 49;
+pub const SDLKey_SDLK_2: SDLKey = 50;
+pub const SDLKey_SDLK_3: SDLKey = 51;
+pub const SDLKey_SDLK_4: SDLKey = 52;
+pub const SDLKey_SDLK_5: SDLKey = 53;
+pub const SDLKey_SDLK_6: SDLKey = 54;
+pub const SDLKey_SDLK_7: SDLKey = 55;
+pub const SDLKey_SDLK_8: SDLKey = 56;
+pub const SDLKey_SDLK_9: SDLKey = 57;
+pub const SDLKey_SDLK_COLON: SDLKey = 58;
+pub const SDLKey_SDLK_SEMICOLON: SDLKey = 59;
+pub const SDLKey_SDLK_LESS: SDLKey = 60;
+pub const SDLKey_SDLK_EQUALS: SDLKey = 61;
+pub const SDLKey_SDLK_GREATER: SDLKey = 62;
+pub const SDLKey_SDLK_QUESTION: SDLKey = 63;
+pub const SDLKey_SDLK_AT: SDLKey = 64;
+pub const SDLKey_SDLK_LEFTBRACKET: SDLKey = 91;
+pub const SDLKey_SDLK_BACKSLASH: SDLKey = 92;
+pub const SDLKey_SDLK_RIGHTBRACKET: SDLKey = 93;
+pub const SDLKey_SDLK_CARET: SDLKey = 94;
+pub const SDLKey_SDLK_UNDERSCORE: SDLKey = 95;
+pub const SDLKey_SDLK_BACKQUOTE: SDLKey = 96;
+pub const SDLKey_SDLK_a: SDLKey = 97;
+pub const SDLKey_SDLK_b: SDLKey = 98;
+pub const SDLKey_SDLK_c: SDLKey = 99;
+pub const SDLKey_SDLK_d: SDLKey = 100;
+pub const SDLKey_SDLK_e: SDLKey = 101;
+pub const SDLKey_SDLK_f: SDLKey = 102;
+pub const SDLKey_SDLK_g: SDLKey = 103;
+pub const SDLKey_SDLK_h: SDLKey = 104;
+pub const SDLKey_SDLK_i: SDLKey = 105;
+pub const SDLKey_SDLK_j: SDLKey = 106;
+pub const SDLKey_SDLK_k: SDLKey = 107;
+pub const SDLKey_SDLK_l: SDLKey = 108;
+pub const SDLKey_SDLK_m: SDLKey = 109;
+pub const SDLKey_SDLK_n: SDLKey = 110;
+pub const SDLKey_SDLK_o: SDLKey = 111;
+pub const SDLKey_SDLK_p: SDLKey = 112;
+pub const SDLKey_SDLK_q: SDLKey = 113;
+pub const SDLKey_SDLK_r: SDLKey = 114;
+pub const SDLKey_SDLK_s: SDLKey = 115;
+pub const SDLKey_SDLK_t: SDLKey = 116;
+pub const SDLKey_SDLK_u: SDLKey = 117;
+pub const SDLKey_SDLK_v: SDLKey = 118;
+pub const SDLKey_SDLK_w: SDLKey = 119;
+pub const SDLKey_SDLK_x: SDLKey = 120;
+pub const SDLKey_SDLK_y: SDLKey = 121;
+pub const SDLKey_SDLK_z: SDLKey = 122;
+pub const SDLKey_SDLK_DELETE: SDLKey = 127;
+pub const SDLKey_SDLK_WORLD_0: SDLKey = 160;
+pub const SDLKey_SDLK_WORLD_1: SDLKey = 161;
+pub const SDLKey_SDLK_WORLD_2: SDLKey = 162;
+pub const SDLKey_SDLK_WORLD_3: SDLKey = 163;
+pub const SDLKey_SDLK_WORLD_4: SDLKey = 164;
+pub const SDLKey_SDLK_WORLD_5: SDLKey = 165;
+pub const SDLKey_SDLK_WORLD_6: SDLKey = 166;
+pub const SDLKey_SDLK_WORLD_7: SDLKey = 167;
+pub const SDLKey_SDLK_WORLD_8: SDLKey = 168;
+pub const SDLKey_SDLK_WORLD_9: SDLKey = 169;
+pub const SDLKey_SDLK_WORLD_10: SDLKey = 170;
+pub const SDLKey_SDLK_WORLD_11: SDLKey = 171;
+pub const SDLKey_SDLK_WORLD_12: SDLKey = 172;
+pub const SDLKey_SDLK_WORLD_13: SDLKey = 173;
+pub const SDLKey_SDLK_WORLD_14: SDLKey = 174;
+pub const SDLKey_SDLK_WORLD_15: SDLKey = 175;
+pub const SDLKey_SDLK_WORLD_16: SDLKey = 176;
+pub const SDLKey_SDLK_WORLD_17: SDLKey = 177;
+pub const SDLKey_SDLK_WORLD_18: SDLKey = 178;
+pub const SDLKey_SDLK_WORLD_19: SDLKey = 179;
+pub const SDLKey_SDLK_WORLD_20: SDLKey = 180;
+pub const SDLKey_SDLK_WORLD_21: SDLKey = 181;
+pub const SDLKey_SDLK_WORLD_22: SDLKey = 182;
+pub const SDLKey_SDLK_WORLD_23: SDLKey = 183;
+pub const SDLKey_SDLK_WORLD_24: SDLKey = 184;
+pub const SDLKey_SDLK_WORLD_25: SDLKey = 185;
+pub const SDLKey_SDLK_WORLD_26: SDLKey = 186;
+pub const SDLKey_SDLK_WORLD_27: SDLKey = 187;
+pub const SDLKey_SDLK_WORLD_28: SDLKey = 188;
+pub const SDLKey_SDLK_WORLD_29: SDLKey = 189;
+pub const SDLKey_SDLK_WORLD_30: SDLKey = 190;
+pub const SDLKey_SDLK_WORLD_31: SDLKey = 191;
+pub const SDLKey_SDLK_WORLD_32: SDLKey = 192;
+pub const SDLKey_SDLK_WORLD_33: SDLKey = 193;
+pub const SDLKey_SDLK_WORLD_34: SDLKey = 194;
+pub const SDLKey_SDLK_WORLD_35: SDLKey = 195;
+pub const SDLKey_SDLK_WORLD_36: SDLKey = 196;
+pub const SDLKey_SDLK_WORLD_37: SDLKey = 197;
+pub const SDLKey_SDLK_WORLD_38: SDLKey = 198;
+pub const SDLKey_SDLK_WORLD_39: SDLKey = 199;
+pub const SDLKey_SDLK_WORLD_40: SDLKey = 200;
+pub const SDLKey_SDLK_WORLD_41: SDLKey = 201;
+pub const SDLKey_SDLK_WORLD_42: SDLKey = 202;
+pub const SDLKey_SDLK_WORLD_43: SDLKey = 203;
+pub const SDLKey_SDLK_WORLD_44: SDLKey = 204;
+pub const SDLKey_SDLK_WORLD_45: SDLKey = 205;
+pub const SDLKey_SDLK_WORLD_46: SDLKey = 206;
+pub const SDLKey_SDLK_WORLD_47: SDLKey = 207;
+pub const SDLKey_SDLK_WORLD_48: SDLKey = 208;
+pub const SDLKey_SDLK_WORLD_49: SDLKey = 209;
+pub const SDLKey_SDLK_WORLD_50: SDLKey = 210;
+pub const SDLKey_SDLK_WORLD_51: SDLKey = 211;
+pub const SDLKey_SDLK_WORLD_52: SDLKey = 212;
+pub const SDLKey_SDLK_WORLD_53: SDLKey = 213;
+pub const SDLKey_SDLK_WORLD_54: SDLKey = 214;
+pub const SDLKey_SDLK_WORLD_55: SDLKey = 215;
+pub const SDLKey_SDLK_WORLD_56: SDLKey = 216;
+pub const SDLKey_SDLK_WORLD_57: SDLKey = 217;
+pub const SDLKey_SDLK_WORLD_58: SDLKey = 218;
+pub const SDLKey_SDLK_WORLD_59: SDLKey = 219;
+pub const SDLKey_SDLK_WORLD_60: SDLKey = 220;
+pub const SDLKey_SDLK_WORLD_61: SDLKey = 221;
+pub const SDLKey_SDLK_WORLD_62: SDLKey = 222;
+pub const SDLKey_SDLK_WORLD_63: SDLKey = 223;
+pub const SDLKey_SDLK_WORLD_64: SDLKey = 224;
+pub const SDLKey_SDLK_WORLD_65: SDLKey = 225;
+pub const SDLKey_SDLK_WORLD_66: SDLKey = 226;
+pub const SDLKey_SDLK_WORLD_67: SDLKey = 227;
+pub const SDLKey_SDLK_WORLD_68: SDLKey = 228;
+pub const SDLKey_SDLK_WORLD_69: SDLKey = 229;
+pub const SDLKey_SDLK_WORLD_70: SDLKey = 230;
+pub const SDLKey_SDLK_WORLD_71: SDLKey = 231;
+pub const SDLKey_SDLK_WORLD_72: SDLKey = 232;
+pub const SDLKey_SDLK_WORLD_73: SDLKey = 233;
+pub const SDLKey_SDLK_WORLD_74: SDLKey = 234;
+pub const SDLKey_SDLK_WORLD_75: SDLKey = 235;
+pub const SDLKey_SDLK_WORLD_76: SDLKey = 236;
+pub const SDLKey_SDLK_WORLD_77: SDLKey = 237;
+pub const SDLKey_SDLK_WORLD_78: SDLKey = 238;
+pub const SDLKey_SDLK_WORLD_79: SDLKey = 239;
+pub const SDLKey_SDLK_WORLD_80: SDLKey = 240;
+pub const SDLKey_SDLK_WORLD_81: SDLKey = 241;
+pub const SDLKey_SDLK_WORLD_82: SDLKey = 242;
+pub const SDLKey_SDLK_WORLD_83: SDLKey = 243;
+pub const SDLKey_SDLK_WORLD_84: SDLKey = 244;
+pub const SDLKey_SDLK_WORLD_85: SDLKey = 245;
+pub const SDLKey_SDLK_WORLD_86: SDLKey = 246;
+pub const SDLKey_SDLK_WORLD_87: SDLKey = 247;
+pub const SDLKey_SDLK_WORLD_88: SDLKey = 248;
+pub const SDLKey_SDLK_WORLD_89: SDLKey = 249;
+pub const SDLKey_SDLK_WORLD_90: SDLKey = 250;
+pub const SDLKey_SDLK_WORLD_91: SDLKey = 251;
+pub const SDLKey_SDLK_WORLD_92: SDLKey = 252;
+pub const SDLKey_SDLK_WORLD_93: SDLKey = 253;
+pub const SDLKey_SDLK_WORLD_94: SDLKey = 254;
+pub const SDLKey_SDLK_WORLD_95: SDLKey = 255;
+pub const SDLKey_SDLK_KP0: SDLKey = 256;
+pub const SDLKey_SDLK_KP1: SDLKey = 257;
+pub const SDLKey_SDLK_KP2: SDLKey = 258;
+pub const SDLKey_SDLK_KP3: SDLKey = 259;
+pub const SDLKey_SDLK_KP4: SDLKey = 260;
+pub const SDLKey_SDLK_KP5: SDLKey = 261;
+pub const SDLKey_SDLK_KP6: SDLKey = 262;
+pub const SDLKey_SDLK_KP7: SDLKey = 263;
+pub const SDLKey_SDLK_KP8: SDLKey = 264;
+pub const SDLKey_SDLK_KP9: SDLKey = 265;
+pub const SDLKey_SDLK_KP_PERIOD: SDLKey = 266;
+pub const SDLKey_SDLK_KP_DIVIDE: SDLKey = 267;
+pub const SDLKey_SDLK_KP_MULTIPLY: SDLKey = 268;
+pub const SDLKey_SDLK_KP_MINUS: SDLKey = 269;
+pub const SDLKey_SDLK_KP_PLUS: SDLKey = 270;
+pub const SDLKey_SDLK_KP_ENTER: SDLKey = 271;
+pub const SDLKey_SDLK_KP_EQUALS: SDLKey = 272;
+pub const SDLKey_SDLK_UP: SDLKey = 273;
+pub const SDLKey_SDLK_DOWN: SDLKey = 274;
+pub const SDLKey_SDLK_RIGHT: SDLKey = 275;
+pub const SDLKey_SDLK_LEFT: SDLKey = 276;
+pub const SDLKey_SDLK_INSERT: SDLKey = 277;
+pub const SDLKey_SDLK_HOME: SDLKey = 278;
+pub const SDLKey_SDLK_END: SDLKey = 279;
+pub const SDLKey_SDLK_PAGEUP: SDLKey = 280;
+pub const SDLKey_SDLK_PAGEDOWN: SDLKey = 281;
+pub const SDLKey_SDLK_F1: SDLKey = 282;
+pub const SDLKey_SDLK_F2: SDLKey = 283;
+pub const SDLKey_SDLK_F3: SDLKey = 284;
+pub const SDLKey_SDLK_F4: SDLKey = 285;
+pub const SDLKey_SDLK_F5: SDLKey = 286;
+pub const SDLKey_SDLK_F6: SDLKey = 287;
+pub const SDLKey_SDLK_F7: SDLKey = 288;
+pub const SDLKey_SDLK_F8: SDLKey = 289;
+pub const SDLKey_SDLK_F9: SDLKey = 290;
+pub const SDLKey_SDLK_F10: SDLKey = 291;
+pub const SDLKey_SDLK_F11: SDLKey = 292;
+pub const SDLKey_SDLK_F12: SDLKey = 293;
+pub const SDLKey_SDLK_F13: SDLKey = 294;
+pub const SDLKey_SDLK_F14: SDLKey = 295;
+pub const SDLKey_SDLK_F15: SDLKey = 296;
+pub const SDLKey_SDLK_NUMLOCK: SDLKey = 300;
+pub const SDLKey_SDLK_CAPSLOCK: SDLKey = 301;
+pub const SDLKey_SDLK_SCROLLOCK: SDLKey = 302;
+pub const SDLKey_SDLK_RSHIFT: SDLKey = 303;
+pub const SDLKey_SDLK_LSHIFT: SDLKey = 304;
+pub const SDLKey_SDLK_RCTRL: SDLKey = 305;
+pub const SDLKey_SDLK_LCTRL: SDLKey = 306;
+pub const SDLKey_SDLK_RALT: SDLKey = 307;
+pub const SDLKey_SDLK_LALT: SDLKey = 308;
+pub const SDLKey_SDLK_RMETA: SDLKey = 309;
+pub const SDLKey_SDLK_LMETA: SDLKey = 310;
+pub const SDLKey_SDLK_LSUPER: SDLKey = 311;
+pub const SDLKey_SDLK_RSUPER: SDLKey = 312;
+pub const SDLKey_SDLK_MODE: SDLKey = 313;
+pub const SDLKey_SDLK_COMPOSE: SDLKey = 314;
+pub const SDLKey_SDLK_HELP: SDLKey = 315;
+pub const SDLKey_SDLK_PRINT: SDLKey = 316;
+pub const SDLKey_SDLK_SYSREQ: SDLKey = 317;
+pub const SDLKey_SDLK_BREAK: SDLKey = 318;
+pub const SDLKey_SDLK_MENU: SDLKey = 319;
+pub const SDLKey_SDLK_POWER: SDLKey = 320;
+pub const SDLKey_SDLK_EURO: SDLKey = 321;
+pub const SDLKey_SDLK_UNDO: SDLKey = 322;
+pub const SDLKey_SDLK_LAST: SDLKey = 323;
+pub type SDLKey = u32;
+pub const SDLMod_KMOD_NONE: SDLMod = 0;
+pub const SDLMod_KMOD_LSHIFT: SDLMod = 1;
+pub const SDLMod_KMOD_RSHIFT: SDLMod = 2;
+pub const SDLMod_KMOD_LCTRL: SDLMod = 64;
+pub const SDLMod_KMOD_RCTRL: SDLMod = 128;
+pub const SDLMod_KMOD_LALT: SDLMod = 256;
+pub const SDLMod_KMOD_RALT: SDLMod = 512;
+pub const SDLMod_KMOD_LMETA: SDLMod = 1024;
+pub const SDLMod_KMOD_RMETA: SDLMod = 2048;
+pub const SDLMod_KMOD_NUM: SDLMod = 4096;
+pub const SDLMod_KMOD_CAPS: SDLMod = 8192;
+pub const SDLMod_KMOD_MODE: SDLMod = 16384;
+pub const SDLMod_KMOD_RESERVED: SDLMod = 32768;
+pub type SDLMod = u32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SDL_keysym {
+    pub scancode: Uint8,
+    pub sym: SDLKey,
+    pub mod_: SDLMod,
+    pub unicode: Uint16,
+}
+#[test]
+fn bindgen_test_layout_SDL_keysym() {
+    assert_eq!(
+        ::std::mem::size_of::<SDL_keysym>(),
+        16usize,
+        concat!("Size of: ", stringify!(SDL_keysym))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<SDL_keysym>(),
+        4usize,
+        concat!("Alignment of ", stringify!(SDL_keysym))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_keysym>())).scancode as *const _
+                as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_keysym),
+            "::",
+            stringify!(scancode)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_keysym>())).sym as *const _ as usize
+        },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_keysym),
+            "::",
+            stringify!(sym)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_keysym>())).mod_ as *const _
+                as usize
+        },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_keysym),
+            "::",
+            stringify!(mod_)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<SDL_keysym>())).unicode as *const _
+                as usize
+        },
+        12usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(SDL_keysym),
+            "::",
+            stringify!(unicode)
+        )
+    );
+}
+extern "C" {
+    pub fn SDL_EnableUNICODE(
+        enable: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_EnableKeyRepeat(
+        delay: ::std::os::raw::c_int,
+        interval: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn SDL_GetKeyRepeat(
+        delay: *mut ::std::os::raw::c_int,
+        interval: *mut ::std::os::raw::c_int,
+    );
+}
+extern "C" {
+    pub fn SDL_GetKeyState(
+        numkeys: *mut ::std::os::raw::c_int,
+    ) -> *mut Uint8;
+}
+extern "C" {
+    pub fn SDL_GetModState() -> SDLMod;
+}
+extern "C" {
+    pub fn SDL_SetModState(modstate: SDLMod);
+}
+extern "C" {
+    pub fn SDL_GetKeyName(key: SDLKey) -> *mut ::std::os::raw::c_char;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct WMcursor {
     _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_Cursor {
-    #[doc = "< The area of the mouse cursor"]
     pub area: SDL_Rect,
-    #[doc = "< The \"tip\" of the cursor"]
     pub hot_x: Sint16,
-    #[doc = "< The \"tip\" of the cursor"]
     pub hot_y: Sint16,
-    #[doc = "< B/W cursor data"]
     pub data: *mut Uint8,
-    #[doc = "< B/W cursor mask"]
     pub mask: *mut Uint8,
-    #[doc = "< Place to save cursor area"]
     pub save: [*mut Uint8; 2usize],
-    #[doc = "< Window-manager cursor"]
     pub wm_cursor: *mut WMcursor,
 }
 #[test]
@@ -8805,41 +8114,21 @@ fn bindgen_test_layout_SDL_Cursor() {
     );
 }
 extern "C" {
-    #[doc = " Retrieve the current state of the mouse."]
-    #[doc = " The current button state is returned as a button bitmask, which can"]
-    #[doc = " be tested using the SDL_BUTTON(X) macros, and x and y are set to the"]
-    #[doc = " current mouse cursor position.  You can pass NULL for either x or y."]
     pub fn SDL_GetMouseState(
         x: *mut ::std::os::raw::c_int,
         y: *mut ::std::os::raw::c_int,
     ) -> Uint8;
 }
 extern "C" {
-    #[doc = " Retrieve the current state of the mouse."]
-    #[doc = " The current button state is returned as a button bitmask, which can"]
-    #[doc = " be tested using the SDL_BUTTON(X) macros, and x and y are set to the"]
-    #[doc = " mouse deltas since the last call to SDL_GetRelativeMouseState()."]
     pub fn SDL_GetRelativeMouseState(
         x: *mut ::std::os::raw::c_int,
         y: *mut ::std::os::raw::c_int,
     ) -> Uint8;
 }
 extern "C" {
-    #[doc = " Set the position of the mouse cursor (generates a mouse motion event)"]
     pub fn SDL_WarpMouse(x: Uint16, y: Uint16);
 }
 extern "C" {
-    #[doc = " Create a cursor using the specified data and mask (in MSB format)."]
-    #[doc = " The cursor width must be a multiple of 8 bits."]
-    #[doc = ""]
-    #[doc = " The cursor is created in black and white according to the following:"]
-    #[doc = " data  mask    resulting pixel on screen"]
-    #[doc = "  0     1       White"]
-    #[doc = "  1     1       Black"]
-    #[doc = "  0     0       Transparent"]
-    #[doc = "  1     0       Inverted color if possible, black if not."]
-    #[doc = ""]
-    #[doc = " Cursors created with this function must be freed with SDL_FreeCursor()."]
     pub fn SDL_CreateCursor(
         data: *mut Uint8,
         mask: *mut Uint8,
@@ -8850,30 +8139,19 @@ extern "C" {
     ) -> *mut SDL_Cursor;
 }
 extern "C" {
-    #[doc = " Set the currently active cursor to the specified one."]
-    #[doc = " If the cursor is currently visible, the change will be immediately"]
-    #[doc = " represented on the display."]
     pub fn SDL_SetCursor(cursor: *mut SDL_Cursor);
 }
 extern "C" {
-    #[doc = " Returns the currently active cursor."]
     pub fn SDL_GetCursor() -> *mut SDL_Cursor;
 }
 extern "C" {
-    #[doc = " Deallocates a cursor created with SDL_CreateCursor()."]
     pub fn SDL_FreeCursor(cursor: *mut SDL_Cursor);
 }
 extern "C" {
-    #[doc = " Toggle whether or not the cursor is shown on the screen."]
-    #[doc = " The cursor start off displayed, but can be turned off."]
-    #[doc = " SDL_ShowCursor() returns 1 if the cursor was being displayed"]
-    #[doc = " before the call, or 0 if it was not.  You can query the current"]
-    #[doc = " state by passing a 'toggle' value of -1."]
     pub fn SDL_ShowCursor(
         toggle: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
-#[doc = " The joystick structure used to identify an SDL joystick"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct _SDL_Joystick {
@@ -8881,115 +8159,69 @@ pub struct _SDL_Joystick {
 }
 pub type SDL_Joystick = _SDL_Joystick;
 extern "C" {
-    #[doc = " Count the number of joysticks attached to the system"]
     pub fn SDL_NumJoysticks() -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the implementation dependent name of a joystick."]
-    #[doc = ""]
-    #[doc = " This can be called before any joysticks are opened."]
-    #[doc = " If no name can be found, this function returns NULL."]
     pub fn SDL_JoystickName(
         device_index: ::std::os::raw::c_int,
     ) -> *const ::std::os::raw::c_char;
 }
 extern "C" {
-    #[doc = " Open a joystick for use."]
-    #[doc = ""]
-    #[doc = " @param[in] device_index"]
-    #[doc = " The index passed as an argument refers to"]
-    #[doc = " the N'th joystick on the system.  This index is the value which will"]
-    #[doc = " identify this joystick in future joystick events."]
-    #[doc = ""]
-    #[doc = " @return This function returns a joystick identifier, or NULL if an error occurred."]
     pub fn SDL_JoystickOpen(
         device_index: ::std::os::raw::c_int,
     ) -> *mut SDL_Joystick;
 }
 extern "C" {
-    #[doc = " Returns 1 if the joystick has been opened, or 0 if it has not."]
     pub fn SDL_JoystickOpened(
         device_index: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the device index of an opened joystick."]
     pub fn SDL_JoystickIndex(
         joystick: *mut SDL_Joystick,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the number of general axis controls on a joystick"]
     pub fn SDL_JoystickNumAxes(
         joystick: *mut SDL_Joystick,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the number of trackballs on a joystick"]
-    #[doc = ""]
-    #[doc = " Joystick trackballs have only relative motion events associated"]
-    #[doc = " with them and their state cannot be polled."]
     pub fn SDL_JoystickNumBalls(
         joystick: *mut SDL_Joystick,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the number of POV hats on a joystick"]
     pub fn SDL_JoystickNumHats(
         joystick: *mut SDL_Joystick,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the number of buttons on a joystick"]
     pub fn SDL_JoystickNumButtons(
         joystick: *mut SDL_Joystick,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Update the current state of the open joysticks."]
-    #[doc = ""]
-    #[doc = " This is called automatically by the event loop if any joystick"]
-    #[doc = " events are enabled."]
     pub fn SDL_JoystickUpdate();
 }
 extern "C" {
-    #[doc = " Enable/disable joystick event polling."]
-    #[doc = ""]
-    #[doc = " If joystick events are disabled, you must call SDL_JoystickUpdate()"]
-    #[doc = " yourself and check the state of the joystick when you want joystick"]
-    #[doc = " information."]
-    #[doc = ""]
-    #[doc = " @param[in] state The state can be one of SDL_QUERY, SDL_ENABLE or SDL_IGNORE."]
     pub fn SDL_JoystickEventState(
         state: ::std::os::raw::c_int,
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the current state of an axis control on a joystick"]
-    #[doc = ""]
-    #[doc = " @param[in] axis The axis indices start at index 0."]
-    #[doc = ""]
-    #[doc = " @return The state is a value ranging from -32768 to 32767."]
     pub fn SDL_JoystickGetAxis(
         joystick: *mut SDL_Joystick,
         axis: ::std::os::raw::c_int,
     ) -> Sint16;
 }
 extern "C" {
-    #[doc = "  Get the current state of a POV hat on a joystick"]
-    #[doc = ""]
-    #[doc = "  @param[in] hat The hat indices start at index 0."]
     pub fn SDL_JoystickGetHat(
         joystick: *mut SDL_Joystick,
         hat: ::std::os::raw::c_int,
     ) -> Uint8;
 }
 extern "C" {
-    #[doc = " Get the ball axis change since the last poll"]
-    #[doc = ""]
-    #[doc = " @param[in] ball The ball indices start at index 0."]
-    #[doc = ""]
-    #[doc = " @return This returns 0, or -1 if you passed it invalid parameters."]
     pub fn SDL_JoystickGetBall(
         joystick: *mut SDL_Joystick,
         ball: ::std::os::raw::c_int,
@@ -8998,72 +8230,40 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Get the current state of a button on a joystick"]
-    #[doc = ""]
-    #[doc = " @param[in] button The button indices start at index 0."]
     pub fn SDL_JoystickGetButton(
         joystick: *mut SDL_Joystick,
         button: ::std::os::raw::c_int,
     ) -> Uint8;
 }
 extern "C" {
-    #[doc = " Close a joystick previously opened with SDL_JoystickOpen()"]
     pub fn SDL_JoystickClose(joystick: *mut SDL_Joystick);
 }
-#[doc = "< Unused (do not remove)"]
 pub const SDL_EventType_SDL_NOEVENT: SDL_EventType = 0;
-#[doc = "< Application loses/gains visibility"]
 pub const SDL_EventType_SDL_ACTIVEEVENT: SDL_EventType = 1;
-#[doc = "< Keys pressed"]
 pub const SDL_EventType_SDL_KEYDOWN: SDL_EventType = 2;
-#[doc = "< Keys released"]
 pub const SDL_EventType_SDL_KEYUP: SDL_EventType = 3;
-#[doc = "< Mouse moved"]
 pub const SDL_EventType_SDL_MOUSEMOTION: SDL_EventType = 4;
-#[doc = "< Mouse button pressed"]
 pub const SDL_EventType_SDL_MOUSEBUTTONDOWN: SDL_EventType = 5;
-#[doc = "< Mouse button released"]
 pub const SDL_EventType_SDL_MOUSEBUTTONUP: SDL_EventType = 6;
-#[doc = "< Joystick axis motion"]
 pub const SDL_EventType_SDL_JOYAXISMOTION: SDL_EventType = 7;
-#[doc = "< Joystick trackball motion"]
 pub const SDL_EventType_SDL_JOYBALLMOTION: SDL_EventType = 8;
-#[doc = "< Joystick hat position change"]
 pub const SDL_EventType_SDL_JOYHATMOTION: SDL_EventType = 9;
-#[doc = "< Joystick button pressed"]
 pub const SDL_EventType_SDL_JOYBUTTONDOWN: SDL_EventType = 10;
-#[doc = "< Joystick button released"]
 pub const SDL_EventType_SDL_JOYBUTTONUP: SDL_EventType = 11;
-#[doc = "< User-requested quit"]
 pub const SDL_EventType_SDL_QUIT: SDL_EventType = 12;
-#[doc = "< System specific event"]
 pub const SDL_EventType_SDL_SYSWMEVENT: SDL_EventType = 13;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVEDA: SDL_EventType = 14;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVEDB: SDL_EventType = 15;
-#[doc = "< User resized video mode"]
 pub const SDL_EventType_SDL_VIDEORESIZE: SDL_EventType = 16;
-#[doc = "< Screen needs to be redrawn"]
 pub const SDL_EventType_SDL_VIDEOEXPOSE: SDL_EventType = 17;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED2: SDL_EventType = 18;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED3: SDL_EventType = 19;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED4: SDL_EventType = 20;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED5: SDL_EventType = 21;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED6: SDL_EventType = 22;
-#[doc = "< Reserved for future use.."]
 pub const SDL_EventType_SDL_EVENT_RESERVED7: SDL_EventType = 23;
-#[doc = " Events SDL_USEREVENT through SDL_MAXEVENTS-1 are for your use"]
 pub const SDL_EventType_SDL_USEREVENT: SDL_EventType = 24;
-#[doc = " This last event is only for bounding internal arrays"]
-#[doc = "  It is the number of bits in the event mask datatype -- Uint32"]
 pub const SDL_EventType_SDL_NUMEVENTS: SDL_EventType = 32;
-#[doc = " Event enumerations"]
 pub type SDL_EventType = u32;
 pub const SDL_EventMask_SDL_ACTIVEEVENTMASK: SDL_EventMask = 2;
 pub const SDL_EventMask_SDL_KEYDOWNMASK: SDL_EventMask = 4;
@@ -9084,15 +8284,11 @@ pub const SDL_EventMask_SDL_VIDEOEXPOSEMASK: SDL_EventMask = 131072;
 pub const SDL_EventMask_SDL_QUITMASK: SDL_EventMask = 4096;
 pub const SDL_EventMask_SDL_SYSWMEVENTMASK: SDL_EventMask = 8192;
 pub type SDL_EventMask = u32;
-#[doc = " Application visibility event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_ActiveEvent {
-    #[doc = "< SDL_ACTIVEEVENT"]
     pub type_: Uint8,
-    #[doc = "< Whether given states were gained or lost (1/0)"]
     pub gain: Uint8,
-    #[doc = "< A mask of the focus states"]
     pub state: Uint8,
 }
 #[test]
@@ -9147,15 +8343,11 @@ fn bindgen_test_layout_SDL_ActiveEvent() {
         )
     );
 }
-#[doc = " Keyboard event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_KeyboardEvent {
-    #[doc = "< SDL_KEYDOWN or SDL_KEYUP"]
     pub type_: Uint8,
-    #[doc = "< The keyboard device index"]
     pub which: Uint8,
-    #[doc = "< SDL_PRESSED or SDL_RELEASED"]
     pub state: Uint8,
     pub keysym: SDL_keysym,
 }
@@ -9224,23 +8416,15 @@ fn bindgen_test_layout_SDL_KeyboardEvent() {
         )
     );
 }
-#[doc = " Mouse motion event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_MouseMotionEvent {
-    #[doc = "< SDL_MOUSEMOTION"]
     pub type_: Uint8,
-    #[doc = "< The mouse device index"]
     pub which: Uint8,
-    #[doc = "< The current button state"]
     pub state: Uint8,
-    #[doc = "< The X/Y coordinates of the mouse"]
     pub x: Uint16,
-    #[doc = "< The X/Y coordinates of the mouse"]
     pub y: Uint16,
-    #[doc = "< The relative motion in the X direction"]
     pub xrel: Sint16,
-    #[doc = "< The relative motion in the Y direction"]
     pub yrel: Sint16,
 }
 #[test]
@@ -9347,21 +8531,14 @@ fn bindgen_test_layout_SDL_MouseMotionEvent() {
         )
     );
 }
-#[doc = " Mouse button event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_MouseButtonEvent {
-    #[doc = "< SDL_MOUSEBUTTONDOWN or SDL_MOUSEBUTTONUP"]
     pub type_: Uint8,
-    #[doc = "< The mouse device index"]
     pub which: Uint8,
-    #[doc = "< The mouse button index"]
     pub button: Uint8,
-    #[doc = "< SDL_PRESSED or SDL_RELEASED"]
     pub state: Uint8,
-    #[doc = "< The X/Y coordinates of the mouse at press time"]
     pub x: Uint16,
-    #[doc = "< The X/Y coordinates of the mouse at press time"]
     pub y: Uint16,
 }
 #[test]
@@ -9455,17 +8632,12 @@ fn bindgen_test_layout_SDL_MouseButtonEvent() {
         )
     );
 }
-#[doc = " Joystick axis motion event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_JoyAxisEvent {
-    #[doc = "< SDL_JOYAXISMOTION"]
     pub type_: Uint8,
-    #[doc = "< The joystick device index"]
     pub which: Uint8,
-    #[doc = "< The joystick axis index"]
     pub axis: Uint8,
-    #[doc = "< The axis value (range: -32768 to 32767)"]
     pub value: Sint16,
 }
 #[test]
@@ -9533,19 +8705,13 @@ fn bindgen_test_layout_SDL_JoyAxisEvent() {
         )
     );
 }
-#[doc = " Joystick trackball motion event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_JoyBallEvent {
-    #[doc = "< SDL_JOYBALLMOTION"]
     pub type_: Uint8,
-    #[doc = "< The joystick device index"]
     pub which: Uint8,
-    #[doc = "< The joystick trackball index"]
     pub ball: Uint8,
-    #[doc = "< The relative motion in the X direction"]
     pub xrel: Sint16,
-    #[doc = "< The relative motion in the Y direction"]
     pub yrel: Sint16,
 }
 #[test]
@@ -9626,21 +8792,12 @@ fn bindgen_test_layout_SDL_JoyBallEvent() {
         )
     );
 }
-#[doc = " Joystick hat position change event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_JoyHatEvent {
-    #[doc = "< SDL_JOYHATMOTION"]
     pub type_: Uint8,
-    #[doc = "< The joystick device index"]
     pub which: Uint8,
-    #[doc = "< The joystick hat index"]
     pub hat: Uint8,
-    #[doc = "< The hat position value:"]
-    #[doc = "   SDL_HAT_LEFTUP   SDL_HAT_UP       SDL_HAT_RIGHTUP"]
-    #[doc = "   SDL_HAT_LEFT     SDL_HAT_CENTERED SDL_HAT_RIGHT"]
-    #[doc = "   SDL_HAT_LEFTDOWN SDL_HAT_DOWN     SDL_HAT_RIGHTDOWN"]
-    #[doc = "  Note that zero means the POV is centered."]
     pub value: Uint8,
 }
 #[test]
@@ -9708,17 +8865,12 @@ fn bindgen_test_layout_SDL_JoyHatEvent() {
         )
     );
 }
-#[doc = " Joystick button event structure"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_JoyButtonEvent {
-    #[doc = "< SDL_JOYBUTTONDOWN or SDL_JOYBUTTONUP"]
     pub type_: Uint8,
-    #[doc = "< The joystick device index"]
     pub which: Uint8,
-    #[doc = "< The joystick button index"]
     pub button: Uint8,
-    #[doc = "< SDL_PRESSED or SDL_RELEASED"]
     pub state: Uint8,
 }
 #[test]
@@ -9786,17 +8938,11 @@ fn bindgen_test_layout_SDL_JoyButtonEvent() {
         )
     );
 }
-#[doc = " The \"window resized\" event"]
-#[doc = "  When you get this event, you are responsible for setting a new video"]
-#[doc = "  mode with the new width and height."]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_ResizeEvent {
-    #[doc = "< SDL_VIDEORESIZE"]
     pub type_: Uint8,
-    #[doc = "< New width"]
     pub w: ::std::os::raw::c_int,
-    #[doc = "< New height"]
     pub h: ::std::os::raw::c_int,
 }
 #[test]
@@ -9851,11 +8997,9 @@ fn bindgen_test_layout_SDL_ResizeEvent() {
         )
     );
 }
-#[doc = " The \"screen redraw\" event"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_ExposeEvent {
-    #[doc = "< SDL_VIDEOEXPOSE"]
     pub type_: Uint8,
 }
 #[test]
@@ -9884,11 +9028,9 @@ fn bindgen_test_layout_SDL_ExposeEvent() {
         )
     );
 }
-#[doc = " The \"quit requested\" event"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_QuitEvent {
-    #[doc = "< SDL_QUIT"]
     pub type_: Uint8,
 }
 #[test]
@@ -9917,17 +9059,12 @@ fn bindgen_test_layout_SDL_QuitEvent() {
         )
     );
 }
-#[doc = " A user-defined event type"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_UserEvent {
-    #[doc = "< SDL_USEREVENT through SDL_NUMEVENTS-1"]
     pub type_: Uint8,
-    #[doc = "< User defined event code"]
     pub code: ::std::os::raw::c_int,
-    #[doc = "< User defined data pointer"]
     pub data1: *mut ::std::os::raw::c_void,
-    #[doc = "< User defined data pointer"]
     pub data2: *mut ::std::os::raw::c_void,
 }
 #[test]
@@ -9995,7 +9132,6 @@ fn bindgen_test_layout_SDL_UserEvent() {
         )
     );
 }
-#[doc = " If you want to use this event, you should include SDL_syswm.h"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_SysWMmsg {
@@ -10046,7 +9182,6 @@ fn bindgen_test_layout_SDL_SysWMEvent() {
         )
     );
 }
-#[doc = " General event structure"]
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union SDL_Event {
@@ -10258,9 +9393,6 @@ fn bindgen_test_layout_SDL_Event() {
     );
 }
 extern "C" {
-    #[doc = " Pumps the event loop, gathering events from the input devices."]
-    #[doc = "  This function updates the event queue and internal input device state."]
-    #[doc = "  This should only be run in the thread that sets the video mode."]
     pub fn SDL_PumpEvents();
 }
 pub const SDL_eventaction_SDL_ADDEVENT: SDL_eventaction = 0;
@@ -10268,22 +9400,6 @@ pub const SDL_eventaction_SDL_PEEKEVENT: SDL_eventaction = 1;
 pub const SDL_eventaction_SDL_GETEVENT: SDL_eventaction = 2;
 pub type SDL_eventaction = u32;
 extern "C" {
-    #[doc = "  Checks the event queue for messages and optionally returns them."]
-    #[doc = ""]
-    #[doc = "  If 'action' is SDL_ADDEVENT, up to 'numevents' events will be added to"]
-    #[doc = "  the back of the event queue."]
-    #[doc = "  If 'action' is SDL_PEEKEVENT, up to 'numevents' events at the front"]
-    #[doc = "  of the event queue, matching 'mask', will be returned and will not"]
-    #[doc = "  be removed from the queue."]
-    #[doc = "  If 'action' is SDL_GETEVENT, up to 'numevents' events at the front"]
-    #[doc = "  of the event queue, matching 'mask', will be returned and will be"]
-    #[doc = "  removed from the queue."]
-    #[doc = ""]
-    #[doc = "  @return"]
-    #[doc = "  This function returns the number of events actually stored, or -1"]
-    #[doc = "  if there was an error."]
-    #[doc = ""]
-    #[doc = "  This function is thread-safe."]
     pub fn SDL_PeepEvents(
         events: *mut SDL_Event,
         numevents: ::std::os::raw::c_int,
@@ -10292,138 +9408,58 @@ extern "C" {
     ) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Polls for currently pending events, and returns 1 if there are any pending"]
-    #[doc = "  events, or 0 if there are none available.  If 'event' is not NULL, the next"]
-    #[doc = "  event is removed from the queue and stored in that area."]
     pub fn SDL_PollEvent(event: *mut SDL_Event) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Waits indefinitely for the next available event, returning 1, or 0 if there"]
-    #[doc = "  was an error while waiting for events.  If 'event' is not NULL, the next"]
-    #[doc = "  event is removed from the queue and stored in that area."]
     pub fn SDL_WaitEvent(event: *mut SDL_Event) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " Add an event to the event queue."]
-    #[doc = "  This function returns 0 on success, or -1 if the event queue was full"]
-    #[doc = "  or there was some other error."]
     pub fn SDL_PushEvent(event: *mut SDL_Event) -> ::std::os::raw::c_int;
 }
 pub type SDL_EventFilter = ::std::option::Option<
     unsafe extern "C" fn(event: *const SDL_Event) -> ::std::os::raw::c_int,
 >;
 extern "C" {
-    #[doc = "  This function sets up a filter to process all events before they"]
-    #[doc = "  change internal state and are posted to the internal event queue."]
-    #[doc = ""]
-    #[doc = "  The filter is protypted as:"]
-    #[doc = "      @code typedef int (SDLCALL *SDL_EventFilter)(const SDL_Event *event); @endcode"]
-    #[doc = ""]
-    #[doc = " If the filter returns 1, then the event will be added to the internal queue."]
-    #[doc = " If it returns 0, then the event will be dropped from the queue, but the"]
-    #[doc = " internal state will still be updated.  This allows selective filtering of"]
-    #[doc = " dynamically arriving events."]
-    #[doc = ""]
-    #[doc = " @warning  Be very careful of what you do in the event filter function, as"]
-    #[doc = "           it may run in a different thread!"]
-    #[doc = ""]
-    #[doc = " There is one caveat when dealing with the SDL_QUITEVENT event type.  The"]
-    #[doc = " event filter is only called when the window manager desires to close the"]
-    #[doc = " application window.  If the event filter returns 1, then the window will"]
-    #[doc = " be closed, otherwise the window will remain open if possible."]
-    #[doc = " If the quit event is generated by an interrupt signal, it will bypass the"]
-    #[doc = " internal queue and be delivered to the application at the next event poll."]
     pub fn SDL_SetEventFilter(filter: SDL_EventFilter);
 }
 extern "C" {
-    #[doc = "  Return the current event filter - can be used to \"chain\" filters."]
-    #[doc = "  If there is no event filter set, this function returns NULL."]
     pub fn SDL_GetEventFilter() -> SDL_EventFilter;
 }
 extern "C" {
-    #[doc = " This function allows you to set the state of processing certain events."]
-    #[doc = " If 'state' is set to SDL_IGNORE, that event will be automatically dropped"]
-    #[doc = " from the event queue and will not event be filtered."]
-    #[doc = " If 'state' is set to SDL_ENABLE, that event will be processed normally."]
-    #[doc = " If 'state' is set to SDL_QUERY, SDL_EventState() will return the"]
-    #[doc = " current processing state of the specified event."]
     pub fn SDL_EventState(
         type_: Uint8,
         state: ::std::os::raw::c_int,
     ) -> Uint8;
 }
 extern "C" {
-    #[doc = " This function dynamically loads a shared object and returns a pointer"]
-    #[doc = " to the object handle (or NULL if there was an error)."]
-    #[doc = " The 'sofile' parameter is a system dependent name of the object file."]
     pub fn SDL_LoadObject(
         sofile: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[doc = " Given an object handle, this function looks up the address of the"]
-    #[doc = " named function in the shared object and returns it.  This address"]
-    #[doc = " is no longer valid after calling SDL_UnloadObject()."]
     pub fn SDL_LoadFunction(
         handle: *mut ::std::os::raw::c_void,
         name: *const ::std::os::raw::c_char,
     ) -> *mut ::std::os::raw::c_void;
 }
 extern "C" {
-    #[doc = " Unload a shared object from memory"]
     pub fn SDL_UnloadObject(handle: *mut ::std::os::raw::c_void);
 }
 extern "C" {
-    #[doc = " Get the number of milliseconds since the SDL library initialization."]
-    #[doc = " Note that this value wraps if the program runs for more than ~49 days."]
     pub fn SDL_GetTicks() -> Uint32;
 }
 extern "C" {
-    #[doc = " Wait a specified number of milliseconds before returning"]
     pub fn SDL_Delay(ms: Uint32);
 }
-#[doc = " Function prototype for the timer callback function"]
 pub type SDL_TimerCallback = ::std::option::Option<
     unsafe extern "C" fn(interval: Uint32) -> Uint32,
 >;
 extern "C" {
-    #[doc = " Set a callback to run after the specified number of milliseconds has"]
-    #[doc = " elapsed. The callback function is passed the current timer interval"]
-    #[doc = " and returns the next timer interval.  If the returned value is the"]
-    #[doc = " same as the one passed in, the periodic alarm continues, otherwise a"]
-    #[doc = " new alarm is scheduled.  If the callback returns 0, the periodic alarm"]
-    #[doc = " is cancelled."]
-    #[doc = ""]
-    #[doc = " To cancel a currently running timer, call SDL_SetTimer(0, NULL);"]
-    #[doc = ""]
-    #[doc = " The timer callback function may run in a different thread than your"]
-    #[doc = " main code, and so shouldn't call any functions from within itself."]
-    #[doc = ""]
-    #[doc = " The maximum resolution of this timer is 10 ms, which means that if"]
-    #[doc = " you request a 16 ms timer, your callback will run approximately 20 ms"]
-    #[doc = " later on an unloaded system.  If you wanted to set a flag signaling"]
-    #[doc = " a frame update at 30 frames per second (every 33 ms), you might set a"]
-    #[doc = " timer for 30 ms:"]
-    #[doc = "   @code SDL_SetTimer((33/10)*10, flag_update); @endcode"]
-    #[doc = ""]
-    #[doc = " If you use this function, you need to pass SDL_INIT_TIMER to SDL_Init()."]
-    #[doc = ""]
-    #[doc = " Under UNIX, you should not use raise or use SIGALRM and this function"]
-    #[doc = " in the same program, as it is implemented using setitimer().  You also"]
-    #[doc = " should not use this function in multi-threaded applications as signals"]
-    #[doc = " to multi-threaded apps have undefined behavior in some implementations."]
-    #[doc = ""]
-    #[doc = " This function returns 0 if successful, or -1 if there was an error."]
     pub fn SDL_SetTimer(
         interval: Uint32,
         callback: SDL_TimerCallback,
     ) -> ::std::os::raw::c_int;
 }
-#[doc = " Function prototype for the new timer callback function."]
-#[doc = " The callback function is passed the current timer interval and returns"]
-#[doc = " the next timer interval.  If the returned value is the same as the one"]
-#[doc = " passed in, the periodic alarm continues, otherwise a new alarm is"]
-#[doc = " scheduled.  If the callback returns 0, the periodic alarm is cancelled."]
 pub type SDL_NewTimerCallback = ::std::option::Option<
     unsafe extern "C" fn(
         interval: Uint32,
@@ -10435,11 +9471,8 @@ pub type SDL_NewTimerCallback = ::std::option::Option<
 pub struct _SDL_TimerID {
     _unused: [u8; 0],
 }
-#[doc = " Definition of the timer ID type"]
 pub type SDL_TimerID = *mut _SDL_TimerID;
 extern "C" {
-    #[doc = " Add a new timer to the pool of timers already running."]
-    #[doc = "  Returns a timer ID, or NULL when an error occurs."]
     pub fn SDL_AddTimer(
         interval: Uint32,
         callback: SDL_NewTimerCallback,
@@ -10447,8 +9480,6 @@ extern "C" {
     ) -> SDL_TimerID;
 }
 extern "C" {
-    #[doc = " Remove one of the multiple timers knowing its ID."]
-    #[doc = " Returns a boolean value indicating success."]
     pub fn SDL_RemoveTimer(t: SDL_TimerID) -> SDL_bool;
 }
 #[repr(C)]
@@ -10511,35 +9542,21 @@ fn bindgen_test_layout_SDL_version() {
     );
 }
 extern "C" {
-    #[doc = " This function gets the version of the dynamically linked SDL library."]
-    #[doc = "  it should NOT be used to fill a version structure, instead you should"]
-    #[doc = "  use the SDL_Version() macro."]
     pub fn SDL_Linked_Version() -> *const SDL_version;
 }
 extern "C" {
-    #[doc = " This function loads the SDL dynamically linked library and initializes"]
-    #[doc = "  the subsystems specified by 'flags' (and those satisfying dependencies)"]
-    #[doc = "  Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup"]
-    #[doc = "  signal handlers for some commonly ignored fatal signals (like SIGSEGV)"]
     pub fn SDL_Init(flags: Uint32) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This function initializes specific SDL subsystems"]
     pub fn SDL_InitSubSystem(flags: Uint32) -> ::std::os::raw::c_int;
 }
 extern "C" {
-    #[doc = " This function cleans up specific SDL subsystems"]
     pub fn SDL_QuitSubSystem(flags: Uint32);
 }
 extern "C" {
-    #[doc = " This function returns mask of the specified subsystems which have"]
-    #[doc = "  been initialized."]
-    #[doc = "  If 'flags' is 0, it returns a mask of all initialized subsystems."]
     pub fn SDL_WasInit(flags: Uint32) -> Uint32;
 }
 extern "C" {
-    #[doc = " This function cleans up all initialized subsystems and unloads the"]
-    #[doc = "  dynamically linked library.  You should call it upon all exit conditions."]
     pub fn SDL_Quit();
 }
 extern "C" {
@@ -10886,13 +9903,11 @@ fn bindgen_test_layout___va_list_tag() {
 pub struct __locale_data {
     pub _address: u8,
 }
-#[doc = " Hardware-specific surface info"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct private_hwdata {
     pub _address: u8,
 }
-#[doc = "< Private"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SDL_BlitMap {

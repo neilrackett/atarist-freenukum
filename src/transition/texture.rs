@@ -39,10 +39,7 @@ impl Texture {
     ) -> Texture {
         let mut surface =
             Surface::create_rgb(flags, w, h, bits_per_pixel, 0, 0, 0, 0);
-        surface.set_color_key(
-            transdl::ll::video::SDL_SRCCOLORKEY,
-            transparent,
-        );
+        surface.set_color_key(transdl::ll::SDL_SRCCOLORKEY, transparent);
 
         Texture { w, h, surface }
     }
@@ -181,7 +178,7 @@ pub mod ffi {
     pub unsafe extern "C" fn fn_texture_blit_to_sdl_surface(
         ptr: *const FnTexture,
         srcrect: *const Geometry,
-        destination: *mut transdl::ll::video::SDL_Surface,
+        destination: *mut transdl::ll::SDL_Surface,
         dstrect: *const Geometry,
     ) {
         let t: &FnTexture = &(*ptr);
