@@ -243,7 +243,7 @@ const FnTexture * fn_environment_get_tile(fn_environment_t * env,
  *
  * @return The health.
  */
-Uint8 fn_environment_get_health(fn_environment_t * env);
+const Uint8 fn_environment_get_health(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

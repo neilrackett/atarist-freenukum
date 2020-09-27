@@ -80,7 +80,8 @@ void fn_borders_blit_array(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit(
-    fn_environment_t * env)
+    SDL_Surface * screen,
+    const FnTileCache * tilecache)
 {
   static int borders
     [ (2*FN_WINDOW_HEIGHT/FN_TILE_HEIGHT)
@@ -165,8 +166,8 @@ void fn_borders_blit(
   };
 
   fn_borders_blit_array(
-      fn_environment_get_tilecache(env),
-      env->screen,
+      tilecache,
+      screen,
       borders,
       2 * FN_WINDOW_WIDTH / FN_TILE_WIDTH,
       2 * FN_WINDOW_HEIGHT / FN_TILE_HEIGHT,
@@ -177,6 +178,7 @@ void fn_borders_blit(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_life(
+    const Uint8 health,
     fn_environment_t * env)
 {
   SDL_Surface * lifesurface;
@@ -194,7 +196,7 @@ void fn_borders_blit_life(
     OBJ_NONHEALTH,
   };
 
-  for (i = 0; i < fn_environment_get_health(env); i++) {
+  for (i = 0; i < health; i++) {
     *(lifetiles + i) = OBJ_HEALTH;
   }
 

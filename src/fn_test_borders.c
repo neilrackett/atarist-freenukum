@@ -52,7 +52,9 @@ int main(int argc, char ** argv)
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
 
-  fn_borders_blit(env);
+  fn_borders_blit(
+          screen,
+          fn_environment_get_tilecache(env));
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
   while (1)

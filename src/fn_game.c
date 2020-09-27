@@ -103,9 +103,13 @@ void fn_game_start(
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
 
-  fn_borders_blit(env);
+  fn_borders_blit(
+          env->screen,
+          fn_environment_get_tilecache(env));
 
-  fn_borders_blit_life(env);
+  fn_borders_blit_life(
+          fn_environment_get_health(env),
+          env);
 
   fn_borders_blit_score(env);
 
@@ -574,7 +578,7 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case fn_event_hero_health_changed:
-              fn_borders_blit_life(env);
+              fn_borders_blit_life(fn_environment_get_health(env), env);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
