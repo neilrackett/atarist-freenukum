@@ -3,6 +3,7 @@
 #[allow(non_upper_case_globals)]
 pub mod ll;
 
+pub mod event;
 pub mod ttf;
 pub mod video;
 

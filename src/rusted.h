@@ -35,6 +35,11 @@
 
 #define WINDOW_WIDTH 320
 
+typedef enum {
+    Ok,
+    Quit,
+} FnInputBoxAnswer;
+
 typedef struct File File;
 
 typedef struct InputField InputField;
@@ -64,9 +69,9 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
-typedef InputField FnInputField;
-
 typedef TileCache FnTileCache;
+
+typedef InputField FnInputField;
 
 typedef struct {
     uint8_t pixelsize;
@@ -95,6 +100,13 @@ void fn_file_read(FnFile *ptr, void *buffer, size_t length);
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
+
+FnInputBoxAnswer fn_inputbox_show(SDL_Surface *screen,
+                                  const FnTileCache *tilecache,
+                                  FnTextureCreationParams params,
+                                  const char *message,
+                                  char *answer,
+                                  size_t answer_length);
 
 void fn_inputfield_backspace_pressed(FnInputField *ptr);
 

@@ -59,6 +59,12 @@ impl Surface {
         }
     }
 
+    pub fn update_rect(&mut self, x: i32, y: i32, w: u32, h: u32) {
+        unsafe {
+            ll::SDL_UpdateRect(self.raw, x, y, w, h);
+        }
+    }
+
     pub fn blit(
         &self,
         srcrect: Option<Rect>,
@@ -79,6 +85,14 @@ impl Surface {
         unsafe {
             ll::SDL_UpperBlit(self.raw, srcrect, dst_raw, dstrect);
         }
+    }
+
+    pub fn width(&self) -> usize {
+        unsafe { *self.raw }.w as usize
+    }
+
+    pub fn height(&self) -> usize {
+        unsafe { *self.raw }.h as usize
     }
 }
 

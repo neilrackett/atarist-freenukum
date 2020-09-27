@@ -1,7 +1,7 @@
 /*******************************************************************
  *
  * Project: FreeNukum 2D Jump'n Run
- * File:    Infobox drawing function test
+ * File:    Tests for Settings functions
  *
  * *****************************************************************
  *
@@ -26,42 +26,48 @@
  *
  *******************************************************************/
 
-#include <SDL/SDL.h>
-
-/* --------------------------------------------------------------- */
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "rusted.h"
-#include "fn_environment.h"
+#include "fn_error.h"
 
 /* --------------------------------------------------------------- */
 
-int main(int argc, char ** argv) {
-  SDL_Surface * screen;
+int main()
+{
+  int res;
 
-  fn_environment_t * env = fn_environment_create();
-  fn_environment_load_tilecache(env);
+  char settingspath[1024];
+  char * homedir;
+
+  /*
+  s = fn_settings_new();
+
+  fn_settings_set_longint(s, "testsetting_num", 132);
+  fn_settings_set_bool(s, "testsetting_bool1", 1);
+  fn_settings_set_string(s, "testsetting_string1", "uiae");
+  fn_settings_set_bool(s, "testsetting_bool2", 0);
+  fn_settings_set_string(s, "testsetting_string1", "drtn");
+  fn_settings_set_string(s, "testsetting_string2", "hello");
+  */
   
-  screen = fn_environment_get_screen_sdl(env);
+  homedir = getenv("HOME");
 
-  char answer[30] = "";
-  FnInputBoxAnswer entered =
-    fn_inputbox_show(
-        screen,
-        fn_environment_get_tilecache(env),
-        fn_environment_build_texture_creation_params(env),
-        "Please enter your name:",
-        answer,
-        30);
-
-  if (entered == Ok) {
-    printf("Okay.\n");
-    printf("You entered %s.\n", answer);
-  } else {
-    printf("Aborted.\n");
+  if (homedir == NULL) {
+    printf("%s\n", "HOME directory path not set.");
+    exit(1);
   }
+  snprintf(settingspath, 1024, "%s%s", homedir, "/.freenukum/config");
 
-  SDL_FreeSurface(screen);
+  s = fn_settings_new_from_file(settingspath);
+  res = fn_settings_store(s, settingspath);
+
+  printf("result: %d\n", res);
+  printf("error: %s\n", strerror(errno));
+
+  fn_settings_free(s);
+
   return 0;
 }
-
-
