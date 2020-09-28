@@ -105,22 +105,32 @@ void fn_game_start(
 
   fn_borders_blit(
           env->screen,
+          fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env));
 
   fn_borders_blit_life(
           env->screen,
+          fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env),
           fn_environment_get_health(env));
 
   fn_borders_blit_score(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_score(env),
-          fn_environment_get_tilecache(env));
+          fn_environment_get_tilecache(env),
+          fn_environment_get_score(env));
 
-  fn_borders_blit_firepower(env);
+  fn_borders_blit_firepower(
+          env->screen,
+          fn_environment_build_texture_creation_params(env),
+          fn_environment_get_tilecache(env),
+          fn_environment_get_firepower(env));
 
-  fn_borders_blit_inventory(env);
+  fn_borders_blit_inventory(
+          env->screen,
+          fn_environment_build_texture_creation_params(env),
+          fn_environment_get_tilecache(env),
+          fn_environment_get_inventory(env));
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
@@ -570,24 +580,33 @@ int fn_game_start_in_level(
               fn_borders_blit_score(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
-                  fn_environment_get_score(env),
-                  fn_environment_get_tilecache(env));
+                  fn_environment_get_tilecache(env),
+                  fn_environment_get_score(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
             case fn_event_hero_firepower_changed:
-              fn_borders_blit_firepower(env);
+              fn_borders_blit_firepower(
+                  env->screen,
+                  fn_environment_build_texture_creation_params(env),
+                  fn_environment_get_tilecache(env),
+                  fn_environment_get_firepower(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
             case fn_event_hero_inventory_changed:
-              fn_borders_blit_inventory(env);
+              fn_borders_blit_inventory(
+                  env->screen,
+                  fn_environment_build_texture_creation_params(env),
+                  fn_environment_get_tilecache(env),
+                  fn_environment_get_inventory(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
             case fn_event_hero_health_changed:
               fn_borders_blit_life(
                       env->screen,
+                      fn_environment_build_texture_creation_params(env),
                       fn_environment_get_tilecache(env),
                       fn_environment_get_health(env));
               /* TODO separately update this area. */

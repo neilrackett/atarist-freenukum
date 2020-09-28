@@ -37,12 +37,14 @@
 
 void fn_borders_blit(
     SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
     const FnTileCache * tilecache);
 
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_life(
     SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
     const FnTileCache * tilecache,
     const Uint8 health);
 
@@ -51,17 +53,23 @@ void fn_borders_blit_life(
 void fn_borders_blit_score(
     SDL_Surface * screen,
     FnTextureCreationParams texture_creation_params,
-    const long long unsigned int score,
-    const FnTileCache * tilecache);
+    const FnTileCache * tilecache,
+    const long long unsigned int score);
 
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_firepower(
-    fn_environment_t * env);
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const FnTileCache * tilecache,
+    Uint8 firepower);
 
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_inventory(
-    fn_environment_t * env);
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const FnTileCache * tilecache,
+    const Uint8 inventory);
 
 /* --------------------------------------------------------------- */

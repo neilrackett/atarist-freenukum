@@ -50,12 +50,11 @@ int main(int argc, char ** argv)
   fn_environment_check_for_episodes(env);
   fn_environment_load_tilecache(env);
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-
   fn_borders_blit(
-          screen,
+          env->screen,
+          fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env));
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  SDL_UpdateRect(env->screen, 0, 0, 0, 0);
 
   while (1)
   {
@@ -79,7 +78,7 @@ int main(int argc, char ** argv)
           }
           break;
         case SDL_VIDEOEXPOSE:
-          SDL_UpdateRect(screen, 0, 0, 0, 0);
+          SDL_UpdateRect(env->screen, 0, 0, 0, 0);
           break;
         default:
           /* ignore other events */

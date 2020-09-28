@@ -37,7 +37,7 @@
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_tile(
-    SDL_Surface * target,
+    FnTexture * target,
     const FnTexture * tile,
     int x,
     int y)
@@ -45,7 +45,9 @@ void fn_borders_blit_tile(
   FnGeometry dstrect;
   dstrect.x = FN_HALFTILE_WIDTH * x;
   dstrect.y = FN_HALFTILE_HEIGHT * y;
-  fn_texture_blit_to_sdl_surface(
+  dstrect.w = fn_texture_get_width(tile);
+  dstrect.h = fn_texture_get_height(tile);
+  fn_texture_clone_to_texture(
       tile,
       NULL,
       target,
@@ -56,7 +58,7 @@ void fn_borders_blit_tile(
 
 void fn_borders_blit_array(
     const FnTileCache * tilecache,
-    SDL_Surface * target,
+    FnTexture * target,
     int * borders,
     Uint8 width,
     Uint8 height,
@@ -81,8 +83,11 @@ void fn_borders_blit_array(
 
 void fn_borders_blit(
     SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
     const FnTileCache * tilecache)
 {
+  FnTexture * texture =
+      fn_texture_new_with_params(screen->w, screen->h, texture_creation_params);
   static int borders
     [ (2*FN_WINDOW_HEIGHT/FN_TILE_HEIGHT)
     * (2*FN_WINDOW_WIDTH/FN_TILE_WIDTH)]
@@ -167,23 +172,24 @@ void fn_borders_blit(
 
   fn_borders_blit_array(
       tilecache,
-      screen,
+      texture,
       borders,
       2 * FN_WINDOW_WIDTH / FN_TILE_WIDTH,
       2 * FN_WINDOW_HEIGHT / FN_TILE_HEIGHT,
       BORD_GREY_START
       );
+  fn_texture_blit_to_sdl_surface(texture, NULL, screen, NULL);
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_life(
     SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
     const FnTileCache * tilecache,
     const Uint8 health)
 {
-  SDL_Surface * lifesurface;
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
 
   int i;
 
@@ -201,15 +207,10 @@ void fn_borders_blit_life(
     *(lifetiles + i) = OBJ_HEALTH;
   }
 
-  lifesurface = SDL_CreateRGBSurface(
-      screen->flags,
-      FN_FONT_WIDTH * FN_NUM_MAXLIFE,
-      FN_TILE_HEIGHT,
-      screen->format->BitsPerPixel,
-      0,
-      0,
-      0,
-      0);
+  FnTexture * lifesurface = fn_texture_new_with_params(
+          FN_FONT_WIDTH * FN_NUM_MAXLIFE,
+          FN_TILE_HEIGHT,
+          texture_creation_params);
 
   fn_borders_blit_array(
       tilecache,
@@ -225,8 +226,8 @@ void fn_borders_blit_life(
   dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH;
   dstrect.h = FN_TILE_HEIGHT;
 
-  SDL_BlitSurface(lifesurface, NULL, screen, &dstrect);
-  SDL_FreeSurface(lifesurface);
+  fn_texture_blit_to_sdl_surface(lifesurface, NULL, screen, &dstrect);
+  fn_texture_free(lifesurface);
 }
 
 /* --------------------------------------------------------------- */
@@ -234,8 +235,8 @@ void fn_borders_blit_life(
 void fn_borders_blit_score(
     SDL_Surface * screen,
     FnTextureCreationParams texture_creation_params,
-    const long long unsigned int score,
-    const FnTileCache * tilecache)
+    const FnTileCache * tilecache,
+    const long long unsigned int score)
 {
   FnGeometry dstrect;
   FnGeometry srcrect = fn_geometry_create(
@@ -269,10 +270,12 @@ void fn_borders_blit_score(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_firepower(
-    fn_environment_t * env)
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const FnTileCache * tilecache,
+    Uint8 firepower)
 {
-  SDL_Surface * firepowersurface;
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
 
   int i;
 
@@ -285,19 +288,22 @@ void fn_borders_blit_firepower(
     -1, -1, -1,      -1, -1, -1, -1, -1
   };
 
-  for (i = 0; i < fn_environment_get_firepower(env); i++) {
+  for (i = 0; i < firepower; i++) {
     *(firepowertiles + FN_NUM_MAXFIREPOWER * 4 + i*2) = OBJ_SHOT;
   }
 
-  firepowersurface = fn_environment_create_surface(
-      env,
+  FnTexture * firepowersurface = fn_texture_new_with_params(
       FN_TILE_WIDTH * FN_NUM_MAXFIREPOWER,
-      FN_TILE_HEIGHT * 2);
+      FN_TILE_HEIGHT * 2,
+      texture_creation_params);
 
   fn_borders_blit_array(
-      fn_environment_get_tilecache(env),
-      firepowersurface, firepowertiles,
-      FN_NUM_MAXFIREPOWER * 2, 4, 0
+      tilecache,
+      firepowersurface,
+      firepowertiles,
+      FN_NUM_MAXFIREPOWER * 2,
+      4,
+      0
       );
 
   dstrect.x = 30 * FN_FONT_WIDTH;
@@ -305,18 +311,19 @@ void fn_borders_blit_firepower(
   dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH;
   dstrect.h = FN_TILE_HEIGHT * 2;
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  SDL_BlitSurface(firepowersurface, NULL, screen, &dstrect);
-  SDL_FreeSurface(firepowersurface);
+  fn_texture_blit_to_sdl_surface(firepowersurface, NULL, screen, &dstrect);
+  fn_texture_free(firepowersurface);
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_inventory(
-    fn_environment_t * env)
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const FnTileCache * tilecache,
+    const Uint8 inventory)
 {
-  SDL_Surface * inventorysurface;
-  SDL_Rect dstrect;
+  FnGeometry dstrect;
 
   int i;
 
@@ -327,7 +334,6 @@ void fn_borders_blit_inventory(
     -1, -1, -1, -1, -1, -1, -1, -1
   };
 
-  Uint8 inventory = fn_environment_get_inventory(env);
   for (i = 0; i < FN_SIZE_INVENTORY; i++) {
     if (inventory & FN_INVENTORY_KEY_RED)
       inventorytiles[0] = OBJ_KEY_RED;
@@ -347,13 +353,14 @@ void fn_borders_blit_inventory(
       inventorytiles[22] = OBJ_ACCESS_CARD;
   }
 
-  inventorysurface = fn_environment_create_surface(
-      env,
+  FnTexture * inventorysurface = fn_texture_new_with_params(
       FN_TILE_WIDTH * FN_SIZE_INVENTORY/2,
-      FN_TILE_HEIGHT * 2);
+      FN_TILE_HEIGHT * 2,
+      texture_creation_params
+      );
 
   fn_borders_blit_array(
-      fn_environment_get_tilecache(env),
+      tilecache,
       inventorysurface, inventorytiles,
       FN_NUM_MAXFIREPOWER * 2, 4, 0
       );
@@ -363,9 +370,8 @@ void fn_borders_blit_inventory(
   dstrect.w = FN_NUM_MAXFIREPOWER * FN_TILE_WIDTH;
   dstrect.h = FN_TILE_HEIGHT * 2;
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  SDL_BlitSurface(inventorysurface, NULL, screen, &dstrect);
-  SDL_FreeSurface(inventorysurface);
+  fn_texture_blit_to_sdl_surface(inventorysurface, NULL, screen, &dstrect);
+  fn_texture_free(inventorysurface);
 }
 
 /* --------------------------------------------------------------- */
