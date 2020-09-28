@@ -42,8 +42,9 @@ void fn_borders_blit(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_life(
-    const Uint8 health,
-    fn_environment_t * env);
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    const Uint8 health);
 
 /* --------------------------------------------------------------- */
 

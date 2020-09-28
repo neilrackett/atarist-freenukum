@@ -108,8 +108,9 @@ void fn_game_start(
           fn_environment_get_tilecache(env));
 
   fn_borders_blit_life(
-          fn_environment_get_health(env),
-          env);
+          env->screen,
+          fn_environment_get_tilecache(env),
+          fn_environment_get_health(env));
 
   fn_borders_blit_score(env);
 
@@ -578,7 +579,10 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case fn_event_hero_health_changed:
-              fn_borders_blit_life(fn_environment_get_health(env), env);
+              fn_borders_blit_life(
+                      env->screen,
+                      fn_environment_get_tilecache(env),
+                      fn_environment_get_health(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

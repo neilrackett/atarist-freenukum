@@ -178,8 +178,9 @@ void fn_borders_blit(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_life(
-    const Uint8 health,
-    fn_environment_t * env)
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    const Uint8 health)
 {
   SDL_Surface * lifesurface;
   SDL_Rect dstrect;
@@ -200,7 +201,6 @@ void fn_borders_blit_life(
     *(lifetiles + i) = OBJ_HEALTH;
   }
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   lifesurface = SDL_CreateRGBSurface(
       screen->flags,
       FN_FONT_WIDTH * FN_NUM_MAXLIFE,
@@ -212,8 +212,12 @@ void fn_borders_blit_life(
       0);
 
   fn_borders_blit_array(
-      fn_environment_get_tilecache(env),
-      lifesurface, lifetiles, FN_NUM_MAXLIFE, 1, 0
+      tilecache,
+      lifesurface,
+      lifetiles,
+      FN_NUM_MAXLIFE,
+      1,
+      0
       );
 
   dstrect.x = 30 * FN_FONT_WIDTH;
