@@ -232,32 +232,28 @@ void fn_borders_blit_life(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_score(
-    fn_environment_t * env)
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const long long unsigned int score,
+    const FnTileCache * tilecache)
 {
-  FnTexture * scoresurface;
   FnGeometry dstrect;
   FnGeometry srcrect = fn_geometry_create(
       0, 0, FN_FONT_WIDTH * FN_SCORE_DIGITS, FN_FONT_HEIGHT);
 
   char scoretext[FN_SCORE_DIGITS+1];
 
-  scoresurface = fn_texture_new_with_params(
+  FnTexture * scoresurface = fn_texture_new_with_params(
       FN_FONT_WIDTH * FN_SCORE_DIGITS,
       FN_FONT_HEIGHT,
-      fn_environment_build_texture_creation_params(env));
+      texture_creation_params);
 
-  sprintf(scoretext, "%08llu",
-      (long long unsigned int)fn_environment_get_score(env));
-
-  fn_environment_create_surface(
-      env,
-      FN_FONT_WIDTH * FN_SCORE_DIGITS,
-      FN_FONT_HEIGHT);
+  sprintf(scoretext, "%08llu", score);
 
   fn_text_print(
       scoresurface,
       srcrect,
-      fn_environment_get_tilecache(env),
+      tilecache,
       scoretext
       );
 
@@ -266,7 +262,6 @@ void fn_borders_blit_score(
   dstrect.w = FN_NUM_MAXLIFE * FN_FONT_WIDTH;
   dstrect.h = FN_TILE_HEIGHT;
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(scoresurface, NULL, screen, &dstrect);
   fn_texture_free(scoresurface);
 }

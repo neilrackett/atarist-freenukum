@@ -112,7 +112,11 @@ void fn_game_start(
           fn_environment_get_tilecache(env),
           fn_environment_get_health(env));
 
-  fn_borders_blit_score(env);
+  fn_borders_blit_score(
+          env->screen,
+          fn_environment_build_texture_creation_params(env),
+          fn_environment_get_score(env),
+          fn_environment_get_tilecache(env));
 
   fn_borders_blit_firepower(env);
 
@@ -564,7 +568,10 @@ int fn_game_start_in_level(
               break;
             case fn_event_heroscored:
               fn_borders_blit_score(
-                  env);
+                  env->screen,
+                  fn_environment_build_texture_creation_params(env),
+                  fn_environment_get_score(env),
+                  fn_environment_get_tilecache(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

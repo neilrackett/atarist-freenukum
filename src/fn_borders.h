@@ -49,7 +49,10 @@ void fn_borders_blit_life(
 /* --------------------------------------------------------------- */
 
 void fn_borders_blit_score(
-    fn_environment_t * env);
+    SDL_Surface * screen,
+    FnTextureCreationParams texture_creation_params,
+    const long long unsigned int score,
+    const FnTileCache * tilecache);
 
 /* --------------------------------------------------------------- */
 
