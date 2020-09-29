@@ -2098,7 +2098,10 @@ void fn_level_actor_function_accesscard_slot_interact_start(fn_level_actor_t * a
     inventory &= ~FN_INVENTORY_ACCESS_CARD;
     fn_hero_set_inventory(hero, inventory);
   } else {
-    fn_infobox_show(env,
+    fn_infobox_show(
+        env->screen,
+        fn_environment_get_tilecache(env),
+        fn_environment_build_texture_creation_params(env),
         "You don't have the access card\n");
   }
 }
@@ -4465,7 +4468,11 @@ void fn_level_actor_function_surveillancescreen_interact_start(
   fn_environment_t * env = fn_level_get_environment(actor->level);
 
   /* TODO show real note instead of this dummy */
-  fn_infobox_show(env, "Not implemented yet.\n");
+  fn_infobox_show(
+          env->screen,
+          fn_environment_get_tilecache(env),
+          fn_environment_build_texture_creation_params(env),
+          "Not implemented yet.\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -4626,7 +4633,11 @@ void fn_level_actor_function_notebook_interact_start(fn_level_actor_t * actor)
   fn_environment_t * env = fn_level_get_environment(actor->level);
 
   /* TODO show real note instead of this dummy */
-  fn_infobox_show(env, "Not implemented yet.\n");
+  fn_infobox_show(
+      env->screen,
+      fn_environment_get_tilecache(env),
+      fn_environment_build_texture_creation_params(env),
+      "Not implemented yet.\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -5110,7 +5121,11 @@ void fn_level_actor_function_keyhole_interact_start(fn_level_actor_t * actor)
     }
   } else if (data->counter != 5) {
     fn_environment_t * env = fn_level_get_environment(actor->level);
-    fn_infobox_show(env, msg);
+    fn_infobox_show(
+        env->screen,
+        fn_environment_get_tilecache(env),
+        fn_environment_build_texture_creation_params(env),
+        msg);
   }
 }
 

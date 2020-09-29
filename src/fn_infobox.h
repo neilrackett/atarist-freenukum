@@ -35,12 +35,14 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
 void fn_infobox_show(
-    fn_environment_t * env,
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    const FnTextureCreationParams texture_creation_params,
     char * msg);
 
 /* --------------------------------------------------------------- */

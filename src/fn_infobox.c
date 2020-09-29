@@ -27,15 +27,17 @@
  *******************************************************************/
 
 #include "fn_infobox.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
 void fn_infobox_show(
-    fn_environment_t * env,
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    FnTextureCreationParams texture_creation_params,
     char * msg)
 {
   FnTexture * msgbox;
-  SDL_Surface * temp;
   FnGeometry destrect;
 
   int res;
@@ -44,10 +46,9 @@ void fn_infobox_show(
 
   msgbox = fn_messagebox(
           msg,
-          fn_environment_get_tilecache(env),
-          fn_environment_build_texture_creation_params(env));
+          tilecache,
+          texture_creation_params);
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   destrect.x = ((screen->w) - fn_texture_get_width(msgbox)) / 2;
   destrect.y = ((screen->h) - fn_texture_get_height(msgbox)) / 2;
   destrect.w = fn_texture_get_width(msgbox);
@@ -56,9 +57,16 @@ void fn_infobox_show(
   SDL_Rect dstrect = fn_geometry_as_sdl_rect(&destrect);
 
   /* backup the background */
-  temp = fn_environment_create_surface(env,
-      fn_texture_get_width(msgbox), fn_texture_get_height(msgbox));
-  SDL_BlitSurface(screen, &dstrect, temp, NULL);
+  SDL_Surface * background_backup = SDL_CreateRGBSurface(
+          screen->flags,
+          fn_texture_get_width(msgbox),
+          fn_texture_get_height(msgbox),
+          screen->format->BitsPerPixel,
+          0,
+          0,
+          0,
+          0);
+  SDL_BlitSurface(screen, &dstrect, background_backup, NULL);
 
   fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &destrect);
   fn_texture_free(msgbox);
@@ -69,14 +77,14 @@ void fn_infobox_show(
     if (res == 1) {
       switch(event.type) {
         case SDL_KEYDOWN:
-          SDL_BlitSurface(temp, NULL, screen, &dstrect);
-          SDL_FreeSurface(temp);
+          SDL_BlitSurface(background_backup, NULL, screen, &dstrect);
+          SDL_FreeSurface(background_backup);
           return;
           break;
         case SDL_MOUSEBUTTONDOWN:
           if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_BlitSurface(temp, NULL, screen, &dstrect);
-            SDL_FreeSurface(temp);
+            SDL_BlitSurface(background_backup, NULL, screen, &dstrect);
+            SDL_FreeSurface(background_backup);
             return;
           }
           break;

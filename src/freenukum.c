@@ -96,6 +96,11 @@ int main(int argc, char ** argv)
     exit(retval);
   }
 
+  SDL_Surface * screen = env->screen;
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
+  FnTextureCreationParams params =
+      fn_environment_build_texture_creation_params(env);
+
   /* show the main menu */
   while (choice != FN_MENUCHOICE_QUIT) {
     choice = fn_mainmenu(env);
@@ -108,15 +113,15 @@ int main(int argc, char ** argv)
             backgroundfile);
         break;
       case FN_MENUCHOICE_RESTORE:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Restore not implemented yet.\n");
         break;
       case FN_MENUCHOICE_INSTRUCTIONS:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Instructions not implemented yet.\n");
         break;
       case FN_MENUCHOICE_ORDERINGINFO:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Orderinginfo not implemented yet.\n");
         break;
       case FN_MENUCHOICE_FULLSCREENTOGGLE:
@@ -135,7 +140,7 @@ int main(int argc, char ** argv)
               7, "DN.DN%d", episode);
           res = fn_picture_splash_show(env, backgroundfile);
           if (res == 0) {
-            fn_infobox_show(env,
+            fn_infobox_show(screen, tilecache, params,
                 "You don't have this episode installed.\n"
                 "We stay in episode 1\n");
             episode = 1;
@@ -149,15 +154,15 @@ int main(int argc, char ** argv)
         }
         break;
       case FN_MENUCHOICE_HIGHSCORES:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Highscores not implemented yet.\n");
         break;
       case FN_MENUCHOICE_PREVIEWS:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Previews not implemented yet.\n");
         break;
       case FN_MENUCHOICE_VIEWUSERDEMO:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Userdemo not implemented yet.\n");
         break;
       case FN_MENUCHOICE_TITLESCREEN:
@@ -165,7 +170,7 @@ int main(int argc, char ** argv)
             backgroundfile);
         break;
       case FN_MENUCHOICE_CREDITS:
-        fn_infobox_show(env,
+        fn_infobox_show(screen, tilecache, params,
             "Credits not implemented yet.\n");
         break;
       default:

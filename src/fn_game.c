@@ -139,7 +139,10 @@ void fn_game_start(
     int interlevel = 0;
     int success = 1;
 
-    fn_infobox_show(env,
+    fn_infobox_show(
+        env->screen,
+        fn_environment_get_tilecache(env),
+        fn_environment_build_texture_creation_params(env),
         "Get ready FreeNukum,\nyou are going in.\n");
 
     while (success && level < 13) {

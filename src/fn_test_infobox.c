@@ -30,6 +30,7 @@
 
 /* --------------------------------------------------------------- */
 
+#include "fn_environment.h"
 #include "fn_infobox.h"
 
 /* --------------------------------------------------------------- */
@@ -38,9 +39,17 @@ int main(int argc, char ** argv) {
   fn_environment_t * env = fn_environment_create();
   fn_environment_load_tilecache(env);
 
-  fn_infobox_show(env, "This is...\n");
-  fn_infobox_show(env, "...the great\nInfobox test case.\n");
-  fn_infobox_show(env, "now\nwith\neven\nmore\nlines.\n");
+  SDL_Surface * screen = env->screen;
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
+  FnTextureCreationParams params =
+      fn_environment_build_texture_creation_params(env);
+
+  fn_infobox_show(
+      screen, tilecache, params, "This is...\n");
+  fn_infobox_show(
+      screen, tilecache, params, "...the great\nInfobox test case.\n");
+  fn_infobox_show(
+      screen, tilecache, params, "now\nwith\neven\nmore\nlines.\n");
   
   return 0;
 }
