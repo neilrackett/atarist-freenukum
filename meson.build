@@ -48,7 +48,6 @@ cargo_build = custom_target(
 )
 
 c_src = [
-    'src/fn_borders.c',
     'src/fn_bot.c',
     'src/fn_collision.c',
     'src/fn_data.c',
@@ -133,7 +132,6 @@ test_borders = executable(
     'test_borders',
     [
         'src/fn_test_borders.c',
-        'src/fn_borders.c',
         'src/fn_bot.c',
         'src/fn_collision.c',
         'src/fn_data.c',

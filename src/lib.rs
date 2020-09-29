@@ -25,6 +25,9 @@ pub const PICTURE_WIDTH: usize = 40;
 pub const PICTURE_HEIGHT: usize = 200;
 pub const BACKDROP_WIDTH: usize = 13;
 pub const BACKDROP_HEIGHT: usize = 10;
+pub const MAX_LIFE: usize = 8;
+pub const MAX_FIREPOWER: usize = 4;
+pub const SCORE_DIGITS: usize = 8;
 
 const FONT_START: usize = 19 * 48 + 3 * 50;
 const FONT_ASCII_UPPERCASE: usize = FONT_START + 10;
@@ -40,6 +43,33 @@ const BORDER_BLUE_LEFT: usize = BORDER_START + 22;
 const BORDER_BLUE_RIGHT: usize = BORDER_START + 23;
 const BORDER_BLUE_TOP: usize = BORDER_START + 24;
 const BORDER_BLUE_BOTTOM: usize = BORDER_START + 25;
+const BORDER_GREY_START: usize = BORDER_START;
+
+const SOLID_START: usize = 4 * 48;
+const ANIMATION_START: usize = SOLID_START + 4 * 48;
+
+const OBJECT_START: usize = ANIMATION_START + 6 * 48;
+const OBJECT_SHOT: usize = OBJECT_START + 6;
+const OBJECT_GUN: usize = OBJECT_START + 43;
+const OBJECT_HEALTH: usize = OBJECT_START + 61;
+const OBJECT_NONHEALTH: usize = OBJECT_START + 62;
+const OBJECT_BOOT: usize = OBJECT_START + 10;
+const OBJECT_CLAMP: usize = OBJECT_START + 18;
+const OBJECT_ROBOHAND: usize = OBJECT_START + 63;
+const OBJECT_ACCESS_CARD: usize = OBJECT_START + 64;
+const OBJECT_KEY_RED: usize = OBJECT_START + 124;
+const OBJECT_KEY_GREEN: usize = OBJECT_START + 125;
+const OBJECT_KEY_BLUE: usize = OBJECT_START + 126;
+const OBJECT_KEY_PINK: usize = OBJECT_START + 127;
+
+const INVENTORY_KEY_RED: u8 = 0x01 << 7;
+const INVENTORY_KEY_GREEN: u8 = 0x01 << 6;
+const INVENTORY_KEY_BLUE: u8 = 0x01 << 5;
+const INVENTORY_KEY_PINK: u8 = 0x01 << 4;
+const INVENTORY_BOOT: u8 = 0x01 << 3;
+const INVENTORY_GLOVE: u8 = 0x01 << 2;
+const INVENTORY_CLAMP: u8 = 0x01 << 1;
+const INVENTORY_ACCESS_CARD: u8 = 0x01 << 0;
 
 pub use game::Game;
 pub use settings::Settings;

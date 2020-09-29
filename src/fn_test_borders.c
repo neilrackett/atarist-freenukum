@@ -31,7 +31,7 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_borders.h"
+#include "fn_environment.h"
 #include "fn_object.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"

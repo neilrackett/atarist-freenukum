@@ -21,11 +21,17 @@
 
 #define INVENTORY_WIDTH (HEALTH_COUNT / 2)
 
+#define MAX_FIREPOWER 4
+
+#define MAX_LIFE 8
+
 #define MAX_TILES_PER_FILE 50
 
 #define PICTURE_HEIGHT 200
 
 #define PICTURE_WIDTH 40
+
+#define SCORE_DIGITS 8
 
 #define TILE_HEIGHT (HALFTILE_HEIGHT * 2)
 
@@ -60,6 +66,8 @@ typedef struct {
 
 typedef TextureCreationParams FnTextureCreationParams;
 
+typedef TileCache FnTileCache;
+
 typedef struct {
     int16_t x;
     int16_t y;
@@ -68,8 +76,6 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
-
-typedef TileCache FnTileCache;
 
 typedef InputField FnInputField;
 
@@ -90,6 +96,30 @@ typedef struct {
 typedef TileHeader FnTileHeader;
 
 FnTexture *fn_backdrop_load(FnFile *ptr, FnTextureCreationParams params);
+
+void fn_borders_blit(SDL_Surface *screen,
+                     FnTextureCreationParams params,
+                     const FnTileCache *tilecache);
+
+void fn_borders_blit_firepower(SDL_Surface *screen,
+                               FnTextureCreationParams params,
+                               const FnTileCache *tilecache,
+                               uint8_t firepower);
+
+void fn_borders_blit_inventory(SDL_Surface *screen,
+                               FnTextureCreationParams params,
+                               const FnTileCache *tilecache,
+                               uint8_t inventory);
+
+void fn_borders_blit_life(SDL_Surface *screen,
+                          FnTextureCreationParams params,
+                          const FnTileCache *tilecache,
+                          uint8_t health);
+
+void fn_borders_blit_score(SDL_Surface *screen,
+                           FnTextureCreationParams params,
+                           const FnTileCache *tilecache,
+                           uintptr_t score);
 
 void fn_file_free(FnFile *ptr);
 
