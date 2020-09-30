@@ -47,7 +47,9 @@ int main(int argc, char ** argv) {
   fn_menu_append_entry(menu, 'd', "D)emo game", 'd');
   char choice = fn_menu_get_choice(
       menu,
-      env);
+      screen,
+      fn_environment_get_tilecache(env),
+      fn_environment_build_texture_creation_params(env));
   printf("Choice: %c\n", choice);
   fn_menu_free(menu);
   SDL_FreeSurface(screen);

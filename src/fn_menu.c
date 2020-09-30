@@ -108,8 +108,11 @@ Uint32 fn_menu_timer_triggered(
 
 /* --------------------------------------------------------------- */
 
-char fn_menu_get_choice(fn_menu_t * menu,
-    fn_environment_t * env)
+char fn_menu_get_choice(
+    fn_menu_t * menu,
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    FnTextureCreationParams texture_creation_params)
 {
   /* TODO This is a dirty workaround which should be removed. */
   Uint16 textrows = 0;
@@ -138,8 +141,8 @@ char fn_menu_get_choice(fn_menu_t * menu,
 
   FnTexture * box = fn_messagebox(
           placeholder,
-          fn_environment_get_tilecache(env),
-          fn_environment_build_texture_creation_params(env));
+          tilecache,
+          texture_creation_params);
   free(placeholder);
 
   unsigned int box_width = fn_texture_get_width(box);
@@ -149,15 +152,15 @@ char fn_menu_get_choice(fn_menu_t * menu,
     fn_texture_new_with_params(
         box_width,
         box_height,
-        fn_environment_build_texture_creation_params(env));
+        texture_creation_params);
 
   FnGeometry targetrect;
 
   fn_menuentry_t * entry = NULL;
 
   FnGeometry destrect;
-  destrect.x = ((fn_environment_get_screen_sdl(env)->w) - box_width) / 2;
-  destrect.y = ((fn_environment_get_screen_sdl(env)->h) - box_height) / 2;
+  destrect.x = ((screen->w) - box_width) / 2;
+  destrect.y = ((screen->h) - box_height) / 2;
   destrect.w = box_width;
   destrect.h = box_height;
 
@@ -187,7 +190,6 @@ char fn_menu_get_choice(fn_menu_t * menu,
   while (!choice_made) {
 
     fn_list_t * iter = NULL;
-    SDL_Surface * screen = fn_environment_get_screen_sdl(env);
 
     if (changed) {
       fn_texture_clone_to_texture(box, NULL, target, NULL);
@@ -207,19 +209,18 @@ char fn_menu_get_choice(fn_menu_t * menu,
         fn_text_print(
             target,
             targetrect,
-            fn_environment_get_tilecache(env),
+            tilecache,
             entry->name
             );
         if (i == menu->currententry) {
           targetrect.x = targetrect.x - FN_FONT_WIDTH * 2;
           pointrect.y = targetrect.y + destrect.y;
           fn_texture_clone_to_texture(
-              fn_environment_get_tile(
-                env,
-                OBJ_POINT + animationframe),
-              NULL,
-              target,
-              &targetrect);
+                  fn_tilecache_get_tile(
+                      tilecache, OBJ_POINT + animationframe),
+                  NULL,
+                  target,
+                  &targetrect);
         }
         i++;
       }

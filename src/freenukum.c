@@ -102,7 +102,7 @@ int main(int argc, char ** argv)
 
   /* show the main menu */
   while (choice != FN_MENUCHOICE_QUIT) {
-    choice = fn_mainmenu(env);
+    choice = fn_mainmenu(screen, tilecache, params);
     switch(choice) {
       case FN_MENUCHOICE_START:
         fn_game_start(

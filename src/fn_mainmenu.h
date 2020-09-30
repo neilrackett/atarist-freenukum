@@ -60,7 +60,9 @@
  *         FN_MENUCHOICE_* defined values.
  */
 int fn_mainmenu(
-    fn_environment_t * env);
+        SDL_Surface * screen,
+        const FnTileCache * tilecache,
+        FnTextureCreationParams texture_creation_params);
 
 /* --------------------------------------------------------------- */
 

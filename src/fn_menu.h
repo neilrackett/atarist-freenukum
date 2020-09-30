@@ -92,7 +92,9 @@ void fn_menu_free(fn_menu_t * menu);
 
 char fn_menu_get_choice(
     fn_menu_t * menu,
-    fn_environment_t * env);
+    SDL_Surface * screen,
+    const FnTileCache * tilecache,
+    FnTextureCreationParams texture_creation_params);
 
 /* --------------------------------------------------------------- */
 

@@ -31,7 +31,10 @@
 
 /* --------------------------------------------------------------- */
 
-int fn_mainmenu(fn_environment_t * env)
+int fn_mainmenu(
+        SDL_Surface * screen,
+        const FnTileCache * tilecache,
+        FnTextureCreationParams texture_creation_params)
 {
   int choice = 0;
   char * msg =
@@ -101,7 +104,8 @@ int fn_mainmenu(fn_environment_t * env)
       "Q)it to DOS",
       FN_MENUCHOICE_QUIT);
 
-  choice = fn_menu_get_choice(menu, env);
+  choice = fn_menu_get_choice(
+          menu, screen, tilecache, texture_creation_params);
 
   if (choice == '\0') {
     choice = FN_MENUCHOICE_QUIT;
