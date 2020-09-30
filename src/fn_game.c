@@ -38,7 +38,6 @@
 #include "fn_hero.h"
 #include "fn_game.h"
 #include "fn_picture_splash.h"
-#include "fn_infobox.h"
 #include "fn_level.h"
 #include "rusted.h"
 

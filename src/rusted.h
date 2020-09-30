@@ -131,6 +131,11 @@ SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
+void fn_infobox_show(SDL_Surface *screen,
+                     const FnTileCache *tilecache,
+                     FnTextureCreationParams params,
+                     const char *message);
+
 FnInputBoxAnswer fn_inputbox_show(SDL_Surface *screen,
                                   const FnTileCache *tilecache,
                                   FnTextureCreationParams params,

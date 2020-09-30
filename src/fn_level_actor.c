@@ -32,7 +32,6 @@
 
 #include "fn_level_actor.h"
 #include "fn_object.h"
-#include "fn_infobox.h"
 #include "fn_error_cmdline.h"
 #include "fn_collision.h"
 
