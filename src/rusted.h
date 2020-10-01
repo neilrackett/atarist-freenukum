@@ -50,6 +50,8 @@ typedef struct File File;
 
 typedef struct InputField InputField;
 
+typedef struct Menu Menu;
+
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
@@ -78,6 +80,8 @@ typedef struct {
 typedef Geometry FnGeometry;
 
 typedef InputField FnInputField;
+
+typedef Menu FnMenu;
 
 typedef struct {
     uint8_t pixelsize;
@@ -166,6 +170,17 @@ void fn_inputfield_right_pressed(FnInputField *ptr);
 void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
+
+void fn_menu_append_entry(FnMenu *ptr, char shortcut, char *name);
+
+FnMenu *fn_menu_create(const char *header);
+
+void fn_menu_free(FnMenu *ptr);
+
+char fn_menu_get_choice(FnMenu *ptr,
+                        SDL_Surface *screen,
+                        const FnTileCache *tilecache,
+                        FnTextureCreationParams texture_creation_paramns);
 
 FnTexture *fn_messagebox(const char *text,
                          const FnTileCache *tilecache,

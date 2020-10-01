@@ -4,6 +4,7 @@
 pub mod ll;
 
 pub mod event;
+pub mod timer;
 pub mod ttf;
 pub mod video;
 

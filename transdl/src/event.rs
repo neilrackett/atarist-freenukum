@@ -12,9 +12,23 @@ pub enum Event {
         key: Option<KeyCode>,
         modifiers: BTreeSet<Modifier>,
     },
-    MouseMotion,
-    MouseButtonDown,
-    MouseButtonUp,
+    MouseMotion {
+        x: u16,
+        y: u16,
+        x_rel: i16,
+        y_rel: i16,
+        buttons: BTreeSet<MouseButton>,
+    },
+    MouseButtonDown {
+        button: Option<MouseButton>,
+        x: u16,
+        y: u16,
+    },
+    MouseButtonUp {
+        button: Option<MouseButton>,
+        x: u16,
+        y: u16,
+    },
     JoystickAxisMotion,
     JoystickBallMotion,
     JoystickHatMotion,
@@ -61,16 +75,33 @@ impl Event {
                 Ok(Event::KeyUp { key, modifiers })
             }
             ll::SDL_EventType_SDL_MOUSEMOTION => {
-                // TODO: Incomplete
-                Ok(Event::MouseMotion)
+                let e = unsafe { raw.motion };
+
+                Ok(Event::MouseMotion {
+                    x: e.x,
+                    y: e.y,
+                    x_rel: e.xrel,
+                    y_rel: e.yrel,
+                    buttons: u8_flags_to_mouse_buttons(e.state),
+                })
             }
             ll::SDL_EventType_SDL_MOUSEBUTTONDOWN => {
-                // TODO: Incomplete
-                Ok(Event::MouseButtonDown)
+                let e = unsafe { raw.button };
+
+                Ok(Event::MouseButtonDown {
+                    x: e.x,
+                    y: e.y,
+                    button: u8_to_mouse_button(e.button),
+                })
             }
             ll::SDL_EventType_SDL_MOUSEBUTTONUP => {
-                // TODO: Incomplete
-                Ok(Event::MouseButtonUp)
+                let e = unsafe { raw.button };
+
+                Ok(Event::MouseButtonUp {
+                    x: e.x,
+                    y: e.y,
+                    button: u8_to_mouse_button(e.button),
+                })
             }
             ll::SDL_EventType_SDL_JOYAXISMOTION => {
                 // TODO: Incomplete
@@ -107,6 +138,35 @@ impl Event {
             }
             v => Err(format!("Unknown event type {:?}", v)),
         }
+    }
+}
+
+pub fn push_user_event() {
+    let res = unsafe {
+        let mut event = ll::SDL_Event { type_: 0 };
+        event.user.type_ = ll::SDL_EventType_SDL_USEREVENT as u8;
+        event.user.code = 0;
+        event.user.data1 = std::ptr::null_mut();
+        event.user.data2 = std::ptr::null_mut();
+        ll::SDL_PushEvent(&mut event as *mut ll::SDL_Event)
+    };
+    if res != 0 {
+        eprintln!("Couldn't push event: {:?}", crate::get_error());
+    }
+}
+
+pub fn enable_key_repeat() {
+    unsafe {
+        ll::SDL_EnableKeyRepeat(
+            ll::SDL_DEFAULT_REPEAT_DELAY as i32,
+            ll::SDL_DEFAULT_REPEAT_INTERVAL as i32,
+        );
+    }
+}
+
+pub fn disable_key_repeat() {
+    unsafe {
+        ll::SDL_EnableKeyRepeat(0, 0);
     }
 }
 
@@ -647,4 +707,57 @@ fn u32_to_modifiers(raw: u32) -> BTreeSet<Modifier> {
         modifiers.insert(Modifier::Mode);
     }
     modifiers
+}
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum MouseButton {
+    Left = 1,
+    Middle = 2,
+    Right = 3,
+    WheelUp = 4,
+    WheelDown = 5,
+    X1 = 6,
+    X2 = 7,
+}
+
+fn u8_flags_to_mouse_buttons(raw: u8) -> BTreeSet<MouseButton> {
+    let mut mouse_buttons = BTreeSet::new();
+    if 1 << ((MouseButton::Left as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::Left);
+    }
+    if 1 << ((MouseButton::Middle as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::Middle);
+    }
+    if 1 << ((MouseButton::Right as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::Right);
+    }
+    if 1 << ((MouseButton::WheelUp as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::WheelUp);
+    }
+    if 1 << ((MouseButton::WheelDown as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::WheelDown);
+    }
+    if 1 << ((MouseButton::X1 as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::X1);
+    }
+    if 1 << ((MouseButton::X2 as u8) - 1) & raw != 0 {
+        mouse_buttons.insert(MouseButton::X2);
+    }
+    mouse_buttons
+}
+
+fn u8_to_mouse_button(raw: u8) -> Option<MouseButton> {
+    match raw {
+        r if r == MouseButton::Left as u8 => Some(MouseButton::Left),
+        r if r == MouseButton::Middle as u8 => Some(MouseButton::Middle),
+        r if r == MouseButton::Right as u8 => Some(MouseButton::Right),
+        r if r == MouseButton::WheelUp as u8 => Some(MouseButton::WheelUp),
+        r if r == MouseButton::WheelDown as u8 => {
+            Some(MouseButton::WheelDown)
+        }
+        r if r == MouseButton::X1 as u8 => Some(MouseButton::X1),
+        r if r == MouseButton::X2 as u8 => Some(MouseButton::X2),
+        _ => None,
+    }
 }

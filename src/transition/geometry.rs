@@ -1,4 +1,4 @@
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 #[repr(C)]
 pub struct Geometry {
     pub x: i16,

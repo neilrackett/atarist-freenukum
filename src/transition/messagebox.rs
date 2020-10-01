@@ -9,7 +9,7 @@ use crate::{
     FONT_HEIGHT, FONT_WIDTH,
 };
 
-fn get_information(text: &str) -> (usize, usize) {
+pub fn get_information(text: &str) -> (usize, usize) {
     let mut columns = 0;
     let mut rows = 0;
 

@@ -27,7 +27,6 @@
  *******************************************************************/
 
 #include "fn_mainmenu.h"
-#include "fn_menu.h"
 
 /* --------------------------------------------------------------- */
 
@@ -40,69 +39,56 @@ int fn_mainmenu(
   char * msg =
     "\n"
     "  FREENUKUM MAIN MENU \n"
-    "  ------------------- \n"
-    "\n";
-  fn_menu_t * menu = fn_menu_create(msg);
+    "  -------------------";
+  FnMenu * menu = fn_menu_create(msg);
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_START,
-      "S)tart a new game",
-      FN_MENUCHOICE_START);
+      "S)tart a new game");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_RESTORE,
-      "R)estore an old game",
-      FN_MENUCHOICE_RESTORE);
+      "R)estore an old game");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_INSTRUCTIONS,
-      "I)nstructions",
-      FN_MENUCHOICE_INSTRUCTIONS);
+      "I)nstructions");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_ORDERINGINFO,
-      "O)rdering information",
-      FN_MENUCHOICE_ORDERINGINFO);
+      "O)rdering information");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_FULLSCREENTOGGLE,
-      "F)ullscreen toggle",
-      FN_MENUCHOICE_FULLSCREENTOGGLE);
+      "F)ullscreen toggle");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_EPISODECHANGE,
-      "E)pisode change",
-      FN_MENUCHOICE_EPISODECHANGE);
+      "E)pisode change");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_HIGHSCORES,
-      "H)igh scores",
-      FN_MENUCHOICE_HIGHSCORES);
+      "H)igh scores");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_PREVIEWS,
-      "P)reviews/Main Demo!",
-      FN_MENUCHOICE_PREVIEWS);
+      "P)reviews/Main Demo!");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_VIEWUSERDEMO,
-      "V)iew user demo",
-      FN_MENUCHOICE_VIEWUSERDEMO);
+      "V)iew user demo");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_TITLESCREEN,
-      "T)itle screen",
-      FN_MENUCHOICE_TITLESCREEN);
+      "T)itle screen");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_CREDITS,
-      "C)redits",
-      FN_MENUCHOICE_CREDITS);
+      "C)redits");
   fn_menu_append_entry(
       menu,
       FN_MENUCHOICE_QUIT,
-      "Q)it to DOS",
-      FN_MENUCHOICE_QUIT);
+      "Q)it to DOS");
 
   choice = fn_menu_get_choice(
           menu, screen, tilecache, texture_creation_params);
