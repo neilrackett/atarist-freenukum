@@ -42,9 +42,25 @@
 #define WINDOW_WIDTH 320
 
 typedef enum {
-    Ok,
-    Quit,
+    FnInputBoxAnswer_Ok,
+    FnInputBoxAnswer_Quit,
 } FnInputBoxAnswer;
+
+typedef enum {
+    MainMenuEntry_Start,
+    MainMenuEntry_Restore,
+    MainMenuEntry_Instructions,
+    MainMenuEntry_OrderingInfo,
+    MainMenuEntry_FullScreenToggle,
+    MainMenuEntry_EpisodeChange,
+    MainMenuEntry_HighScores,
+    MainMenuEntry_Previews,
+    MainMenuEntry_ViewUserDemo,
+    MainMenuEntry_TitleScreen,
+    MainMenuEntry_Credits,
+    MainMenuEntry_Quit,
+    MainMenuEntry_Invalid,
+} MainMenuEntry;
 
 typedef struct File File;
 
@@ -80,6 +96,8 @@ typedef struct {
 typedef Geometry FnGeometry;
 
 typedef InputField FnInputField;
+
+typedef MainMenuEntry FnMainMenuEntry;
 
 typedef Menu FnMenu;
 
@@ -170,6 +188,10 @@ void fn_inputfield_right_pressed(FnInputField *ptr);
 void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
+
+FnMainMenuEntry fn_mainmenu(SDL_Surface *screen,
+                            const FnTileCache *tilecache,
+                            FnTextureCreationParams texture_creation_paramns);
 
 void fn_menu_append_entry(FnMenu *ptr, char shortcut, char *name);
 

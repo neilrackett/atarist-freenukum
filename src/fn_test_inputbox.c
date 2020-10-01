@@ -53,7 +53,7 @@ int main(int argc, char ** argv) {
         answer,
         30);
 
-  if (entered == Ok) {
+  if (entered == FnInputBoxAnswer_Ok) {
     printf("Okay.\n");
     printf("You entered %s.\n", answer);
   } else {

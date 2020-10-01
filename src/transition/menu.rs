@@ -7,8 +7,8 @@ use transdl::event::{Event, KeyCode, MouseButton};
 use transdl::video::Surface;
 
 pub struct MenuEntry {
-    shortcut: char,
-    name: String,
+    pub shortcut: char,
+    pub name: String,
 }
 
 pub struct Menu {

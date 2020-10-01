@@ -1,11 +1,18 @@
 extern crate cbindgen;
+use cbindgen::{Builder, Config, EnumConfig};
 
 use std::env;
 
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
-    cbindgen::Builder::new()
+    let mut enum_config = EnumConfig::default();
+    enum_config.prefix_with_name = true;
+    let mut config = Config::default();
+    config.enumeration = enum_config;
+
+    Builder::new()
+        .with_config(config)
         .with_crate(crate_dir)
         .with_pragma_once(true)
         .with_language(cbindgen::Language::C)

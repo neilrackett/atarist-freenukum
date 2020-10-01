@@ -60,7 +60,6 @@ c_src = [
     'src/fn_level.c',
     'src/fn_level_actor.c',
     'src/fn_list.c',
-    'src/fn_mainmenu.c',
     'src/fn_picture_splash.c',
     'src/fn_shot.c',
     'src/freenukum.c'

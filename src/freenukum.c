@@ -52,7 +52,6 @@
 #include "fn_error_cmdline.h"
 #include "fn_error.h"
 #include "fn_picture_splash.h"
-#include "fn_mainmenu.h"
 #include "fn_game.h"
 #include "fn_data.h"
 #include "fn_environment.h"
@@ -101,34 +100,34 @@ int main(int argc, char ** argv)
       fn_environment_build_texture_creation_params(env);
 
   /* show the main menu */
-  while (choice != FN_MENUCHOICE_QUIT) {
+  while (choice != MainMenuEntry_Quit) {
     choice = fn_mainmenu(screen, tilecache, params);
     switch(choice) {
-      case FN_MENUCHOICE_START:
+      case MainMenuEntry_Start:
         fn_game_start(
             env);
         res = fn_picture_splash_show(
             env,
             backgroundfile);
         break;
-      case FN_MENUCHOICE_RESTORE:
+      case MainMenuEntry_Restore:
         fn_infobox_show(screen, tilecache, params,
             "Restore not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_INSTRUCTIONS:
+      case MainMenuEntry_Instructions:
         fn_infobox_show(screen, tilecache, params,
             "Instructions not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_ORDERINGINFO:
+      case MainMenuEntry_OrderingInfo:
         fn_infobox_show(screen, tilecache, params,
             "Orderinginfo not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_FULLSCREENTOGGLE:
+      case MainMenuEntry_FullScreenToggle:
         {
           fn_environment_toggle_fullscreen(env);
         }
         break;
-      case FN_MENUCHOICE_EPISODECHANGE:
+      case MainMenuEntry_EpisodeChange:
         {
           Uint8 episode = fn_environment_get_episode(env);
           episode++;
@@ -152,23 +151,23 @@ int main(int argc, char ** argv)
           }
         }
         break;
-      case FN_MENUCHOICE_HIGHSCORES:
+      case MainMenuEntry_HighScores:
         fn_infobox_show(screen, tilecache, params,
             "Highscores not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_PREVIEWS:
+      case MainMenuEntry_Previews:
         fn_infobox_show(screen, tilecache, params,
             "Previews not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_VIEWUSERDEMO:
+      case MainMenuEntry_ViewUserDemo:
         fn_infobox_show(screen, tilecache, params,
             "Userdemo not implemented yet.\n");
         break;
-      case FN_MENUCHOICE_TITLESCREEN:
+      case MainMenuEntry_TitleScreen:
         res = fn_picture_splash_show(env,
             backgroundfile);
         break;
-      case FN_MENUCHOICE_CREDITS:
+      case MainMenuEntry_Credits:
         fn_infobox_show(screen, tilecache, params,
             "Credits not implemented yet.\n");
         break;

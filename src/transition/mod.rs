@@ -5,6 +5,7 @@ pub mod geometry;
 pub mod infobox;
 pub mod inputbox;
 pub mod inputfield;
+pub mod mainmenu;
 pub mod menu;
 pub mod messagebox;
 pub mod picture;
