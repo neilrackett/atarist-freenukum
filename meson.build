@@ -49,7 +49,6 @@ cargo_build = custom_target(
 
 c_src = [
     'src/fn_data.c',
-    'src/fn_effect.c',
     'src/fn_environment.c',
     'src/fn_error.c',
     'src/fn_error_cmdline.c',
@@ -154,36 +153,6 @@ test_drop = executable(
         'src/fn_test_drop.c',
 
         'src/fn_data.c',
-        'src/fn_environment.c',
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
-        'src/fn_hero.c',
-        'src/fn_level.c',
-        'src/fn_level_actor.c',
-        'src/fn_list.c',
-        'src/fn_shot.c',
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum_rs.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
-test_effect = executable(
-    'test_effect',
-    [
-        'src/fn_test_effect.c',
-
-        'src/fn_data.c',
-        'src/fn_effect.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
