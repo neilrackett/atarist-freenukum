@@ -21,6 +21,16 @@
 
 #define INVENTORY_WIDTH (HEALTH_COUNT / 2)
 
+/**
+ * The height of the level in full tiles
+ */
+#define LEVEL_HEIGHT 90
+
+/**
+ * The width of the level in full tiles
+ */
+#define LEVEL_WIDTH 128
+
 #define MAX_FIREPOWER 4
 
 #define MAX_LIFE 8
@@ -84,6 +94,8 @@ typedef struct File File;
 
 typedef struct InputField InputField;
 
+typedef struct LevelSolids LevelSolids;
+
 typedef struct Menu Menu;
 
 typedef struct Texture Texture;
@@ -118,6 +130,8 @@ typedef struct {
 typedef Geometry FnGeometry;
 
 typedef InputField FnInputField;
+
+typedef LevelSolids FnLevelSolids;
 
 typedef MainMenuEntry FnMainMenuEntry;
 
@@ -234,6 +248,17 @@ void fn_inputfield_right_pressed(FnInputField *ptr);
 void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
+
+FnLevelSolids *fn_level_solids_create(void);
+
+void fn_level_solids_free(FnLevelSolids *ptr);
+
+bool fn_level_solids_get(const FnLevelSolids *ptr, uintptr_t x, uintptr_t y);
+
+void fn_level_solids_set(FnLevelSolids *ptr,
+                         uintptr_t x,
+                         uintptr_t y,
+                         bool value);
 
 FnMainMenuEntry fn_mainmenu(SDL_Surface *screen,
                             const FnTileCache *tilecache,

@@ -61,7 +61,7 @@ struct fn_level_t {
   /**
    * Stores if tiles are solid or not.
    */
-  Uint8 solid[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
+  FnLevelSolids * solids;
   
   /**
    * The solid and background tiles.

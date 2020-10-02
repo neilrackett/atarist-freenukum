@@ -49,6 +49,8 @@ fn_level_t * fn_level_load(FnFile* file,
   Uint8 uppertile;
   Uint8 lowertile;
 
+  lv->solids = fn_level_solids_create();
+
   lv->environment = env;
 
   lv->animated_frames = 0;
@@ -90,7 +92,7 @@ fn_level_t * fn_level_load(FnFile* file,
 
     if ((tilenr >= 4) && (tilenr <= 0x2fe0)) {
       lv->tiles[y][x] = tilenr / 0x20;
-      lv->solid[y][x] = (tilenr >= 0x1800);
+      fn_level_solids_set(lv->solids, x, y, (tilenr >= 0x1800));
     }
 
     fn_hero_t * hero = fn_environment_get_hero(env);
@@ -155,7 +157,7 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x1C00: /* center conveyor */
         lv->tiles[y][x] = SOLID_BLACK; 
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
 
         /*
         fn_level_add_initial_actor(lv,
@@ -170,27 +172,27 @@ fn_level_t * fn_level_load(FnFile* file,
           FN_LEVEL_ACTOR_BOX_GREY_EMPTY, x, y);
         break;
       case 0x3001: /* lift */
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
           FN_LEVEL_ACTOR_LIFT, x, y);
         break;
       case 0x3002: /* left end of left-moving conveyor */
         lv->tiles[y][x] = SOLID_CONVEYORBELT_LEFTEND;
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         break;
       case 0x3003: /* right end of left-moving conveyor */
         lv->tiles[y][x] = SOLID_BLACK; 
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_CONVEYOR_LEFTMOVING_RIGHTEND, x, y);
         break;
       case 0x3004: /* left end of right-moving conveyor */
         lv->tiles[y][x] = SOLID_CONVEYORBELT_LEFTEND;
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         break;
       case 0x3005: /* right end of right-moving conveyor */
         lv->tiles[y][x] = SOLID_BLACK; 
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_CONVEYOR_RIGHTMOVING_RIGHTEND, x, y);
         break;
@@ -288,7 +290,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_WATER, x, y);
         break;
@@ -380,7 +382,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_ACCESS_CARD_DOOR, x, y);
         break;
@@ -436,7 +438,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_ACME, x, y);
         break;
@@ -632,7 +634,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_DOOR_RED, x, y);
         break;
@@ -640,7 +642,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_DOOR_GREEN, x, y);
         break;
@@ -648,7 +650,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_DOOR_BLUE, x, y);
         break;
@@ -656,7 +658,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
-        lv->solid[y][x] = 1;
+        fn_level_solids_set(lv->solids, x, y, true);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_DOOR_PINK, x, y);
         break;
@@ -824,6 +826,8 @@ void fn_level_free(fn_level_t * lv)
   SDL_FreeSurface(lv->surface);
   SDL_FreeSurface(lv->surface_fixed);
 
+  fn_level_solids_free(lv->solids);
+
   free(lv);
 }
 
@@ -865,7 +869,7 @@ Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y)
   if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
     return 1;
   }
-  return lv->solid[y][x];
+  return fn_level_solids_get(lv->solids, x, y);
 }
 
 /* --------------------------------------------------------------- */
@@ -875,7 +879,7 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
   if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
     return;
   }
-  lv->solid[y][x] = solid;
+  fn_level_solids_set(lv->solids, x, y, solid);
 }
 
 /* --------------------------------------------------------------- */
