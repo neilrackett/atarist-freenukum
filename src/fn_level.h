@@ -202,7 +202,7 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
  *
  * @return 1 if solid, else 0.
  */
-Uint8 fn_level_is_solid(fn_level_t * lv, int x, int y);
+Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y);
 
 /* --------------------------------------------------------------- */
 
@@ -394,7 +394,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
  *
  * @return 1 if the rectangle would collide, otherwise 0.
  */
-Uint8 fn_level_solid_collides(fn_level_t * lv, FnGeometry rect);
+Uint8 fn_level_solid_collides(const fn_level_t * lv, FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 

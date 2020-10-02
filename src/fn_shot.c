@@ -35,11 +35,10 @@
 
 /* --------------------------------------------------------------- */
 
-fn_shot_t * fn_shot_create(fn_level_t * level,
+fn_shot_t * fn_shot_create(
     Uint16 x, Uint16 y, fn_horizontal_direction_e direction)
 {
   fn_shot_t * shot = malloc(sizeof(fn_shot_t));
-  shot->level = level;
   shot->position.w = 4;
   shot->position.h = FN_TILE_HEIGHT - 4;
 
@@ -63,7 +62,7 @@ void fn_shot_free(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_shot_act(fn_shot_t * shot)
+Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level)
 {
   shot->counter++;
   shot->counter %= 4;
@@ -76,12 +75,12 @@ Uint8 fn_shot_act(fn_shot_t * shot)
   if (shot->countdown == 2) {
     if (shot->direction == fn_horizontal_direction_right) {
       /* push twice so that every position gets covered. */
-      fn_shot_push(shot, FN_HALFTILE_WIDTH);
-      fn_shot_push(shot, FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, FN_HALFTILE_WIDTH);
     } else {
       /* push twice so that every position gets covered. */
-      fn_shot_push(shot, -FN_HALFTILE_WIDTH);
-      fn_shot_push(shot, -FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH);
     }
   }
   return shot->is_alive;
@@ -89,13 +88,11 @@ Uint8 fn_shot_act(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-void fn_shot_blit(fn_shot_t * shot)
+void fn_shot_blit(fn_shot_t * shot, SDL_Surface * target, const FnTileCache * tilecache)
 {
   if (shot->is_alive) {
-    SDL_Surface * target = fn_level_get_surface(shot->level);
     FnGeometry destrect;
-    const FnTileCache * tc = fn_level_get_tilecache(shot->level);
-    const FnTexture * tile = fn_tilecache_get_tile(tc,
+    const FnTexture * tile = fn_tilecache_get_tile(tilecache,
         OBJ_SHOT+shot->counter);
     destrect.x =
       (shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH);
@@ -148,21 +145,6 @@ Uint16 fn_shot_get_h(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-fn_level_t * fn_shot_get_level(fn_shot_t * shot)
-{
-  return shot->level;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_shot_overlaps_actor(fn_shot_t * shot, fn_level_actor_t * actor)
-{
-  FnGeometry actorpos = fn_level_actor_get_position(actor);
-  return fn_geometry_overlaps(actorpos, shot->position);
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_shot_touches_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
@@ -180,19 +162,19 @@ void fn_shot_set_draw_collision_bounds(
 /* --------------------------------------------------------------- */
 
 Uint8 fn_shot_hits_solid(
-    fn_shot_t * shot)
+    fn_shot_t * shot, const fn_level_t * level)
 {
-  return fn_level_solid_collides(shot->level, shot->position);
+  return fn_level_solid_collides(level, shot->position);
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_shot_push(fn_shot_t * shot, Sint16 offset)
+void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
 {
   if (shot->countdown == 2) {
     shot->position.x += offset;
     fn_list_t * iter = NULL;
-    for (iter = fn_list_first(shot->level->actors);
+    for (iter = fn_list_first(level->actors);
         iter != NULL && shot->countdown != 1;
         iter = fn_list_next(iter)) {
       fn_level_actor_t * actor = (fn_level_actor_t *)iter->data;
@@ -205,10 +187,10 @@ void fn_shot_push(fn_shot_t * shot, Sint16 offset)
     }
   }
   if (shot->countdown == 2) {
-    if (fn_shot_hits_solid(shot)) {
+    if (fn_shot_hits_solid(shot, level)) {
       shot->countdown = 1;
 
-      fn_level_add_actor(shot->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_EXPLOSION,
           shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH,
           shot->position.y);

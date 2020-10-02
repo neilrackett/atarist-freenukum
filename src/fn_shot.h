@@ -45,11 +45,6 @@ typedef struct fn_shot_t fn_shot_t;
  */
 struct fn_shot_t {
   /**
-   * The level inside which the shot is located.
-   */
-  fn_level_t * level;
-
-  /**
    * The position of the shot.
    */
   FnGeometry position;
@@ -92,7 +87,7 @@ struct fn_shot_t {
  *
  * @return  The newly created shot.
  */
-fn_shot_t * fn_shot_create(fn_level_t * level,
+fn_shot_t * fn_shot_create(
     Uint16 x, Uint16 y, fn_horizontal_direction_e direction);
 
 /* --------------------------------------------------------------- */
@@ -113,7 +108,7 @@ void fn_shot_free(fn_shot_t * shot);
  *
  * @return 0 if shot is obsolete, 1 if it is still alive.
  */
-Uint8 fn_shot_act(fn_shot_t * shot);
+Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -122,7 +117,7 @@ Uint8 fn_shot_act(fn_shot_t * shot);
  *
  * @param  shot       The shot to delete.
  */
-void fn_shot_blit(fn_shot_t * shot);
+void fn_shot_blit(fn_shot_t * shot, SDL_Surface * target, const FnTileCache * tilecache);
 
 /* --------------------------------------------------------------- */
 
@@ -173,29 +168,6 @@ Uint16 fn_shot_get_h(fn_shot_t * shot);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the level inside which a shot resides.
- * 
- * @param  shot  The shot.
- *
- * @return The level inside the shot resides.
- */
-fn_level_t * fn_shot_get_level(fn_shot_t * shot);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if a shot overlaps an actor.
- *
- * @param  shot   The shot.
- * @param  actor  The actor.
- *
- * @return 1 if they overlap, otherwise 0.
- */
-Uint8 fn_shot_overlaps_actor(fn_shot_t * shot, fn_level_actor_t * actor);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Check if a shot touches an actor.
  *
  * @param  shot   The shot.
@@ -226,7 +198,8 @@ void fn_shot_set_draw_collision_bounds(
  * @return 1 if the shot hits solid tile, otherwise 0.
  */
 Uint8 fn_shot_hits_solid(
-    fn_shot_t * shot);
+    fn_shot_t * shot,
+    const fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -237,7 +210,7 @@ Uint8 fn_shot_hits_solid(
  * @param  shot    The shot.
  * @param  offset  The offset to which the shot gets pushed.
  */
-void fn_shot_push(fn_shot_t * shot, Sint16 offset);
+void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset);
 
 /* --------------------------------------------------------------- */
 

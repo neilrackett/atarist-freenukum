@@ -860,7 +860,7 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_is_solid(fn_level_t * lv, int x, int y)
+Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y)
 {
   if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
     return 1;
@@ -1000,7 +1000,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       Uint16 x = fn_shot_get_x(shot) / FN_TILE_WIDTH;
       Uint16 y = fn_shot_get_y(shot) / FN_TILE_HEIGHT;
       if (x > x_start && y > y_start && x < x_end && y < y_end) {
-        fn_shot_blit(shot);
+        fn_shot_blit(shot, lv->surface, tilecache);
       } else {
         fn_shot_gets_out_of_sight(shot);
       }
@@ -1062,7 +1062,7 @@ int fn_level_act(fn_level_t * lv) {
     fn_shot_t * shot = (fn_shot_t *)iter->data;
 
     if (shot != NULL) {
-      res = fn_shot_act(shot);
+      res = fn_shot_act(shot, lv);
       if (res == 0) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1182,15 +1182,14 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
     Uint16 x,
     Uint16 y)
 {
-  fn_shot_t * shot = fn_shot_create(lv,
-      x, y, direction);
+  fn_shot_t * shot = fn_shot_create(x, y, direction);
 
   int addition = (direction == fn_horizontal_direction_right ?
       1 : -1);
 
   lv->shots = fn_list_append(lv->shots, shot);
 
-  fn_shot_push(shot, addition * FN_HALFTILE_WIDTH);
+  fn_shot_push(shot, lv, addition * FN_HALFTILE_WIDTH);
 
   Uint8 draw_collision_bounds =
     fn_environment_get_draw_collision_bounds(lv->environment);
@@ -1265,7 +1264,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_solid_collides(fn_level_t * lv, FnGeometry rect)
+Uint8 fn_level_solid_collides(const fn_level_t * lv, FnGeometry rect)
 {
   Uint16 i = 0;
   Uint16 j = 0;
