@@ -219,7 +219,7 @@ struct fn_level_actor_t {
   /**
    * The current position of the actor.
    */
-  SDL_Rect position;
+  FnGeometry position;
 
   /**
    * Private data - depends on type.
@@ -457,7 +457,7 @@ Uint8 fn_level_actor_in_foreground(fn_level_actor_t * actor);
  *
  * @return A rectangle containing the current position of the actor.
  */
-SDL_Rect * fn_level_actor_get_position(fn_level_actor_t * actor);
+FnGeometry fn_level_actor_get_position(fn_level_actor_t * actor);
 
 /* --------------------------------------------------------------- */
 

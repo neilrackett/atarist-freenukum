@@ -395,8 +395,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
  *
  * @return 1 if the rectangle would collide, otherwise 0.
  */
-Uint8 fn_level_solid_collides(fn_level_t * lv,
-    SDL_Rect * rect);
+Uint8 fn_level_solid_collides(fn_level_t * lv, FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 
@@ -410,8 +409,8 @@ Uint8 fn_level_solid_collides(fn_level_t * lv,
  * 
  * @return 1 if the rectangle stands on solid ground, otherwise 0.
  */
-Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
-    SDL_Rect * rect);
+Uint8 fn_level_stands_on_solid_ground_completely(
+        fn_level_t * lv, FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 
@@ -426,7 +425,7 @@ Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
  * @return 1 if the rectangle stands on solid ground, otherwise 0.
  */
 Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
-    SDL_Rect * rect);
+    FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 
@@ -443,7 +442,7 @@ Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
  * @return 1 if the push was successful, otherwise 0.
  */
 Uint8 fn_level_push_rect_standing_on_solid_ground(
-    fn_level_t * level, SDL_Rect * rect, Sint8 offset, Uint8 gravity);
+    fn_level_t * level, FnGeometry rect, Sint8 offset, Uint8 gravity);
 
 /* --------------------------------------------------------------- */
 
@@ -460,7 +459,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
  *         (maximally the same value as dist).
  */
 Uint8 fn_level_rect_fall_down(
-    fn_level_t * level, SDL_Rect * rect, Uint8 dist);
+    fn_level_t * level, FnGeometry rect, Uint8 dist);
 
 /* --------------------------------------------------------------- */
 

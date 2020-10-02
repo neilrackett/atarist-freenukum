@@ -178,7 +178,7 @@ void fn_hero_blit(fn_hero_t * hero,
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   if (fn_environment_get_draw_collision_bounds(env)) {
-    fn_collision_rect_draw(target, &(hero->position));
+    fn_collision_rect_draw(target, hero->position);
 
     Uint16 i = 0;
     Uint16 j = 0;
@@ -194,13 +194,13 @@ void fn_hero_blit(fn_hero_t * hero,
         if (level != NULL) {
           if (fn_level_is_solid(level, tile_x, tile_y))
           {
-            SDL_Rect obstacle;
+            FnGeometry obstacle;
             obstacle.x = tile_x * FN_TILE_WIDTH;
             obstacle.y = tile_y * FN_TILE_HEIGHT;
             obstacle.w = FN_TILE_WIDTH;
             obstacle.h = FN_TILE_HEIGHT;
 
-            fn_collision_rect_draw(target, &obstacle);
+            fn_collision_rect_draw(target, obstacle);
           }
         }
       }
@@ -663,7 +663,7 @@ int fn_hero_would_collide(fn_hero_t * hero, void * level,
     return 1;
   }
 
-  SDL_Rect herorect;
+  FnGeometry herorect;
   herorect.x = x;
   herorect.y = y;
   herorect.w = hero->position.w;
@@ -682,13 +682,13 @@ int fn_hero_would_collide(fn_hero_t * hero, void * level,
       Uint16 tile_y = j / FN_TILE_HEIGHT;
       if (fn_level_is_solid(lv, tile_x, tile_y))
       {
-        SDL_Rect obstacle;
+        FnGeometry obstacle;
         obstacle.x = tile_x * FN_TILE_WIDTH;
         obstacle.y = tile_y * FN_TILE_HEIGHT;
         obstacle.w = FN_TILE_WIDTH;
         obstacle.h = FN_TILE_HEIGHT;
 
-        if (fn_collision_overlap_rect_rect(&herorect, &obstacle)) {
+        if (fn_collision_overlap_rect_rect(herorect, obstacle)) {
           return 1;
         }
       }
@@ -774,9 +774,9 @@ void fn_hero_set_fetched_letter(fn_hero_t * hero, Uint8 letter)
 
 /* --------------------------------------------------------------- */
 
-SDL_Rect * fn_hero_get_position(fn_hero_t * hero)
+FnGeometry fn_hero_get_position(fn_hero_t * hero)
 {
-  return &(hero->position);
+  return hero->position;
 }
 
 /* --------------------------------------------------------------- */
@@ -865,27 +865,26 @@ Sint8 fn_hero_push_vertically(
 
 int fn_hero_collides_with_solid(fn_hero_t * hero, fn_level_t * level)
 {
-  SDL_Rect * pos = fn_hero_get_position(hero);
+  FnGeometry pos = fn_hero_get_position(hero);
   Uint16 i = 0;
   Uint16 j = 0;
-  for (i = pos->x - FN_TILE_WIDTH;
-      i < pos->x + FN_TILE_WIDTH * 2;
+  for (i = pos.x - FN_TILE_WIDTH;
+      i < pos.x + FN_TILE_WIDTH * 2;
       i += FN_TILE_WIDTH) {
-    for (j = pos->y - FN_TILE_HEIGHT;
-        j < pos->y + FN_TILE_HEIGHT * 3;
+    for (j = pos.y - FN_TILE_HEIGHT;
+        j < pos.y + FN_TILE_HEIGHT * 3;
         j += FN_TILE_HEIGHT) {
       Uint16 tile_x = i / FN_TILE_WIDTH;
       Uint16 tile_y = j / FN_TILE_HEIGHT;
       if (fn_level_is_solid(level, tile_x, tile_y))
       {
-        SDL_Rect obstacle;
+        FnGeometry obstacle;
         obstacle.x = tile_x * FN_TILE_WIDTH;
         obstacle.y = tile_y * FN_TILE_HEIGHT;
         obstacle.w = FN_TILE_WIDTH;
         obstacle.h = FN_TILE_HEIGHT;
 
-        if (fn_collision_overlap_rect_rect(
-              pos, &obstacle)) {
+        if (fn_collision_overlap_rect_rect(pos, obstacle)) {
           return 1;
         }
       }

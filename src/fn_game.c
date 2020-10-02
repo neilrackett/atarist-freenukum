@@ -556,13 +556,13 @@ int fn_game_start_in_level(
               break;
             case fn_event_heromoved:
               {
-                SDL_Rect * heropos = fn_hero_get_position(hero);
-                srcrect.x = heropos->x + heropos->w / 2 -
+                FnGeometry heropos = fn_hero_get_position(hero);
+                srcrect.x = heropos.x + heropos.w / 2 -
                    FN_LEVELWINDOW_WIDTH * FN_TILE_WIDTH / 2;
                 if (srcrect.x < 0) {
                   srcrect.x = 0;
                 }
-                srcrect.y = heropos->y -
+                srcrect.y = heropos.y -
                    FN_LEVELWINDOW_HEIGHT * FN_TILE_HEIGHT / 2;
                 if (srcrect.y < 0) {
                   srcrect.y = 0;

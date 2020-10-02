@@ -121,7 +121,7 @@ struct fn_hero_t {
   /**
    * The position and bounds of the hero.
    */
-  SDL_Rect position;
+  FnGeometry position;
 
   /**
    * The score of the hero.
@@ -544,7 +544,7 @@ void fn_hero_set_fetched_letter(fn_hero_t * hero, Uint8 letter);
  *
  * @return The current position.
  */
-SDL_Rect * fn_hero_get_position(fn_hero_t * hero);
+FnGeometry fn_hero_get_position(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 

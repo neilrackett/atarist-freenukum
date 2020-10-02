@@ -1133,7 +1133,7 @@ void fn_level_hero_interact_start(fn_level_t * lv)
     if (fn_level_actor_hero_can_interact(actor)) {
 
       fn_hero_t * hero = fn_level_get_hero(lv);
-      SDL_Rect * heropos = fn_hero_get_position(hero);
+      FnGeometry heropos = fn_hero_get_position(hero);
 
       if (fn_collision_touch_rect_rect(heropos,
             fn_level_actor_get_position(actor)))
@@ -1239,9 +1239,9 @@ void fn_level_fire_shot(fn_level_t * lv)
   fn_hero_t * hero = fn_level_get_hero(lv);
 
   if (lv->num_shots < fn_hero_get_firepower(hero)) {
-    SDL_Rect * position = fn_hero_get_position(hero);
+    FnGeometry position = fn_hero_get_position(hero);
 
-    fn_level_add_shot(lv, hero->direction, position->x, position->y);
+    fn_level_add_shot(lv, hero->direction, position.x, position.y);
     lv->num_shots++;
   }
 }
@@ -1266,26 +1266,25 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_solid_collides(fn_level_t * lv,
-    SDL_Rect * rect)
+Uint8 fn_level_solid_collides(fn_level_t * lv, FnGeometry rect)
 {
   Uint16 i = 0;
   Uint16 j = 0;
-  SDL_Rect solidrect;
+  FnGeometry solidrect;
   solidrect.w = FN_TILE_WIDTH;
   solidrect.h = FN_TILE_HEIGHT;
 
-  for (i = rect->x / FN_TILE_WIDTH;
-      i < (rect->x + rect->w) / FN_TILE_WIDTH + 1;
+  for (i = rect.x / FN_TILE_WIDTH;
+      i < (rect.x + rect.w) / FN_TILE_WIDTH + 1;
       i++) {
-    for (j = rect->y / FN_TILE_WIDTH;
-        j < (rect->y + rect->h) / FN_TILE_HEIGHT + 1;
+    for (j = rect.y / FN_TILE_WIDTH;
+        j < (rect.y + rect.h) / FN_TILE_HEIGHT + 1;
         j++)
     {
       if (fn_level_is_solid(lv, i, j)) {
         solidrect.x = i * FN_TILE_WIDTH;
         solidrect.y = j * FN_TILE_HEIGHT;
-        if (fn_collision_overlap_rect_rect(&solidrect, rect)) {
+        if (fn_collision_overlap_rect_rect(solidrect, rect)) {
           return 1;
         }
       }
@@ -1297,15 +1296,15 @@ Uint8 fn_level_solid_collides(fn_level_t * lv,
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
-    SDL_Rect * rect)
+    FnGeometry rect)
 {
-  if ((rect->y + rect->h) % FN_TILE_HEIGHT) {
+  if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
     return 0;
   }
   Uint16 i = 0;
-  Uint16 j = (rect->y + rect->h) / FN_TILE_HEIGHT;
-  for (i = rect->x / FN_TILE_WIDTH;
-      i < (rect->x + rect->w - 1) / FN_TILE_WIDTH + 1;
+  Uint16 j = (rect.y + rect.h) / FN_TILE_HEIGHT;
+  for (i = rect.x / FN_TILE_WIDTH;
+      i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
       i++)
   {
     if (!fn_level_is_solid(lv, i, j)) {
@@ -1318,16 +1317,16 @@ Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
 /* --------------------------------------------------------------- */
 
 
-Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
-    SDL_Rect * rect)
+Uint8 fn_level_stands_on_solid_ground_partially(
+        fn_level_t * lv, FnGeometry rect)
 {
-  if ((rect->y + rect->h) % FN_TILE_HEIGHT) {
+  if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
     return 0;
   }
   Uint16 i = 0;
-  Uint16 j = (rect->y + rect->h) / FN_TILE_HEIGHT;
-  for (i = rect->x / FN_TILE_WIDTH;
-      i < (rect->x + rect->w - 1) / FN_TILE_WIDTH + 1;
+  Uint16 j = (rect.y + rect.h) / FN_TILE_HEIGHT;
+  for (i = rect.x / FN_TILE_WIDTH;
+      i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
       i++)
   {
     if (fn_level_is_solid(lv, i, j)) {
@@ -1340,7 +1339,7 @@ Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_push_rect_standing_on_solid_ground(
-    fn_level_t * level, SDL_Rect * rect, Sint8 offset,
+    fn_level_t * level, FnGeometry rect, Sint8 offset,
     Uint8 gravity)
 {
   if (fn_level_solid_collides(level, rect)) {
@@ -1355,11 +1354,11 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
   Uint8 stood_solid = fn_level_stands_on_solid_ground_completely(
       level, rect);
 
-  rect->x += offset;
+  rect.x += offset;
 
   if (fn_level_solid_collides(level, rect)) {
     /* we collide with something, so we revert to original position */
-    rect->x -= offset;
+    rect.x -= offset;
     return 0;
   }
 
@@ -1369,7 +1368,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
     return 1;
   } else if (stood_solid) {
     /* we stood on solid ground before, but do no longer now. */
-    rect->x -= offset;
+    rect.x -= offset;
     return 0;
   } else {
     /* we walk on partial solid ground as long as possible. */
@@ -1380,7 +1379,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_rect_fall_down(
-    fn_level_t * level, SDL_Rect * rect, Uint8 dist)
+    fn_level_t * level, FnGeometry rect, Uint8 dist)
 {
   if (fn_level_solid_collides(level, rect)) {
     /* can't fall down because collides with solid ground */
@@ -1393,7 +1392,7 @@ Uint8 fn_level_rect_fall_down(
   Uint8 i = 0;
   while (i < dist) {
     /* check how far we can fall down */
-    rect->y++;
+    rect.y++;
     if (fn_level_stands_on_solid_ground_partially(level, rect)) {
       return i;
     }

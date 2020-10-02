@@ -36,6 +36,7 @@ typedef struct fn_shot_t fn_shot_t;
 /* --------------------------------------------------------------- */
 
 #include "fn_level.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -51,7 +52,7 @@ struct fn_shot_t {
   /**
    * The position of the shot.
    */
-  SDL_Rect position;
+  FnGeometry position;
 
   /**
    * Flag that indicates if the shot is (still) alive.
@@ -258,7 +259,7 @@ Uint8 fn_shot_is_alive(fn_shot_t * shot);
  *
  * @return  The current position of the shot.
  */
-SDL_Rect * fn_shot_get_position(fn_shot_t * shot);
+FnGeometry fn_shot_get_position(fn_shot_t * shot);
 
 /* --------------------------------------------------------------- */
 

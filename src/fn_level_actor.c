@@ -1010,7 +1010,7 @@ void fn_level_actor_function_firewheelbot_act(fn_level_actor_t * actor)
           -1 : 1);
     if (!fn_level_push_rect_standing_on_solid_ground(
         actor->level,
-        &(actor->position),
+        actor->position,
         direction * FN_HALFTILE_WIDTH / 2,
         FN_HALFTILE_HEIGHT))
     {
@@ -1348,10 +1348,9 @@ void fn_level_actor_function_lift_interact_start(fn_level_actor_t * actor)
   fn_level_actor_lift_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
-  SDL_Rect * heropos = fn_hero_get_position(hero);
-  if (fn_collision_touch_rect_rect(
-        heropos, &(actor->position)) &&
-      heropos->y + heropos->h == actor->position.y) {
+  FnGeometry heropos = fn_hero_get_position(hero);
+  if (fn_collision_touch_rect_rect(heropos, actor->position) &&
+      heropos.y + heropos.h == actor->position.y) {
     data->state = fn_level_actor_lift_state_ascending;
   }
 }
@@ -1368,10 +1367,10 @@ void fn_level_actor_function_lift_interact_end(fn_level_actor_t * actor)
   fn_level_actor_lift_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
-  SDL_Rect * heropos = fn_hero_get_position(hero);
+  FnGeometry heropos = fn_hero_get_position(hero);
   if (fn_collision_touch_rect_rect(
-        heropos, &(actor->position)) &&
-      heropos->x == actor->position.x) {
+        heropos, actor->position) &&
+      heropos.x == actor->position.x) {
     data->state = fn_level_actor_lift_state_idle;
   } else {
     data->state = fn_level_actor_lift_state_descending;
@@ -1396,10 +1395,9 @@ void fn_level_actor_function_lift_act(fn_level_actor_t * actor)
        actor->position.h > FN_TILE_HEIGHT))
   {
     /* check if hero leaves elevator. */
-    SDL_Rect * heropos = fn_hero_get_position(hero);
-    if (!fn_collision_touch_rect_rect(heropos,
-          &(actor->position)) ||
-        actor->position.x != heropos->x) {
+    FnGeometry heropos = fn_hero_get_position(hero);
+    if (!fn_collision_touch_rect_rect(heropos, actor->position) ||
+        actor->position.x != heropos.x) {
       data->state = fn_level_actor_lift_state_descending;
     }
   }
@@ -3474,7 +3472,7 @@ void fn_level_actor_function_rocket_act(fn_level_actor_t * actor)
   }
   if (data->state == fn_level_actor_rocket_state_flying) {
     actor->position.y -= FN_HALFTILE_HEIGHT;
-    if (fn_level_solid_collides(actor->level, &(actor->position))) {
+    if (fn_level_solid_collides(actor->level, actor->position)) {
       Uint16 tile_x = actor->position.x / FN_TILE_WIDTH;
       Uint16 tile_y = actor->position.y / FN_TILE_HEIGHT;
       fn_level_set_solid(actor->level, tile_x, tile_y, 0);
@@ -4396,14 +4394,14 @@ void fn_level_actor_function_conveyor_act(fn_level_actor_t * actor)
   }
 
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  SDL_Rect * heropos = fn_hero_get_position(hero);
+  FnGeometry heropos = fn_hero_get_position(hero);
 
   int direction = (
       data->direction == fn_horizontal_direction_right ?  1 : -1);
   if (
-      heropos->x + heropos->w > actor->position.x &&
-      heropos->x < actor->position.x + actor->position.w &&
-      heropos->y + heropos->h == actor->position.y) {
+      heropos.x + heropos.w > actor->position.x &&
+      heropos.x < actor->position.x + actor->position.w &&
+      heropos.y + heropos.h == actor->position.y) {
     fn_hero_push_horizontally(
         hero, actor->level, direction * FN_HALFTILE_WIDTH);
   }
@@ -5582,7 +5580,7 @@ void fn_level_actor_function_fan_act(fn_level_actor_t * actor)
   if (data->running < 10 && data->running > 0) {
     data->running--;
   } else if (data->running == 10) {
-    SDL_Rect * heropos = fn_hero_get_position(hero);
+    FnGeometry heropos = fn_hero_get_position(hero);
 
     if (fn_collision_overlap_vertical_rect_area(heropos,
           actor->position.y, actor->position.h)) {
@@ -8024,10 +8022,8 @@ void fn_level_actor_free(fn_level_actor_t * actor)
 int fn_level_actor_touches_hero(fn_level_actor_t * actor)
 {
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  return(
-      fn_collision_overlap_rect_area(
-        fn_hero_get_position(hero),
-        actor->position.x, actor->position.y, actor->position.w, actor->position.h));
+  return fn_collision_overlap_rect_rect(
+        fn_hero_get_position(hero), actor->position);
 }
 
 /* --------------------------------------------------------------- */
@@ -8080,8 +8076,8 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
      * which the hero stands.
      */
     fn_hero_t * hero = fn_level_get_hero(actor->level);
-    SDL_Rect * heropos = fn_hero_get_position(hero);
-    return (actor->position.x == heropos->x);
+    FnGeometry heropos = fn_hero_get_position(hero);
+    return (actor->position.x == heropos.x);
   }
   fn_level_actor_function_t func =
     fn_level_actor_functions[
@@ -8205,9 +8201,9 @@ Uint8 fn_level_actor_in_foreground(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-SDL_Rect * fn_level_actor_get_position(fn_level_actor_t * actor)
+FnGeometry fn_level_actor_get_position(fn_level_actor_t * actor)
 {
-  return &(actor->position);
+  return actor->position;
 }
 
 /* --------------------------------------------------------------- */

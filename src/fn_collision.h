@@ -35,6 +35,10 @@
 
 /* --------------------------------------------------------------- */
 
+#include "rusted.h"
+
+/* --------------------------------------------------------------- */
+
 /**
  * Check if two rectangles overlap.
  *
@@ -43,7 +47,7 @@
  *
  * @return 1 if the rectangles overlap, otherwise 0.
  */
-int fn_collision_overlap_rect_rect(SDL_Rect * r1, SDL_Rect * r2);
+int fn_collision_overlap_rect_rect(FnGeometry r1, FnGeometry r2);
 
 /* --------------------------------------------------------------- */
 
@@ -74,11 +78,11 @@ int fn_collision_overlap_area_area(
  * @param  x     The x coordinate of the area.
  * @param  y     The y coordinate of the area.
  * @param  w     The width of the area.
- * @param  h     The height of the area.
+k* @param  h     The height of the area.
  *
  * @return 1 if the rectangle overalps the area, otherwise 0.
  */
-int fn_collision_overlap_rect_area(SDL_Rect * rect,
+int fn_collision_overlap_rect_area(FnGeometry rect,
     Uint32 x, Uint32 y, Uint32 w, Uint32 h);
 
 /* --------------------------------------------------------------- */
@@ -114,7 +118,7 @@ int fn_collision_touch_area_area(
  *
  * @return 1 if the rectangle and the area touch, otherwise 0.
  */
-int fn_collision_touch_rect_area(SDL_Rect * rect,
+int fn_collision_touch_rect_area(FnGeometry rect,
     Uint32 x, Uint32 y, Uint32 w, Uint32 h);
 
 /* --------------------------------------------------------------- */
@@ -127,8 +131,7 @@ int fn_collision_touch_rect_area(SDL_Rect * rect,
  *
  * @return 1 if the rectangles touch, otherwise 0.
  */
-int fn_collision_touch_rect_rect(SDL_Rect * rect1,
-    SDL_Rect * rect2);
+int fn_collision_touch_rect_rect(FnGeometry rect1, FnGeometry rect2);
 
 /* --------------------------------------------------------------- */
 
@@ -157,7 +160,7 @@ int fn_collision_distance_horizontal_area_area(
  * @return The distance between the two areas.
  */
 int fn_collision_distance_horizontal_rect_area(
-    SDL_Rect * rect, Uint32 x, Uint32 w);
+    FnGeometry rect, Uint32 x, Uint32 w);
 
 /* --------------------------------------------------------------- */
 
@@ -186,7 +189,7 @@ int fn_collision_overlap_vertical_area_area(
  * @return The distance between the two areas.
  */
 int fn_collision_overlap_vertical_rect_area(
-    SDL_Rect * rect, Uint32 y, Uint32 h);
+    FnGeometry rect, Uint32 y, Uint32 h);
 
 /* --------------------------------------------------------------- */
 
@@ -215,7 +218,7 @@ int fn_collision_distance_vertical_area_area(
  * @return The distance between the two areas.
  */
 int fn_collision_distance_vertical_rect_area(
-    SDL_Rect * rect, Uint32 y, Uint32 h);
+    FnGeometry rect, Uint32 y, Uint32 h);
 
 /* --------------------------------------------------------------- */
 
@@ -240,7 +243,7 @@ void fn_collision_area_draw(SDL_Surface * destination,
  * @param  rect  The rectangle.
  */
 void fn_collision_rect_draw(SDL_Surface * destination,
-    SDL_Rect * rect);
+    FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 

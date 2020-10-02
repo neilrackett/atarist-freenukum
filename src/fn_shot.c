@@ -106,7 +106,7 @@ void fn_shot_blit(fn_shot_t * shot)
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
     if (shot->draw_collision_bounds) {
-      fn_collision_rect_draw(target, &(shot->position));
+      fn_collision_rect_draw(target, shot->position);
     }
   }
 }
@@ -157,16 +157,16 @@ fn_level_t * fn_shot_get_level(fn_shot_t * shot)
 
 Uint8 fn_shot_overlaps_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 {
-  SDL_Rect * actorpos = fn_level_actor_get_position(actor);
-  return fn_collision_overlap_rect_rect(actorpos, &(shot->position));
+  FnGeometry actorpos = fn_level_actor_get_position(actor);
+  return fn_collision_overlap_rect_rect(actorpos, shot->position);
 }
 
 /* --------------------------------------------------------------- */
 
 Uint8 fn_shot_touches_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 {
-  SDL_Rect * actorpos = fn_level_actor_get_position(actor);
-  return fn_collision_touch_rect_rect(actorpos, &(shot->position));
+  FnGeometry actorpos = fn_level_actor_get_position(actor);
+  return fn_collision_touch_rect_rect(actorpos, shot->position);
 }
 
 /* --------------------------------------------------------------- */
@@ -182,7 +182,7 @@ void fn_shot_set_draw_collision_bounds(
 Uint8 fn_shot_hits_solid(
     fn_shot_t * shot)
 {
-  return fn_level_solid_collides(shot->level, &(shot->position));
+  return fn_level_solid_collides(shot->level, shot->position);
 }
 
 /* --------------------------------------------------------------- */
@@ -225,9 +225,9 @@ Uint8 fn_shot_is_alive(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-SDL_Rect * fn_shot_get_position(fn_shot_t * shot)
+FnGeometry fn_shot_get_position(fn_shot_t * shot)
 {
-  return &(shot->position);
+  return shot->position;
 }
 
 /* --------------------------------------------------------------- */
