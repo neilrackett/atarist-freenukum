@@ -1,6 +1,5 @@
 pub mod backdrop;
 pub mod borders;
-pub mod collision;
 pub mod file;
 pub mod geometry;
 pub mod infobox;
