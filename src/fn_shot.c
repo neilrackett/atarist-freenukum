@@ -181,7 +181,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
-          fn_level_actor_shot(actor)) {
+          fn_level_actor_shot(actor, level)) {
         shot->countdown = 1;
       }
     }

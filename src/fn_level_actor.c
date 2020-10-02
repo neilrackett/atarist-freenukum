@@ -119,7 +119,11 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  *
  * @param  actor The animation actor.
  */
-void fn_level_actor_function_simpleanimation_create(fn_level_actor_t * actor)
+void fn_level_actor_function_simpleanimation_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_simpleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_simpleanimation_data_t));
@@ -230,7 +234,11 @@ void fn_level_actor_function_simpleanimation_create(fn_level_actor_t * actor)
  *
  * @param  actor  The animation actor.
  */
-void fn_level_actor_function_simpleanimation_free(fn_level_actor_t * actor)
+void fn_level_actor_function_simpleanimation_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_simpleanimation_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -244,7 +252,11 @@ void fn_level_actor_function_simpleanimation_free(fn_level_actor_t * actor)
  *
  * @param  actor  The animation actor.
  */
-void fn_level_actor_function_simpleanimation_act(fn_level_actor_t * actor)
+void fn_level_actor_function_simpleanimation_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_simpleanimation_data_t * data = actor->data;
   data->current_frame++;
@@ -258,13 +270,16 @@ void fn_level_actor_function_simpleanimation_act(fn_level_actor_t * actor)
  *
  * @param  actor  The animation actor.
  */
-void fn_level_actor_function_simpleanimation_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_simpleanimation_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_simpleanimation_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -296,7 +311,11 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_jumping_create(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_jumping_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_jumping_data_t * data = malloc(
       sizeof(fn_level_actor_redball_jumping_data_t));
@@ -310,10 +329,13 @@ void fn_level_actor_function_redball_jumping_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_jumping_free(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_jumping_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_jumping_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
@@ -321,24 +343,32 @@ void fn_level_actor_function_redball_jumping_free(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(
-    fn_level_actor_t * actor)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_increase_hurting_actors(hero, actor);
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_end(
-    fn_level_actor_t * actor)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_jumping_act(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_jumping_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_jumping_data_t * data = actor->data;
 
@@ -382,14 +412,17 @@ void fn_level_actor_function_redball_jumping_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_jumping_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_jumping_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_jumping_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -400,7 +433,11 @@ void fn_level_actor_function_redball_jumping_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_jumping_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_jumping_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   /*
    * Do nothing. This function just exists so that the red
@@ -427,7 +464,11 @@ typedef struct fn_level_actor_redball_lying_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_lying_create(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_lying_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_lying_data_t * data = malloc(
       sizeof(fn_level_actor_redball_lying_data_t));
@@ -441,10 +482,13 @@ void fn_level_actor_function_redball_lying_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_lying_free(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_lying_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
@@ -452,10 +496,12 @@ void fn_level_actor_function_redball_lying_free(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_hero_touch_start(
-    fn_level_actor_t * actor)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (!data->touching_hero) {
     data->touching_hero = 1;
     fn_hero_increase_hurting_actors(hero, actor);
@@ -465,10 +511,12 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_act(
-    fn_level_actor_t * actor)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   if (!fn_level_is_solid(actor->level,
         (actor->position.x) / FN_TILE_WIDTH,
@@ -488,14 +536,17 @@ void fn_level_actor_function_redball_lying_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_redball_lying_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_redball_lying_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -535,7 +586,11 @@ typedef struct fn_level_actor_robot_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = malloc(
       sizeof(fn_level_actor_robot_data_t));
@@ -552,10 +607,13 @@ void fn_level_actor_function_robot_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 
   free(data); actor->data = NULL; data = NULL;
@@ -563,27 +621,37 @@ void fn_level_actor_function_robot_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_increase_hurting_actors(hero, actor);
   data->touching_hero = 1;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   data->touching_hero = 0;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
   data->current_frame++;
@@ -632,11 +700,15 @@ void fn_level_actor_function_robot_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile = fn_tilecache_get_tile(tc,
@@ -650,10 +722,13 @@ void fn_level_actor_function_robot_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_robot_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_robot_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   fn_hero_add_score(hero, 100);
   if (data->touching_hero) {
@@ -704,7 +779,11 @@ typedef struct fn_level_actor_tankbot_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = malloc(
       sizeof(fn_level_actor_tankbot_data_t));
@@ -722,10 +801,13 @@ void fn_level_actor_function_tankbot_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 
   free(data); data = NULL; actor->data = NULL;
@@ -733,10 +815,13 @@ void fn_level_actor_function_tankbot_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (data->was_shot < 2) {
     fn_hero_increase_hurting_actors(hero, actor);
     data->touching_hero = 1;
@@ -745,10 +830,13 @@ void fn_level_actor_function_tankbot_hero_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_hero_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_hero_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (data->was_shot < 2) {
     fn_hero_decrease_hurting_actors(hero, actor);
     data->touching_hero = 0;
@@ -757,10 +845,13 @@ void fn_level_actor_function_tankbot_hero_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   data->current_frame++;
   if (data->was_shot == 2) {
     /* create explosion */
@@ -838,15 +929,18 @@ void fn_level_actor_function_tankbot_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + (data->current_frame/2) * 2);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -854,7 +948,7 @@ void fn_level_actor_function_tankbot_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-  tile = fn_tilecache_get_tile(tc,
+  tile = fn_tilecache_get_tile(tilecache,
       data->tile + (data->current_frame/2) * 2 + 1);
   destrect.x += FN_TILE_WIDTH;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
@@ -862,10 +956,13 @@ void fn_level_actor_function_tankbot_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_tankbot_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_tankbot_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   if (data->was_shot == 1 && data->touching_hero) {
     fn_hero_decrease_hurting_actors(hero, actor);
@@ -921,7 +1018,11 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = malloc(
       sizeof(fn_level_actor_firewheelbot_data_t));
@@ -940,10 +1041,13 @@ void fn_level_actor_function_firewheelbot_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 
   free(data); data = NULL; actor->data = NULL;
@@ -951,10 +1055,13 @@ void fn_level_actor_function_firewheelbot_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (data->was_shot < 2) {
     fn_hero_increase_hurting_actors(hero, actor);
     data->touching_hero = 1;
@@ -963,10 +1070,13 @@ void fn_level_actor_function_firewheelbot_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (data->was_shot < 2) {
     fn_hero_decrease_hurting_actors(hero, actor);
     data->touching_hero = 0;
@@ -975,10 +1085,13 @@ void fn_level_actor_function_firewheelbot_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (data->was_shot == 2) {
     /* create explosion */
     actor->is_alive = 0;
@@ -1033,13 +1146,17 @@ void fn_level_actor_function_firewheelbot_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
+  const FnTileCache * tc = fn_level_get_tilecache(level);
   
   const FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + (data->current_frame) * 4);
@@ -1068,10 +1185,13 @@ void fn_level_actor_function_firewheelbot_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_firewheelbot_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_firewheelbot_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   if (!(data->fire_is_on)) {
     if (data->was_shot == 1 && data->touching_hero) {
@@ -1123,7 +1243,11 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_create(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 
   fn_level_actor_wallcrawler_data_t * data = malloc(
@@ -1149,10 +1273,13 @@ void fn_level_actor_function_wallcrawler_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_free(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 
   free(data); actor->data = NULL; data = NULL;
@@ -1160,10 +1287,13 @@ void fn_level_actor_function_wallcrawler_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (!data->was_shot) {
     fn_hero_increase_hurting_actors(hero, actor);
     data->touching_hero = 1;
@@ -1172,10 +1302,13 @@ void fn_level_actor_function_wallcrawler_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (!data->was_shot) {
     fn_hero_decrease_hurting_actors(hero, actor);
     data->touching_hero = 0;
@@ -1184,10 +1317,13 @@ void fn_level_actor_function_wallcrawler_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_act(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_level_t * level = actor->level;
 
   int direction = (data->direction == fn_vertical_direction_up ?
       1 :
@@ -1245,14 +1381,17 @@ void fn_level_actor_function_wallcrawler_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -1263,10 +1402,13 @@ void fn_level_actor_function_wallcrawler_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_wallcrawler_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_wallcrawler_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   if (!data->was_shot) {
     if (data->touching_hero) {
@@ -1311,7 +1453,11 @@ typedef struct fn_level_actor_lift_data_t {
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_create(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_lift_data_t * data = malloc(
       sizeof(fn_level_actor_lift_data_t));
@@ -1329,7 +1475,11 @@ void fn_level_actor_function_lift_create(fn_level_actor_t * actor)
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_free(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_lift_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -1342,10 +1492,13 @@ void fn_level_actor_function_lift_free(fn_level_actor_t * actor)
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_lift_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   FnGeometry heropos = fn_hero_get_position(hero);
   if (fn_geometry_touches(heropos, actor->position) &&
@@ -1361,10 +1514,13 @@ void fn_level_actor_function_lift_interact_start(fn_level_actor_t * actor)
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_interact_end(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_interact_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_lift_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   FnGeometry heropos = fn_hero_get_position(hero);
   if (fn_geometry_touches(heropos, actor->position) &&
@@ -1382,11 +1538,13 @@ void fn_level_actor_function_lift_interact_end(fn_level_actor_t * actor)
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_act(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_lift_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
-  fn_level_t * level = actor->level;
 
   if (data->state == fn_level_actor_lift_state_ascending ||
       (data->state == fn_level_actor_lift_state_idle &&
@@ -1461,11 +1619,14 @@ void fn_level_actor_function_lift_act(fn_level_actor_t * actor)
  *
  * @param  actor  The lift actor.
  */
-void fn_level_actor_function_lift_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_lift_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
 
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -1473,7 +1634,7 @@ void fn_level_actor_function_lift_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
 
   int i = 0;
-  const FnTexture * tile = fn_tilecache_get_tile(tc, SOLID_START + 23);
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache, SOLID_START + 23);
   for (i = 0;
       i < actor->position.h - FN_TILE_HEIGHT;
       i += FN_HALFTILE_HEIGHT) {
@@ -1481,7 +1642,7 @@ void fn_level_actor_function_lift_blit(fn_level_actor_t * actor)
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
   }
 
-  tile = fn_tilecache_get_tile(tc,
+  tile = fn_tilecache_get_tile(tilecache,
       OBJ_ELEVATOR);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -1514,7 +1675,11 @@ typedef struct fn_level_actor_acme_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_create(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = malloc(
       sizeof(fn_level_actor_acme_data_t));
@@ -1529,11 +1694,14 @@ void fn_level_actor_function_acme_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_free(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = actor->data;
 
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
 
   free(data); data = NULL; actor->data = NULL;
@@ -1541,11 +1709,13 @@ void fn_level_actor_function_acme_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_act(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = actor->data;
-
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   switch(data->counter) {
     case 0:
@@ -1616,14 +1786,17 @@ void fn_level_actor_function_acme_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -1631,20 +1804,22 @@ void fn_level_actor_function_acme_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-  tile = fn_tilecache_get_tile(tc, data->tile+1);
+  tile = fn_tilecache_get_tile(tilecache, data->tile+1);
   destrect.x += FN_TILE_WIDTH;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = actor->data;
 
   if (data->counter > 0) {
-    fn_hero_t * hero = fn_level_get_hero(actor->level);
-
     fn_hero_add_score(hero, 500);
     fn_level_add_actor(actor->level,
         FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
@@ -1656,10 +1831,13 @@ void fn_level_actor_function_acme_shot(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_acme_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_acme_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_acme_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   if (data->counter > 10 && !data->touching_hero) {
     data->touching_hero = 1;
@@ -1706,7 +1884,11 @@ typedef struct fn_level_actor_fire_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_create(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = malloc(
       sizeof(fn_level_actor_fire_data_t));
@@ -1731,20 +1913,26 @@ void fn_level_actor_function_fire_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_free(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   data->touching_hero = 1;
 
   if (data->state == fn_level_actor_fire_state_burning) {
@@ -1754,10 +1942,13 @@ void fn_level_actor_function_fire_hero_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_hero_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_hero_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   data->touching_hero = 0;
 
   if (data->state == fn_level_actor_fire_state_burning) {
@@ -1767,10 +1958,13 @@ void fn_level_actor_function_fire_hero_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_act(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   switch(data->state)
   {
     case fn_level_actor_fire_state_off:
@@ -1808,12 +2002,15 @@ void fn_level_actor_function_fire_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fire_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_fire_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile0 = NULL;
   const FnTexture * tile1 = NULL;
   const FnTexture * tile2 = NULL;
@@ -1825,24 +2022,23 @@ void fn_level_actor_function_fire_blit(fn_level_actor_t * actor)
     case fn_level_actor_fire_state_ignition:
       if (data->counter % 2) {
         if (data->direction == fn_horizontal_direction_left) {
-          tile2 = fn_tilecache_get_tile(tc,
-              data->tile);
+          tile2 = fn_tilecache_get_tile(tilecache, data->tile);
         } else {
-          tile0 = fn_tilecache_get_tile(tc,
-              data->tile);
+          tile0 = fn_tilecache_get_tile(tilecache, data->tile);
         }
       }
       break;
     case fn_level_actor_fire_state_burning:
-      tile1 = fn_tilecache_get_tile(tc,
-          data->tile + 1 + (data->counter % 2));
+      tile1 = fn_tilecache_get_tile(
+              tilecache,
+              data->tile + 1 + (data->counter % 2));
       if (data->direction == fn_horizontal_direction_left) {
         tile2 = tile1;
-        tile0 = fn_tilecache_get_tile(tc, data->tile + 3 +
+        tile0 = fn_tilecache_get_tile(tilecache, data->tile + 3 +
             (data->counter % 2));
       } else {
         tile0 = tile1;
-        tile2 = fn_tilecache_get_tile(tc, data->tile + 3 +
+        tile2 = fn_tilecache_get_tile(tilecache, data->tile + 3 +
             (data->counter % 2));
       }
       break;
@@ -1896,7 +2092,11 @@ typedef struct fn_level_actor_mill_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_create(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = malloc(
       sizeof(fn_level_actor_mill_data_t));
@@ -1909,7 +2109,7 @@ void fn_level_actor_function_mill_create(fn_level_actor_t * actor)
   data->num_frames = 5;
   data->lives = 10;
 
-  while (!fn_level_is_solid(actor->level,
+  while (!fn_level_is_solid(level,
         actor->position.x / FN_TILE_WIDTH,
         actor->position.y / FN_TILE_HEIGHT - 1)) {
     actor->position.y -= FN_TILE_HEIGHT;
@@ -1919,7 +2119,11 @@ void fn_level_actor_function_mill_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_free(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -1927,7 +2131,11 @@ void fn_level_actor_function_mill_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   if (data->lives > 0) {
@@ -1938,7 +2146,11 @@ void fn_level_actor_function_mill_hero_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_act(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   if (data->lives > 0) {
@@ -1950,14 +2162,17 @@ void fn_level_actor_function_mill_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -1973,7 +2188,11 @@ void fn_level_actor_function_mill_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_mill_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_mill_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   
@@ -2032,7 +2251,11 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  *
  * @param  actor  The accesscard slot actor.
  */
-void fn_level_actor_function_accesscard_slot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_accesscard_slot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -2052,7 +2275,11 @@ void fn_level_actor_function_accesscard_slot_create(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard slot actor.
  */
-void fn_level_actor_function_accesscard_slot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_accesscard_slot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_access_card_slot_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -2065,11 +2292,13 @@ void fn_level_actor_function_accesscard_slot_free(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard slot actor.
  */
-void fn_level_actor_function_accesscard_slot_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_accesscard_slot_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_access_card_slot_data_t * data = actor->data;
-  fn_level_t * level = actor->level;
-  fn_hero_t * hero = fn_level_get_hero(level);
   Uint8 inventory = fn_hero_get_inventory(hero);
   fn_environment_t * env = fn_level_get_environment(level);
 
@@ -2108,7 +2337,11 @@ void fn_level_actor_function_accesscard_slot_interact_start(fn_level_actor_t * a
  *
  * @param  actor  The accesscard slot actor.
  */
-void fn_level_actor_function_accesscard_slot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_accesscard_slot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_access_card_slot_data_t * data = actor->data;
   data->current_frame++;
@@ -2122,7 +2355,11 @@ void fn_level_actor_function_accesscard_slot_act(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard slot actor.
  */
-void fn_level_actor_function_accesscard_slot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_accesscard_slot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   SDL_Surface * target = fn_level_get_surface(actor->level);
   FnGeometry destrect;
@@ -2180,7 +2417,11 @@ typedef struct fn_level_actor_glove_slot_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_glove_slot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_glove_slot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -2197,7 +2438,11 @@ void fn_level_actor_function_glove_slot_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_glove_slot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_glove_slot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -2205,10 +2450,13 @@ void fn_level_actor_function_glove_slot_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_glove_slot_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_glove_slot_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   switch(data->state)
   {
     case fn_level_actor_glove_slot_state_idle:
@@ -2239,7 +2487,11 @@ void fn_level_actor_function_glove_slot_interact_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_glove_slot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_glove_slot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
 
@@ -2312,7 +2564,11 @@ void fn_level_actor_function_glove_slot_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_glove_slot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_glove_slot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
   SDL_Surface * target = fn_level_get_surface(actor->level);
@@ -2373,7 +2629,11 @@ typedef struct fn_level_actor_item_data_t {
  *
  * @param  actor The item actor.
  */
-void fn_level_actor_function_item_create(fn_level_actor_t * actor)
+void fn_level_actor_function_item_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_item_data_t * data = malloc(
       sizeof(fn_level_actor_item_data_t));
@@ -2521,7 +2781,11 @@ void fn_level_actor_function_item_create(fn_level_actor_t * actor)
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_free(fn_level_actor_t * actor)
+void fn_level_actor_function_item_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_item_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -2534,9 +2798,12 @@ void fn_level_actor_function_item_free(fn_level_actor_t * actor)
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_item_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_level_actor_item_data_t * data = (fn_level_actor_item_data_t *)actor->data;
   Uint8 inventory = fn_hero_get_inventory(hero);
   Uint8 health = fn_hero_get_health(hero);
@@ -2705,7 +2972,12 @@ void fn_level_actor_function_item_touch_start(fn_level_actor_t * actor)
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_touch_end(fn_level_actor_t * actor) {
+void fn_level_actor_function_item_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
+{
   /* Nothing to do here */
 }
 
@@ -2716,7 +2988,11 @@ void fn_level_actor_function_item_touch_end(fn_level_actor_t * actor) {
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_act(fn_level_actor_t * actor)
+void fn_level_actor_function_item_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_item_data_t * data = actor->data;
   data->current_frame++;
@@ -2735,13 +3011,16 @@ void fn_level_actor_function_item_act(fn_level_actor_t * actor)
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_item_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_item_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -2757,156 +3036,159 @@ void fn_level_actor_function_item_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The item actor.
  */
-void fn_level_actor_function_item_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_item_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_level_t * lv = actor->level;
   switch(actor->type) {
     case FN_LEVEL_ACTOR_BOX_BLUE_FOOTBALL:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_FOOTBALL,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_FOOTBALL,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_BLUE_JOYSTICK:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_JOYSTICK,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_JOYSTICK,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_BLUE_DISK:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_DISK,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_DISK,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_BLUE_BALLOON:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_BALLOON,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_BALLOON,
           actor->position.x, actor->position.y - FN_TILE_HEIGHT);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_BLUE_FLAG:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_FLAG,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_FLAG,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_BLUE_RADIO:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_RADIO,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_RADIO,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_RED_SODA:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_SODA,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_SODA,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_RED_CHICKEN:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_CHICKEN_SINGLE,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_CHICKEN_SINGLE,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_EMPTY:
       actor->is_alive = 0;
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_BOOTS:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_BOOTS,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_BOOTS,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_CLAMPS:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_CLAMPS,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_CLAMPS,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_GUN:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_GUN,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_GUN,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_BOMB:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_BOMB,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_BOMB,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_GLOVE:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_GLOVE,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_GLOVE,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_FULL_LIFE:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_FULL_LIFE,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_FULL_LIFE,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_ACCESS_CARD:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_ACCESS_CARD,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_ACCESS_CARD,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_LETTER_D:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_LETTER_D,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_D,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_LETTER_U:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_LETTER_U,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_U,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_LETTER_K:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_LETTER_K,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_K,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_BOX_GREY_LETTER_E:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_LETTER_E,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_E,
           actor->position.x, actor->position.y);
       fn_level_add_particle_firework(
-          actor->level, actor->position.x, actor->position.y, 4);
+          level, actor->position.x, actor->position.y, 4);
       break;
     case FN_LEVEL_ACTOR_CHICKEN_SINGLE:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_CHICKEN_DOUBLE,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_CHICKEN_DOUBLE,
           actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_SODA:
       actor->is_alive = 0;
-      fn_level_add_actor(lv, FN_LEVEL_ACTOR_SODA_FLYING,
+      fn_level_add_actor(level, FN_LEVEL_ACTOR_SODA_FLYING,
           actor->position.x, actor->position.y);
       break;
     default:
@@ -2917,7 +3199,11 @@ void fn_level_actor_function_item_shot(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_create(fn_level_actor_t * actor)
+void fn_level_actor_function_soda_flying_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -2925,16 +3211,23 @@ void fn_level_actor_function_soda_flying_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_free(fn_level_actor_t * actor)
+void fn_level_actor_function_soda_flying_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   /* nothing to do here */
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_soda_flying_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_add_score(hero, 1000);
   fn_level_add_actor(actor->level,
       FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
@@ -2943,13 +3236,17 @@ void fn_level_actor_function_soda_flying_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_act(fn_level_actor_t * actor)
+void fn_level_actor_function_soda_flying_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.y -= FN_HALFTILE_HEIGHT;
-  if (fn_level_is_solid(actor->level,
+  if (fn_level_is_solid(level,
         (actor->position.x) / FN_TILE_WIDTH,
         (actor->position.y) / FN_TILE_HEIGHT)) {
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_EXPLOSION, actor->position.x, actor->position.y);
     actor->is_alive = 0;
   }
@@ -2957,12 +3254,15 @@ void fn_level_actor_function_soda_flying_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_soda_flying_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc, ANIM_SODAFLY +
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache, ANIM_SODAFLY +
       (actor->position.y/FN_HALFTILE_HEIGHT) % 4);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -2991,7 +3291,11 @@ typedef struct fn_level_actor_balloon_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_create(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data =
     malloc(sizeof(fn_level_actor_balloon_data_t));
@@ -3004,7 +3308,11 @@ void fn_level_actor_function_balloon_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_free(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3012,10 +3320,13 @@ void fn_level_actor_function_balloon_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (!data->destroyed) {
     actor->is_alive = 0;
     fn_hero_add_score(hero, 10000);
@@ -3026,10 +3337,13 @@ void fn_level_actor_function_balloon_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_act(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
-  fn_level_t * level = actor->level;
 
   data->current_frame++;
   data->current_frame %= 9;
@@ -3053,13 +3367,16 @@ void fn_level_actor_function_balloon_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile;
 
   destrect.x = actor->position.x;
@@ -3068,25 +3385,28 @@ void fn_level_actor_function_balloon_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
 
   if (data->destroyed) {
-    tile = fn_tilecache_get_tile(tc, OBJ_BALLOON + 4);
+    tile = fn_tilecache_get_tile(tilecache, OBJ_BALLOON + 4);
   } else {
-    tile = fn_tilecache_get_tile(tc, OBJ_BALLOON);
+    tile = fn_tilecache_get_tile(tilecache, OBJ_BALLOON);
   }
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
   destrect.y += FN_TILE_HEIGHT;
 
-  tile = fn_tilecache_get_tile(tc,
+  tile = fn_tilecache_get_tile(tilecache,
       OBJ_BALLOON + 1 + data->current_frame / 3);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_balloon_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_balloon_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
-  fn_level_t * level = actor->level;
   data->destroyed = 1;
   fn_level_add_actor(level,
       FN_LEVEL_ACTOR_STEAM, actor->position.x, actor->position.y);
@@ -3100,7 +3420,11 @@ void fn_level_actor_function_balloon_shot(fn_level_actor_t * actor)
  *
  * @param  actor  The teleporter actor.
  */
-void fn_level_actor_function_teleporter_create(fn_level_actor_t * actor)
+void fn_level_actor_function_teleporter_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -3114,7 +3438,11 @@ void fn_level_actor_function_teleporter_create(fn_level_actor_t * actor)
  *
  * @param  actor  The teleporter actor.
  */
-void fn_level_actor_function_teleporter_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_teleporter_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_type_e othertype;
   if (actor->type == FN_LEVEL_ACTOR_TELEPORTER1) {
@@ -3122,7 +3450,6 @@ void fn_level_actor_function_teleporter_interact_start(fn_level_actor_t * actor)
   } else {
     othertype = FN_LEVEL_ACTOR_TELEPORTER1;
   }
-  fn_level_t * level = actor->level;
 
   fn_list_t * iter = NULL;
   for (iter = fn_list_first(level->actors);
@@ -3147,7 +3474,11 @@ void fn_level_actor_function_teleporter_interact_start(fn_level_actor_t * actor)
  *
  * @param  actor  The teleporter actor.
  */
-void fn_level_actor_function_teleporter_act(fn_level_actor_t * actor)
+void fn_level_actor_function_teleporter_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 }
 
@@ -3158,11 +3489,14 @@ void fn_level_actor_function_teleporter_act(fn_level_actor_t * actor)
  *
  * @param  actor  The teleporter actor.
  */
-void fn_level_actor_function_teleporter_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_teleporter_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile;
 
   destrect.x = actor->position.x;
@@ -3176,7 +3510,7 @@ void fn_level_actor_function_teleporter_blit(fn_level_actor_t * actor)
     for (j = 0; j < 3; j++) {
       destrect.x = actor->position.x - (1 - j) * FN_TILE_WIDTH;
       destrect.y = actor->position.y - (2 - i) * FN_TILE_HEIGHT;
-      tile = fn_tilecache_get_tile(tc,
+      tile = fn_tilecache_get_tile(tilecache,
           ANIM_TELEPORTER1 + i * 3 + j
           );
       fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
@@ -3212,7 +3546,11 @@ typedef struct fn_level_actor_singleanimation_data_t {
  *
  * @param  actor  The singleanimation actor.
  */
-void fn_level_actor_function_singleanimation_create(fn_level_actor_t * actor)
+void fn_level_actor_function_singleanimation_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_singleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_singleanimation_data_t));
@@ -3258,7 +3596,11 @@ void fn_level_actor_function_singleanimation_create(fn_level_actor_t * actor)
  *
  * @param  actor  The singleanimation actor.
  */
-void fn_level_actor_function_singleanimation_free(fn_level_actor_t * actor)
+void fn_level_actor_function_singleanimation_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_singleanimation_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3271,7 +3613,11 @@ void fn_level_actor_function_singleanimation_free(fn_level_actor_t * actor)
  *
  * @param  actor  The singleanimation actor.
  */
-void fn_level_actor_function_singleanimation_act(fn_level_actor_t * actor)
+void fn_level_actor_function_singleanimation_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_singleanimation_data_t * data = actor->data;
 
@@ -3292,13 +3638,16 @@ void fn_level_actor_function_singleanimation_act(fn_level_actor_t * actor)
  *
  * @param  actor  The singleanimation actor.
  */
-void fn_level_actor_function_singleanimation_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_singleanimation_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_singleanimation_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -3334,7 +3683,11 @@ typedef struct fn_level_actor_particle_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_particle_create(fn_level_actor_t * actor)
+void fn_level_actor_function_particle_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_particle_data_t * data = malloc(
       sizeof(fn_level_actor_particle_data_t));
@@ -3376,7 +3729,11 @@ void fn_level_actor_function_particle_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_particle_free(fn_level_actor_t * actor)
+void fn_level_actor_function_particle_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_particle_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -3384,7 +3741,11 @@ void fn_level_actor_function_particle_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_particle_act(fn_level_actor_t * actor)
+void fn_level_actor_function_particle_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_particle_data_t * data = actor->data;
   if (data->countdown) {
@@ -3399,13 +3760,16 @@ void fn_level_actor_function_particle_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_particle_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_particle_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_particle_data_t * data = actor->data;
 
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc, data->tile);
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache, data->tile);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -3441,7 +3805,11 @@ typedef struct fn_level_actor_rocket_data_t {
  *
  * @param  actor  The rocket actor.
  */
-void fn_level_actor_function_rocket_create(fn_level_actor_t * actor)
+void fn_level_actor_function_rocket_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_rocket_data_t * data = malloc(
       sizeof(fn_level_actor_rocket_data_t));
@@ -3453,7 +3821,11 @@ void fn_level_actor_function_rocket_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_rocket_free(fn_level_actor_t * actor)
+void fn_level_actor_function_rocket_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -3461,7 +3833,11 @@ void fn_level_actor_function_rocket_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_rocket_act(fn_level_actor_t * actor)
+void fn_level_actor_function_rocket_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
   if (data->state == fn_level_actor_rocket_state_idle) {
@@ -3483,13 +3859,16 @@ void fn_level_actor_function_rocket_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_rocket_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_rocket_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc, OBJ_ROCKET);
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET);
   destrect.x = actor->position.x;
   destrect.y = (actor->position.y - FN_TILE_HEIGHT * 3);
   destrect.w = FN_TILE_WIDTH;
@@ -3497,34 +3876,38 @@ void fn_level_actor_function_rocket_blit(fn_level_actor_t * actor)
 
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-  tile = fn_tilecache_get_tile(tc, OBJ_ROCKET + 1);
+  tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET + 1);
   destrect.y += FN_TILE_HEIGHT;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
   destrect.y += FN_TILE_HEIGHT;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
   destrect.y += FN_TILE_HEIGHT;
 
-  tile = fn_tilecache_get_tile(tc, OBJ_ROCKET + 2);
+  tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET + 2);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-  tile = fn_tilecache_get_tile(tc, OBJ_ROCKET + 3);
+  tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET + 3);
   destrect.x -= FN_TILE_WIDTH;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
   destrect.x += FN_TILE_WIDTH * 2;
-  tile = fn_tilecache_get_tile(tc, OBJ_ROCKET + 4);
+  tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET + 4);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
   if (data->state == fn_level_actor_rocket_state_flying) {
     destrect.x -= FN_TILE_WIDTH;
     destrect.y += FN_TILE_HEIGHT;
-    tile = fn_tilecache_get_tile(tc, OBJ_ROCKET + 6);
+    tile = fn_tilecache_get_tile(tilecache, OBJ_ROCKET + 6);
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
   }
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_rocket_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_rocket_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
   data->state = fn_level_actor_rocket_state_flying;
@@ -3578,7 +3961,11 @@ typedef struct fn_level_actor_bomb_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bomb_create(fn_level_actor_t * actor)
+void fn_level_actor_bomb_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bomb_data_t * data = malloc(
       sizeof(fn_level_actor_bomb_data_t));
@@ -3598,7 +3985,11 @@ void fn_level_actor_bomb_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bomb_free(fn_level_actor_t * actor)
+void fn_level_actor_bomb_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3606,7 +3997,11 @@ void fn_level_actor_bomb_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bomb_act(fn_level_actor_t * actor)
+void fn_level_actor_bomb_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   data->current_frame++;
@@ -3667,7 +4062,11 @@ void fn_level_actor_bomb_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bomb_blit(fn_level_actor_t * actor)
+void fn_level_actor_bomb_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   if (data->counter < data->explode_threshold) {
@@ -3708,7 +4107,11 @@ typedef struct fn_level_actor_bombfire_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_create(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bombfire_data_t * data = malloc(
       sizeof(fn_level_actor_bombfire_data_t));
@@ -3723,19 +4126,25 @@ void fn_level_actor_bombfire_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_free(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_level_actor_bombfire_data_t * data = actor->data;
   fn_hero_increase_hurting_actors(hero, actor);
   data->touching_hero = 1;
@@ -3743,9 +4152,12 @@ void fn_level_actor_bombfire_hero_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_hero_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_hero_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   fn_level_actor_bombfire_data_t * data = actor->data;
   data->touching_hero = 0;
@@ -3753,7 +4165,11 @@ void fn_level_actor_bombfire_hero_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_act(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   data->current_frame++;
@@ -3764,13 +4180,16 @@ void fn_level_actor_bombfire_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_bombfire_blit(fn_level_actor_t * actor)
+void fn_level_actor_bombfire_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -3807,7 +4226,11 @@ typedef struct fn_level_actor_explosion_data_t {
  *
  * @param  actor  The explosion actor.
  */
-void fn_level_actor_function_explosion_create(fn_level_actor_t * actor)
+void fn_level_actor_function_explosion_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_explosion_data_t * data = malloc(
       sizeof(fn_level_actor_explosion_data_t));
@@ -3829,7 +4252,11 @@ void fn_level_actor_function_explosion_create(fn_level_actor_t * actor)
  *
  * @param  actor  The explosion actor.
  */
-void fn_level_actor_function_explosion_free(fn_level_actor_t * actor)
+void fn_level_actor_function_explosion_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_explosion_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3842,7 +4269,11 @@ void fn_level_actor_function_explosion_free(fn_level_actor_t * actor)
  *
  * @param  actor  The explosion actor.
  */
-void fn_level_actor_function_explosion_act(fn_level_actor_t * actor)
+void fn_level_actor_function_explosion_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_explosion_data_t * data = actor->data;
 
@@ -3859,9 +4290,13 @@ void fn_level_actor_function_explosion_act(fn_level_actor_t * actor)
  *
  * @param  actor  The explosion actor.
  */
-void fn_level_actor_function_explosion_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_explosion_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_explosion_data_t * data = actor->data;
@@ -3882,7 +4317,11 @@ void fn_level_actor_function_explosion_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The camera actor.
  */
-void fn_level_actor_function_camera_create(fn_level_actor_t * actor)
+void fn_level_actor_function_camera_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -3894,23 +4333,25 @@ void fn_level_actor_function_camera_create(fn_level_actor_t * actor)
  *
  * @param  actor  The camera actor.
  */
-void fn_level_actor_function_camera_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_camera_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile;
 
   size_t x = fn_hero_get_x(hero);
   if (x-1 > actor->position.x) {
-    tile = fn_tilecache_get_tile(tc,
+    tile = fn_tilecache_get_tile(tilecache,
         ANIM_CAMERA_RIGHT);
   } else if (x+1 < actor->position.x) {
-    tile = fn_tilecache_get_tile(tc,
+    tile = fn_tilecache_get_tile(tilecache,
         ANIM_CAMERA_LEFT);
   } else {
-    tile = fn_tilecache_get_tile(tc,
+    tile = fn_tilecache_get_tile(tilecache,
         ANIM_CAMERA_CENTER);
   }
   destrect.x = actor->position.x;
@@ -3927,9 +4368,12 @@ void fn_level_actor_function_camera_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The camera actor.
  */
-void fn_level_actor_function_camera_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_camera_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   actor->is_alive = 0;
   fn_hero_add_score(hero, 100);
   fn_level_add_actor(actor->level,
@@ -3968,7 +4412,11 @@ typedef struct fn_level_actor_score_data_t {
  *
  * @param  actor  The score actor.
  */
-void fn_level_actor_function_score_create(fn_level_actor_t * actor)
+void fn_level_actor_function_score_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_score_data_t * data = malloc(
       sizeof(fn_level_actor_score_data_t));
@@ -4054,7 +4502,11 @@ void fn_level_actor_function_score_create(fn_level_actor_t * actor)
  *
  * @param  actor  The score actor.
  */
-void fn_level_actor_function_score_free(fn_level_actor_t * actor)
+void fn_level_actor_function_score_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_score_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4067,7 +4519,11 @@ void fn_level_actor_function_score_free(fn_level_actor_t * actor)
  * 
  * @param  actor  The score actor.
  */
-void fn_level_actor_function_score_act(fn_level_actor_t * actor)
+void fn_level_actor_function_score_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_score_data_t * data = actor->data;
   data->countdown--;
@@ -4084,13 +4540,16 @@ void fn_level_actor_function_score_act(fn_level_actor_t * actor)
  *
  * @param  actor  The score actor.
  */
-void fn_level_actor_function_score_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_score_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_score_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + (data->countdown % 2));
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -4120,7 +4579,11 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_create(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = malloc(
       sizeof(fn_level_actor_unstablefloor_data_t));
@@ -4134,7 +4597,11 @@ void fn_level_actor_function_unstablefloor_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_free(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4142,10 +4609,13 @@ void fn_level_actor_function_unstablefloor_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (fn_geometry_touches(fn_hero_get_position(hero), actor->position))
   {
     if (!data->touched) {
@@ -4158,7 +4628,11 @@ void fn_level_actor_function_unstablefloor_touch_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   if (data->touching) {
@@ -4169,11 +4643,13 @@ void fn_level_actor_function_unstablefloor_touch_end(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_act(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
-  fn_level_t * level = actor->level;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   Uint8 floorlength = 0;
 
@@ -4228,13 +4704,16 @@ void fn_level_actor_function_unstablefloor_act(fn_level_actor_t * actor)
 }
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_unstablefloor_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_unstablefloor_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile = NULL;
 
   destrect.x = actor->position.x;
@@ -4244,8 +4723,7 @@ void fn_level_actor_function_unstablefloor_blit(fn_level_actor_t * actor)
 
   int i = 0;
   for (i = 0; i < (actor->position.w / FN_TILE_WIDTH); i++) {
-    tile = fn_tilecache_get_tile(tc,
-        data->tile + i % 2);
+    tile = fn_tilecache_get_tile(tilecache, data->tile + i % 2);
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
     destrect.x += FN_TILE_WIDTH;
   }
@@ -4254,7 +4732,11 @@ void fn_level_actor_function_unstablefloor_blit(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_expandingfloor_create(fn_level_actor_t * actor)
+void fn_level_actor_function_expandingfloor_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -4262,24 +4744,35 @@ void fn_level_actor_function_expandingfloor_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_expandingfloor_free(fn_level_actor_t * actor)
+void fn_level_actor_function_expandingfloor_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_expandingfloor_act(fn_level_actor_t * actor)
+void fn_level_actor_function_expandingfloor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_expandingfloor_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_expandingfloor_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc, SOLID_EXPANDINGFLOOR);
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache, SOLID_EXPANDINGFLOOR);
 
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -4316,7 +4809,11 @@ typedef struct fn_level_actor_conveyor_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_conveyor_create(fn_level_actor_t * actor)
+void fn_level_actor_function_conveyor_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_conveyor_data_t * data = malloc(
       sizeof(fn_level_actor_conveyor_data_t));
@@ -4324,7 +4821,6 @@ void fn_level_actor_function_conveyor_create(fn_level_actor_t * actor)
   actor->is_in_foreground = 0;
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
-  fn_level_t * level = actor->level;
 
   data->current_frame = 0;
 
@@ -4366,7 +4862,11 @@ void fn_level_actor_function_conveyor_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_conveyor_free(fn_level_actor_t * actor)
+void fn_level_actor_function_conveyor_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_conveyor_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -4374,7 +4874,11 @@ void fn_level_actor_function_conveyor_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_conveyor_act(fn_level_actor_t * actor)
+void fn_level_actor_function_conveyor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_conveyor_data_t * data = actor->data;
   if (data->direction == fn_horizontal_direction_left) {
@@ -4387,7 +4891,6 @@ void fn_level_actor_function_conveyor_act(fn_level_actor_t * actor)
     data->current_frame %= data->num_frames;
   }
 
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   FnGeometry heropos = fn_hero_get_position(hero);
 
   int direction = (
@@ -4403,11 +4906,14 @@ void fn_level_actor_function_conveyor_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_conveyor_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_conveyor_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_conveyor_data_t * data = actor->data;
 
   destrect.x = actor->position.x;
@@ -4417,20 +4923,20 @@ void fn_level_actor_function_conveyor_blit(fn_level_actor_t * actor)
 
   Uint16 i = 0;
 
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       SOLID_CONVEYORBELT_LEFTEND + data->current_frame);
 
   for (i = actor->position.x; i < actor->position.x + actor->position.w; i+= FN_TILE_WIDTH) {
     destrect.x = i;
     if (i + FN_TILE_WIDTH == actor->position.x + actor->position.w) {
       /* last element */
-      tile = fn_tilecache_get_tile(tc,
+      tile = fn_tilecache_get_tile(tilecache,
           SOLID_CONVEYORBELT_RIGHTEND + data->current_frame);
     }
 
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-    tile = fn_tilecache_get_tile(tc,
+    tile = fn_tilecache_get_tile(tilecache,
         SOLID_CONVEYORBELT_CENTER + data->current_frame % 2);
   }
 
@@ -4439,7 +4945,11 @@ void fn_level_actor_function_conveyor_blit(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_surveillancescreen_create(fn_level_actor_t * actor)
+void fn_level_actor_function_surveillancescreen_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH * 2;
   actor->position.h = FN_TILE_HEIGHT;
@@ -4447,16 +4957,23 @@ void fn_level_actor_function_surveillancescreen_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_surveillancescreen_free(fn_level_actor_t * actor)
+void fn_level_actor_function_surveillancescreen_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_interact_start(
-    fn_level_actor_t * actor)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_environment_t * env = fn_level_get_environment(actor->level);
+  fn_environment_t * env = fn_level_get_environment(level);
 
   /* TODO show real note instead of this dummy */
   fn_infobox_show(
@@ -4468,23 +4985,26 @@ void fn_level_actor_function_surveillancescreen_interact_start(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_surveillancescreen_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_surveillancescreen_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   const FnTexture * tile = NULL;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
 
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
   destrect.w = actor->position.w;
   destrect.h = actor->position.h;
 
-  tile = fn_tilecache_get_tile(tc, ANIM_BADGUYSCREEN);
+  tile = fn_tilecache_get_tile(tilecache, ANIM_BADGUYSCREEN);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
   destrect.x += FN_TILE_WIDTH;
-  tile = fn_tilecache_get_tile(tc, ANIM_BADGUYSCREEN + 1);
+  tile = fn_tilecache_get_tile(tilecache, ANIM_BADGUYSCREEN + 1);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
@@ -4512,7 +5032,11 @@ typedef struct fn_level_actor_hostileshot_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_create(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = malloc(
       sizeof(fn_level_actor_hostileshot_data_t));
@@ -4531,37 +5055,50 @@ void fn_level_actor_function_hostileshot_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_free(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_increase_hurting_actors(hero, actor);
   data->touching_hero = 1;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   data->touching_hero = 0;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_act(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
 
@@ -4586,14 +5123,17 @@ void fn_level_actor_function_hostileshot_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_hostileshot_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_hostileshot_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -4605,7 +5145,11 @@ void fn_level_actor_function_hostileshot_blit(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_notebook_create(fn_level_actor_t * actor)
+void fn_level_actor_function_notebook_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -4613,13 +5157,21 @@ void fn_level_actor_function_notebook_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_notebook_free(fn_level_actor_t * actor)
+void fn_level_actor_function_notebook_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_notebook_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_notebook_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_environment_t * env = fn_level_get_environment(actor->level);
 
@@ -4633,19 +5185,22 @@ void fn_level_actor_function_notebook_interact_start(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_notebook_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_notebook_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   const FnTexture * tile = NULL;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
 
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
   destrect.w = actor->position.w;
   destrect.h = actor->position.h;
 
-  tile = fn_tilecache_get_tile(tc, OBJ_NOTE);
+  tile = fn_tilecache_get_tile(tilecache, OBJ_NOTE);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
@@ -4680,7 +5235,11 @@ typedef struct fn_level_actor_exitdoor_data_t {
  *
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_exitdoor_create(fn_level_actor_t * actor)
+void fn_level_actor_function_exitdoor_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_exitdoor_data_t * data = malloc(
       sizeof(fn_level_actor_exitdoor_data_t));
@@ -4700,7 +5259,11 @@ void fn_level_actor_function_exitdoor_create(fn_level_actor_t * actor)
  *
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_exitdoor_free(fn_level_actor_t * actor)
+void fn_level_actor_function_exitdoor_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_exitdoor_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4713,11 +5276,14 @@ void fn_level_actor_function_exitdoor_free(fn_level_actor_t * actor)
  *
  * @param  actor  The exitdoor actor.
  */
-void fn_level_actor_function_exitdoor_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_exitdoor_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_exitdoor_data_t * data = actor->data;
   data->state = 1;
-  fn_level_t * level = actor->level;
   level->levelpassed = 1;
 }
 
@@ -4728,10 +5294,13 @@ void fn_level_actor_function_exitdoor_interact_start(fn_level_actor_t * actor)
  * 
  * @param  actor  The exitdoor actor.
  */
-void fn_level_actor_function_exitdoor_act(fn_level_actor_t * actor)
+void fn_level_actor_function_exitdoor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_exitdoor_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   switch(data->state) {
     case 0: /* idle */
@@ -4764,11 +5333,14 @@ void fn_level_actor_function_exitdoor_act(fn_level_actor_t * actor)
  *
  * @param  actor  The exitdoor actor.
  */
-void fn_level_actor_function_exitdoor_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_exitdoor_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_exitdoor_data_t * data = actor->data;
 
   destrect.x = 0;
@@ -4785,23 +5357,23 @@ void fn_level_actor_function_exitdoor_blit(fn_level_actor_t * actor)
       0,
       0,
       0);
-  const FnTexture * part = fn_tilecache_get_tile(tc,
+  const FnTexture * part = fn_tilecache_get_tile(tilecache,
       data->tile + data->counter * 4);
   fn_texture_blit_to_sdl_surface(part, NULL, tile, &destrect);
 
   destrect.x += FN_TILE_WIDTH;
-  part = fn_tilecache_get_tile(tc,
+  part = fn_tilecache_get_tile(tilecache,
     data->tile + data->counter * 4 + 1);
   fn_texture_blit_to_sdl_surface(part, NULL, tile, &destrect);
 
   destrect.x = 0;
   destrect.y += FN_TILE_HEIGHT;
-  part = fn_tilecache_get_tile(tc,
+  part = fn_tilecache_get_tile(tilecache,
     data->tile + data->counter * 4 + 2);
   fn_texture_blit_to_sdl_surface(part, NULL, tile, &destrect);
 
   destrect.x += FN_TILE_WIDTH;
-  part = fn_tilecache_get_tile(tc,
+  part = fn_tilecache_get_tile(tilecache,
     data->tile + data->counter * 4 + 3);
   fn_texture_blit_to_sdl_surface(part, NULL, tile, &destrect);
 
@@ -4848,7 +5420,11 @@ typedef struct fn_level_actor_door_data_t {
  *
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_door_create(fn_level_actor_t * actor)
+void fn_level_actor_function_door_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_door_data_t * data = malloc(
       sizeof(fn_level_actor_door_data_t));
@@ -4868,7 +5444,11 @@ void fn_level_actor_function_door_create(fn_level_actor_t * actor)
  *
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_door_free(fn_level_actor_t * actor)
+void fn_level_actor_function_door_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_door_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4881,9 +5461,12 @@ void fn_level_actor_function_door_free(fn_level_actor_t * actor)
  * 
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_door_act(fn_level_actor_t * actor)
+void fn_level_actor_function_door_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_level_t * level = actor->level;
   fn_level_actor_door_data_t * data = actor->data;
 
   switch(data->state) {
@@ -4919,13 +5502,16 @@ void fn_level_actor_function_door_act(fn_level_actor_t * actor)
  *
  * @param  actor  The door actor.
  */
-void fn_level_actor_function_door_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_door_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_door_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->counter);
 
   destrect.x = actor->position.x;
@@ -4962,7 +5548,11 @@ typedef struct fn_level_actor_keyhole_data_t {
  *
  * @param  actor  The keyhole actor.
  */
-void fn_level_actor_function_keyhole_create(fn_level_actor_t * actor)
+void fn_level_actor_function_keyhole_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_keyhole_data_t * data = malloc(
       sizeof(fn_level_actor_keyhole_data_t));
@@ -4981,7 +5571,11 @@ void fn_level_actor_function_keyhole_create(fn_level_actor_t * actor)
  *
  * @param  actor  The keyhole actor.
  */
-void fn_level_actor_function_keyhole_free(fn_level_actor_t * actor)
+void fn_level_actor_function_keyhole_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_keyhole_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4994,7 +5588,11 @@ void fn_level_actor_function_keyhole_free(fn_level_actor_t * actor)
  * 
  * @param  actor  The keyhole actor.
  */
-void fn_level_actor_function_keyhole_act(fn_level_actor_t * actor)
+void fn_level_actor_function_keyhole_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_keyhole_data_t * data = actor->data;
 
@@ -5011,28 +5609,31 @@ void fn_level_actor_function_keyhole_act(fn_level_actor_t * actor)
  *
  * @param  actor  The keyhole actor.
  */
-void fn_level_actor_function_keyhole_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_keyhole_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_keyhole_data_t * data = actor->data;
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile);
 
   if (data->counter > 1) {
     switch(actor->type) {
       case FN_LEVEL_ACTOR_KEYHOLE_RED:
-        tile = fn_tilecache_get_tile(tc, OBJ_KEYHOLE_RED);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_RED);
         break;
       case FN_LEVEL_ACTOR_KEYHOLE_BLUE:
-        tile = fn_tilecache_get_tile(tc, OBJ_KEYHOLE_BLUE);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_BLUE);
         break;
       case FN_LEVEL_ACTOR_KEYHOLE_PINK:
-        tile = fn_tilecache_get_tile(tc, OBJ_KEYHOLE_PINK);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_PINK);
         break;
       case FN_LEVEL_ACTOR_KEYHOLE_GREEN:
-        tile = fn_tilecache_get_tile(tc, OBJ_KEYHOLE_GREEN);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_GREEN);
         break;
       default:
         fn_error_print_commandline("Invalid keyhole actor");
@@ -5054,9 +5655,12 @@ void fn_level_actor_function_keyhole_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The keyhole actor.
  */
-void fn_level_actor_function_keyhole_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_function_keyhole_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_level_actor_keyhole_data_t * data = actor->data;
   Uint8 inventory = fn_hero_get_inventory(hero);
 
@@ -5128,7 +5732,11 @@ void fn_level_actor_function_keyhole_interact_start(fn_level_actor_t * actor)
  *
  * @param  actor  The key actor.
  */
-void fn_level_actor_function_key_create(fn_level_actor_t * actor)
+void fn_level_actor_function_key_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_WIDTH;
@@ -5143,9 +5751,12 @@ void fn_level_actor_function_key_create(fn_level_actor_t * actor)
  *
  * @param  actor  The key actor.
  */
-void fn_level_actor_function_key_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_key_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   Uint8 inventory = fn_hero_get_inventory(hero);
   switch(actor->type) {
     case FN_LEVEL_ACTOR_KEY_RED:
@@ -5180,11 +5791,14 @@ void fn_level_actor_function_key_touch_start(fn_level_actor_t * actor)
  *
  * @param  actor  The key actor.
  */
-void fn_level_actor_function_key_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_key_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile = NULL;
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -5192,16 +5806,16 @@ void fn_level_actor_function_key_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
   switch(actor->type) {
     case FN_LEVEL_ACTOR_KEY_RED:
-      tile = fn_tilecache_get_tile(tc, OBJ_KEY_RED);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_RED);
       break;
     case FN_LEVEL_ACTOR_KEY_BLUE:
-      tile = fn_tilecache_get_tile(tc, OBJ_KEY_BLUE);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_BLUE);
       break;
     case FN_LEVEL_ACTOR_KEY_GREEN:
-      tile = fn_tilecache_get_tile(tc, OBJ_KEY_GREEN);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_GREEN);
       break;
     case FN_LEVEL_ACTOR_KEY_PINK:
-      tile = fn_tilecache_get_tile(tc, OBJ_KEY_PINK);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_PINK);
       break;
     default:
       printf(__FILE__ ":%d: warning: key #%d"
@@ -5221,7 +5835,11 @@ void fn_level_actor_function_key_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The wall actor.
  */
-void fn_level_actor_function_shootable_wall_create(fn_level_actor_t * actor)
+void fn_level_actor_function_shootable_wall_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
@@ -5235,21 +5853,24 @@ void fn_level_actor_function_shootable_wall_create(fn_level_actor_t * actor)
  *
  * @param  actor  The wall actor.
  */
-void fn_level_actor_function_shootable_wall_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_shootable_wall_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
   const FnTexture * tile = NULL;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
 
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
   destrect.w = actor->position.w;
   destrect.h = actor->position.h;
 
-  tile = fn_tilecache_get_tile(tc, 0x8C0/0x20);
+  tile = fn_tilecache_get_tile(tilecache, 0x8C0/0x20);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
-  tile = fn_tilecache_get_tile(tc, 0x1800/0x20);
+  tile = fn_tilecache_get_tile(tilecache, 0x1800/0x20);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
@@ -5260,10 +5881,12 @@ void fn_level_actor_function_shootable_wall_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The wall actor.
  */
-void fn_level_actor_function_shootable_wall_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_shootable_wall_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_level_t * level = actor->level;
-  fn_hero_t * hero = fn_level_get_hero(level);
   actor->is_alive = 0;
   fn_hero_add_score(hero, 10);
   fn_level_set_solid(level,
@@ -5298,7 +5921,11 @@ typedef struct fn_level_actor_accesscard_door_data_t
  *
  * @param  actor  The accesscard door actor.
  */
-void fn_level_actor_function_access_card_door_create(fn_level_actor_t * actor)
+void fn_level_actor_function_access_card_door_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_accesscard_door_data_t * data = malloc(
       sizeof(fn_level_actor_accesscard_door_data_t));
@@ -5319,7 +5946,11 @@ void fn_level_actor_function_access_card_door_create(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard door actor.
  */
-void fn_level_actor_function_access_card_door_free(fn_level_actor_t * actor)
+void fn_level_actor_function_access_card_door_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_accesscard_door_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -5332,13 +5963,16 @@ void fn_level_actor_function_access_card_door_free(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard door actor.
  */
-void fn_level_actor_function_access_card_door_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_access_card_door_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_accesscard_door_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -5354,7 +5988,11 @@ void fn_level_actor_function_access_card_door_blit(fn_level_actor_t * actor)
  *
  * @param  actor  The accesscard door actor.
  */
-void fn_level_actor_function_access_card_door_act(fn_level_actor_t * actor)
+void fn_level_actor_function_access_card_door_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_accesscard_door_data_t * data = actor->data;
   data->current_frame++;
@@ -5381,7 +6019,11 @@ typedef struct fn_level_actor_spike_data_t {
  *
  * @param  actor  The spikes actor.
  */
-void fn_level_actor_function_spikes_create(fn_level_actor_t * actor)
+void fn_level_actor_function_spikes_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_spike_data_t * data = malloc(
       sizeof(fn_level_actor_spike_data_t));
@@ -5400,10 +6042,13 @@ void fn_level_actor_function_spikes_create(fn_level_actor_t * actor)
  *
  * @param  actor  The spikes actor.
  */
-void fn_level_actor_function_spikes_free(fn_level_actor_t * actor)
+void fn_level_actor_function_spikes_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_spike_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
@@ -5415,9 +6060,12 @@ void fn_level_actor_function_spikes_free(fn_level_actor_t * actor)
  *
  * @param  actor  The spikes actor.
  */
-void fn_level_actor_function_spikes_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_function_spikes_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_level_actor_spike_data_t * data = actor->data;
   fn_hero_increase_hurting_actors(hero, actor);
   data->touching_hero = 1;
@@ -5430,9 +6078,12 @@ void fn_level_actor_function_spikes_touch_start(fn_level_actor_t * actor)
  *
  * @param  actor  The spikes actor.
  */
-void fn_level_actor_function_spikes_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_function_spikes_touch_end(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_hero_decrease_hurting_actors(hero, actor);
   fn_level_actor_spike_data_t * data = actor->data;
   data->touching_hero = 0;
@@ -5445,11 +6096,14 @@ void fn_level_actor_function_spikes_touch_end(fn_level_actor_t * actor)
  *
  * @param  actor  The spikes actor.
  */
-void fn_level_actor_function_spikes_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_spikes_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   const FnTexture * tile = NULL;
   fn_level_actor_spike_data_t * data = actor->data;
   destrect.x = actor->position.x;
@@ -5458,16 +6112,16 @@ void fn_level_actor_function_spikes_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
   switch(actor->type) {
     case FN_LEVEL_ACTOR_SPIKES_UP:
-      tile = fn_tilecache_get_tile(tc, OBJ_SPIKES_UP);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKES_UP);
       break;
     case FN_LEVEL_ACTOR_SPIKES_DOWN:
-      tile = fn_tilecache_get_tile(tc, OBJ_SPIKES_DOWN);
+      tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKES_DOWN);
       break;
     case FN_LEVEL_ACTOR_SPIKE:
       if (data->touching_hero) {
-        tile = fn_tilecache_get_tile(tc, OBJ_SPIKE + 1);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKE + 1);
       } else {
-        tile = fn_tilecache_get_tile(tc, OBJ_SPIKE);
+        tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKE);
       }
 
       break;
@@ -5508,7 +6162,11 @@ typedef struct fn_level_actor_fan_data_t {
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fan_create(fn_level_actor_t * actor)
+void fn_level_actor_function_fan_create(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fan_data_t * data = malloc(
       sizeof(fn_level_actor_fan_data_t));
@@ -5524,7 +6182,11 @@ void fn_level_actor_function_fan_create(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fan_free(fn_level_actor_t * actor)
+void fn_level_actor_function_fan_free(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fan_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -5532,10 +6194,13 @@ void fn_level_actor_function_fan_free(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fan_act(fn_level_actor_t * actor)
+void fn_level_actor_function_fan_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fan_data_t * data = actor->data;
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   switch(data->running) {
     case 0:
@@ -5612,15 +6277,18 @@ void fn_level_actor_function_fan_act(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fan_blit(fn_level_actor_t * actor)
+void fn_level_actor_function_fan_blit(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fan_data_t * data = actor->data;
 
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
 
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame * 2);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -5628,7 +6296,7 @@ void fn_level_actor_function_fan_blit(fn_level_actor_t * actor)
   destrect.h = actor->position.h;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-  tile = fn_tilecache_get_tile(tc,
+  tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame * 2 + 1);
   destrect.y += FN_TILE_HEIGHT;
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
@@ -5636,7 +6304,11 @@ void fn_level_actor_function_fan_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_fan_shot(fn_level_actor_t * actor)
+void fn_level_actor_function_fan_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache)
 {
   fn_level_actor_fan_data_t * data = actor->data;
   data->running = 9;
@@ -5648,7 +6320,11 @@ void fn_level_actor_function_fan_shot(fn_level_actor_t * actor)
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef void (* fn_level_actor_function_t)(fn_level_actor_t *);
+typedef void (* fn_level_actor_function_t)(
+        fn_level_actor_t *,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache);
 
 /**
  * An array of functions to call for different actions on different
@@ -5656,7 +6332,7 @@ typedef void (* fn_level_actor_function_t)(fn_level_actor_t *);
  */
 void
   (* fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES][FN_LEVEL_ACTOR_NUM_FUNCTIONS])
-  (fn_level_actor_t *) =
+  (fn_level_actor_t *, fn_level_t *, fn_hero_t *, const FnTileCache*) =
 {
   [FN_LEVEL_ACTOR_FIREWHEELBOT] = {
     [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
@@ -7993,19 +8669,19 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
   actor->acts_while_invisible = 0;
   func = fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_CREATE];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
   return actor;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_free(fn_level_actor_t * actor)
+void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_FREE];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
   free(actor);
 }
@@ -8021,16 +8697,17 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_check_hero_touch(fn_level_actor_t * actor)
+void fn_level_actor_check_hero_touch(
+        fn_level_actor_t * actor, fn_level_t * level)
 {
   if (fn_level_actor_touches_hero(actor)) {
     if (!actor->touches_hero) {
       actor->touches_hero = 1;
-      fn_level_actor_hero_touch_start(actor);
+      fn_level_actor_hero_touch_start(actor, level);
     }
   } else {
     if (actor->touches_hero) {
-      fn_level_actor_hero_touch_end(actor);
+      fn_level_actor_hero_touch_end(actor, level);
       actor->touches_hero = 0;
     }
   }
@@ -8038,23 +8715,23 @@ void fn_level_actor_check_hero_touch(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_touch_start(fn_level_actor_t * actor)
+void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_touch_end(fn_level_actor_t * actor)
+void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
 }
 
@@ -8080,50 +8757,50 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_interact_start(fn_level_actor_t * actor)
+void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[
     actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor)
+void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[
     actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
 }
 
 /* --------------------------------------------------------------- */
 
-int fn_level_actor_act(fn_level_actor_t * actor)
+int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
 {
-  fn_level_actor_check_hero_touch(actor);
+  fn_level_actor_check_hero_touch(actor, level);
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_ACT];
   if (func != NULL)
   {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
   return actor->is_alive;
 }
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_blit(fn_level_actor_t * actor)
+void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_BLIT];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
     SDL_Surface * target = fn_level_get_surface(actor->level);
     Uint8 draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(
@@ -8137,12 +8814,12 @@ void fn_level_actor_blit(fn_level_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_actor_shot(fn_level_actor_t * actor)
+Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
     fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_SHOT];
   if (func != NULL) {
-    func(actor);
+    func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
     return 1;
   }
   return 0;

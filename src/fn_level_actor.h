@@ -277,7 +277,7 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
  *
  * @param  actor  The actor to delete.
  */
-void fn_level_actor_free(fn_level_actor_t * actor);
+void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -299,7 +299,7 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor);
  *
  * @param  actor  The actor.
  */
-void fn_level_actor_check_hero_touch(fn_level_actor_t * actor);
+void fn_level_actor_check_hero_touch(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -308,7 +308,7 @@ void fn_level_actor_check_hero_touch(fn_level_actor_t * actor);
  *
  * @param  actor  The actor which got touched.
  */
-void fn_level_actor_hero_touch_start(fn_level_actor_t * actor);
+void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -317,7 +317,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor);
  *
  * @param  actor  The actor which got touched.
  */
-void fn_level_actor_hero_touch_end(fn_level_actor_t * actor);
+void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -338,7 +338,7 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor);
  *
  * @param  actor  The actor with whom the player interacts.
  */
-void fn_level_actor_hero_interact_start(fn_level_actor_t * actor);
+void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -348,7 +348,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor);
  *
  * @param  actor  The actor with whom the player interacts.
  */
-void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor);
+void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -360,7 +360,7 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor);
  *
  * @return  Zero if the actor died, otherwise a non-zero value.
  */
-int fn_level_actor_act(fn_level_actor_t * actor);
+int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -369,7 +369,7 @@ int fn_level_actor_act(fn_level_actor_t * actor);
  *
  * @param  actor  The actor.
  */
-void fn_level_actor_blit(fn_level_actor_t * actor);
+void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 
@@ -380,7 +380,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor);
  *
  * @return 1 if the actor absorbs the shot, otherwise 0.
  */
-Uint8 fn_level_actor_shot(fn_level_actor_t * actor);
+Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level);
 
 /* --------------------------------------------------------------- */
 

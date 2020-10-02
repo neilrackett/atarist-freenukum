@@ -815,7 +815,7 @@ void fn_level_free(fn_level_t * lv)
       iter != fn_list_last(lv->actors);
       iter = fn_list_next(iter)) {
     if (iter->data != NULL) {
-      fn_level_actor_free((fn_level_actor_t *)iter->data);
+      fn_level_actor_free((fn_level_actor_t *)iter->data, lv);
       iter->data = NULL;
     }
   }
@@ -950,7 +950,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       if (xr > x_start && yb > y_start && xl < x_end && yt < y_end) {
         fn_level_actor_set_visible(actor, 1);
         if (!fn_level_actor_in_foreground(actor)) {
-          fn_level_actor_blit(actor);
+          fn_level_actor_blit(actor, lv);
         }
       } else {
         fn_level_actor_set_visible(actor, 0);
@@ -971,7 +971,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
 
     if (actor != NULL && fn_level_actor_is_visible(actor)) {
       if (fn_level_actor_in_foreground(actor)) {
-        fn_level_actor_blit(actor);
+        fn_level_actor_blit(actor, lv);
       }
     }
   }
@@ -1088,12 +1088,12 @@ int fn_level_act(fn_level_t * lv) {
 
     if  (actor->acts_while_invisible || actor->is_visible) {
       sum++;
-      res = fn_level_actor_act(actor);
+      res = fn_level_actor_act(actor, lv);
       if (res == 0) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = NULL;
-        fn_level_actor_free(actor); actor = NULL;
+        fn_level_actor_free(actor, lv); actor = NULL;
       }
     }
   }
@@ -1115,7 +1115,7 @@ int fn_level_act(fn_level_t * lv) {
 void fn_level_hero_interact_stop(fn_level_t * lv)
 {
   if (lv->interactor != NULL) {
-    fn_level_actor_hero_interact_stop(lv->interactor);
+    fn_level_actor_hero_interact_stop(lv->interactor, lv);
   }
   lv->interactor = NULL;
 }
@@ -1140,7 +1140,7 @@ void fn_level_hero_interact_start(fn_level_t * lv)
         fn_level_hero_interact_stop(lv);
 
         lv->interactor = actor;
-        fn_level_actor_hero_interact_start(actor);
+        fn_level_actor_hero_interact_start(actor, lv);
         return;
       }
     }
