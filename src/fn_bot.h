@@ -32,7 +32,6 @@
 #include <SDL/SDL.h>
 
 #include "fn_hero.h"
-#include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
 
@@ -200,11 +199,6 @@ struct fn_bot_t {
   fn_hero_t * hero;
 
   /**
-   * The environment of the bot.
-   */
-  fn_environment_t * environment;
-
-  /**
    * The x position in the level.
    */
   Uint16 x;
@@ -227,7 +221,6 @@ struct fn_bot_t {
  * Create a bot.
  *
  * @param  type       The type of the bot.
- * @param  env        The environment of the game.
  * @param  x          The x position of the bot (in half-tiles)
  * @param  y          The y position of the bot (in half-tiles)
  *
@@ -236,7 +229,6 @@ struct fn_bot_t {
 fn_bot_t * fn_bot_create(
     fn_bot_type_e type,
     fn_hero_t * hero,
-    fn_environment_t * env,
     size_t x,
     size_t y);
 
@@ -257,7 +249,10 @@ void fn_bot_free(fn_bot_t * bot);
  * @param  bot     The bot to blit.
  * @param  target  The target surface.
  */
-void fn_bot_blit(fn_bot_t * bot, SDL_Surface * target);
+void fn_bot_blit(
+        fn_bot_t * bot,
+        SDL_Surface * target,
+        const FnTileCache * tilecache);
 
 /* --------------------------------------------------------------- */
 

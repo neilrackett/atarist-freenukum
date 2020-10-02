@@ -239,8 +239,7 @@ fn_level_t * fn_level_load(FnFile* file,
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
         lv->bots = fn_list_append(lv->bots, fn_bot_create(
-              FN_BOT_TYPE_FOOTBOT, hero, env,
-              x*2, y*2));
+              FN_BOT_TYPE_FOOTBOT, hero, x*2, y*2));
         break;
       case 0x300d: /* tankbot */
         if (x > 0) {
@@ -976,6 +975,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       }
     }
   }
+  
+  const FnTileCache * tilecache = fn_level_get_tilecache(lv);
 
   /* blit the bots */
   for (iter = fn_list_first(lv->bots);
@@ -985,7 +986,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     int x = fn_bot_get_x(bot) / 2;
     int y = fn_bot_get_y(bot) / 2;
     if (x > x_start && y > y_start && x < x_end && y < y_end) {
-      fn_bot_blit(bot, lv->surface);
+      fn_bot_blit(bot, lv->surface, tilecache);
     }
   }
 
