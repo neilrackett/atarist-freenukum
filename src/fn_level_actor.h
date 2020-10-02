@@ -207,11 +207,6 @@ enum fn_level_actor_type_e {
  */
 struct fn_level_actor_t {
   /**
-   * The level inside which the actor is located.
-   */
-  fn_level_t * level;
-
-  /**
    * The type of the actor.
    */
   fn_level_actor_type_e type;
@@ -288,7 +283,7 @@ void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level);
  *
  * @return Non-zero if the hero touches, otherwise zero.
  */
-int fn_level_actor_touches_hero(fn_level_actor_t * actor);
+int fn_level_actor_touches_hero(fn_level_actor_t * actor, fn_hero_t * hero);
 
 
 /* --------------------------------------------------------------- */
@@ -328,7 +323,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
  *
  * @return 1 if the hero can interact with the actor, otherwise 0.
  */
-Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor);
+Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 

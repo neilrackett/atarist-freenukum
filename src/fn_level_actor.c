@@ -486,7 +486,7 @@ void fn_level_actor_function_redball_lying_act(
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
 
-  if (!fn_level_is_solid(actor->level,
+  if (!fn_level_is_solid(level,
         (actor->position.x) / FN_TILE_WIDTH,
         (actor->position.y) / FN_TILE_HEIGHT + 1)) {
     actor->position.y += FN_HALFTILE_HEIGHT;
@@ -497,7 +497,7 @@ void fn_level_actor_function_redball_lying_act(
   } else if (data->touching_hero > 1) {
     fn_hero_decrease_hurting_actors(hero, actor);
     actor->is_alive = 0;
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_FIRE, actor->position.x, actor->position.y);
   }
 }
@@ -622,7 +622,7 @@ void fn_level_actor_function_robot_act(
   data->current_frame++;
 
   data->current_frame %= data->num_frames;
-  if (!fn_level_is_solid(actor->level,
+  if (!fn_level_is_solid(level,
         (actor->position.x) / FN_TILE_WIDTH,
         (actor->position.y) / FN_TILE_HEIGHT + 1)) {
     /* still in the air, so let the robot fall down. */
@@ -636,12 +636,12 @@ void fn_level_actor_function_robot_act(
           2);
       if (
           /* Check if the place next to the bot is free */
-          !fn_level_is_solid(actor->level,
+          !fn_level_is_solid(level,
             (actor->position.x + direction * FN_HALFTILE_WIDTH) /
             FN_TILE_WIDTH,
             (actor->position.y) / FN_TILE_HEIGHT) &&
           /* Check if it is solid below this place */
-          fn_level_is_solid(actor->level,
+          fn_level_is_solid(level,
             (actor->position.x + direction * FN_HALFTILE_WIDTH) /
             FN_TILE_WIDTH,
             (actor->position.y+FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
@@ -675,7 +675,7 @@ void fn_level_actor_function_robot_blit(
 
   SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
+  const FnTileCache * tc = fn_level_get_tilecache(level);
   const FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
@@ -700,7 +700,7 @@ void fn_level_actor_function_robot_shot(
     fn_hero_decrease_hurting_actors(hero, actor);
     data->touching_hero = 0;
   }
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_ROBOT_DISAPPEARING,
       actor->position.x,
       actor->position.y);
@@ -818,19 +818,19 @@ void fn_level_actor_function_tankbot_act(
   if (data->was_shot == 2) {
     /* create explosion */
     actor->is_alive = 0;
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_EXPLOSION,
         actor->position.x + FN_HALFTILE_WIDTH,
         actor->position.y);
     fn_hero_add_score(hero, 2500);
     fn_level_add_particle_firework(
-        actor->level, actor->position.x, actor->position.y, 4);
+        level, actor->position.x, actor->position.y, 4);
   } else {
     data->current_frame %= data->num_frames;
-    if (!fn_level_is_solid(actor->level,
+    if (!fn_level_is_solid(level,
           (actor->position.x) / FN_TILE_WIDTH,
           (actor->position.y) / FN_TILE_HEIGHT + 1) &&
-        !fn_level_is_solid(actor->level,
+        !fn_level_is_solid(level,
           (actor->position.x) / FN_TILE_WIDTH + 1,
           (actor->position.y) / FN_TILE_HEIGHT + 1)) {
       /* still in the air, so let the robot fall down */
@@ -841,12 +841,12 @@ void fn_level_actor_function_tankbot_act(
           -1 : 4);
       if (
           /* check if the place next to the bot is free */
-          !fn_level_is_solid(actor->level,
+          !fn_level_is_solid(level,
             (actor->position.x +
              direction * FN_HALFTILE_WIDTH) / FN_TILE_WIDTH,
             (actor->position.y) / FN_TILE_HEIGHT) &&
           /* check if it is solid below this place */
-          fn_level_is_solid(actor->level,
+          fn_level_is_solid(level,
             (actor->position.x +
              direction * FN_HALFTILE_WIDTH) / FN_TILE_WIDTH,
             (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
@@ -868,11 +868,11 @@ void fn_level_actor_function_tankbot_act(
         data->tile += 4 * direction;
 
         if (direction > 0) {
-          fn_level_add_actor(actor->level,
+          fn_level_add_actor(level,
              FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT,
              actor->position.x, actor->position.y - 6);
         } else {
-          fn_level_add_actor(actor->level,
+          fn_level_add_actor(level,
              FN_LEVEL_ACTOR_HOSTILESHOT_LEFT,
              actor->position.x, actor->position.y - 6);
         }
@@ -882,7 +882,7 @@ void fn_level_actor_function_tankbot_act(
   if (data->was_shot == 1) {
     /* create steam clouds */
     if (data->current_frame == 0) {
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_STEAM, actor->position.x + FN_HALFTILE_WIDTH,
           actor->position.y - FN_TILE_HEIGHT);
     }
@@ -1054,11 +1054,11 @@ void fn_level_actor_function_firewheelbot_act(
   if (data->was_shot == 2) {
     /* create explosion */
     actor->is_alive = 0;
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_EXPLOSION, actor->position.x + FN_HALFTILE_WIDTH,
         actor->position.y);
     fn_level_add_particle_firework(
-        actor->level, actor->position.x, actor->position.y, 8);
+        level, actor->position.x, actor->position.y, 8);
     fn_hero_add_score(hero, 2500);
   } else {
     data->counter++;
@@ -1080,7 +1080,7 @@ void fn_level_actor_function_firewheelbot_act(
     int direction = (data->direction == fn_horizontal_direction_left ?
           -1 : 1);
     if (!fn_level_push_rect_standing_on_solid_ground(
-        actor->level,
+        level,
         actor->position,
         direction * FN_HALFTILE_WIDTH / 2,
         FN_HALFTILE_HEIGHT))
@@ -1095,7 +1095,7 @@ void fn_level_actor_function_firewheelbot_act(
     if (data->was_shot == 1) {
       /* create steam clouds */
       if (data->current_frame == 0) {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_STEAM, actor->position.x + FN_HALFTILE_WIDTH,
             actor->position.y - FN_TILE_HEIGHT);
       }
@@ -1373,9 +1373,9 @@ void fn_level_actor_function_wallcrawler_shot(
       data->current_frame = 0;
     }
     actor->is_alive = 0;
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_STEAM, actor->position.x, actor->position.y);
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_EXPLOSION, actor->position.x, actor->position.y);
     fn_hero_add_score(hero, 100);
   }
@@ -1686,9 +1686,9 @@ void fn_level_actor_function_acme_act(
           for (i = y + FN_TILE_HEIGHT;
               i < hy && !solidbetween;
               i += FN_TILE_HEIGHT) {
-            if (fn_level_is_solid(actor->level,
+            if (fn_level_is_solid(level,
                   xl / FN_TILE_WIDTH, i / FN_TILE_WIDTH) ||
-                fn_level_is_solid(actor->level,
+                fn_level_is_solid(level,
                   xl / FN_TILE_WIDTH + 1, i / FN_TILE_WIDTH)) {
               solidbetween = 1;
             }
@@ -1716,16 +1716,16 @@ void fn_level_actor_function_acme_act(
       data->counter++;
       break;
     default:
-      if (fn_level_is_solid(actor->level,
+      if (fn_level_is_solid(level,
             actor->position.x / FN_TILE_WIDTH,
             (actor->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_STEAM,
             actor->position.x + FN_HALFTILE_WIDTH,
             actor->position.y);
         fn_level_add_particle_firework(
-            actor->level, actor->position.x, actor->position.y, 4);
+            level, actor->position.x, actor->position.y, 4);
         actor->is_alive = 0;
       } else {
         actor->position.y += FN_TILE_HEIGHT;
@@ -1771,11 +1771,11 @@ void fn_level_actor_function_acme_shot(
 
   if (data->counter > 0) {
     fn_hero_add_score(hero, 500);
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
     actor->is_alive = 0;
     fn_level_add_particle_firework(
-        actor->level, actor->position.x, actor->position.y, 4);
+        level, actor->position.x, actor->position.y, 4);
   }
 }
 
@@ -2084,7 +2084,7 @@ void fn_level_actor_function_mill_hero_touch_start(
   fn_level_actor_mill_data_t * data = actor->data;
   if (data->lives > 0) {
     /* TODO check if this is okay or if we need to go beyond 0 */
-    fn_hero_set_health(fn_level_get_hero(actor->level), 0);
+    fn_hero_set_health(fn_level_get_hero(level), 0);
   }
 }
 
@@ -2143,24 +2143,24 @@ void fn_level_actor_function_mill_shot(
   data->lives--;
   if (data->lives > 0) {
     fn_level_add_particle_firework(
-        actor->level,
+        level,
         actor->position.x + actor->position.w / 2,
         actor->position.y + actor->position.h / 2,
         4);
   } else {
     /* TODO add removal animation (destroyed body) */
     actor->is_alive = 0;
-    fn_hero_add_score(fn_level_get_hero(actor->level), 20000);
+    fn_hero_add_score(hero, 20000);
     fn_level_add_particle_firework(
-        actor->level,
+        level,
         actor->position.x + actor->position.w / 2,
         actor->position.y + actor->position.h / 2,
         20);
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_SCORE_10000,
         actor->position.x,
         actor->position.y + actor->position.h / 2 - FN_TILE_HEIGHT);
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_SCORE_10000,
         actor->position.x,
         actor->position.y + actor->position.h / 2);
@@ -2245,7 +2245,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
 
   if (inventory & FN_INVENTORY_ACCESS_CARD) {
     fn_list_t * iter = NULL;
-    for (iter = fn_list_first(actor->level->actors);
+    for (iter = fn_list_first(level->actors);
         iter != NULL;
         iter = fn_list_next(iter)) {
       fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
@@ -2302,9 +2302,9 @@ void fn_level_actor_function_accesscard_slot_blit(
         fn_hero_t * hero,
         const FnTileCache * tilecache)
 {
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
+  const FnTileCache * tc = fn_level_get_tilecache(level);
   fn_level_actor_access_card_slot_data_t * data = actor->data;
   const FnTexture * tile = fn_tilecache_get_tile(tc,
       data->tile + data->current_frame);
@@ -2445,7 +2445,7 @@ void fn_level_actor_function_glove_slot_act(
       data->current_frame %= data->num_frames;
       {
         fn_list_t * expandfloors =
-          fn_level_get_items_of_type(actor->level,
+          fn_level_get_items_of_type(level,
               FN_LEVEL_ACTOR_EXPANDINGFLOOR);
         Uint8 action = 0;
         fn_list_t * iter = NULL;
@@ -2453,10 +2453,10 @@ void fn_level_actor_function_glove_slot_act(
             iter != fn_list_last(expandfloors);
             iter = fn_list_next(iter)) {
           fn_level_actor_t * floor = iter->data;
-          if (!fn_level_is_solid(actor->level,
+          if (!fn_level_is_solid(level,
                 (floor->position.x + floor->position.w) / FN_TILE_WIDTH,
                 (floor->position.y) / FN_TILE_HEIGHT)) {
-            fn_level_set_solid(actor->level,
+            fn_level_set_solid(level,
                 (floor->position.x + floor->position.w) / FN_TILE_WIDTH,
                 (floor->position.y) / FN_TILE_HEIGHT, 1);
             action = 1;
@@ -2476,11 +2476,11 @@ void fn_level_actor_function_glove_slot_act(
 
       data->countdown--;
       if (data->countdown % 4 == 0) {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT,
             actor->position.x, actor->position.y);
       } else if (data->countdown % 4 == 2) {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_HOSTILESHOT_LEFT,
             actor->position.x, actor->position.y);
       }
@@ -2509,11 +2509,10 @@ void fn_level_actor_function_glove_slot_blit(
         const FnTileCache * tilecache)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
-  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   Uint8 adder = (data->current_frame == 0 ? 0 : 1);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + adder);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -2522,11 +2521,11 @@ void fn_level_actor_function_glove_slot_blit(
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
   destrect.x -= FN_TILE_WIDTH;
-  tile = fn_tilecache_get_tile(tc, data->tile + 2);
+  tile = fn_tilecache_get_tile(tilecache, data->tile + 2);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
   destrect.x += 2 * FN_TILE_WIDTH;
-  tile = fn_tilecache_get_tile(tc, data->tile + 3);
+  tile = fn_tilecache_get_tile(tilecache, data->tile + 3);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 }
 
@@ -2748,7 +2747,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_fetched_letter(hero, 'D');
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_LETTER_U:
@@ -2759,7 +2758,7 @@ void fn_level_actor_function_item_touch_start(
       }
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_LETTER_K:
@@ -2770,17 +2769,17 @@ void fn_level_actor_function_item_touch_start(
       }
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_LETTER_E:
       if (fn_hero_get_fetched_letter(hero) == 'K') {
       fn_hero_add_score(hero, 10000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_10000, actor->position.x, actor->position.y);
       } else {
       fn_hero_add_score(hero, 500);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_500, actor->position.x, actor->position.y);
       }
       actor->is_alive = 0;
@@ -2790,7 +2789,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_health(hero, health);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_GUN:
@@ -2798,7 +2797,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_firepower(hero, firepower);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_ACCESS_CARD:
@@ -2806,7 +2805,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_GLOVE:
@@ -2814,7 +2813,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_BOOTS:
@@ -2822,7 +2821,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_CLAMPS:
@@ -2830,24 +2829,24 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_FOOTBALL:
       fn_hero_add_score(hero, 100);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_100, actor->position.x, actor->position.y);
       actor->is_alive = 0;
       break;
     case FN_LEVEL_ACTOR_DISK:
       fn_hero_add_score(hero, 5000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_5000, actor->position.x, actor->position.y);
       actor->is_alive = 0;
       break;
     case FN_LEVEL_ACTOR_JOYSTICK:
       fn_hero_add_score(hero, 2000);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_2000, actor->position.x, actor->position.y);
       actor->is_alive = 0;
       break;
@@ -2856,18 +2855,18 @@ void fn_level_actor_function_item_touch_start(
       switch(data->current_frame) {
         case 0:
           fn_hero_add_score(hero, 100);
-          fn_level_add_actor(actor->level,
+          fn_level_add_actor(level,
               FN_LEVEL_ACTOR_SCORE_100, actor->position.x, actor->position.y);
           break;
         case 1:
           fn_hero_add_score(hero, 2000);
-          fn_level_add_actor(actor->level,
+          fn_level_add_actor(level,
               FN_LEVEL_ACTOR_SCORE_2000,
               actor->position.x, actor->position.y);
           break;
         case 2:
           fn_hero_add_score(hero, 5000);
-          fn_level_add_actor(actor->level,
+          fn_level_add_actor(level,
               FN_LEVEL_ACTOR_SCORE_5000, actor->position.x, actor->position.y);
           break;
       }
@@ -2877,21 +2876,21 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_improve_health(hero, 1);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 200);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_200, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_CHICKEN_SINGLE:
       fn_hero_improve_health(hero, 1);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 100);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_100, actor->position.x, actor->position.y);
       break;
     case FN_LEVEL_ACTOR_CHICKEN_DOUBLE:
       fn_hero_improve_health(hero, 2);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 200);
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_SCORE_200, actor->position.x, actor->position.y);
       break;
     default:
@@ -2932,7 +2931,7 @@ void fn_level_actor_function_item_act(
   fn_level_actor_item_data_t * data = actor->data;
   data->current_frame++;
   data->current_frame %= data->num_frames;
-  if (!fn_level_is_solid(actor->level,
+  if (!fn_level_is_solid(level,
         (actor->position.x) / FN_TILE_WIDTH,
         (actor->position.y) / FN_TILE_HEIGHT + 1)) {
     actor->position.y += FN_HALFTILE_HEIGHT;
@@ -3161,7 +3160,7 @@ void fn_level_actor_function_soda_flying_touch_start(
         const FnTileCache * tilecache)
 {
   fn_hero_add_score(hero, 1000);
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
   actor->is_alive = 0;
 }
@@ -3259,7 +3258,7 @@ void fn_level_actor_function_balloon_touch_start(
   if (!data->destroyed) {
     actor->is_alive = 0;
     fn_hero_add_score(hero, 10000);
-    fn_level_add_actor(actor->level,
+    fn_level_add_actor(level,
         FN_LEVEL_ACTOR_SCORE_10000, actor->position.x, actor->position.y);
   }
 }
@@ -3384,7 +3383,6 @@ void fn_level_actor_function_teleporter_interact_start(
       iter = fn_list_next(iter)) {
     fn_level_actor_t * otheractor = (fn_level_actor_t *)iter->data;
     if (otheractor->type == othertype) {
-      fn_hero_t * hero = fn_level_get_hero(actor->level);
       fn_hero_replace(hero,
           otheractor->position.x,
           otheractor->position.y - FN_TILE_HEIGHT);
@@ -3549,7 +3547,7 @@ void fn_level_actor_function_singleanimation_act(
   if (data->current_frame == data->num_frames) {
     actor->is_alive = 0;
     if (actor->type == FN_LEVEL_ACTOR_ROBOT_DISAPPEARING) {
-      fn_level_add_actor(actor->level,
+      fn_level_add_actor(level,
           FN_LEVEL_ACTOR_EXPLOSION, actor->position.x, actor->position.y);
     }
   }
@@ -3764,12 +3762,12 @@ void fn_level_actor_function_rocket_act(
   }
   if (data->state == fn_level_actor_rocket_state_flying) {
     actor->position.y -= FN_HALFTILE_HEIGHT;
-    if (fn_level_solid_collides(actor->level, actor->position)) {
+    if (fn_level_solid_collides(level, actor->position)) {
       Uint16 tile_x = actor->position.x / FN_TILE_WIDTH;
       Uint16 tile_y = actor->position.y / FN_TILE_HEIGHT;
-      fn_level_set_solid(actor->level, tile_x, tile_y, 0);
-      fn_level_set_tile(actor->level, tile_x, tile_y,
-          fn_level_get_tile(actor->level, tile_x, tile_y - 1));
+      fn_level_set_solid(level, tile_x, tile_y, 0);
+      fn_level_set_tile(level, tile_x, tile_y,
+          fn_level_get_tile(level, tile_x, tile_y - 1));
       actor->is_alive = 0;
     }
   }
@@ -3833,9 +3831,9 @@ void fn_level_actor_function_rocket_shot(
   Uint16 tile_x = actor->position.x / FN_TILE_WIDTH;
   Uint16 tile_y = (actor->position.y + actor->position.h) /
     FN_TILE_HEIGHT;
-  fn_level_set_solid(actor->level, tile_x, tile_y, 0);
-  fn_level_set_tile(actor->level, tile_x, tile_y,
-      fn_level_get_tile(actor->level, tile_x, tile_y + 1));
+  fn_level_set_solid(level, tile_x, tile_y, 0);
+  fn_level_set_tile(level, tile_x, tile_y,
+      fn_level_get_tile(level, tile_x, tile_y + 1));
 }
 
 /* --------------------------------------------------------------- */
@@ -3934,15 +3932,15 @@ void fn_level_actor_bomb_act(
       /* explode to the left if possible */
       if (
           /* check if the place for the flame is free */
-          !fn_level_is_solid(actor->level,
+          !fn_level_is_solid(level,
             (actor->position.x - distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             actor->position.y / FN_TILE_HEIGHT) &&
           /* check if there is solid place below */
-          fn_level_is_solid(actor->level,
+          fn_level_is_solid(level,
             (actor->position.x - distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             (actor->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_BOMBFIRE, actor->position.x - distance * FN_TILE_WIDTH,
             actor->position.y);
       } else {
@@ -3954,15 +3952,15 @@ void fn_level_actor_bomb_act(
       /* explode to the right if possible */
       if (
           /* check if the place for the flame is free */
-          !fn_level_is_solid(actor->level,
+          !fn_level_is_solid(level,
             (actor->position.x + distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             actor->position.y / FN_TILE_HEIGHT) &&
           /* check if there is solid place below */
-          fn_level_is_solid(actor->level,
+          fn_level_is_solid(level,
             (actor->position.x + distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             (actor->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_BOMBFIRE, actor->position.x + distance * FN_TILE_WIDTH,
             actor->position.y);
       } else {
@@ -3985,10 +3983,9 @@ void fn_level_actor_bomb_blit(
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   if (data->counter < data->explode_threshold) {
-    SDL_Surface * target = fn_level_get_surface(actor->level);
+    SDL_Surface * target = fn_level_get_surface(level);
     FnGeometry destrect;
-    const FnTileCache * tc = fn_level_get_tilecache(actor->level);
-    const FnTexture * tile = fn_tilecache_get_tile(tc,
+    const FnTexture * tile = fn_tilecache_get_tile(tilecache,
         data->tile + data->current_frame);
     destrect.x = actor->position.x;
     destrect.y = actor->position.y;
@@ -4207,9 +4204,8 @@ void fn_level_actor_function_explosion_blit(
 {
   SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(actor->level);
   fn_level_actor_explosion_data_t * data = actor->data;
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -4283,9 +4279,9 @@ void fn_level_actor_function_camera_shot(
 {
   actor->is_alive = 0;
   fn_hero_add_score(hero, 100);
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_SCORE_100, actor->position.x, actor->position.y);
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_EXPLOSION, actor->position.x, actor->position.y);
 }
 
@@ -4582,12 +4578,12 @@ void fn_level_actor_function_unstablefloor_act(
             actor->position.x / FN_TILE_WIDTH + floorlength,
             actor->position.y / FN_TILE_HEIGHT,
             0);
-        fn_level_add_actor(actor->level,
+        fn_level_add_actor(level,
             FN_LEVEL_ACTOR_EXPLOSION,
             actor->position.x + floorlength * FN_TILE_WIDTH,
             actor->position.y);
         fn_level_add_particle_firework(
-            actor->level,
+            level,
             actor->position.x + floorlength * FN_TILE_WIDTH,
             actor->position.y, 4);
         floorlength++;
@@ -4795,7 +4791,7 @@ void fn_level_actor_function_conveyor_act(
       heropos.x < actor->position.x + actor->position.w &&
       heropos.y + heropos.h == actor->position.y) {
     fn_hero_push_horizontally(
-        hero, actor->level, direction * FN_HALFTILE_WIDTH);
+        hero, level, direction * FN_HALFTILE_WIDTH);
   }
 }
 
@@ -4999,12 +4995,11 @@ void fn_level_actor_function_hostileshot_act(
   } else {
     actor->position.x += FN_HALFTILE_WIDTH;
   }
-  if (fn_level_is_solid(actor->level,
+  if (fn_level_is_solid(level,
         actor->position.x / FN_TILE_WIDTH,
         actor->position.y / FN_TILE_HEIGHT)) {
     actor->is_alive = 0;
     if (data->touching_hero) {
-      fn_hero_t * hero = fn_level_get_hero(actor->level);
       fn_hero_decrease_hurting_actors(hero, actor);
     }
   }
@@ -5059,7 +5054,7 @@ void fn_level_actor_function_notebook_interact_start(
         fn_hero_t * hero,
         const FnTileCache * tilecache)
 {
-  fn_environment_t * env = fn_level_get_environment(actor->level);
+  fn_environment_t * env = fn_level_get_environment(level);
 
   /* TODO show real note instead of this dummy */
   fn_infobox_show(
@@ -5198,7 +5193,7 @@ void fn_level_actor_function_exitdoor_act(
       break;
     case 2: /* door closing */
       if (data->counter == 0) {
-        actor->level->do_play = 0;
+        level->do_play = 0;
         hero->hidden = 0;
       }
       data->counter--;
@@ -5581,7 +5576,7 @@ void fn_level_actor_function_keyhole_interact_start(
 
     /* open all doors with the real color */
     fn_list_t * iter = NULL;
-    for (iter = fn_list_first(actor->level->actors);
+    for (iter = fn_list_first(level->actors);
         iter != NULL;
         iter = fn_list_next(iter)) {
       fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
@@ -5592,7 +5587,7 @@ void fn_level_actor_function_keyhole_interact_start(
       }
     }
   } else if (data->counter != 5) {
-    fn_environment_t * env = fn_level_get_environment(actor->level);
+    fn_environment_t * env = fn_level_get_environment(level);
     fn_infobox_show(
         env->screen,
         fn_environment_get_tilecache(env),
@@ -5653,7 +5648,7 @@ void fn_level_actor_function_key_touch_start(
       break;
   }
   fn_hero_add_score(hero, 1000);
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_SCORE_1000, actor->position.x, actor->position.y);
   actor->is_alive = 0;
   fn_hero_set_inventory(hero, inventory);
@@ -5766,7 +5761,7 @@ void fn_level_actor_function_shootable_wall_shot(
       actor->position.x / FN_TILE_WIDTH,
       actor->position.y / FN_TILE_HEIGHT,
       0);
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_EXPLOSION, actor->position.x, actor->position.y);
 }
 
@@ -6132,7 +6127,7 @@ void fn_level_actor_function_fan_act(
       if (hdistance_abs < 8 * FN_HALFTILE_WIDTH) {
         fn_hero_push_horizontally(
             hero,
-            actor->level,
+            level,
             fandirection * FN_TILE_WIDTH);
       }
     }
@@ -6176,7 +6171,7 @@ void fn_level_actor_function_fan_shot(
 {
   fn_level_actor_fan_data_t * data = actor->data;
   data->running = 9;
-  fn_level_add_actor(actor->level,
+  fn_level_add_actor(level,
       FN_LEVEL_ACTOR_STEAM, actor->position.x, actor->position.y);
 }
 
@@ -7831,7 +7826,6 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
 {
   fn_level_actor_create_function_t func = NULL;
   fn_level_actor_t * actor = malloc(sizeof(fn_level_actor_t));
-  actor->level = level;
   actor->type = type;
   actor->position.x = x;
   actor->position.y = y;
@@ -7863,9 +7857,8 @@ void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
 
 /* --------------------------------------------------------------- */
 
-int fn_level_actor_touches_hero(fn_level_actor_t * actor)
+int fn_level_actor_touches_hero(fn_level_actor_t * actor, fn_hero_t * hero)
 {
-  fn_hero_t * hero = fn_level_get_hero(actor->level);
   return fn_geometry_overlaps(
         fn_hero_get_position(hero), actor->position);
 }
@@ -7875,7 +7868,7 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor)
 void fn_level_actor_check_hero_touch(
         fn_level_actor_t * actor, fn_level_t * level)
 {
-  if (fn_level_actor_touches_hero(actor)) {
+  if (fn_level_actor_touches_hero(actor, fn_level_get_hero(level))) {
     if (!actor->touches_hero) {
       actor->touches_hero = 1;
       fn_level_actor_hero_touch_start(actor, level);
@@ -7912,7 +7905,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
+Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * hero)
 {
   if (actor->type == FN_LEVEL_ACTOR_LIFT) {
     /* This check needs to be done for lift only because
@@ -7920,7 +7913,6 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
      * lift would be chosen for interaction instead of the one on
      * which the hero stands.
      */
-    fn_hero_t * hero = fn_level_get_hero(actor->level);
     FnGeometry heropos = fn_hero_get_position(hero);
     return (actor->position.x == heropos.x);
   }
@@ -7973,10 +7965,10 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
     fn_level_actor_functions[actor->type].blit;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
-    SDL_Surface * target = fn_level_get_surface(actor->level);
+    SDL_Surface * target = fn_level_get_surface(level);
     Uint8 draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(
-          fn_level_get_environment(actor->level));
+          fn_level_get_environment(level));
     Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
     if (draw_collision_bounds) {
       fn_geometry_draw_outline(target, actor->position, collision_color);

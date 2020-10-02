@@ -1129,10 +1129,10 @@ void fn_level_hero_interact_start(fn_level_t * lv)
       iter != NULL;
       iter = fn_list_next(iter)) {
     fn_level_actor_t * actor = (fn_level_actor_t *)iter->data;
+    fn_hero_t * hero = fn_level_get_hero(lv);
 
-    if (fn_level_actor_hero_can_interact(actor)) {
+    if (fn_level_actor_hero_can_interact(actor, hero)) {
 
-      fn_hero_t * hero = fn_level_get_hero(lv);
       FnGeometry heropos = fn_hero_get_position(hero);
 
       if (fn_geometry_touches(heropos, fn_level_actor_get_position(actor)))
