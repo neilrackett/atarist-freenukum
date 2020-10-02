@@ -194,11 +194,6 @@ struct fn_bot_t {
   fn_bot_type_e type;
 
   /**
-   * The level inside which the bot is located.
-   */
-  fn_hero_t * hero;
-
-  /**
    * The x position in the level.
    */
   Uint16 x;
@@ -228,7 +223,6 @@ struct fn_bot_t {
  */
 fn_bot_t * fn_bot_create(
     fn_bot_type_e type,
-    fn_hero_t * hero,
     size_t x,
     size_t y);
 

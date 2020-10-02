@@ -239,7 +239,7 @@ fn_level_t * fn_level_load(FnFile* file,
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
         lv->bots = fn_list_append(lv->bots, fn_bot_create(
-              FN_BOT_TYPE_FOOTBOT, hero, x*2, y*2));
+              FN_BOT_TYPE_FOOTBOT, x*2, y*2));
         break;
       case 0x300d: /* tankbot */
         if (x > 0) {

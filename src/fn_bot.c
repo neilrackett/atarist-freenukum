@@ -39,7 +39,6 @@
 
 fn_bot_t * fn_bot_create(
     fn_bot_type_e type,
-    fn_hero_t * hero,
     size_t x,
     size_t y)
 {
@@ -47,7 +46,6 @@ fn_bot_t * fn_bot_create(
   bot->x = x;
   bot->y = y;
   bot->type = type;
-  bot->hero = hero;
 
   switch(type) {
     case FN_BOT_TYPE_FIREWHEEL:
