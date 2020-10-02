@@ -36,6 +36,26 @@
 
 /* --------------------------------------------------------------- */
 
+typedef void (* fn_level_actor_function_t)(
+        fn_level_actor_t *,
+        fn_level_t * level,
+        fn_hero_t * hero,
+        const FnTileCache * tilecache);
+
+/* --------------------------------------------------------------- */
+
+typedef struct fn_level_actor_functions_t {
+    fn_level_actor_function_t create;
+    fn_level_actor_function_t free;
+    fn_level_actor_function_t hero_touch_start;
+    fn_level_actor_function_t hero_touch_end;
+    fn_level_actor_function_t hero_interact_start;
+    fn_level_actor_function_t hero_interact_end;
+    fn_level_actor_function_t act;
+    fn_level_actor_function_t blit;
+    fn_level_actor_function_t shot;
+} fn_level_actor_functions_t;
+
 /**
  * The different types of functions which can be executed on the actor.
  */
@@ -6320,2332 +6340,1643 @@ void fn_level_actor_function_fan_shot(
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef void (* fn_level_actor_function_t)(
-        fn_level_actor_t *,
-        fn_level_t * level,
-        fn_hero_t * hero,
-        const FnTileCache * tilecache);
-
 /**
  * An array of functions to call for different actions on different
  * actors.
  */
-void
-  (* fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES][FN_LEVEL_ACTOR_NUM_FUNCTIONS])
-  (fn_level_actor_t *, fn_level_t *, fn_hero_t *, const FnTileCache*) =
+fn_level_actor_functions_t
+fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
 {
   [FN_LEVEL_ACTOR_FIREWHEELBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_firewheelbot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_firewheelbot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_firewheelbot_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_firewheelbot_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_firewheelbot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_firewheelbot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_firewheelbot_shot,
+    .create = fn_level_actor_function_firewheelbot_create,
+    .free = fn_level_actor_function_firewheelbot_free,
+    .hero_touch_start = fn_level_actor_function_firewheelbot_touch_start,
+    .hero_touch_end = fn_level_actor_function_firewheelbot_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_firewheelbot_act,
+    .blit = fn_level_actor_function_firewheelbot_blit,
+    .shot = fn_level_actor_function_firewheelbot_shot,
   },
   [FN_LEVEL_ACTOR_FLAMEGNOMEBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_FLYINGBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_FOOTBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_HELICOPTERBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_RABBITOIDBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_REDBALL_JUMPING] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_redball_jumping_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_redball_jumping_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_redball_jumping_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_redball_jumping_hero_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_redball_jumping_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_redball_jumping_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_redball_jumping_shot,
+    .create = fn_level_actor_function_redball_jumping_create,
+    .free = fn_level_actor_function_redball_jumping_free,
+    .hero_touch_start = fn_level_actor_function_redball_jumping_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_redball_jumping_hero_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_redball_jumping_act,
+    .blit = fn_level_actor_function_redball_jumping_blit,
+    .shot = fn_level_actor_function_redball_jumping_shot,
   },
   [FN_LEVEL_ACTOR_REDBALL_LYING] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_redball_lying_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_redball_lying_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_redball_lying_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_redball_lying_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_redball_lying_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_redball_lying_create,
+    .free = fn_level_actor_function_redball_lying_free,
+    .hero_touch_start = fn_level_actor_function_redball_lying_hero_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_redball_lying_act,
+    .blit = fn_level_actor_function_redball_lying_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_ROBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_robot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_robot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_robot_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_robot_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_robot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_robot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_robot_shot,
+    .create = fn_level_actor_function_robot_create,
+    .free = fn_level_actor_function_robot_free,
+    .hero_touch_start = fn_level_actor_function_robot_touch_start,
+    .hero_touch_end = fn_level_actor_function_robot_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_robot_act,
+    .blit = fn_level_actor_function_robot_blit,
+    .shot = fn_level_actor_function_robot_shot,
   },
   [FN_LEVEL_ACTOR_ROBOT_DISAPPEARING] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_singleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_singleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_singleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_singleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_singleanimation_create,
+    .free = fn_level_actor_function_singleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_singleanimation_act,
+    .blit = fn_level_actor_function_singleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SNAKEBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_TANKBOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_tankbot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_tankbot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_tankbot_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_tankbot_hero_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_tankbot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_tankbot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_tankbot_shot,
+    .create = fn_level_actor_function_tankbot_create,
+    .free = fn_level_actor_function_tankbot_free,
+    .hero_touch_start = fn_level_actor_function_tankbot_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_tankbot_hero_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_tankbot_act,
+    .blit = fn_level_actor_function_tankbot_blit,
+    .shot = fn_level_actor_function_tankbot_shot,
   },
   [FN_LEVEL_ACTOR_WALLCRAWLERBOT_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_wallcrawler_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_wallcrawler_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_wallcrawler_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_wallcrawler_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_wallcrawler_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_wallcrawler_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_wallcrawler_shot,
+    .create = fn_level_actor_function_wallcrawler_create,
+    .free = fn_level_actor_function_wallcrawler_free,
+    .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
+    .hero_touch_end = fn_level_actor_function_wallcrawler_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_wallcrawler_act,
+    .blit = fn_level_actor_function_wallcrawler_blit,
+    .shot = fn_level_actor_function_wallcrawler_shot,
   },
   [FN_LEVEL_ACTOR_WALLCRAWLERBOT_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_wallcrawler_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_wallcrawler_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_wallcrawler_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_wallcrawler_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_wallcrawler_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_wallcrawler_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_wallcrawler_shot,
+    .create = fn_level_actor_function_wallcrawler_create,
+    .free = fn_level_actor_function_wallcrawler_free,
+    .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
+    .hero_touch_end = fn_level_actor_function_wallcrawler_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_wallcrawler_act,
+    .blit = fn_level_actor_function_wallcrawler_blit,
+    .shot = fn_level_actor_function_wallcrawler_shot,
   },
   [FN_LEVEL_ACTOR_DRPROTON] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_CAMERA] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_camera_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_camera_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_camera_shot,
+    .create = fn_level_actor_function_camera_create,
+    .free = NULL,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_camera_blit,
+    .shot = fn_level_actor_function_camera_shot,
   },
   [FN_LEVEL_ACTOR_EXPLOSION] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_explosion_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_explosion_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_explosion_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_explosion_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_explosion_create,
+    .free = fn_level_actor_function_explosion_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_explosion_act,
+    .blit = fn_level_actor_function_explosion_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_FIRE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_singleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_singleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_singleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_singleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_singleanimation_create,
+    .free = fn_level_actor_function_singleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_singleanimation_act,
+    .blit = fn_level_actor_function_singleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_DUSTCLOUD] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_singleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_singleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_singleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_singleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_singleanimation_create,
+    .free = fn_level_actor_function_singleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_singleanimation_act,
+    .blit = fn_level_actor_function_singleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_STEAM] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_singleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_singleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_singleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_singleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_singleanimation_create,
+    .free = fn_level_actor_function_singleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_singleanimation_act,
+    .blit = fn_level_actor_function_singleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_PARTICLE_PINK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_particle_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_particle_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_particle_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_particle_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_particle_create,
+    .free = fn_level_actor_function_particle_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_particle_act,
+    .blit = fn_level_actor_function_particle_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_PARTICLE_BLUE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_particle_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_particle_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_particle_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_particle_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_particle_create,
+    .free = fn_level_actor_function_particle_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_particle_act,
+    .blit = fn_level_actor_function_particle_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_PARTICLE_WHITE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_particle_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_particle_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_particle_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_particle_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_particle_create,
+    .free = fn_level_actor_function_particle_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_particle_act,
+    .blit = fn_level_actor_function_particle_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_PARTICLE_GREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_particle_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_particle_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_particle_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_particle_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_particle_create,
+    .free = fn_level_actor_function_particle_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_particle_act,
+    .blit = fn_level_actor_function_particle_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_ROCKET] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_rocket_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_rocket_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_rocket_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_rocket_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_rocket_shot,
+    .create = fn_level_actor_function_rocket_create,
+    .free = fn_level_actor_function_rocket_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_rocket_act,
+    .blit = fn_level_actor_function_rocket_blit,
+    .shot = fn_level_actor_function_rocket_shot,
   },
   [FN_LEVEL_ACTOR_BOMB] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_bomb_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_bomb_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_bomb_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_bomb_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_bomb_create,
+    .free = fn_level_actor_bomb_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_bomb_act,
+    .blit = fn_level_actor_bomb_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOMBFIRE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_bombfire_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_bombfire_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_bombfire_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_bombfire_hero_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_bombfire_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_bombfire_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_bombfire_create,
+    .free = fn_level_actor_bombfire_free,
+    .hero_touch_start = fn_level_actor_bombfire_hero_touch_start,
+    .hero_touch_end = fn_level_actor_bombfire_hero_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_bombfire_act,
+    .blit = fn_level_actor_bombfire_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_WATER] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_EXITDOOR] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_exitdoor_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_exitdoor_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_exitdoor_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_exitdoor_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_exitdoor_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_exitdoor_create,
+    .free = fn_level_actor_function_exitdoor_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_exitdoor_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_exitdoor_act,
+    .blit = fn_level_actor_function_exitdoor_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_NOTEBOOK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_notebook_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_notebook_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_notebook_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_notebook_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_notebook_create,
+    .free = fn_level_actor_function_notebook_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_notebook_interact_start,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_notebook_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SURVEILLANCESCREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_surveillancescreen_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_surveillancescreen_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_surveillancescreen_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_surveillancescreen_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_surveillancescreen_create,
+    .free = fn_level_actor_function_surveillancescreen_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_surveillancescreen_interact_start,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_surveillancescreen_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_HOSTILESHOT_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_hostileshot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_hostileshot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_hostileshot_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_hostileshot_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_hostileshot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_hostileshot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_hostileshot_create,
+    .free = fn_level_actor_function_hostileshot_free,
+    .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
+    .hero_touch_end = fn_level_actor_function_hostileshot_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_hostileshot_act,
+    .blit = fn_level_actor_function_hostileshot_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_hostileshot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_hostileshot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_hostileshot_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_hostileshot_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_hostileshot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_hostileshot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_hostileshot_create,
+    .free = fn_level_actor_function_hostileshot_free,
+    .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
+    .hero_touch_end = fn_level_actor_function_hostileshot_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_hostileshot_act,
+    .blit = fn_level_actor_function_hostileshot_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SODA] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_SODA_FLYING] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_soda_flying_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_soda_flying_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_soda_flying_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_soda_flying_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_soda_flying_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_soda_flying_create,
+    .free = fn_level_actor_function_soda_flying_free,
+    .hero_touch_start = fn_level_actor_function_soda_flying_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_soda_flying_act,
+    .blit = fn_level_actor_function_soda_flying_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_UNSTABLEFLOOR] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_unstablefloor_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_unstablefloor_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_unstablefloor_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_unstablefloor_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_unstablefloor_create,
+    .free = fn_level_actor_function_unstablefloor_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_unstablefloor_act,
+    .blit = fn_level_actor_function_unstablefloor_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_EXPANDINGFLOOR] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_expandingfloor_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_expandingfloor_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_expandingfloor_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_expandingfloor_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_expandingfloor_create,
+    .free = fn_level_actor_function_expandingfloor_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_expandingfloor_act,
+    .blit = fn_level_actor_function_expandingfloor_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_CONVEYOR_LEFTMOVING_RIGHTEND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_conveyor_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_conveyor_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_conveyor_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_conveyor_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_conveyor_create,
+    .free = fn_level_actor_function_conveyor_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_conveyor_act,
+    .blit = fn_level_actor_function_conveyor_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_CONVEYOR_RIGHTMOVING_RIGHTEND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_conveyor_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_conveyor_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_conveyor_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_conveyor_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_conveyor_create,
+    .free = fn_level_actor_function_conveyor_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_conveyor_act,
+    .blit = fn_level_actor_function_conveyor_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_FAN_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_fan_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_fan_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_fan_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_fan_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_fan_shot,
+    .create = fn_level_actor_function_fan_create,
+    .free = fn_level_actor_function_fan_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_fan_act,
+    .blit = fn_level_actor_function_fan_blit,
+    .shot = fn_level_actor_function_fan_shot,
   },
   [FN_LEVEL_ACTOR_FAN_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_fan_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_fan_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_fan_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_fan_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_fan_shot,
+    .create = fn_level_actor_function_fan_create,
+    .free = fn_level_actor_function_fan_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_fan_act,
+    .blit = fn_level_actor_function_fan_blit,
+    .shot = fn_level_actor_function_fan_shot,
   },
   [FN_LEVEL_ACTOR_BROKENWALL_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_STONE_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_TELEPORTER1] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_teleporter_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_teleporter_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_teleporter_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_teleporter_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_teleporter_create,
+    .free = NULL,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_teleporter_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_teleporter_act,
+    .blit = fn_level_actor_function_teleporter_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_TELEPORTER2] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_teleporter_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_teleporter_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_teleporter_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_teleporter_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_teleporter_create,
+    .free = NULL,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_teleporter_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_teleporter_act,
+    .blit = fn_level_actor_function_teleporter_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_FENCE_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_STONEWINDOW_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_WINDOWLEFT_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_WINDOWRIGHT_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_BOX_GREY_EMPTY] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_BOOTS] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BOOTS] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_CLAMPS] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = 
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_CLAMPS] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_GUN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_GUN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_BOMB] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BOX_RED_SODA] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BOX_RED_CHICKEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_CHICKEN_SINGLE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_CHICKEN_DOUBLE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_FOOTBALL] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_FOOTBALL] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_FLAG] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_JOYSTICK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_JOYSTICK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_DISK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_DISK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_BALLOON] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BALLOON] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_balloon_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_balloon_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_balloon_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_balloon_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_balloon_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_balloon_shot,
+    .create = fn_level_actor_function_balloon_create,
+    .free = fn_level_actor_function_balloon_free,
+    .hero_touch_start = fn_level_actor_function_balloon_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_balloon_act,
+    .blit = fn_level_actor_function_balloon_blit,
+    .shot = fn_level_actor_function_balloon_shot,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_GLOVE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_GLOVE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_FULL_LIFE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_FULL_LIFE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-    fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_FLAG] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_BLUE_FLAG] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_BOX_BLUE_RADIO] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_RADIO] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_ACCESS_CARD] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_ACCESS_CARD] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_LETTER_D] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_LETTER_D] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_LETTER_U] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_LETTER_U] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_LETTER_K] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_LETTER_K] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BOX_GREY_LETTER_E] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_item_shot,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = fn_level_actor_function_item_shot,
   },
   [FN_LEVEL_ACTOR_LETTER_E] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_item_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_item_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_item_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_item_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_item_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_item_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_item_create,
+    .free = fn_level_actor_function_item_free,
+    .hero_touch_start = fn_level_actor_function_item_touch_start,
+    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_item_act,
+    .blit = fn_level_actor_function_item_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_ACCESS_CARD_SLOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_accesscard_slot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_accesscard_slot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_accesscard_slot_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_accesscard_slot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_accesscard_slot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_accesscard_slot_create,
+    .free = fn_level_actor_function_accesscard_slot_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_accesscard_slot_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_accesscard_slot_act,
+    .blit = fn_level_actor_function_accesscard_slot_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_GLOVE_SLOT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_glove_slot_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_glove_slot_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_glove_slot_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_glove_slot_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_glove_slot_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_glove_slot_create,
+    .free = fn_level_actor_function_glove_slot_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_glove_slot_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_glove_slot_act,
+    .blit = fn_level_actor_function_glove_slot_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEY_RED] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_key_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_key_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_key_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_key_create,
+    .free = NULL,
+    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_key_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEYHOLE_RED] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_keyhole_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_keyhole_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_keyhole_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_keyhole_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_keyhole_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_keyhole_create,
+    .free = fn_level_actor_function_keyhole_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_keyhole_act,
+    .blit = fn_level_actor_function_keyhole_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_DOOR_RED] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_door_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_door_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_door_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_door_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_door_create,
+    .free = fn_level_actor_function_door_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_door_act,
+    .blit = fn_level_actor_function_door_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEY_BLUE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_key_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_key_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_key_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_key_create,
+    .free = NULL,
+    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_key_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEYHOLE_BLUE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_keyhole_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_keyhole_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_keyhole_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_keyhole_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_keyhole_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_keyhole_create,
+    .free = fn_level_actor_function_keyhole_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_keyhole_act,
+    .blit = fn_level_actor_function_keyhole_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_DOOR_BLUE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_door_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_door_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_door_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_door_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_door_create,
+    .free = fn_level_actor_function_door_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_door_act,
+    .blit = fn_level_actor_function_door_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEY_PINK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_key_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_key_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_key_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_key_create,
+    .free = NULL,
+    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_key_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEYHOLE_PINK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_keyhole_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_keyhole_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_keyhole_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_keyhole_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_keyhole_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_keyhole_create,
+    .free = fn_level_actor_function_keyhole_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_keyhole_act,
+    .blit = fn_level_actor_function_keyhole_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_DOOR_PINK] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_door_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_door_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_door_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_door_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_door_create,
+    .free = fn_level_actor_function_door_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_door_act,
+    .blit = fn_level_actor_function_door_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEY_GREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_key_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_key_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_key_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_key_create,
+    .free = NULL,
+    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_key_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEYHOLE_GREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_keyhole_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_keyhole_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_keyhole_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_keyhole_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_keyhole_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_keyhole_create,
+    .free = fn_level_actor_function_keyhole_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_keyhole_act,
+    .blit = fn_level_actor_function_keyhole_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_DOOR_GREEN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_door_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_door_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_door_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_door_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_door_create,
+    .free = fn_level_actor_function_door_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_door_act,
+    .blit = fn_level_actor_function_door_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SHOOTABLE_WALL] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_shootable_wall_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_shootable_wall_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_shootable_wall_shot,
+    .create = fn_level_actor_function_shootable_wall_create,
+    .free = NULL,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_shootable_wall_blit,
+    .shot = fn_level_actor_function_shootable_wall_shot,
   },
   [FN_LEVEL_ACTOR_LIFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_lift_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_lift_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] =
-      fn_level_actor_function_lift_interact_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   =
-      fn_level_actor_function_lift_interact_end,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_lift_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_lift_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_lift_create,
+    .free = fn_level_actor_function_lift_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = fn_level_actor_function_lift_interact_start,
+    .hero_interact_end = fn_level_actor_function_lift_interact_end,
+    .act = fn_level_actor_function_lift_act,
+    .blit = fn_level_actor_function_lift_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_ACME] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_acme_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_acme_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_acme_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_acme_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_acme_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_acme_shot,
+    .create = fn_level_actor_function_acme_create,
+    .free = fn_level_actor_function_acme_free,
+    .hero_touch_start = fn_level_actor_function_acme_hero_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_acme_act,
+    .blit = fn_level_actor_function_acme_blit,
+    .shot = fn_level_actor_function_acme_shot,
   },
   [FN_LEVEL_ACTOR_FIRE_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_fire_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_fire_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_fire_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_fire_hero_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_fire_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_fire_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_fire_create,
+    .free = fn_level_actor_function_fire_free,
+    .hero_touch_start = fn_level_actor_function_fire_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_fire_hero_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_fire_act,
+    .blit = fn_level_actor_function_fire_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_FIRE_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_fire_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_fire_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_fire_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_fire_hero_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_fire_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_fire_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_fire_create,
+    .free = fn_level_actor_function_fire_free,
+    .hero_touch_start = fn_level_actor_function_fire_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_fire_hero_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_fire_act,
+    .blit = fn_level_actor_function_fire_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_MILL] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_mill_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_mill_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_mill_hero_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_mill_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_mill_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                =
-      fn_level_actor_function_mill_shot,
+    .create = fn_level_actor_function_mill_create,
+    .free = fn_level_actor_function_mill_free,
+    .hero_touch_start = fn_level_actor_function_mill_hero_touch_start,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_mill_act,
+    .blit = fn_level_actor_function_mill_blit,
+    .shot = fn_level_actor_function_mill_shot,
   },
   [FN_LEVEL_ACTOR_LASERBEAM] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    .create = NULL, /* TODO */
+    .free = NULL, /* TODO */
+    .hero_touch_start = NULL, /* TODO */
+    .hero_touch_end = NULL, /* TODO */
+    .hero_interact_start = NULL, /* TODO */
+    .hero_interact_end = NULL, /* TODO */
+    .act = NULL, /* TODO */
+    .blit = NULL, /* TODO */
+    .shot = NULL, /* TODO */
   },
   [FN_LEVEL_ACTOR_ACCESS_CARD_DOOR] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_access_card_door_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_access_card_door_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_access_card_door_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_access_card_door_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_access_card_door_create,
+    .free = fn_level_actor_function_access_card_door_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_access_card_door_act,
+    .blit = fn_level_actor_function_access_card_door_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SPIKES_UP] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_spikes_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_spikes_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_spikes_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_spikes_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_spikes_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_spikes_create,
+    .free = fn_level_actor_function_spikes_free,
+    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_spikes_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SPIKES_DOWN] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_spikes_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_spikes_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_spikes_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_spikes_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_spikes_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_spikes_create,
+    .free = fn_level_actor_function_spikes_free,
+    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_spikes_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SPIKE] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_spikes_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_spikes_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    =
-      fn_level_actor_function_spikes_touch_start,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      =
-      fn_level_actor_function_spikes_touch_end,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_spikes_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_spikes_create,
+    .free = fn_level_actor_function_spikes_free,
+    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = NULL,
+    .blit = fn_level_actor_function_spikes_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_100] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_200] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_500] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_1000] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_2000] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_5000] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_10000] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_1_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_1_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_2_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_2_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_3_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_3_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_4_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_4_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_5_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_5_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_6_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_6_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_7_LEFT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_SCORE_BONUS_7_RIGHT] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_score_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                =
-      fn_level_actor_function_score_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 =
-      fn_level_actor_function_score_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_score_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_score_create,
+    .free = fn_level_actor_function_score_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_score_act,
+    .blit = fn_level_actor_function_score_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND1] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND2] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND3] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND4] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_TEXT_ON_SCREEN_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_HIGH_VOLTAGE_FLASH_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_RED_FLASHLIGHT_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_BLUE_FLASHLIGHT_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_KEYPANEL_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_RED_ROTATIONLIGHT_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_UPARROW_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_GREEN_POISON_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
   [FN_LEVEL_ACTOR_LAVA_BACKGROUND] = {
-    [FN_LEVEL_ACTOR_FUNCTION_CREATE]              =
-      fn_level_actor_function_simpleanimation_create,
-    [FN_LEVEL_ACTOR_FUNCTION_FREE]                = 
-      fn_level_actor_function_simpleanimation_free,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
-    [FN_LEVEL_ACTOR_FUNCTION_ACT]                 = 
-      fn_level_actor_function_simpleanimation_act,
-    [FN_LEVEL_ACTOR_FUNCTION_BLIT]                =
-      fn_level_actor_function_simpleanimation_blit,
-    [FN_LEVEL_ACTOR_FUNCTION_SHOT]                = NULL,
+    .create = fn_level_actor_function_simpleanimation_create,
+    .free = fn_level_actor_function_simpleanimation_free,
+    .hero_touch_start = NULL,
+    .hero_touch_end = NULL,
+    .hero_interact_start = NULL,
+    .hero_interact_end = NULL,
+    .act = fn_level_actor_function_simpleanimation_act,
+    .blit = fn_level_actor_function_simpleanimation_blit,
+    .shot = NULL,
   },
 };
+
 
 /* --------------------------------------------------------------- */
 
@@ -8667,7 +7998,7 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
   actor->is_in_foreground = 0;
   actor->is_visible = 0;
   actor->acts_while_invisible = 0;
-  func = fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_CREATE];
+  func = fn_level_actor_functions[actor->type].create;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8679,7 +8010,7 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
 void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_FREE];
+    fn_level_actor_functions[actor->type].free;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8718,7 +8049,7 @@ void fn_level_actor_check_hero_touch(
 void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_START];
+    fn_level_actor_functions[actor->type].hero_touch_start;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8729,7 +8060,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
 void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_TOUCH_END];
+    fn_level_actor_functions[actor->type].hero_touch_end;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8750,8 +8081,7 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
     return (actor->position.x == heropos.x);
   }
   fn_level_actor_function_t func =
-    fn_level_actor_functions[
-    actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START];
+    fn_level_actor_functions[actor->type].hero_interact_start;
   return (func != NULL);
 }
 
@@ -8760,8 +8090,7 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor)
 void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[
-    actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_START];
+    fn_level_actor_functions[actor->type].hero_interact_start;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8772,8 +8101,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
 void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[
-    actor->type][FN_LEVEL_ACTOR_FUNCTION_HERO_INTERACT_END];
+    fn_level_actor_functions[actor->type].hero_interact_end;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
   }
@@ -8785,7 +8113,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_check_hero_touch(actor, level);
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_ACT];
+    fn_level_actor_functions[actor->type].act;
   if (func != NULL)
   {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
@@ -8798,7 +8126,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
 void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_BLIT];
+    fn_level_actor_functions[actor->type].blit;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
     SDL_Surface * target = fn_level_get_surface(actor->level);
@@ -8817,7 +8145,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_SHOT];
+    fn_level_actor_functions[actor->type].shot;
   if (func != NULL) {
     func(actor, level, fn_level_get_hero(level), fn_level_get_tilecache(level));
     return 1;
@@ -8857,8 +8185,7 @@ Uint16 fn_level_actor_get_h(fn_level_actor_t * actor)
 
 Uint8 fn_level_actor_can_get_shot(fn_level_actor_t * actor)
 {
-  fn_level_actor_function_t func =
-    fn_level_actor_functions[actor->type][FN_LEVEL_ACTOR_FUNCTION_SHOT];
+  fn_level_actor_function_t func = fn_level_actor_functions[actor->type].shot;
   return (func != NULL);
 }
 
