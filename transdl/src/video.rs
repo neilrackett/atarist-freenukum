@@ -51,9 +51,9 @@ impl Surface {
         PixelFormat { raw }
     }
 
-    pub fn fill_rect(&mut self, dstrect: &Rect, color: u32) {
+    pub fn fill_rect(&mut self, dstrect: Rect, color: u32) {
         unsafe {
-            let dstrect_ptr: *const Rect = dstrect;
+            let dstrect_ptr: *const Rect = &dstrect;
             let dstrect_mut_ptr = dstrect_ptr as *mut Rect;
             ll::SDL_FillRect(self.raw, dstrect_mut_ptr, color);
         }

@@ -153,6 +153,18 @@ SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);
 
+void fn_geometry_draw_outline(SDL_Surface *surface,
+                              FnGeometry geometry,
+                              uint32_t color);
+
+int32_t fn_geometry_horizontal_distance(FnGeometry r1, FnGeometry r2);
+
+bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
+
+bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
+
+bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
 void fn_infobox_show(SDL_Surface *screen,
                      const FnTileCache *tilecache,
                      FnTextureCreationParams params,

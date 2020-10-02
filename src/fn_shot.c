@@ -32,7 +32,6 @@
 
 #include "fn_shot.h"
 #include "fn_object.h"
-#include "fn_collision.h"
 
 /* --------------------------------------------------------------- */
 
@@ -106,7 +105,8 @@ void fn_shot_blit(fn_shot_t * shot)
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
     if (shot->draw_collision_bounds) {
-      fn_collision_rect_draw(target, shot->position);
+        Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
+        fn_geometry_draw_outline(target, shot->position, collision_color);
     }
   }
 }
@@ -158,7 +158,7 @@ fn_level_t * fn_shot_get_level(fn_shot_t * shot)
 Uint8 fn_shot_overlaps_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
-  return fn_collision_overlap_rect_rect(actorpos, shot->position);
+  return fn_geometry_overlaps(actorpos, shot->position);
 }
 
 /* --------------------------------------------------------------- */
@@ -166,7 +166,7 @@ Uint8 fn_shot_overlaps_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 Uint8 fn_shot_touches_actor(fn_shot_t * shot, fn_level_actor_t * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
-  return fn_collision_touch_rect_rect(actorpos, shot->position);
+  return fn_geometry_touches(actorpos, shot->position);
 }
 
 /* --------------------------------------------------------------- */

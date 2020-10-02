@@ -35,7 +35,6 @@
 #include "fn_level_actor.h"
 #include "fn_hero.h"
 #include "fn_object.h"
-#include "fn_collision.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -1135,8 +1134,7 @@ void fn_level_hero_interact_start(fn_level_t * lv)
       fn_hero_t * hero = fn_level_get_hero(lv);
       FnGeometry heropos = fn_hero_get_position(hero);
 
-      if (fn_collision_touch_rect_rect(heropos,
-            fn_level_actor_get_position(actor)))
+      if (fn_geometry_touches(heropos, fn_level_actor_get_position(actor)))
       {
         fn_level_hero_interact_stop(lv);
 
@@ -1284,7 +1282,7 @@ Uint8 fn_level_solid_collides(fn_level_t * lv, FnGeometry rect)
       if (fn_level_is_solid(lv, i, j)) {
         solidrect.x = i * FN_TILE_WIDTH;
         solidrect.y = j * FN_TILE_HEIGHT;
-        if (fn_collision_overlap_rect_rect(solidrect, rect)) {
+        if (fn_geometry_overlaps(solidrect, rect)) {
           return 1;
         }
       }

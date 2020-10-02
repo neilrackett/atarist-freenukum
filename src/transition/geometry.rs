@@ -1,3 +1,5 @@
+use transdl::video::Surface;
+
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub struct Geometry {
@@ -57,9 +59,83 @@ impl Geometry {
             h: self.h,
         }
     }
+
+    pub fn overlaps(&self, other: Geometry) -> bool {
+        if self.x as i32 + self.w as i32 <= other.x as i32 {
+            return false;
+        }
+        if other.x as i32 + other.w as i32 <= self.x as i32 {
+            return false;
+        }
+        if self.y as i32 + self.h as i32 <= other.y as i32 {
+            return false;
+        }
+        if other.y as i32 + other.h as i32 <= self.y as i32 {
+            return false;
+        }
+        true
+    }
+
+    pub fn horizontal_distance(&self, other: Geometry) -> i32 {
+        if (self.x as i32 + self.w as i32) < other.x as i32 {
+            return other.x as i32 - self.w as i32 - self.x as i32;
+        }
+        if (other.x as i32 + other.w as i32) < self.x as i32 {
+            return -(self.x as i32 - other.w as i32 - other.x as i32);
+        }
+        return 0;
+    }
+
+    pub fn touches(&self, other: Geometry) -> bool {
+        let mut r1 = self.clone();
+        r1.w += 1;
+        r1.h += 1;
+        let mut r2 = other.clone();
+        r2.w += 1;
+        r2.h += 1;
+        r1.overlaps(r2)
+    }
+
+    pub fn overlaps_vertically(&self, other: Geometry) -> bool {
+        if self.y as i32 + self.h as i32 <= other.y as i32 {
+            return false;
+        }
+        if other.y as i32 + other.h as i32 <= self.y as i32 {
+            return false;
+        }
+        true
+    }
+
+    pub fn draw_outline(&self, surface: &mut Surface, color: u32) {
+        {
+            let mut r = self.clone();
+            r.w = 1;
+            surface.fill_rect(r.as_sdl_rect(), color);
+        }
+        {
+            let mut r = self.clone();
+            r.x += r.w as i16 - 1;
+            r.w = 1;
+            surface.fill_rect(r.as_sdl_rect(), color);
+        }
+        {
+            let mut r = self.clone();
+            r.h = 1;
+            surface.fill_rect(r.as_sdl_rect(), color);
+        }
+        {
+            let mut r = self.clone();
+            r.y += r.h as i16 - 1;
+            r.h = 1;
+            surface.fill_rect(r.as_sdl_rect(), color);
+        }
+    }
 }
 
 pub mod ffi {
+    use transdl::ll::SDL_Surface;
+    use transdl::video::Surface;
+
     pub type FnGeometry = super::Geometry;
 
     #[no_mangle]
@@ -78,5 +154,49 @@ pub mod ffi {
     ) -> transdl::ll::SDL_Rect {
         let g: &FnGeometry = &(*ptr);
         g.as_sdl_rect()
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn fn_geometry_overlaps(
+        r1: FnGeometry,
+        r2: FnGeometry,
+    ) -> bool {
+        r1.overlaps(r2)
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn fn_geometry_overlaps_vertically(
+        r1: FnGeometry,
+        r2: FnGeometry,
+    ) -> bool {
+        r1.overlaps_vertically(r2)
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn fn_geometry_touches(
+        r1: FnGeometry,
+        r2: FnGeometry,
+    ) -> bool {
+        r1.touches(r2)
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn fn_geometry_horizontal_distance(
+        r1: FnGeometry,
+        r2: FnGeometry,
+    ) -> i32 {
+        r1.horizontal_distance(r2)
+    }
+
+    #[no_mangle]
+    pub unsafe extern "C" fn fn_geometry_draw_outline(
+        surface: *mut SDL_Surface,
+        geometry: FnGeometry,
+        color: u32,
+    ) {
+        assert!(!surface.is_null());
+        let mut surface = Surface { raw: surface };
+
+        geometry.draw_outline(&mut surface, color)
     }
 }

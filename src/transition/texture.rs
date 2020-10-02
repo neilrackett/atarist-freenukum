@@ -70,7 +70,7 @@ impl Texture {
                 r.x = j as i16;
                 r.y = i as i16;
 
-                self.surface.fill_rect(&r, color);
+                self.surface.fill_rect(r, color);
             }
         }
     }
@@ -131,7 +131,7 @@ impl Texture {
         let format = self.surface.format();
         let color = map_rgb(&format, red, green, blue);
 
-        self.surface.fill_rect(&r, color);
+        self.surface.fill_rect(r, color);
     }
 }
 

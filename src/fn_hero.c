@@ -35,7 +35,6 @@
 #include "fn_object.h"
 #include "fn.h"
 #include "fn_level.h"
-#include "fn_collision.h"
 
 /* --------------------------------------------------------------- */
 
@@ -177,8 +176,9 @@ void fn_hero_blit(fn_hero_t * hero,
   tile = fn_environment_get_tile(env, tilenr+3);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
+  Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
   if (fn_environment_get_draw_collision_bounds(env)) {
-    fn_collision_rect_draw(target, hero->position);
+    fn_geometry_draw_outline(target, hero->position, collision_color);
 
     Uint16 i = 0;
     Uint16 j = 0;
@@ -200,7 +200,7 @@ void fn_hero_blit(fn_hero_t * hero,
             obstacle.w = FN_TILE_WIDTH;
             obstacle.h = FN_TILE_HEIGHT;
 
-            fn_collision_rect_draw(target, obstacle);
+            fn_geometry_draw_outline(target, obstacle, collision_color);
           }
         }
       }
@@ -688,7 +688,7 @@ int fn_hero_would_collide(fn_hero_t * hero, void * level,
         obstacle.w = FN_TILE_WIDTH;
         obstacle.h = FN_TILE_HEIGHT;
 
-        if (fn_collision_overlap_rect_rect(herorect, obstacle)) {
+        if (fn_geometry_overlaps(herorect, obstacle)) {
           return 1;
         }
       }
@@ -884,7 +884,7 @@ int fn_hero_collides_with_solid(fn_hero_t * hero, fn_level_t * level)
         obstacle.w = FN_TILE_WIDTH;
         obstacle.h = FN_TILE_HEIGHT;
 
-        if (fn_collision_overlap_rect_rect(pos, obstacle)) {
+        if (fn_geometry_overlaps(pos, obstacle)) {
           return 1;
         }
       }

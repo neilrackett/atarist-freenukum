@@ -33,7 +33,6 @@
 #include "fn_level_actor.h"
 #include "fn_object.h"
 #include "fn_error_cmdline.h"
-#include "fn_collision.h"
 
 /* --------------------------------------------------------------- */
 
@@ -1349,7 +1348,7 @@ void fn_level_actor_function_lift_interact_start(fn_level_actor_t * actor)
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   FnGeometry heropos = fn_hero_get_position(hero);
-  if (fn_collision_touch_rect_rect(heropos, actor->position) &&
+  if (fn_geometry_touches(heropos, actor->position) &&
       heropos.y + heropos.h == actor->position.y) {
     data->state = fn_level_actor_lift_state_ascending;
   }
@@ -1368,8 +1367,7 @@ void fn_level_actor_function_lift_interact_end(fn_level_actor_t * actor)
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
   FnGeometry heropos = fn_hero_get_position(hero);
-  if (fn_collision_touch_rect_rect(
-        heropos, actor->position) &&
+  if (fn_geometry_touches(heropos, actor->position) &&
       heropos.x == actor->position.x) {
     data->state = fn_level_actor_lift_state_idle;
   } else {
@@ -1396,7 +1394,7 @@ void fn_level_actor_function_lift_act(fn_level_actor_t * actor)
   {
     /* check if hero leaves elevator. */
     FnGeometry heropos = fn_hero_get_position(hero);
-    if (!fn_collision_touch_rect_rect(heropos, actor->position) ||
+    if (!fn_geometry_touches(heropos, actor->position) ||
         actor->position.x != heropos.x) {
       data->state = fn_level_actor_lift_state_descending;
     }
@@ -4148,8 +4146,7 @@ void fn_level_actor_function_unstablefloor_touch_start(fn_level_actor_t * actor)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  if (fn_collision_touch_rect_rect(
-        fn_hero_get_position(hero), actor->position))
+  if (fn_geometry_touches(fn_hero_get_position(hero), actor->position))
   {
     if (!data->touched) {
       data->touching = 1;
@@ -4199,8 +4196,7 @@ void fn_level_actor_function_unstablefloor_act(fn_level_actor_t * actor)
     actor->position.h = FN_TILE_HEIGHT;
   }
 
-  if (fn_collision_touch_rect_rect(
-        fn_hero_get_position(hero), actor->position))
+  if (fn_geometry_touches(fn_hero_get_position(hero), actor->position))
   {
     if (data->touched) {
       floorlength = 0;
@@ -5580,9 +5576,8 @@ void fn_level_actor_function_fan_act(fn_level_actor_t * actor)
   } else if (data->running == 10) {
     FnGeometry heropos = fn_hero_get_position(hero);
 
-    if (fn_collision_overlap_vertical_rect_rect(
-                heropos, actor->position)) {
-      int hdistance = fn_collision_distance_horizontal_rect_rect(
+    if (fn_geometry_overlaps_vertically(heropos, actor->position)) {
+      int hdistance = fn_geometry_horizontal_distance(
           heropos, actor->position);
 
       int fandirection = 0;
@@ -8020,7 +8015,7 @@ void fn_level_actor_free(fn_level_actor_t * actor)
 int fn_level_actor_touches_hero(fn_level_actor_t * actor)
 {
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  return fn_collision_overlap_rect_rect(
+  return fn_geometry_overlaps(
         fn_hero_get_position(hero), actor->position);
 }
 
@@ -8133,8 +8128,9 @@ void fn_level_actor_blit(fn_level_actor_t * actor)
     Uint8 draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(
           fn_level_get_environment(actor->level));
+    Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
     if (draw_collision_bounds) {
-      fn_collision_rect_draw(target, actor->position);
+      fn_geometry_draw_outline(target, actor->position, collision_color);
     }
   }
 }
