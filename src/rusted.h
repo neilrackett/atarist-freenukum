@@ -42,6 +42,22 @@
 #define WINDOW_WIDTH 320
 
 typedef enum {
+    BotType_FireWheel,
+    BotType_FlameGnome,
+    BotType_FlyingBot,
+    BotType_FootBot,
+    BotType_Helicopter,
+    BotType_Rabbitoid,
+    BotType_RedBallJumping,
+    BotType_RedBallLying,
+    BotType_SnakeBot,
+    BotType_TankBot,
+    BotType_WallCrawlerLeft,
+    BotType_WallCrawlerRight,
+    BotType_DrProton,
+} BotType;
+
+typedef enum {
     FnInputBoxAnswer_Ok,
     FnInputBoxAnswer_Quit,
 } FnInputBoxAnswer;
@@ -61,6 +77,8 @@ typedef enum {
     MainMenuEntry_Quit,
     MainMenuEntry_Invalid,
 } MainMenuEntry;
+
+typedef struct Bot Bot;
 
 typedef struct File File;
 
@@ -85,6 +103,10 @@ typedef struct {
 typedef TextureCreationParams FnTextureCreationParams;
 
 typedef TileCache FnTileCache;
+
+typedef Bot FnBot;
+
+typedef BotType FnBotType;
 
 typedef struct {
     int16_t x;
@@ -142,6 +164,18 @@ void fn_borders_blit_score(SDL_Surface *screen,
                            FnTextureCreationParams params,
                            const FnTileCache *tilecache,
                            uintptr_t score);
+
+void fn_bot_blit(const FnBot *bot,
+                 SDL_Surface *surface,
+                 const FnTileCache *tilecache);
+
+FnBot *fn_bot_create(FnBotType bot_type, uintptr_t x, uintptr_t y);
+
+void fn_bot_free(FnBot *ptr);
+
+uintptr_t fn_bot_get_x(const FnBot *bot);
+
+uintptr_t fn_bot_get_y(const FnBot *bot);
 
 void fn_file_free(FnFile *ptr);
 

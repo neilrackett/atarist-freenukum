@@ -43,7 +43,6 @@ typedef struct fn_level_t fn_level_t;
 #include "fn_hero.h"
 #include "fn_level_actor.h"
 #include "fn_shot.h"
-#include "fn_bot.h"
 #include "fn_list.h"
 #include "fn_environment.h"
 #include "rusted.h"
