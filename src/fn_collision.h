@@ -52,78 +52,6 @@ int fn_collision_overlap_rect_rect(FnGeometry r1, FnGeometry r2);
 /* --------------------------------------------------------------- */
 
 /**
- * Check if two areas overlap.
- *
- * @param  x1  The x coordinate of the first area.
- * @param  y1  The y coordinate of the first area.
- * @param  w1  The width of the first area.
- * @param  h1  The height of the first area.
- * @param  x2  The x coordinate of the second area.
- * @param  y2  The y coordinate of the second area.
- * @param  w2  The width of the second area.
- * @param  h2  The height of the second area.
- *
- * @return 1 if the areas overalp, otherwise 0.
- */
-int fn_collision_overlap_area_area(
-    Uint32 x1, Uint32 y1, Uint32 w1, Uint32 h1,
-    Uint32 x2, Uint32 y2, Uint32 w2, Uint32 h2);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if a rectangle overlaps an area.
- *
- * @param  rect  The rectangle.
- * @param  x     The x coordinate of the area.
- * @param  y     The y coordinate of the area.
- * @param  w     The width of the area.
-k* @param  h     The height of the area.
- *
- * @return 1 if the rectangle overalps the area, otherwise 0.
- */
-int fn_collision_overlap_rect_area(FnGeometry rect,
-    Uint32 x, Uint32 y, Uint32 w, Uint32 h);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if two areas touch each other.
- *
- * @param  x1    The x coordinate of the first area.
- * @param  y1    The y coordinate of the first area.
- * @param  w1    The width of the first area.
- * @param  h1    The height of the first area.
- * @param  x2    The x coordinate of the second area.
- * @param  y2    The y coordinate of the second area.
- * @param  w2    The width of the second area.
- * @param  h2    The height of the second area.
- *
- * @return 1 if the rectangles touch, otherwise 0.
- */
-int fn_collision_touch_area_area(
-    Uint32 x1, Uint32 y1, Uint32 w1, Uint32 h1,
-    Uint32 x2, Uint32 y2, Uint32 w2, Uint32 h2);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if an area and a rectangle touch each other.
- *
- * @param  rect    The rectangle.
- * @param  x     The x coordinate of the area.
- * @param  y     The y coordinate of the area.
- * @param  w     The width of the area.
- * @param  h     The height of the area.
- *
- * @return 1 if the rectangle and the area touch, otherwise 0.
- */
-int fn_collision_touch_rect_area(FnGeometry rect,
-    Uint32 x, Uint32 y, Uint32 w, Uint32 h);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Check if two rectangles touch.
  *
  * @param  rect1    The first rectangle.
@@ -136,21 +64,6 @@ int fn_collision_touch_rect_rect(FnGeometry rect1, FnGeometry rect2);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the horizontal distance of two areas.
- *
- * @param  x1  The x coordinate of the first area.
- * @param  w1  The width of the first area.
- * @param  x2  The x coordinate of the second area.
- * @param  w2  The width of the second area.
- *
- * @return The distance between the two areas.
- */
-int fn_collision_distance_horizontal_area_area(
-    Uint32 x1, Uint32 w1, Uint32 x2, Uint32 w2);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the horizontal distance of an area and a rectangle.
  *
  * @param  rect  The rectangle.
@@ -159,52 +72,21 @@ int fn_collision_distance_horizontal_area_area(
  *
  * @return The distance between the two areas.
  */
-int fn_collision_distance_horizontal_rect_area(
-    FnGeometry rect, Uint32 x, Uint32 w);
+int fn_collision_distance_horizontal_rect_rect(
+    FnGeometry r1, FnGeometry r2);
 
 /* --------------------------------------------------------------- */
 
 /**
- * Check if two horizontal areas overlap.
+ * Check if two rectangles overlap in horizontal direction.
  *
- * @param  y1  The y coordinate of the first area.
- * @param  h1  The height of the first area.
- * @param  y2  The y coordinate of the second area.
- * @param  h2  The height of the second area.
+ * @param  r1  Rectangle 1.
+ * @param  r2  Rectangle 2.
  *
- * @return 1 if the areas overlap, 0 if they don't.
+ * @return The distance between the two rectangles.
  */
-int fn_collision_overlap_vertical_area_area(
-    Uint32 y1, Uint32 h1, Uint32 y2, Uint32 h2);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if a horizontal area and a rectangle overlap.
- *
- * @param  rect  The rectangle.
- * @param  y     The y coordinate of the area.
- * @param  h     The height of the area.
- *
- * @return The distance between the two areas.
- */
-int fn_collision_overlap_vertical_rect_area(
-    FnGeometry rect, Uint32 y, Uint32 h);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the vertical distance of two areas.
- *
- * @param  y1  The y coordinate of the first area.
- * @param  h1  The height of the first area.
- * @param  y2  The y coordinate of the second area.
- * @param  h2  The height of the second area.
- *
- * @return The distance between the two areas.
- */
-int fn_collision_distance_vertical_area_area(
-    Uint32 y1, Uint32 h1, Uint32 y2, Uint32 h2);
+int fn_collision_overlap_vertical_rect_rect(
+    FnGeometry r1, FnGeometry r2);
 
 /* --------------------------------------------------------------- */
 
@@ -217,22 +99,8 @@ int fn_collision_distance_vertical_area_area(
  *
  * @return The distance between the two areas.
  */
-int fn_collision_distance_vertical_rect_area(
-    FnGeometry rect, Uint32 y, Uint32 h);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Debug drawing function for a collision area.
- *
- * @param  destination  The surface on which to draw.
- * @param  x     The x coordinate of the area.
- * @param  y     The y coordinate of the area.
- * @param  w     The width of the area.
- * @param  h     The height of the area.
- */
-void fn_collision_area_draw(SDL_Surface * destination,
-    Uint32 x, Uint32 y, Uint32 w, Uint32 h);
+int fn_collision_distance_vertical_rect_rect(
+    FnGeometry r1, FnGeometry r2);
 
 /* --------------------------------------------------------------- */
 

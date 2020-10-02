@@ -4148,9 +4148,8 @@ void fn_level_actor_function_unstablefloor_touch_start(fn_level_actor_t * actor)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
-  if (fn_collision_touch_rect_area(
-        fn_hero_get_position(hero),
-        actor->position.x, actor->position.y, actor->position.w, actor->position.h))
+  if (fn_collision_touch_rect_rect(
+        fn_hero_get_position(hero), actor->position))
   {
     if (!data->touched) {
       data->touching = 1;
@@ -4200,9 +4199,8 @@ void fn_level_actor_function_unstablefloor_act(fn_level_actor_t * actor)
     actor->position.h = FN_TILE_HEIGHT;
   }
 
-  if (fn_collision_touch_rect_area(
-        fn_hero_get_position(hero),
-        actor->position.x, actor->position.y, actor->position.w, actor->position.h))
+  if (fn_collision_touch_rect_rect(
+        fn_hero_get_position(hero), actor->position))
   {
     if (data->touched) {
       floorlength = 0;
@@ -5582,10 +5580,10 @@ void fn_level_actor_function_fan_act(fn_level_actor_t * actor)
   } else if (data->running == 10) {
     FnGeometry heropos = fn_hero_get_position(hero);
 
-    if (fn_collision_overlap_vertical_rect_area(heropos,
-          actor->position.y, actor->position.h)) {
-      int hdistance = fn_collision_distance_horizontal_rect_area(
-          heropos, actor->position.x, actor->position.w);
+    if (fn_collision_overlap_vertical_rect_rect(
+                heropos, actor->position)) {
+      int hdistance = fn_collision_distance_horizontal_rect_rect(
+          heropos, actor->position);
 
       int fandirection = 0;
       if (actor->type == FN_LEVEL_ACTOR_FAN_LEFT) {
@@ -8136,8 +8134,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor)
       fn_environment_get_draw_collision_bounds(
           fn_level_get_environment(actor->level));
     if (draw_collision_bounds) {
-      fn_collision_area_draw(target,
-          actor->position.x, actor->position.y, actor->position.w, actor->position.h);
+      fn_collision_rect_draw(target, actor->position);
     }
   }
 }
