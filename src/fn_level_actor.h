@@ -212,9 +212,9 @@ struct fn_level_actor_t {
   fn_level_actor_type_e type;
 
   /**
-   * The current position of the actor.
+   * The general data of the actor.
    */
-  FnGeometry position;
+  FnLevelActorData * actor_data;
 
   /**
    * Private data - depends on type.
@@ -230,12 +230,6 @@ struct fn_level_actor_t {
    * Flag that indicates if the actor is being touched by the hero
    */
   int touches_hero;
-
-  /**
-   * Flag that indicates if the actor is in foreground (means in front
-   * of hero).
-   */
-  Uint8 is_in_foreground;
 
   /**
    * Is the actor visible in the currently shown area?

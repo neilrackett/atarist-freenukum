@@ -1,6 +1,6 @@
 use transdl::video::Surface;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 #[repr(C)]
 pub struct Geometry {
     pub x: i16,

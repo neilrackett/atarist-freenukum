@@ -147,6 +147,13 @@ typedef HorizontalDirection FnHorizontalDirection;
 
 typedef InputField FnInputField;
 
+typedef struct {
+    Geometry position;
+    bool is_in_foreground;
+} ActorData;
+
+typedef ActorData FnLevelActorData;
+
 typedef LevelSolids FnLevelSolids;
 
 typedef LevelTiles FnLevelTiles;
@@ -270,6 +277,10 @@ void fn_inputfield_right_pressed(FnInputField *ptr);
 void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
+
+FnLevelActorData *fn_level_actor_data_create(void);
+
+void fn_level_actor_data_free(FnLevelActorData *ptr);
 
 bool fn_level_solids_collides(const FnLevelSolids *ptr, FnGeometry rect);
 

@@ -754,8 +754,8 @@ fn_level_t * fn_level_load(FnFile* file,
       iter != fn_list_last(cameras);
       iter = fn_list_next(iter)) {
     fn_level_actor_t * camera = iter->data;
-    Uint16 camera_y = camera->position.y / FN_TILE_HEIGHT;
-    Uint16 camera_x = camera->position.x / FN_TILE_WIDTH;
+    Uint16 camera_y = camera->actor_data->position.y / FN_TILE_HEIGHT;
+    Uint16 camera_x = camera->actor_data->position.x / FN_TILE_WIDTH;
     fn_level_tiles_copy_from_to(
             lv->tiles,
             camera_x,
