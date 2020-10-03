@@ -1,4 +1,4 @@
-use super::geometry::Geometry;
+use super::super::geometry::Geometry;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 
 pub struct LevelSolids {
@@ -56,7 +56,7 @@ impl LevelSolids {
 }
 
 pub mod ffi {
-    use super::super::geometry::ffi::FnGeometry;
+    use super::super::super::geometry::ffi::FnGeometry;
 
     pub type FnLevelSolids = super::LevelSolids;
 
