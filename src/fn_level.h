@@ -194,31 +194,6 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the information wether a tile is solid or not.
- *
- * @param  lv  The level.
- * @param  x   The x coordinate.
- * @param  y   The y coordinate.
- *
- * @return 1 if solid, else 0.
- */
-Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Set the information wether a tile is solid or not.
- *
- * @param  lv     The level.
- * @param  x      The x coordinate.
- * @param  y      The y coordinate.
- * @param  solid  1 if solid, else 0;
- */
-void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Blit the current state of the level to an SDL Surface.
  *
  * @param  lv         The level to blit.
@@ -383,18 +358,6 @@ void fn_level_fire_shot(fn_level_t * lv);
  */
 fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
     fn_level_actor_type_e type);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if a rectangle would collide with solids in a level.
- *
- * @param  lv     The level.
- * @param  rect   The rectangle.
- *
- * @return 1 if the rectangle would collide, otherwise 0.
- */
-Uint8 fn_level_solid_collides(const fn_level_t * lv, FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 

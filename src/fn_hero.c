@@ -129,9 +129,10 @@ void fn_hero_enterlevel(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_blit(fn_hero_t * hero,
+void fn_hero_blit(
+    fn_hero_t * hero,
     SDL_Surface * target,
-    fn_level_t * level)
+    FnLevelSolids * solids)
 {
   FnGeometry dstrect;
   int tilenr;
@@ -191,8 +192,8 @@ void fn_hero_blit(fn_hero_t * hero,
           j += FN_TILE_HEIGHT) {
         Uint16 tile_x = i / FN_TILE_WIDTH;
         Uint16 tile_y = j / FN_TILE_HEIGHT;
-        if (level != NULL) {
-          if (fn_level_is_solid(level, tile_x, tile_y))
+        if (solids != NULL) {
+          if (fn_level_solids_get(solids, tile_x, tile_y))
           {
             FnGeometry obstacle;
             obstacle.x = tile_x * FN_TILE_WIDTH;
@@ -236,7 +237,7 @@ int fn_hero_act(
     } else {
       switch(hero->direction) {
         case fn_horizontal_direction_left:
-          if (!fn_hero_would_collide(hero, lv,
+          if (!fn_hero_would_collide(hero, lv->solids,
                 fn_hero_get_x(hero) - FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
                 )) {
@@ -248,7 +249,7 @@ int fn_hero_act(
           }
           break;
         case fn_horizontal_direction_right:
-          if (!fn_hero_would_collide(hero, lv,
+          if (!fn_hero_would_collide(hero, lv->solids,
                 fn_hero_get_x(hero) + FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
                 )) {
@@ -291,7 +292,7 @@ int fn_hero_act(
       }
       int i = 0;
       for (i = 0; i < hero->verticalspeed; i++) {
-        if (!fn_hero_would_collide(hero, lv,
+        if (!fn_hero_would_collide(hero, lv->solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) - FN_HALFTILE_HEIGHT
               )) {
@@ -310,7 +311,7 @@ int fn_hero_act(
 
       int i = 0;
       for (i = 0; i < hero->verticalspeed/2; i++) {
-        if (!fn_hero_would_collide(hero, lv,
+        if (!fn_hero_would_collide(hero, lv->solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
               )) {
@@ -321,7 +322,7 @@ int fn_hero_act(
     }
   }
 
-  if (fn_hero_would_collide(hero, lv,
+  if (fn_hero_would_collide(hero, lv->solids,
         fn_hero_get_x(hero),
         fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
         )) {
@@ -655,11 +656,13 @@ Uint16 fn_hero_get_h(
 
 /* --------------------------------------------------------------- */
 
-int fn_hero_would_collide(fn_hero_t * hero, void * level,
-    Uint32 x, Uint32 y)
+int fn_hero_would_collide(
+        fn_hero_t * hero,
+        FnLevelSolids * solids,
+        Uint32 x,
+        Uint32 y)
 {
-  fn_level_t * lv = (fn_level_t *)level;
-  if (lv == NULL) {
+  if (solids == NULL) {
     return 1;
   }
 
@@ -680,7 +683,7 @@ int fn_hero_would_collide(fn_hero_t * hero, void * level,
         j += FN_TILE_HEIGHT) {
       Uint16 tile_x = i / FN_TILE_WIDTH;
       Uint16 tile_y = j / FN_TILE_HEIGHT;
-      if (fn_level_is_solid(lv, tile_x, tile_y))
+      if (fn_level_solids_get(solids, tile_x, tile_y))
       {
         FnGeometry obstacle;
         obstacle.x = tile_x * FN_TILE_WIDTH;
@@ -782,14 +785,14 @@ FnGeometry fn_hero_get_position(fn_hero_t * hero)
 /* --------------------------------------------------------------- */
 
 Sint8 fn_hero_push_horizontally(
-    fn_hero_t * hero, fn_level_t * level, Sint8 offset)
+    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
 {
   if (offset == 0) {
     return 0;
   }
   hero->position.x += offset;
 
-  if (!fn_hero_collides_with_solid(hero, level)) {
+  if (!fn_hero_collides_with_solid(hero, solids)) {
     /* no solids in the way */
     SDL_Event event;
     event.type = SDL_USEREVENT;
@@ -807,7 +810,7 @@ Sint8 fn_hero_push_horizontally(
   Uint8 i = 0;
   for (i = 0; i < offset_abs; i++) {
     hero->position.x -= direction;
-    if (!fn_hero_collides_with_solid(hero, level)) {
+    if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
       event.user.code = fn_event_heromoved;
@@ -823,14 +826,14 @@ Sint8 fn_hero_push_horizontally(
 /* --------------------------------------------------------------- */
 
 Sint8 fn_hero_push_vertically(
-    fn_hero_t * hero, fn_level_t * level, Sint8 offset)
+    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
 {
   if (offset == 0) {
     return 0;
   }
   hero->position.y += offset;
 
-  if (!fn_hero_collides_with_solid(hero, level)) {
+  if (!fn_hero_collides_with_solid(hero, solids)) {
     /* no solids in the way */
     SDL_Event event;
     event.type = SDL_USEREVENT;
@@ -848,7 +851,7 @@ Sint8 fn_hero_push_vertically(
   Uint8 i = 0;
   for (i = 0; i < offset_abs; i++) {
     hero->position.y -= direction;
-    if (!fn_hero_collides_with_solid(hero, level)) {
+    if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
       event.user.code = fn_event_heromoved;
@@ -863,7 +866,7 @@ Sint8 fn_hero_push_vertically(
 
 /* --------------------------------------------------------------- */
 
-int fn_hero_collides_with_solid(fn_hero_t * hero, fn_level_t * level)
+int fn_hero_collides_with_solid(fn_hero_t * hero, FnLevelSolids * solids)
 {
   FnGeometry pos = fn_hero_get_position(hero);
   Uint16 i = 0;
@@ -876,7 +879,7 @@ int fn_hero_collides_with_solid(fn_hero_t * hero, fn_level_t * level)
         j += FN_TILE_HEIGHT) {
       Uint16 tile_x = i / FN_TILE_WIDTH;
       Uint16 tile_y = j / FN_TILE_HEIGHT;
-      if (fn_level_is_solid(level, tile_x, tile_y))
+      if (fn_level_solids_get(solids, tile_x, tile_y))
       {
         FnGeometry obstacle;
         obstacle.x = tile_x * FN_TILE_WIDTH;

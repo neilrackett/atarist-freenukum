@@ -508,7 +508,7 @@ fn_level_t * fn_level_load(FnFile* file,
             FN_LEVEL_ACTOR_GLOVE_SLOT, x, y);
         break;
       case 0x3036: /* floor which expands to right by access of glove slot */
-        fn_level_set_solid(lv, x, y, 1);
+        fn_level_solids_set(lv->solids, x, y, 1);
         fn_level_add_initial_actor(lv,
             FN_LEVEL_ACTOR_EXPANDINGFLOOR, x, y);
         break;
@@ -965,7 +965,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   /* blit the hero */
   fn_hero_blit(hero,
       lv->surface,
-      lv);
+      lv->solids);
 
   /* blit the actors in the foreground */
   for (iter = fn_list_first(lv->actors);
@@ -1268,35 +1268,6 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_solid_collides(const fn_level_t * lv, FnGeometry rect)
-{
-  Uint16 i = 0;
-  Uint16 j = 0;
-  FnGeometry solidrect;
-  solidrect.w = FN_TILE_WIDTH;
-  solidrect.h = FN_TILE_HEIGHT;
-
-  for (i = rect.x / FN_TILE_WIDTH;
-      i < (rect.x + rect.w) / FN_TILE_WIDTH + 1;
-      i++) {
-    for (j = rect.y / FN_TILE_WIDTH;
-        j < (rect.y + rect.h) / FN_TILE_HEIGHT + 1;
-        j++)
-    {
-      if (fn_level_is_solid(lv, i, j)) {
-        solidrect.x = i * FN_TILE_WIDTH;
-        solidrect.y = j * FN_TILE_HEIGHT;
-        if (fn_geometry_overlaps(solidrect, rect)) {
-          return 1;
-        }
-      }
-    }
-  }
-  return 0;
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
     FnGeometry rect)
 {
@@ -1344,7 +1315,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
     fn_level_t * level, FnGeometry rect, Sint8 offset,
     Uint8 gravity)
 {
-  if (fn_level_solid_collides(level, rect)) {
+  if (fn_level_solids_collides(level->solids, rect)) {
     /* locked in, so don't move at all */
     return 0;
   }
@@ -1358,7 +1329,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 
   rect.x += offset;
 
-  if (fn_level_solid_collides(level, rect)) {
+  if (fn_level_solids_collides(level->solids, rect)) {
     /* we collide with something, so we revert to original position */
     rect.x -= offset;
     return 0;
@@ -1383,7 +1354,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 Uint8 fn_level_rect_fall_down(
     fn_level_t * level, FnGeometry rect, Uint8 dist)
 {
-  if (fn_level_solid_collides(level, rect)) {
+  if (fn_level_solids_collides(level->solids, rect)) {
     /* can't fall down because collides with solid ground */
     return 0;
   }

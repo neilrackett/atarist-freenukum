@@ -162,9 +162,9 @@ void fn_shot_set_draw_collision_bounds(
 /* --------------------------------------------------------------- */
 
 Uint8 fn_shot_hits_solid(
-    fn_shot_t * shot, const fn_level_t * level)
+    fn_shot_t * shot, const FnLevelSolids * solids)
 {
-  return fn_level_solid_collides(level, shot->position);
+  return fn_level_solids_collides(solids, shot->position);
 }
 
 /* --------------------------------------------------------------- */
@@ -187,7 +187,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
     }
   }
   if (shot->countdown == 2) {
-    if (fn_shot_hits_solid(shot, level)) {
+    if (fn_shot_hits_solid(shot, level->solids)) {
       shot->countdown = 1;
 
       fn_level_add_actor(level,

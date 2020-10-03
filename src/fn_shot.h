@@ -199,7 +199,7 @@ void fn_shot_set_draw_collision_bounds(
  */
 Uint8 fn_shot_hits_solid(
     fn_shot_t * shot,
-    const fn_level_t * level);
+    const FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
 

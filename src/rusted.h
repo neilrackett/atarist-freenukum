@@ -249,6 +249,8 @@ void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 
+bool fn_level_solids_collides(const FnLevelSolids *ptr, FnGeometry rect);
+
 FnLevelSolids *fn_level_solids_create(void);
 
 void fn_level_solids_free(FnLevelSolids *ptr);

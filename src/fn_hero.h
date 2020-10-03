@@ -188,7 +188,7 @@ typedef void (*fn_hero_changed_f)(fn_hero_t *);
 void fn_hero_blit(
     fn_hero_t * hero,
     SDL_Surface * target,
-    fn_level_t * level);
+    FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
 
@@ -446,8 +446,11 @@ Uint16 fn_hero_get_h(
  *
  * @return 1 if hero collides, 0 if not.
  */
-int fn_hero_would_collide(fn_hero_t * hero, void * level,
-    Uint32 x, Uint32 y);
+int fn_hero_would_collide(
+        fn_hero_t * hero,
+        FnLevelSolids * solids,
+        Uint32 x,
+        Uint32 y);
 
 /* --------------------------------------------------------------- */
 
@@ -558,7 +561,7 @@ FnGeometry fn_hero_get_position(fn_hero_t * hero);
  * @return  The offset by which the hero finally could be moved.
  */
 Sint8 fn_hero_push_horizontally(
-    fn_hero_t * hero, fn_level_t * level, Sint8 offset);
+    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset);
 
 /* --------------------------------------------------------------- */
 
@@ -572,7 +575,7 @@ Sint8 fn_hero_push_horizontally(
  * @return  The offset by which the hero finally could be moved.
  */
 Sint8 fn_hero_push_vertically(
-    fn_hero_t * hero, fn_level_t * level, Sint8 offset);
+    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset);
 
 /* --------------------------------------------------------------- */
 
@@ -584,7 +587,7 @@ Sint8 fn_hero_push_vertically(
  *
  * @return  1 if the hero collides, otherwise 0.
  */
-int fn_hero_collides_with_solid(fn_hero_t * hero, fn_level_t * level);
+int fn_hero_collides_with_solid(fn_hero_t * hero, FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
 

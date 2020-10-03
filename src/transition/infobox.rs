@@ -43,7 +43,8 @@ fn show(
 
     loop {
         match Event::wait() {
-            Ok(Event::KeyDown { .. }) | Ok(Event::MouseButtonDown{..}) => {
+            Ok(Event::KeyDown { .. })
+            | Ok(Event::MouseButtonDown { .. }) => {
                 background_backup.blit(
                     None,
                     screen,
