@@ -709,8 +709,7 @@ void fn_level_actor_function_robot_blit(
 
   SDL_Surface * target = fn_level_get_surface(level);
   FnGeometry destrect;
-  const FnTileCache * tc = fn_level_get_tilecache(level);
-  const FnTexture * tile = fn_tilecache_get_tile(tc,
+  const FnTexture * tile = fn_tilecache_get_tile(tilecache,
       data->tile + data->current_frame);
   destrect.x = actor->position.x;
   destrect.y = actor->position.y;
@@ -3802,8 +3801,8 @@ void fn_level_actor_function_rocket_act(
       Uint16 tile_x = actor->position.x / FN_TILE_WIDTH;
       Uint16 tile_y = actor->position.y / FN_TILE_HEIGHT;
       fn_level_solids_set(solids, tile_x, tile_y, 0);
-      fn_level_set_tile(level, tile_x, tile_y,
-          fn_level_get_tile(level, tile_x, tile_y - 1));
+      fn_level_tiles_copy_from_to(
+              level->tiles, tile_x, tile_y - 1, tile_x, tile_y);
       actor->is_alive = 0;
     }
   }
@@ -3868,8 +3867,8 @@ void fn_level_actor_function_rocket_shot(
   Uint16 tile_y = (actor->position.y + actor->position.h) /
     FN_TILE_HEIGHT;
   fn_level_solids_set(solids, tile_x, tile_y, 0);
-  fn_level_set_tile(level, tile_x, tile_y,
-      fn_level_get_tile(level, tile_x, tile_y + 1));
+  fn_level_tiles_copy_from_to(
+          level->tiles, tile_x, tile_y + 1, tile_x, tile_y);
 }
 
 /* --------------------------------------------------------------- */
@@ -4778,13 +4777,14 @@ void fn_level_actor_function_conveyor_create(
   while(!found_begin) {
     actor->position.x -= FN_TILE_WIDTH;
     actor->position.w += FN_TILE_WIDTH;
-    tile = fn_level_get_tile(level,
-        actor->position.x / FN_TILE_WIDTH, actor->position.y / FN_TILE_HEIGHT);
+    tile = fn_level_tiles_get(level->tiles,
+        actor->position.x / FN_TILE_WIDTH,
+        actor->position.y / FN_TILE_HEIGHT);
     if (tile == SOLID_CONVEYORBELT_LEFTEND ||
         actor->position.x == 0 ||
         tile == 0) {
       found_begin = 1;
-      fn_level_set_tile(level,
+      fn_level_tiles_set(level->tiles,
           actor->position.x / FN_TILE_WIDTH,
           actor->position.y / FN_TILE_HEIGHT,
           SOLID_BLACK);

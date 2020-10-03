@@ -108,6 +108,8 @@ typedef struct InputField InputField;
 
 typedef struct LevelSolids LevelSolids;
 
+typedef struct LevelTiles LevelTiles;
+
 typedef struct Menu Menu;
 
 typedef struct Texture Texture;
@@ -146,6 +148,8 @@ typedef HorizontalDirection FnHorizontalDirection;
 typedef InputField FnInputField;
 
 typedef LevelSolids FnLevelSolids;
+
+typedef LevelTiles FnLevelTiles;
 
 typedef MainMenuEntry FnMainMenuEntry;
 
@@ -279,6 +283,25 @@ void fn_level_solids_set(FnLevelSolids *ptr,
                          uintptr_t x,
                          uintptr_t y,
                          bool value);
+
+void fn_level_tiles_copy_from_to(FnLevelTiles *ptr,
+                                 uintptr_t x_from,
+                                 uintptr_t y_from,
+                                 uintptr_t x_to,
+                                 uintptr_t y_to);
+
+FnLevelTiles *fn_level_tiles_create(void);
+
+void fn_level_tiles_free(FnLevelTiles *ptr);
+
+uint16_t fn_level_tiles_get(const FnLevelTiles *ptr,
+                            uintptr_t x,
+                            uintptr_t y);
+
+void fn_level_tiles_set(FnLevelTiles *ptr,
+                        uintptr_t x,
+                        uintptr_t y,
+                        uint16_t value);
 
 FnMainMenuEntry fn_mainmenu(SDL_Surface *screen,
                             const FnTileCache *tilecache,

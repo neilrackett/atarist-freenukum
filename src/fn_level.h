@@ -66,7 +66,7 @@ struct fn_level_t {
   /**
    * The solid and background tiles.
    */
-  Uint16 tiles[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
+  FnLevelTiles * tiles;
 
   /**
    * The surface which contains the always fixed tiles.
@@ -148,35 +148,6 @@ fn_level_t * fn_level_load(FnFile * file,
  * @param  level  The level to destroy.
  */
 void fn_level_free(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Set a tile on a certain position inside the level.
- *
- * @param  lv    The level.
- * @param  x     The x coordinate.
- * @param  y     The y coordinate.
- * @param  tile  The tile number.
- */
-void fn_level_set_tile(
-    fn_level_t * lv,
-    size_t x,
-    size_t y,
-    Uint16 tile);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get a tile from a certain position inside the level.
- *
- * @param  lv  The level.
- * @param  x   The x coordinate.
- * @param  y   The y coordinate.
- *
- * @return  The tile of the position.
- */
-Uint16 fn_level_get_tile(fn_level_t * lv, size_t x, size_t y);
 
 /* --------------------------------------------------------------- */
 
