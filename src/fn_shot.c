@@ -191,7 +191,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
       shot->countdown = 1;
 
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_EXPLOSION,
+          ActorType_Explosion,
           shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH,
           shot->position.y);
     }

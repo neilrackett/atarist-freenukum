@@ -37,7 +37,7 @@
 /* --------------------------------------------------------------- */
 
 typedef void (* fn_level_actor_create_function_t)(
-        fn_level_actor_type_e type,
+        FnLevelActorType type,
         void ** data,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -133,7 +133,7 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  * @param  actor The animation actor.
  */
 void fn_level_actor_function_simpleanimation_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -147,87 +147,87 @@ void fn_level_actor_function_simpleanimation_create(
   actor_data->position.w = FN_TILE_WIDTH;
   actor_data->position.h = FN_TILE_HEIGHT;
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_TEXT_ON_SCREEN_BACKGROUND:
+    case ActorType_TextOnScreenBackground:
       data->tile = 0x0004;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_HIGH_VOLTAGE_FLASH_BACKGROUND:
+    case ActorType_HighVoltageFlashBackground:
       data->tile = 0x0008;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_RED_FLASHLIGHT_BACKGROUND:
+    case ActorType_RedFlashlightBackground:
       data->tile = 0x000C;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BLUE_FLASHLIGHT_BACKGROUND:
+    case ActorType_BlueFlashlightBackground:
       data->tile = 0x0010;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_KEYPANEL_BACKGROUND:
+    case ActorType_KeypanelBackground:
       data->tile = 0x0014;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_RED_ROTATIONLIGHT_BACKGROUND:
+    case ActorType_RedRotationLightBackground:
       data->tile = 0x0018;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_UPARROW_BACKGROUND:
+    case ActorType_UpArrowBackground:
       data->tile = 0x001C;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND1:
+    case ActorType_BlueLightBackground1:
       data->tile = 0x0020;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND2:
+    case ActorType_BlueLightBackground2:
       data->tile = 0x0021;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND3:
+    case ActorType_BlueLightBackground3:
       data->tile = 0x0022;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND4:
+    case ActorType_BlueLightBackground4:
       data->tile = 0x0023;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_GREEN_POISON_BACKGROUND:
+    case ActorType_GreenPoisonBackground:
       data->tile = 0x0028;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_LAVA_BACKGROUND:
+    case ActorType_LavaBackground:
       data->tile = 0x002C;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_WINDOWLEFT_BACKGROUND:
+    case ActorType_WindowLeftBackground:
       data->tile = ANIM_WINDOWBG;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_WINDOWRIGHT_BACKGROUND:
+    case ActorType_WindowRightBackground:
       data->tile = ANIM_WINDOWBG + 1;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_STONEWINDOW_BACKGROUND:
+    case ActorType_StoneWindowBackground:
       data->tile = ANIM_STONEWINDOWBG;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_BROKENWALL_BACKGROUND:
+    case ActorType_BrokenWallBackground:
       data->tile = ANIM_BROKENWALLBG;
       data->current_frame = 0;
       data->num_frames = 1;
@@ -324,7 +324,7 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -474,7 +474,7 @@ typedef struct fn_level_actor_redball_lying_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -538,7 +538,7 @@ void fn_level_actor_function_redball_lying_act(
     actor->is_alive = 0;
     fn_level_add_actor(
             level,
-            FN_LEVEL_ACTOR_FIRE,
+            ActorType_Fire,
             actor->actor_data->position.x,
             actor->actor_data->position.y);
   }
@@ -597,7 +597,7 @@ typedef struct fn_level_actor_robot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -744,7 +744,7 @@ void fn_level_actor_function_robot_shot(
     data->touching_hero = 0;
   }
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_ROBOT_DISAPPEARING,
+      ActorType_RobotDisappearing,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
   actor->is_alive = 0;
@@ -788,7 +788,7 @@ typedef struct fn_level_actor_tankbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -862,7 +862,7 @@ void fn_level_actor_function_tankbot_act(
     /* create explosion */
     actor->is_alive = 0;
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_EXPLOSION,
+        ActorType_Explosion,
         actor->actor_data->position.x + FN_HALFTILE_WIDTH,
         actor->actor_data->position.y);
     fn_hero_add_score(hero, 2500);
@@ -915,12 +915,12 @@ void fn_level_actor_function_tankbot_act(
 
         if (direction > 0) {
           fn_level_add_actor(level,
-             FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT,
+             ActorType_HostileShotRight,
              actor->actor_data->position.x,
              actor->actor_data->position.y - 6);
         } else {
           fn_level_add_actor(level,
-             FN_LEVEL_ACTOR_HOSTILESHOT_LEFT,
+             ActorType_HostileShotLeft,
              actor->actor_data->position.x,
              actor->actor_data->position.y - 6);
         }
@@ -931,7 +931,7 @@ void fn_level_actor_function_tankbot_act(
     /* create steam clouds */
     if (data->current_frame == 0) {
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_STEAM,
+          ActorType_Steam,
           actor->actor_data->position.x + FN_HALFTILE_WIDTH,
           actor->actor_data->position.y - FN_TILE_HEIGHT);
     }
@@ -1030,7 +1030,7 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -1104,7 +1104,7 @@ void fn_level_actor_function_firewheelbot_act(
     /* create explosion */
     actor->is_alive = 0;
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_EXPLOSION,
+        ActorType_Explosion,
         actor->actor_data->position.x + FN_HALFTILE_WIDTH,
         actor->actor_data->position.y);
     fn_level_add_particle_firework(
@@ -1149,7 +1149,7 @@ void fn_level_actor_function_firewheelbot_act(
       /* create steam clouds */
       if (data->current_frame == 0) {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_STEAM,
+            ActorType_Steam,
             actor->actor_data->position.x + FN_HALFTILE_WIDTH,
             actor->actor_data->position.y - FN_TILE_HEIGHT);
       }
@@ -1259,7 +1259,7 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -1273,7 +1273,7 @@ void fn_level_actor_function_wallcrawler_create(
   actor_data->position.w = FN_TILE_WIDTH;
   actor_data->position.h = FN_TILE_HEIGHT;
   data->direction = VerticalDirection_Up;
-  if (actor_type == FN_LEVEL_ACTOR_WALLCRAWLERBOT_LEFT) {
+  if (actor_type == ActorType_WallCrawlerBotLeft) {
     data->tile = ANIM_WALLCRAWLERBOT_LEFT;
     data->orientation = HorizontalDirection_Left;
   } else {
@@ -1432,11 +1432,11 @@ void fn_level_actor_function_wallcrawler_shot(
     }
     actor->is_alive = 0;
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_STEAM,
+        ActorType_Steam,
         actor->actor_data->position.x,
         actor->actor_data->position.y);
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_EXPLOSION,
+        ActorType_Explosion,
         actor->actor_data->position.x,
         actor->actor_data->position.y);
     fn_hero_add_score(hero, 100);
@@ -1472,7 +1472,7 @@ typedef struct fn_level_actor_lift_data_t {
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -1693,7 +1693,7 @@ typedef struct fn_level_actor_acme_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -1787,7 +1787,7 @@ void fn_level_actor_function_acme_act(
             (actor->actor_data->position.y / FN_TILE_HEIGHT) + 1))
       {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_STEAM,
+            ActorType_Steam,
             actor->actor_data->position.x + FN_HALFTILE_WIDTH,
             actor->actor_data->position.y);
         fn_level_add_particle_firework(
@@ -1839,7 +1839,7 @@ void fn_level_actor_function_acme_shot(
   if (data->counter > 0) {
     fn_hero_add_score(hero, 500);
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_SCORE_500,
+        ActorType_Score500,
         actor->actor_data->position.x,
         actor->actor_data->position.y);
     actor->is_alive = 0;
@@ -1906,7 +1906,7 @@ typedef struct fn_level_actor_fire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -1919,7 +1919,7 @@ void fn_level_actor_function_fire_create(
   actor_data->position.w = FN_TILE_WIDTH * 3;
   actor_data->position.h = FN_TILE_HEIGHT;
 
-  if (actor_type == FN_LEVEL_ACTOR_FIRE_RIGHT) {
+  if (actor_type == ActorType_FireRight) {
     data->tile = OBJ_FIRERIGHT;
     data->direction = HorizontalDirection_Right;
   } else {
@@ -2111,7 +2111,7 @@ typedef struct fn_level_actor_mill_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -2229,11 +2229,11 @@ void fn_level_actor_function_mill_shot(
         actor->actor_data->position.y + actor->actor_data->position.h / 2,
         20);
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_SCORE_10000,
+        ActorType_Score10000,
         actor->actor_data->position.x,
         actor->actor_data->position.y + actor->actor_data->position.h / 2 - FN_TILE_HEIGHT);
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_SCORE_10000,
+        ActorType_Score10000,
         actor->actor_data->position.x,
         actor->actor_data->position.y + actor->actor_data->position.h / 2);
   }
@@ -2268,7 +2268,7 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -2324,7 +2324,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         iter = fn_list_next(iter)) {
       fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
 
-      if (dooractor->type == FN_LEVEL_ACTOR_ACCESS_CARD_DOOR) {
+      if (dooractor->type == ActorType_AccessCardDoor) {
         dooractor->is_alive = 0;
         int x = dooractor->actor_data->position.x / FN_TILE_WIDTH;
         int y = dooractor->actor_data->position.y / FN_TILE_HEIGHT;
@@ -2433,7 +2433,7 @@ typedef struct fn_level_actor_glove_slot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -2522,7 +2522,7 @@ void fn_level_actor_function_glove_slot_act(
       {
         fn_list_t * expandfloors =
           fn_level_get_items_of_type(level,
-              FN_LEVEL_ACTOR_EXPANDINGFLOOR);
+              ActorType_ExpandingFloor);
         Uint8 action = 0;
         fn_list_t * iter = NULL;
         for (iter = fn_list_first(expandfloors);
@@ -2553,11 +2553,11 @@ void fn_level_actor_function_glove_slot_act(
       data->countdown--;
       if (data->countdown % 4 == 0) {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT,
+            ActorType_HostileShotRight,
             actor->actor_data->position.x, actor->actor_data->position.y);
       } else if (data->countdown % 4 == 2) {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_HOSTILESHOT_LEFT,
+            ActorType_HostileShotLeft,
             actor->actor_data->position.x, actor->actor_data->position.y);
       }
       if (data->countdown == 0) {
@@ -2643,7 +2643,7 @@ typedef struct fn_level_actor_item_data_t {
  * @param  actor The item actor.
  */
 void fn_level_actor_function_item_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -2657,124 +2657,124 @@ void fn_level_actor_function_item_create(
   actor_data->position.h = FN_TILE_HEIGHT;
   actor_data->is_in_foreground = 0;
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_BOX_RED_SODA:
-    case FN_LEVEL_ACTOR_BOX_RED_CHICKEN:
+    case ActorType_BoxRedSoda:
+    case ActorType_BoxRedChicken:
       data->tile = OBJ_BOX_RED;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_FOOTBALL:
-    case FN_LEVEL_ACTOR_BOX_BLUE_JOYSTICK:
-    case FN_LEVEL_ACTOR_BOX_BLUE_DISK:
-    case FN_LEVEL_ACTOR_BOX_BLUE_BALLOON:
-    case FN_LEVEL_ACTOR_BOX_BLUE_FLAG:
-    case FN_LEVEL_ACTOR_BOX_BLUE_RADIO:
+    case ActorType_BoxBlueFootball:
+    case ActorType_BoxBlueJoystick:
+    case ActorType_BoxBlueDisk:
+    case ActorType_BoxBlueBalloon:
+    case ActorType_BoxBlueFlag:
+    case ActorType_BoxBlueRadio:
       data->tile = OBJ_BOX_BLUE;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_EMPTY:
-    case FN_LEVEL_ACTOR_BOX_GREY_BOOTS:
-    case FN_LEVEL_ACTOR_BOX_GREY_CLAMPS:
-    case FN_LEVEL_ACTOR_BOX_GREY_GUN:
-    case FN_LEVEL_ACTOR_BOX_GREY_BOMB:
-    case FN_LEVEL_ACTOR_BOX_GREY_GLOVE:
-    case FN_LEVEL_ACTOR_BOX_GREY_FULL_LIFE:
-    case FN_LEVEL_ACTOR_BOX_GREY_ACCESS_CARD:
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_D:
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_U:
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_K:
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_E:
+    case ActorType_BoxGreyEmpty:
+    case ActorType_BoxGreyBoots:
+    case ActorType_BoxGreyClamps:
+    case ActorType_BoxGreyGun:
+    case ActorType_BoxGreyBomb:
+    case ActorType_BoxGreyGlove:
+    case ActorType_BoxGreyFullLife:
+    case ActorType_BoxGreyAccessCard:
+    case ActorType_BoxGreyLetterD:
+    case ActorType_BoxGreyLetterU:
+    case ActorType_BoxGreyLetterK:
+    case ActorType_BoxGreyLetterE:
       data->tile = OBJ_BOX_GREY;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_JOYSTICK:
+    case ActorType_Joystick:
       data->tile = OBJ_JOYSTICK;
       data->current_frame = 0;
       data->num_frames  = 1;
       break;
-    case FN_LEVEL_ACTOR_FOOTBALL:
+    case ActorType_Football:
       data->tile = OBJ_FOOTBALL;
       data->current_frame = 0;
       data->num_frames  = 1;
       break;
-    case FN_LEVEL_ACTOR_FLAG:
+    case ActorType_Flag:
       data->tile = OBJ_FLAG;
       data->current_frame = 0;
       data->num_frames  = 3;
       break;
-    case FN_LEVEL_ACTOR_DISK:
+    case ActorType_Disk:
       data->tile = OBJ_DISK;
       data->current_frame = 0;
       data->num_frames  = 1;
       break;
-    case FN_LEVEL_ACTOR_RADIO:
+    case ActorType_Radio:
       data->tile = OBJ_RADIO;
       data->current_frame = 0;
       data->num_frames = 3;
       break;
-    case FN_LEVEL_ACTOR_SODA:
+    case ActorType_Soda:
       data->tile = ANIM_SODA;
       data->current_frame = 0;
       data->num_frames = 4;
       break;
-    case FN_LEVEL_ACTOR_BOOTS:
+    case ActorType_Boots:
       data->tile = OBJ_BOOT;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_GUN:
+    case ActorType_Gun:
       data->tile = OBJ_GUN;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_FULL_LIFE:
+    case ActorType_FullLife:
       data->tile = OBJ_NUCLEARMOLECULE;
       data->current_frame = 0;
       data->num_frames = 8;
       break;
-    case FN_LEVEL_ACTOR_CHICKEN_SINGLE:
+    case ActorType_ChickenSingle:
       data->tile = OBJ_CHICKEN_SINGLE;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_CHICKEN_DOUBLE:
+    case ActorType_ChickenDouble:
       data->tile = OBJ_CHICKEN_DOUBLE;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_LETTER_D:
+    case ActorType_LetterD:
       data->tile = OBJ_LETTER_D;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_LETTER_U:
+    case ActorType_LetterU:
       data->tile = OBJ_LETTER_U;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_LETTER_K:
+    case ActorType_LetterK:
       data->tile = OBJ_LETTER_K;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_LETTER_E:
+    case ActorType_LetterE:
       data->tile = OBJ_LETTER_E;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_ACCESS_CARD:
+    case ActorType_AccessCard:
       data->tile = OBJ_ACCESS_CARD;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_GLOVE:
+    case ActorType_Glove:
       data->tile = OBJ_ROBOHAND;
       data->current_frame = 0;
       data->num_frames = 1;
       break;
-    case FN_LEVEL_ACTOR_CLAMPS:
+    case ActorType_Clamps:
       data->tile = OBJ_CLAMP;
       data->current_frame = 0;
       data->num_frames = 1;
@@ -2820,16 +2820,16 @@ void fn_level_actor_function_item_touch_start(
   Uint8 health = fn_hero_get_health(hero);
   Uint8 firepower = fn_hero_get_firepower(hero);
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_LETTER_D:
+    case ActorType_LetterD:
       fn_hero_set_fetched_letter(hero, 'D');
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_500,
+          ActorType_Score500,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_LETTER_U:
+    case ActorType_LetterU:
       if (fn_hero_get_fetched_letter(hero) == 'D') {
         fn_hero_set_fetched_letter(hero, 'U');
       } else {
@@ -2838,11 +2838,11 @@ void fn_level_actor_function_item_touch_start(
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_500,
+          ActorType_Score500,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_LETTER_K:
+    case ActorType_LetterK:
       if (fn_hero_get_fetched_letter(hero) == 'U') {
         fn_hero_set_fetched_letter(hero, 'K');
       } else {
@@ -2851,161 +2851,161 @@ void fn_level_actor_function_item_touch_start(
       actor->is_alive = 0;
       fn_hero_add_score(hero, 500);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_500,
+          ActorType_Score500,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_LETTER_E:
+    case ActorType_LetterE:
       if (fn_hero_get_fetched_letter(hero) == 'K') {
       fn_hero_add_score(hero, 10000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_10000,
+          ActorType_Score10000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       } else {
       fn_hero_add_score(hero, 500);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_500,
+          ActorType_Score500,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       }
       actor->is_alive = 0;
       break;
-    case FN_LEVEL_ACTOR_FULL_LIFE:
+    case ActorType_FullLife:
       health = 8;
       fn_hero_set_health(hero, health);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_GUN:
+    case ActorType_Gun:
       firepower++;
       fn_hero_set_firepower(hero, firepower);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_ACCESS_CARD:
+    case ActorType_AccessCard:
       inventory |= FN_INVENTORY_ACCESS_CARD;
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_GLOVE:
+    case ActorType_Glove:
       inventory |= FN_INVENTORY_GLOVE;
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_BOOTS:
+    case ActorType_Boots:
       inventory |= FN_INVENTORY_BOOT;
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_CLAMPS:
+    case ActorType_Clamps:
       inventory |= FN_INVENTORY_CLAMP;
       fn_hero_set_inventory(hero, inventory);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 1000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_1000,
+          ActorType_Score1000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_FOOTBALL:
+    case ActorType_Football:
       fn_hero_add_score(hero, 100);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_100,
+          ActorType_Score100,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       actor->is_alive = 0;
       break;
-    case FN_LEVEL_ACTOR_DISK:
+    case ActorType_Disk:
       fn_hero_add_score(hero, 5000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_5000,
+          ActorType_Score5000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       actor->is_alive = 0;
       break;
-    case FN_LEVEL_ACTOR_JOYSTICK:
+    case ActorType_Joystick:
       fn_hero_add_score(hero, 2000);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_2000,
+          ActorType_Score2000,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       actor->is_alive = 0;
       break;
-    case FN_LEVEL_ACTOR_RADIO:
-    case FN_LEVEL_ACTOR_FLAG:
+    case ActorType_Radio:
+    case ActorType_Flag:
       switch(data->current_frame) {
         case 0:
           fn_hero_add_score(hero, 100);
           fn_level_add_actor(level,
-              FN_LEVEL_ACTOR_SCORE_100,
+              ActorType_Score100,
               actor->actor_data->position.x,
               actor->actor_data->position.y);
           break;
         case 1:
           fn_hero_add_score(hero, 2000);
           fn_level_add_actor(level,
-              FN_LEVEL_ACTOR_SCORE_2000,
+              ActorType_Score2000,
               actor->actor_data->position.x,
               actor->actor_data->position.y);
           break;
         case 2:
           fn_hero_add_score(hero, 5000);
           fn_level_add_actor(level,
-              FN_LEVEL_ACTOR_SCORE_5000,
+              ActorType_Score5000,
               actor->actor_data->position.x,
               actor->actor_data->position.y);
           break;
       }
       actor->is_alive = 0;
       break;
-    case FN_LEVEL_ACTOR_SODA:
+    case ActorType_Soda:
       fn_hero_improve_health(hero, 1);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 200);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_200,
+          ActorType_Score200,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_CHICKEN_SINGLE:
+    case ActorType_ChickenSingle:
       fn_hero_improve_health(hero, 1);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 100);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_100,
+          ActorType_Score100,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_CHICKEN_DOUBLE:
+    case ActorType_ChickenDouble:
       fn_hero_improve_health(hero, 2);
       actor->is_alive = 0;
       fn_hero_add_score(hero, 200);
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_SCORE_200,
+          ActorType_Score200,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
@@ -3092,9 +3092,9 @@ void fn_level_actor_function_item_shot(
         fn_hero_t * _hero)
 {
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_BOX_BLUE_FOOTBALL:
+    case ActorType_BoxBlueFootball:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_FOOTBALL,
+      fn_level_add_actor(level, ActorType_Football,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3103,9 +3103,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_JOYSTICK:
+    case ActorType_BoxBlueJoystick:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_JOYSTICK,
+      fn_level_add_actor(level, ActorType_Joystick,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3113,9 +3113,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_DISK:
+    case ActorType_BoxBlueDisk:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_DISK,
+      fn_level_add_actor(level, ActorType_Disk,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3123,9 +3123,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_BALLOON:
+    case ActorType_BoxBlueBalloon:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_BALLOON,
+      fn_level_add_actor(level, ActorType_Balloon,
           actor->actor_data->position.x,
           actor->actor_data->position.y - FN_TILE_HEIGHT);
       fn_level_add_particle_firework(
@@ -3134,9 +3134,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_FLAG:
+    case ActorType_BoxBlueFlag:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_FLAG,
+      fn_level_add_actor(level, ActorType_Flag,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3145,9 +3145,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_BLUE_RADIO:
+    case ActorType_BoxBlueRadio:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_RADIO,
+      fn_level_add_actor(level, ActorType_Radio,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3155,9 +3155,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_RED_SODA:
+    case ActorType_BoxRedSoda:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_SODA,
+      fn_level_add_actor(level, ActorType_Soda,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3166,9 +3166,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_RED_CHICKEN:
+    case ActorType_BoxRedChicken:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_CHICKEN_SINGLE,
+      fn_level_add_actor(level, ActorType_ChickenSingle,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3177,7 +3177,7 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_EMPTY:
+    case ActorType_BoxGreyEmpty:
       actor->is_alive = 0;
       fn_level_add_particle_firework(
           level,
@@ -3185,9 +3185,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_BOOTS:
+    case ActorType_BoxGreyBoots:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_BOOTS,
+      fn_level_add_actor(level, ActorType_Boots,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3196,9 +3196,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_CLAMPS:
+    case ActorType_BoxGreyClamps:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_CLAMPS,
+      fn_level_add_actor(level, ActorType_Clamps,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3207,9 +3207,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_GUN:
+    case ActorType_BoxGreyGun:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_GUN,
+      fn_level_add_actor(level, ActorType_Gun,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3218,9 +3218,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_BOMB:
+    case ActorType_BoxGreyBomb:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_BOMB,
+      fn_level_add_actor(level, ActorType_Bomb,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3229,9 +3229,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_GLOVE:
+    case ActorType_BoxGreyGlove:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_GLOVE,
+      fn_level_add_actor(level, ActorType_Glove,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3240,9 +3240,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_FULL_LIFE:
+    case ActorType_BoxGreyFullLife:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_FULL_LIFE,
+      fn_level_add_actor(level, ActorType_FullLife,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3251,9 +3251,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_ACCESS_CARD:
+    case ActorType_BoxGreyAccessCard:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_ACCESS_CARD,
+      fn_level_add_actor(level, ActorType_AccessCard,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3262,9 +3262,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.y,
           4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_D:
+    case ActorType_BoxGreyLetterD:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_D,
+      fn_level_add_actor(level, ActorType_LetterD,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3272,9 +3272,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_U:
+    case ActorType_BoxGreyLetterU:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_U,
+      fn_level_add_actor(level, ActorType_LetterU,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3282,9 +3282,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_K:
+    case ActorType_BoxGreyLetterK:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_K,
+      fn_level_add_actor(level, ActorType_LetterK,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3292,9 +3292,9 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_BOX_GREY_LETTER_E:
+    case ActorType_BoxGreyLetterE:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_LETTER_E,
+      fn_level_add_actor(level, ActorType_LetterE,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       fn_level_add_particle_firework(
@@ -3302,15 +3302,15 @@ void fn_level_actor_function_item_shot(
           actor->actor_data->position.x,
           actor->actor_data->position.y, 4);
       break;
-    case FN_LEVEL_ACTOR_CHICKEN_SINGLE:
+    case ActorType_ChickenSingle:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_CHICKEN_DOUBLE,
+      fn_level_add_actor(level, ActorType_ChickenDouble,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
-    case FN_LEVEL_ACTOR_SODA:
+    case ActorType_Soda:
       actor->is_alive = 0;
-      fn_level_add_actor(level, FN_LEVEL_ACTOR_SODA_FLYING,
+      fn_level_add_actor(level, ActorType_SodaFlying,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
       break;
@@ -3323,7 +3323,7 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -3351,7 +3351,7 @@ void fn_level_actor_function_soda_flying_touch_start(
 {
   fn_hero_add_score(hero, 1000);
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_SCORE_1000,
+      ActorType_Score1000,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
   actor->is_alive = 0;
@@ -3370,7 +3370,7 @@ void fn_level_actor_function_soda_flying_act(
         (actor->actor_data->position.x) / FN_TILE_WIDTH,
         (actor->actor_data->position.y) / FN_TILE_HEIGHT)) {
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_EXPLOSION,
+        ActorType_Explosion,
         actor->actor_data->position.x,
         actor->actor_data->position.y);
     actor->is_alive = 0;
@@ -3418,7 +3418,7 @@ typedef struct fn_level_actor_balloon_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -3455,7 +3455,7 @@ void fn_level_actor_function_balloon_touch_start(
     actor->is_alive = 0;
     fn_hero_add_score(hero, 10000);
     fn_level_add_actor(level,
-        FN_LEVEL_ACTOR_SCORE_10000,
+        ActorType_Score10000,
         actor->actor_data->position.x,
         actor->actor_data->position.y);
   }
@@ -3486,7 +3486,7 @@ void fn_level_actor_function_balloon_act(
     {
       data->destroyed = 1;
       fn_level_add_actor(level,
-          FN_LEVEL_ACTOR_STEAM,
+          ActorType_Steam,
           actor->actor_data->position.x,
           actor->actor_data->position.y);
     }
@@ -3537,7 +3537,7 @@ void fn_level_actor_function_balloon_shot(
   fn_level_actor_balloon_data_t * data = actor->data;
   data->destroyed = 1;
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_STEAM,
+      ActorType_Steam,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
 }
@@ -3551,7 +3551,7 @@ void fn_level_actor_function_balloon_shot(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -3575,11 +3575,11 @@ void fn_level_actor_function_teleporter_interact_start(
         FnLevelSolids * solids,
         fn_hero_t * hero)
 {
-  fn_level_actor_type_e othertype;
-  if (actor->type == FN_LEVEL_ACTOR_TELEPORTER1) {
-    othertype = FN_LEVEL_ACTOR_TELEPORTER2;
+  FnLevelActorType othertype;
+  if (actor->type == ActorType_Teleporter1) {
+    othertype = ActorType_Teleporter2;
   } else {
-    othertype = FN_LEVEL_ACTOR_TELEPORTER1;
+    othertype = ActorType_Teleporter1;
   }
 
   fn_list_t * iter = NULL;
@@ -3679,7 +3679,7 @@ typedef struct fn_level_actor_singleanimation_data_t {
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -3694,22 +3694,22 @@ void fn_level_actor_function_singleanimation_create(
   actor_data->is_in_foreground = 1;
 
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_FIRE:
+    case ActorType_Fire:
       data->tile = ANIM_BOMBFIRE;
       data->current_frame = 0;
       data->num_frames = 6;
       break;
-    case FN_LEVEL_ACTOR_DUSTCLOUD:
+    case ActorType_DustCloud:
       data->tile = OBJ_DUST;
       data->current_frame = 0;
       data->num_frames = 5;
       break;
-    case FN_LEVEL_ACTOR_STEAM:
+    case ActorType_Steam:
       data->tile = OBJ_STEAM;
       data->current_frame = 0;
       data->num_frames = 5;
       break;
-    case FN_LEVEL_ACTOR_ROBOT_DISAPPEARING:
+    case ActorType_RobotDisappearing:
       data->tile = ANIM_ROBOT + 3;
       data->current_frame = 0;
       data->num_frames = 7;
@@ -3755,10 +3755,10 @@ void fn_level_actor_function_singleanimation_act(
   data->current_frame++;
   if (data->current_frame == data->num_frames) {
     actor->is_alive = 0;
-    if (actor->type == FN_LEVEL_ACTOR_ROBOT_DISAPPEARING) {
+    if (actor->type == ActorType_RobotDisappearing) {
       fn_level_add_actor(
               level,
-              FN_LEVEL_ACTOR_EXPLOSION,
+              ActorType_Explosion,
               actor->actor_data->position.x,
               actor->actor_data->position.y);
     }
@@ -3818,7 +3818,7 @@ typedef struct fn_level_actor_particle_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -3842,16 +3842,16 @@ void fn_level_actor_function_particle_create(
   data->vspeed = vrand - vrand_max / 2;
 
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_PARTICLE_PINK:
+    case ActorType_ParticlePink:
       data->tile = OBJ_SPARK_PINK;
       break;
-    case FN_LEVEL_ACTOR_PARTICLE_BLUE:
+    case ActorType_ParticleBlue:
       data->tile = OBJ_SPARK_BLUE;
       break;
-    case FN_LEVEL_ACTOR_PARTICLE_WHITE:
+    case ActorType_ParticleWhite:
       data->tile = OBJ_SPARK_WHITE;
       break;
-    case FN_LEVEL_ACTOR_PARTICLE_GREEN:
+    case ActorType_ParticleGreen:
       data->tile = OBJ_SPARK_GREEN;
       break;
     default:
@@ -3939,7 +3939,7 @@ typedef struct fn_level_actor_rocket_data_t {
  * @param  actor  The rocket actor.
  */
 void fn_level_actor_function_rocket_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4095,7 +4095,7 @@ typedef struct fn_level_actor_bomb_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4162,7 +4162,7 @@ void fn_level_actor_bomb_act(
             (actor->actor_data->position.y / FN_TILE_HEIGHT) + 1))
       {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_BOMBFIRE,
+            ActorType_BombFire,
             actor->actor_data->position.x - distance * FN_TILE_WIDTH,
             actor->actor_data->position.y);
       } else {
@@ -4185,7 +4185,7 @@ void fn_level_actor_bomb_act(
             (actor->actor_data->position.y / FN_TILE_HEIGHT) + 1))
       {
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_BOMBFIRE,
+            ActorType_BombFire,
             actor->actor_data->position.x + distance * FN_TILE_WIDTH,
             actor->actor_data->position.y);
       } else {
@@ -4245,7 +4245,7 @@ typedef struct fn_level_actor_bombfire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4361,7 +4361,7 @@ typedef struct fn_level_actor_explosion_data_t {
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4450,7 +4450,7 @@ void fn_level_actor_function_explosion_blit(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4510,10 +4510,10 @@ void fn_level_actor_function_camera_shot(
   actor->is_alive = 0;
   fn_hero_add_score(hero, 100);
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_SCORE_100,
+      ActorType_Score100,
       actor->actor_data->position.x, actor->actor_data->position.y);
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_EXPLOSION,
+      ActorType_Explosion,
       actor->actor_data->position.x, actor->actor_data->position.y);
 }
 
@@ -4548,7 +4548,7 @@ typedef struct fn_level_actor_score_data_t {
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4563,67 +4563,67 @@ void fn_level_actor_function_score_create(
   data->countdown = 40;
 
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_SCORE_100:
+    case ActorType_Score100:
       data->tile = NUMB_100;
       break;
-    case FN_LEVEL_ACTOR_SCORE_200:
+    case ActorType_Score200:
       data->tile = NUMB_200;
       break;
-    case FN_LEVEL_ACTOR_SCORE_500:
+    case ActorType_Score500:
       data->tile = NUMB_500;
       break;
-    case FN_LEVEL_ACTOR_SCORE_1000:
+    case ActorType_Score1000:
       data->tile = NUMB_1000;
       break;
-    case FN_LEVEL_ACTOR_SCORE_2000:
+    case ActorType_Score2000:
       data->tile = NUMB_2000;
       break;
-    case FN_LEVEL_ACTOR_SCORE_5000:
+    case ActorType_Score5000:
       data->tile = NUMB_5000;
       break;
-    case FN_LEVEL_ACTOR_SCORE_10000:
+    case ActorType_Score10000:
       data->tile = NUMB_10000;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_1_LEFT:
+    case ActorType_ScoreBonus1Left:
       data->tile = NUMB_BONUS_1_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_1_RIGHT:
+    case ActorType_ScoreBonus1Right:
       data->tile = NUMB_BONUS_1_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_2_LEFT:
+    case ActorType_ScoreBonus2Left:
       data->tile = NUMB_BONUS_2_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_2_RIGHT:
+    case ActorType_ScoreBonus2Right:
       data->tile = NUMB_BONUS_2_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_3_LEFT:
+    case ActorType_ScoreBonus3Left:
       data->tile = NUMB_BONUS_3_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_3_RIGHT:
+    case ActorType_ScoreBonus3Right:
       data->tile = NUMB_BONUS_3_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_4_LEFT:
+    case ActorType_ScoreBonus4Left:
       data->tile = NUMB_BONUS_4_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_4_RIGHT:
+    case ActorType_ScoreBonus4Right:
       data->tile = NUMB_BONUS_4_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_5_LEFT:
+    case ActorType_ScoreBonus5Left:
       data->tile = NUMB_BONUS_5_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_5_RIGHT:
+    case ActorType_ScoreBonus5Right:
       data->tile = NUMB_BONUS_5_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_6_LEFT:
+    case ActorType_ScoreBonus6Left:
       data->tile = NUMB_BONUS_6_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_6_RIGHT:
+    case ActorType_ScoreBonus6Right:
       data->tile = NUMB_BONUS_6_RIGHT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_7_LEFT:
+    case ActorType_ScoreBonus7Left:
       data->tile = NUMB_BONUS_7_LEFT;
       break;
-    case FN_LEVEL_ACTOR_SCORE_BONUS_7_RIGHT:
+    case ActorType_ScoreBonus7Right:
       data->tile = NUMB_BONUS_7_RIGHT;
       break;
     default:
@@ -4714,7 +4714,7 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4817,7 +4817,7 @@ void fn_level_actor_function_unstablefloor_act(
             actor->actor_data->position.y / FN_TILE_HEIGHT,
             0);
         fn_level_add_actor(level,
-            FN_LEVEL_ACTOR_EXPLOSION,
+            ActorType_Explosion,
             actor->actor_data->position.x + floorlength * FN_TILE_WIDTH,
             actor->actor_data->position.y);
         fn_level_add_particle_firework(
@@ -4868,7 +4868,7 @@ void fn_level_actor_function_unstablefloor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4944,7 +4944,7 @@ typedef struct fn_level_actor_conveyor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -4962,10 +4962,10 @@ void fn_level_actor_function_conveyor_create(
   data->num_frames = 4;
 
   switch(actor_type) {
-    case FN_LEVEL_ACTOR_CONVEYOR_LEFTMOVING_RIGHTEND:
+    case ActorType_ConveyorLeftMovingRightEnd:
       data->direction = HorizontalDirection_Left;
       break;
-    case FN_LEVEL_ACTOR_CONVEYOR_RIGHTMOVING_RIGHTEND:
+    case ActorType_ConveyorRightMovingRightEnd:
       data->direction = HorizontalDirection_Right;
       break;
     default: /* error */
@@ -5090,7 +5090,7 @@ void fn_level_actor_function_conveyor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5176,7 +5176,7 @@ typedef struct fn_level_actor_hostileshot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5189,7 +5189,7 @@ void fn_level_actor_function_hostileshot_create(
   *userdata = data;
   data->current_frame = 0;
   data->num_frames = 2;
-  if (actor_type == FN_LEVEL_ACTOR_HOSTILESHOT_LEFT) {
+  if (actor_type == ActorType_HostileShotLeft) {
     data->tile = OBJ_BADSHOT;
   } else {
     data->tile = OBJ_BADSHOT + 2;
@@ -5245,7 +5245,7 @@ void fn_level_actor_function_hostileshot_act(
   data->current_frame++;
   data->current_frame %= data->num_frames;
 
-  if (actor->type == FN_LEVEL_ACTOR_HOSTILESHOT_LEFT) {
+  if (actor->type == ActorType_HostileShotLeft) {
     actor->actor_data->position.x -= FN_HALFTILE_WIDTH;
   } else {
     actor->actor_data->position.x += FN_HALFTILE_WIDTH;
@@ -5285,7 +5285,7 @@ void fn_level_actor_function_hostileshot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5374,7 +5374,7 @@ typedef struct fn_level_actor_exitdoor_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5558,7 +5558,7 @@ typedef struct fn_level_actor_door_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5685,7 +5685,7 @@ typedef struct fn_level_actor_keyhole_data_t {
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5758,16 +5758,16 @@ void fn_level_actor_function_keyhole_blit(
 
   if (data->counter > 1) {
     switch(actor->type) {
-      case FN_LEVEL_ACTOR_KEYHOLE_RED:
+      case ActorType_KeyholeRed:
         tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_RED);
         break;
-      case FN_LEVEL_ACTOR_KEYHOLE_BLUE:
+      case ActorType_KeyholeBlue:
         tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_BLUE);
         break;
-      case FN_LEVEL_ACTOR_KEYHOLE_PINK:
+      case ActorType_KeyholePink:
         tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_PINK);
         break;
-      case FN_LEVEL_ACTOR_KEYHOLE_GREEN:
+      case ActorType_KeyholeGreen:
         tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_GREEN);
         break;
       default:
@@ -5803,27 +5803,27 @@ void fn_level_actor_function_keyhole_interact_start(
 
   Uint8 haskey = 0;
   Uint8 needed_key = 0;
-  fn_level_actor_type_e door_to_open;
+  FnLevelActorType door_to_open;
 
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_KEYHOLE_RED:
+    case ActorType_KeyholeRed:
       needed_key = FN_INVENTORY_KEY_RED;
-      door_to_open = FN_LEVEL_ACTOR_DOOR_RED;
+      door_to_open = ActorType_DoorRed;
       snprintf(msg, 40, "You don't have the red key.\n");
       break;
-    case FN_LEVEL_ACTOR_KEYHOLE_BLUE:
+    case ActorType_KeyholeBlue:
       needed_key = FN_INVENTORY_KEY_BLUE;
-      door_to_open = FN_LEVEL_ACTOR_DOOR_BLUE;
+      door_to_open = ActorType_DoorBlue;
       snprintf(msg, 40, "You don't have the blue key.\n");
       break;
-    case FN_LEVEL_ACTOR_KEYHOLE_PINK:
+    case ActorType_KeyholePink:
       needed_key = FN_INVENTORY_KEY_PINK;
-      door_to_open = FN_LEVEL_ACTOR_DOOR_PINK;
+      door_to_open = ActorType_DoorPink;
       snprintf(msg, 40, "You don't have the pink key.\n");
       break;
-    case FN_LEVEL_ACTOR_KEYHOLE_GREEN:
+    case ActorType_KeyholeGreen:
       needed_key = FN_INVENTORY_KEY_GREEN;
-      door_to_open = FN_LEVEL_ACTOR_DOOR_GREEN;
+      door_to_open = ActorType_DoorGreen;
       snprintf(msg, 40, "You don't have the green key.\n");
       break;
     default:
@@ -5868,7 +5868,7 @@ void fn_level_actor_function_keyhole_interact_start(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -5894,16 +5894,16 @@ void fn_level_actor_function_key_touch_start(
 {
   Uint8 inventory = fn_hero_get_inventory(hero);
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_KEY_RED:
+    case ActorType_KeyRed:
       inventory |= FN_INVENTORY_KEY_RED;
       break;
-    case FN_LEVEL_ACTOR_KEY_BLUE:
+    case ActorType_KeyBlue:
       inventory |= FN_INVENTORY_KEY_BLUE;
       break;
-    case FN_LEVEL_ACTOR_KEY_GREEN:
+    case ActorType_KeyGreen:
       inventory |= FN_INVENTORY_KEY_GREEN;
       break;
-    case FN_LEVEL_ACTOR_KEY_PINK:
+    case ActorType_KeyPink:
       inventory |= FN_INVENTORY_KEY_PINK;
       break;
     default:
@@ -5914,7 +5914,7 @@ void fn_level_actor_function_key_touch_start(
   }
   fn_hero_add_score(hero, 1000);
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_SCORE_1000,
+      ActorType_Score1000,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
   actor->is_alive = 0;
@@ -5942,16 +5942,16 @@ void fn_level_actor_function_key_blit(
   destrect.w = actor->actor_data->position.w;
   destrect.h = actor->actor_data->position.h;
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_KEY_RED:
+    case ActorType_KeyRed:
       tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_RED);
       break;
-    case FN_LEVEL_ACTOR_KEY_BLUE:
+    case ActorType_KeyBlue:
       tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_BLUE);
       break;
-    case FN_LEVEL_ACTOR_KEY_GREEN:
+    case ActorType_KeyGreen:
       tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_GREEN);
       break;
-    case FN_LEVEL_ACTOR_KEY_PINK:
+    case ActorType_KeyPink:
       tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_PINK);
       break;
     default:
@@ -5973,7 +5973,7 @@ void fn_level_actor_function_key_blit(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -6032,7 +6032,7 @@ void fn_level_actor_function_shootable_wall_shot(
       actor->actor_data->position.y / FN_TILE_HEIGHT,
       0);
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_EXPLOSION,
+      ActorType_Explosion,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
 }
@@ -6062,7 +6062,7 @@ typedef struct fn_level_actor_accesscard_door_data_t
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -6159,7 +6159,7 @@ typedef struct fn_level_actor_spike_data_t {
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -6247,13 +6247,13 @@ void fn_level_actor_function_spikes_blit(
   destrect.w = actor->actor_data->position.w;
   destrect.h = actor->actor_data->position.h;
   switch(actor->type) {
-    case FN_LEVEL_ACTOR_SPIKES_UP:
+    case ActorType_SpikesUp:
       tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKES_UP);
       break;
-    case FN_LEVEL_ACTOR_SPIKES_DOWN:
+    case ActorType_SpikesDown:
       tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKES_DOWN);
       break;
-    case FN_LEVEL_ACTOR_SPIKE:
+    case ActorType_Spike:
       if (data->touching_hero) {
         tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKE + 1);
       } else {
@@ -6299,7 +6299,7 @@ typedef struct fn_level_actor_fan_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_create(
-        fn_level_actor_type_e actor_type,
+        FnLevelActorType actor_type,
         void ** userdata,
         FnLevelActorData * actor_data,
         FnLevelTiles * tiles,
@@ -6382,7 +6382,7 @@ void fn_level_actor_function_fan_act(
           heropos, actor->actor_data->position);
 
       int fandirection = 0;
-      if (actor->type == FN_LEVEL_ACTOR_FAN_LEFT) {
+      if (actor->type == ActorType_FanLeft) {
         fandirection = -1;
       } else {
         fandirection = 1;
@@ -6449,7 +6449,7 @@ void fn_level_actor_function_fan_shot(
   fn_level_actor_fan_data_t * data = actor->data;
   data->running = 9;
   fn_level_add_actor(level,
-      FN_LEVEL_ACTOR_STEAM,
+      ActorType_Steam,
       actor->actor_data->position.x,
       actor->actor_data->position.y);
 }
@@ -6463,9 +6463,9 @@ void fn_level_actor_function_fan_shot(
  * actors.
  */
 fn_level_actor_functions_t
-fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
+fn_level_actor_functions[] =
 {
-  [FN_LEVEL_ACTOR_FIREWHEELBOT] = {
+  [ActorType_FireWheelBot] = {
     .create = fn_level_actor_function_firewheelbot_create,
     .free = fn_level_actor_function_firewheelbot_free,
     .hero_touch_start = fn_level_actor_function_firewheelbot_touch_start,
@@ -6476,7 +6476,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_firewheelbot_blit,
     .shot = fn_level_actor_function_firewheelbot_shot,
   },
-  [FN_LEVEL_ACTOR_FLAMEGNOMEBOT] = {
+  [ActorType_FlameGnomeBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6487,7 +6487,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_FLYINGBOT] = {
+  [ActorType_FlyingBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6498,7 +6498,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_FOOTBOT] = {
+  [ActorType_FootBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6509,7 +6509,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_HELICOPTERBOT] = {
+  [ActorType_HelicopterBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6520,7 +6520,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_RABBITOIDBOT] = {
+  [ActorType_RabbitoidBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6531,7 +6531,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_REDBALL_JUMPING] = {
+  [ActorType_RedBallJumping] = {
     .create = fn_level_actor_function_redball_jumping_create,
     .free = fn_level_actor_function_redball_jumping_free,
     .hero_touch_start = fn_level_actor_function_redball_jumping_hero_touch_start,
@@ -6542,7 +6542,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_redball_jumping_blit,
     .shot = fn_level_actor_function_redball_jumping_shot,
   },
-  [FN_LEVEL_ACTOR_REDBALL_LYING] = {
+  [ActorType_RedBallLying] = {
     .create = fn_level_actor_function_redball_lying_create,
     .free = fn_level_actor_function_redball_lying_free,
     .hero_touch_start = fn_level_actor_function_redball_lying_hero_touch_start,
@@ -6553,7 +6553,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_redball_lying_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_ROBOT] = {
+  [ActorType_Robot] = {
     .create = fn_level_actor_function_robot_create,
     .free = fn_level_actor_function_robot_free,
     .hero_touch_start = fn_level_actor_function_robot_touch_start,
@@ -6564,7 +6564,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_robot_blit,
     .shot = fn_level_actor_function_robot_shot,
   },
-  [FN_LEVEL_ACTOR_ROBOT_DISAPPEARING] = {
+  [ActorType_RobotDisappearing] = {
     .create = fn_level_actor_function_singleanimation_create,
     .free = fn_level_actor_function_singleanimation_free,
     .hero_touch_start = NULL,
@@ -6575,7 +6575,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SNAKEBOT] = {
+  [ActorType_SnakeBot] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6586,7 +6586,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_TANKBOT] = {
+  [ActorType_TankBot] = {
     .create = fn_level_actor_function_tankbot_create,
     .free = fn_level_actor_function_tankbot_free,
     .hero_touch_start = fn_level_actor_function_tankbot_hero_touch_start,
@@ -6597,7 +6597,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_tankbot_blit,
     .shot = fn_level_actor_function_tankbot_shot,
   },
-  [FN_LEVEL_ACTOR_WALLCRAWLERBOT_LEFT] = {
+  [ActorType_WallCrawlerBotLeft] = {
     .create = fn_level_actor_function_wallcrawler_create,
     .free = fn_level_actor_function_wallcrawler_free,
     .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
@@ -6608,7 +6608,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_wallcrawler_blit,
     .shot = fn_level_actor_function_wallcrawler_shot,
   },
-  [FN_LEVEL_ACTOR_WALLCRAWLERBOT_RIGHT] = {
+  [ActorType_WallCrawlerBotRight] = {
     .create = fn_level_actor_function_wallcrawler_create,
     .free = fn_level_actor_function_wallcrawler_free,
     .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
@@ -6619,7 +6619,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_wallcrawler_blit,
     .shot = fn_level_actor_function_wallcrawler_shot,
   },
-  [FN_LEVEL_ACTOR_DRPROTON] = {
+  [ActorType_DrProton] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6630,7 +6630,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_CAMERA] = {
+  [ActorType_Camera] = {
     .create = fn_level_actor_function_camera_create,
     .free = NULL,
     .hero_touch_start = NULL,
@@ -6641,7 +6641,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_camera_blit,
     .shot = fn_level_actor_function_camera_shot,
   },
-  [FN_LEVEL_ACTOR_EXPLOSION] = {
+  [ActorType_Explosion] = {
     .create = fn_level_actor_function_explosion_create,
     .free = fn_level_actor_function_explosion_free,
     .hero_touch_start = NULL,
@@ -6652,7 +6652,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_explosion_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_FIRE] = {
+  [ActorType_Fire] = {
     .create = fn_level_actor_function_singleanimation_create,
     .free = fn_level_actor_function_singleanimation_free,
     .hero_touch_start = NULL,
@@ -6663,7 +6663,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_DUSTCLOUD] = {
+  [ActorType_DustCloud] = {
     .create = fn_level_actor_function_singleanimation_create,
     .free = fn_level_actor_function_singleanimation_free,
     .hero_touch_start = NULL,
@@ -6674,7 +6674,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_STEAM] = {
+  [ActorType_Steam] = {
     .create = fn_level_actor_function_singleanimation_create,
     .free = fn_level_actor_function_singleanimation_free,
     .hero_touch_start = NULL,
@@ -6685,7 +6685,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_PARTICLE_PINK] = {
+  [ActorType_ParticlePink] = {
     .create = fn_level_actor_function_particle_create,
     .free = fn_level_actor_function_particle_free,
     .hero_touch_start = NULL,
@@ -6696,7 +6696,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_PARTICLE_BLUE] = {
+  [ActorType_ParticleBlue] = {
     .create = fn_level_actor_function_particle_create,
     .free = fn_level_actor_function_particle_free,
     .hero_touch_start = NULL,
@@ -6707,7 +6707,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_PARTICLE_WHITE] = {
+  [ActorType_ParticleWhite] = {
     .create = fn_level_actor_function_particle_create,
     .free = fn_level_actor_function_particle_free,
     .hero_touch_start = NULL,
@@ -6718,7 +6718,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_PARTICLE_GREEN] = {
+  [ActorType_ParticleGreen] = {
     .create = fn_level_actor_function_particle_create,
     .free = fn_level_actor_function_particle_free,
     .hero_touch_start = NULL,
@@ -6729,7 +6729,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_ROCKET] = {
+  [ActorType_Rocket] = {
     .create = fn_level_actor_function_rocket_create,
     .free = fn_level_actor_function_rocket_free,
     .hero_touch_start = NULL,
@@ -6740,7 +6740,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_rocket_blit,
     .shot = fn_level_actor_function_rocket_shot,
   },
-  [FN_LEVEL_ACTOR_BOMB] = {
+  [ActorType_Bomb] = {
     .create = fn_level_actor_bomb_create,
     .free = fn_level_actor_bomb_free,
     .hero_touch_start = NULL,
@@ -6751,7 +6751,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_bomb_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOMBFIRE] = {
+  [ActorType_BombFire] = {
     .create = fn_level_actor_bombfire_create,
     .free = fn_level_actor_bombfire_free,
     .hero_touch_start = fn_level_actor_bombfire_hero_touch_start,
@@ -6762,7 +6762,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_bombfire_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_WATER] = {
+  [ActorType_Water] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6773,7 +6773,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_EXITDOOR] = {
+  [ActorType_ExitDoor] = {
     .create = fn_level_actor_function_exitdoor_create,
     .free = fn_level_actor_function_exitdoor_free,
     .hero_touch_start = NULL,
@@ -6784,7 +6784,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_exitdoor_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_NOTEBOOK] = {
+  [ActorType_Notebook] = {
     .create = fn_level_actor_function_notebook_create,
     .free = fn_level_actor_function_notebook_free,
     .hero_touch_start = NULL,
@@ -6795,7 +6795,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_notebook_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SURVEILLANCESCREEN] = {
+  [ActorType_SurveillanceScreen] = {
     .create = fn_level_actor_function_surveillancescreen_create,
     .free = fn_level_actor_function_surveillancescreen_free,
     .hero_touch_start = NULL,
@@ -6806,7 +6806,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_surveillancescreen_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_HOSTILESHOT_LEFT] = {
+  [ActorType_HostileShotLeft] = {
     .create = fn_level_actor_function_hostileshot_create,
     .free = fn_level_actor_function_hostileshot_free,
     .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
@@ -6817,7 +6817,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_hostileshot_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_HOSTILESHOT_RIGHT] = {
+  [ActorType_HostileShotRight] = {
     .create = fn_level_actor_function_hostileshot_create,
     .free = fn_level_actor_function_hostileshot_free,
     .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
@@ -6828,7 +6828,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_hostileshot_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SODA] = {
+  [ActorType_Soda] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -6839,7 +6839,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_SODA_FLYING] = {
+  [ActorType_SodaFlying] = {
     .create = fn_level_actor_function_soda_flying_create,
     .free = fn_level_actor_function_soda_flying_free,
     .hero_touch_start = fn_level_actor_function_soda_flying_touch_start,
@@ -6850,7 +6850,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_soda_flying_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_UNSTABLEFLOOR] = {
+  [ActorType_UnstableFloor] = {
     .create = fn_level_actor_function_unstablefloor_create,
     .free = fn_level_actor_function_unstablefloor_free,
     .hero_touch_start = NULL,
@@ -6861,7 +6861,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_unstablefloor_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_EXPANDINGFLOOR] = {
+  [ActorType_ExpandingFloor] = {
     .create = fn_level_actor_function_expandingfloor_create,
     .free = fn_level_actor_function_expandingfloor_free,
     .hero_touch_start = NULL,
@@ -6872,7 +6872,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_expandingfloor_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_CONVEYOR_LEFTMOVING_RIGHTEND] = {
+  [ActorType_ConveyorLeftMovingRightEnd] = {
     .create = fn_level_actor_function_conveyor_create,
     .free = fn_level_actor_function_conveyor_free,
     .hero_touch_start = NULL,
@@ -6883,7 +6883,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_conveyor_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_CONVEYOR_RIGHTMOVING_RIGHTEND] = {
+  [ActorType_ConveyorRightMovingRightEnd] = {
     .create = fn_level_actor_function_conveyor_create,
     .free = fn_level_actor_function_conveyor_free,
     .hero_touch_start = NULL,
@@ -6894,7 +6894,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_conveyor_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_FAN_LEFT] = {
+  [ActorType_FanLeft] = {
     .create = fn_level_actor_function_fan_create,
     .free = fn_level_actor_function_fan_free,
     .hero_touch_start = NULL,
@@ -6905,7 +6905,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_fan_blit,
     .shot = fn_level_actor_function_fan_shot,
   },
-  [FN_LEVEL_ACTOR_FAN_RIGHT] = {
+  [ActorType_FanRight] = {
     .create = fn_level_actor_function_fan_create,
     .free = fn_level_actor_function_fan_free,
     .hero_touch_start = NULL,
@@ -6916,7 +6916,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_fan_blit,
     .shot = fn_level_actor_function_fan_shot,
   },
-  [FN_LEVEL_ACTOR_BROKENWALL_BACKGROUND] = {
+  [ActorType_BrokenWallBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -6927,7 +6927,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_STONE_BACKGROUND] = {
+  [ActorType_StoneBackground] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6938,7 +6938,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_TELEPORTER1] = {
+  [ActorType_Teleporter1] = {
     .create = fn_level_actor_function_teleporter_create,
     .free = NULL,
     .hero_touch_start = NULL,
@@ -6949,7 +6949,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_TELEPORTER2] = {
+  [ActorType_Teleporter2] = {
     .create = fn_level_actor_function_teleporter_create,
     .free = NULL,
     .hero_touch_start = NULL,
@@ -6960,7 +6960,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_FENCE_BACKGROUND] = {
+  [ActorType_FenceBackground] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -6971,7 +6971,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_STONEWINDOW_BACKGROUND] = {
+  [ActorType_StoneWindowBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -6982,7 +6982,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_WINDOWLEFT_BACKGROUND] = {
+  [ActorType_WindowLeftBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -6993,7 +6993,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_WINDOWRIGHT_BACKGROUND] = {
+  [ActorType_WindowRightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -7004,7 +7004,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCREEN] = {
+  [ActorType_Screen] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -7015,7 +7015,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_EMPTY] = {
+  [ActorType_BoxGreyEmpty] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7026,7 +7026,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_BOOTS] = {
+  [ActorType_BoxGreyBoots] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7037,7 +7037,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BOOTS] = {
+  [ActorType_Boots] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7048,7 +7048,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_CLAMPS] = {
+  [ActorType_BoxGreyClamps] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7059,7 +7059,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_CLAMPS] = {
+  [ActorType_Clamps] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7070,7 +7070,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_GUN] = {
+  [ActorType_BoxGreyGun] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7081,7 +7081,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_GUN] = {
+  [ActorType_Gun] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7092,7 +7092,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_BOMB] = {
+  [ActorType_BoxGreyBomb] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7103,7 +7103,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BOX_RED_SODA] = {
+  [ActorType_BoxRedSoda] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7114,7 +7114,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BOX_RED_CHICKEN] = {
+  [ActorType_BoxRedChicken] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7125,7 +7125,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_CHICKEN_SINGLE] = {
+  [ActorType_ChickenSingle] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7136,7 +7136,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_CHICKEN_DOUBLE] = {
+  [ActorType_ChickenDouble] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7147,7 +7147,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_FOOTBALL] = {
+  [ActorType_BoxBlueFootball] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7158,7 +7158,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_FOOTBALL] = {
+  [ActorType_Football] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7169,7 +7169,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_FLAG] = {
+  [ActorType_Flag] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7180,7 +7180,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_JOYSTICK] = {
+  [ActorType_BoxBlueJoystick] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7191,7 +7191,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_JOYSTICK] = {
+  [ActorType_Joystick] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7202,7 +7202,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_DISK] = {
+  [ActorType_BoxBlueDisk] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7213,7 +7213,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_DISK] = {
+  [ActorType_Disk] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7224,7 +7224,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_BALLOON] = {
+  [ActorType_BoxBlueBalloon] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7235,7 +7235,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BALLOON] = {
+  [ActorType_Balloon] = {
     .create = fn_level_actor_function_balloon_create,
     .free = fn_level_actor_function_balloon_free,
     .hero_touch_start = fn_level_actor_function_balloon_touch_start,
@@ -7246,7 +7246,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_balloon_blit,
     .shot = fn_level_actor_function_balloon_shot,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_GLOVE] = {
+  [ActorType_BoxGreyGlove] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7257,7 +7257,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_GLOVE] = {
+  [ActorType_Glove] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7268,7 +7268,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_FULL_LIFE] = {
+  [ActorType_BoxGreyFullLife] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7279,7 +7279,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_FULL_LIFE] = {
+  [ActorType_FullLife] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7290,7 +7290,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_FLAG] = {
+  [ActorType_BoxBlueFlag] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7301,7 +7301,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_BLUE_FLAG] = {
+  [ActorType_BlueFlag] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -7312,7 +7312,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_BOX_BLUE_RADIO] = {
+  [ActorType_BoxBlueRadio] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7323,7 +7323,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_RADIO] = {
+  [ActorType_Radio] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7334,7 +7334,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_ACCESS_CARD] = {
+  [ActorType_BoxGreyAccessCard] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7345,7 +7345,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_ACCESS_CARD] = {
+  [ActorType_AccessCard] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7356,7 +7356,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_LETTER_D] = {
+  [ActorType_BoxGreyLetterD] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7367,7 +7367,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_LETTER_D] = {
+  [ActorType_LetterD] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7378,7 +7378,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_LETTER_U] = {
+  [ActorType_BoxGreyLetterU] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7389,7 +7389,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_LETTER_U] = {
+  [ActorType_LetterU] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7400,7 +7400,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_LETTER_K] = {
+  [ActorType_BoxGreyLetterK] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7411,7 +7411,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_LETTER_K] = {
+  [ActorType_LetterK] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7422,7 +7422,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BOX_GREY_LETTER_E] = {
+  [ActorType_BoxGreyLetterE] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7433,7 +7433,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
   },
-  [FN_LEVEL_ACTOR_LETTER_E] = {
+  [ActorType_LetterE] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
     .hero_touch_start = fn_level_actor_function_item_touch_start,
@@ -7444,7 +7444,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_ACCESS_CARD_SLOT] = {
+  [ActorType_AccessCardSlot] = {
     .create = fn_level_actor_function_accesscard_slot_create,
     .free = fn_level_actor_function_accesscard_slot_free,
     .hero_touch_start = NULL,
@@ -7455,7 +7455,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_accesscard_slot_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_GLOVE_SLOT] = {
+  [ActorType_GloveSlot] = {
     .create = fn_level_actor_function_glove_slot_create,
     .free = fn_level_actor_function_glove_slot_free,
     .hero_touch_start = NULL,
@@ -7466,7 +7466,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_glove_slot_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEY_RED] = {
+  [ActorType_KeyRed] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
     .hero_touch_start = fn_level_actor_function_key_touch_start,
@@ -7477,7 +7477,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEYHOLE_RED] = {
+  [ActorType_KeyholeRed] = {
     .create = fn_level_actor_function_keyhole_create,
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
@@ -7488,7 +7488,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_DOOR_RED] = {
+  [ActorType_DoorRed] = {
     .create = fn_level_actor_function_door_create,
     .free = fn_level_actor_function_door_free,
     .hero_touch_start = NULL,
@@ -7499,7 +7499,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEY_BLUE] = {
+  [ActorType_KeyBlue] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
     .hero_touch_start = fn_level_actor_function_key_touch_start,
@@ -7510,7 +7510,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEYHOLE_BLUE] = {
+  [ActorType_KeyholeBlue] = {
     .create = fn_level_actor_function_keyhole_create,
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
@@ -7521,7 +7521,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_DOOR_BLUE] = {
+  [ActorType_DoorBlue] = {
     .create = fn_level_actor_function_door_create,
     .free = fn_level_actor_function_door_free,
     .hero_touch_start = NULL,
@@ -7532,7 +7532,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEY_PINK] = {
+  [ActorType_KeyPink] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
     .hero_touch_start = fn_level_actor_function_key_touch_start,
@@ -7543,7 +7543,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEYHOLE_PINK] = {
+  [ActorType_KeyholePink] = {
     .create = fn_level_actor_function_keyhole_create,
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
@@ -7554,7 +7554,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_DOOR_PINK] = {
+  [ActorType_DoorPink] = {
     .create = fn_level_actor_function_door_create,
     .free = fn_level_actor_function_door_free,
     .hero_touch_start = NULL,
@@ -7565,7 +7565,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEY_GREEN] = {
+  [ActorType_KeyGreen] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
     .hero_touch_start = fn_level_actor_function_key_touch_start,
@@ -7576,7 +7576,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEYHOLE_GREEN] = {
+  [ActorType_KeyholeGreen] = {
     .create = fn_level_actor_function_keyhole_create,
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
@@ -7587,7 +7587,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_DOOR_GREEN] = {
+  [ActorType_DoorGreen] = {
     .create = fn_level_actor_function_door_create,
     .free = fn_level_actor_function_door_free,
     .hero_touch_start = NULL,
@@ -7598,7 +7598,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SHOOTABLE_WALL] = {
+  [ActorType_ShootableWall] = {
     .create = fn_level_actor_function_shootable_wall_create,
     .free = NULL,
     .hero_touch_start = NULL,
@@ -7609,7 +7609,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_shootable_wall_blit,
     .shot = fn_level_actor_function_shootable_wall_shot,
   },
-  [FN_LEVEL_ACTOR_LIFT] = {
+  [ActorType_Lift] = {
     .create = fn_level_actor_function_lift_create,
     .free = fn_level_actor_function_lift_free,
     .hero_touch_start = NULL,
@@ -7620,7 +7620,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_lift_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_ACME] = {
+  [ActorType_Acme] = {
     .create = fn_level_actor_function_acme_create,
     .free = fn_level_actor_function_acme_free,
     .hero_touch_start = fn_level_actor_function_acme_hero_touch_start,
@@ -7631,7 +7631,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_acme_blit,
     .shot = fn_level_actor_function_acme_shot,
   },
-  [FN_LEVEL_ACTOR_FIRE_RIGHT] = {
+  [ActorType_FireRight] = {
     .create = fn_level_actor_function_fire_create,
     .free = fn_level_actor_function_fire_free,
     .hero_touch_start = fn_level_actor_function_fire_hero_touch_start,
@@ -7642,7 +7642,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_fire_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_FIRE_LEFT] = {
+  [ActorType_FireLeft] = {
     .create = fn_level_actor_function_fire_create,
     .free = fn_level_actor_function_fire_free,
     .hero_touch_start = fn_level_actor_function_fire_hero_touch_start,
@@ -7653,7 +7653,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_fire_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_MILL] = {
+  [ActorType_Mill] = {
     .create = fn_level_actor_function_mill_create,
     .free = fn_level_actor_function_mill_free,
     .hero_touch_start = fn_level_actor_function_mill_hero_touch_start,
@@ -7664,7 +7664,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_mill_blit,
     .shot = fn_level_actor_function_mill_shot,
   },
-  [FN_LEVEL_ACTOR_LASERBEAM] = {
+  [ActorType_Laserbeam] = {
     .create = NULL, /* TODO */
     .free = NULL, /* TODO */
     .hero_touch_start = NULL, /* TODO */
@@ -7675,7 +7675,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
   },
-  [FN_LEVEL_ACTOR_ACCESS_CARD_DOOR] = {
+  [ActorType_AccessCardDoor] = {
     .create = fn_level_actor_function_access_card_door_create,
     .free = fn_level_actor_function_access_card_door_free,
     .hero_touch_start = NULL,
@@ -7686,7 +7686,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_access_card_door_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SPIKES_UP] = {
+  [ActorType_SpikesUp] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
     .hero_touch_start = fn_level_actor_function_spikes_touch_start,
@@ -7697,7 +7697,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SPIKES_DOWN] = {
+  [ActorType_SpikesDown] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
     .hero_touch_start = fn_level_actor_function_spikes_touch_start,
@@ -7708,7 +7708,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SPIKE] = {
+  [ActorType_Spike] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
     .hero_touch_start = fn_level_actor_function_spikes_touch_start,
@@ -7719,7 +7719,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_100] = {
+  [ActorType_Score100] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7730,7 +7730,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_200] = {
+  [ActorType_Score200] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7741,7 +7741,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_500] = {
+  [ActorType_Score500] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7752,7 +7752,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_1000] = {
+  [ActorType_Score1000] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7763,7 +7763,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_2000] = {
+  [ActorType_Score2000] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7774,7 +7774,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_5000] = {
+  [ActorType_Score5000] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7785,7 +7785,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_10000] = {
+  [ActorType_Score10000] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7796,7 +7796,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_1_LEFT] = {
+  [ActorType_ScoreBonus1Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7807,7 +7807,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_1_RIGHT] = {
+  [ActorType_ScoreBonus1Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7818,7 +7818,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_2_LEFT] = {
+  [ActorType_ScoreBonus2Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7829,7 +7829,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_2_RIGHT] = {
+  [ActorType_ScoreBonus2Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7840,7 +7840,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_3_LEFT] = {
+  [ActorType_ScoreBonus3Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7851,7 +7851,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_3_RIGHT] = {
+  [ActorType_ScoreBonus3Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7862,7 +7862,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_4_LEFT] = {
+  [ActorType_ScoreBonus4Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7873,7 +7873,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_4_RIGHT] = {
+  [ActorType_ScoreBonus4Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7884,7 +7884,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_5_LEFT] = {
+  [ActorType_ScoreBonus5Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7895,7 +7895,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_5_RIGHT] = {
+  [ActorType_ScoreBonus5Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7906,7 +7906,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_6_LEFT] = {
+  [ActorType_ScoreBonus6Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7917,7 +7917,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_6_RIGHT] = {
+  [ActorType_ScoreBonus6Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7928,7 +7928,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_7_LEFT] = {
+  [ActorType_ScoreBonus7Left] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7939,7 +7939,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_SCORE_BONUS_7_RIGHT] = {
+  [ActorType_ScoreBonus7Right] = {
     .create = fn_level_actor_function_score_create,
     .free = fn_level_actor_function_score_free,
     .hero_touch_start = NULL,
@@ -7950,7 +7950,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND1] = {
+  [ActorType_BlueLightBackground1] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -7961,7 +7961,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND2] = {
+  [ActorType_BlueLightBackground2] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -7972,7 +7972,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND3] = {
+  [ActorType_BlueLightBackground3] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -7983,7 +7983,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BLUE_LIGHT_BACKGROUND4] = {
+  [ActorType_BlueLightBackground4] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -7994,7 +7994,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_TEXT_ON_SCREEN_BACKGROUND] = {
+  [ActorType_TextOnScreenBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8005,7 +8005,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_HIGH_VOLTAGE_FLASH_BACKGROUND] = {
+  [ActorType_HighVoltageFlashBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8016,7 +8016,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_RED_FLASHLIGHT_BACKGROUND] = {
+  [ActorType_RedFlashlightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8027,7 +8027,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_BLUE_FLASHLIGHT_BACKGROUND] = {
+  [ActorType_BlueFlashlightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8038,7 +8038,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_KEYPANEL_BACKGROUND] = {
+  [ActorType_KeypanelBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8049,7 +8049,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_RED_ROTATIONLIGHT_BACKGROUND] = {
+  [ActorType_RedRotationLightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8060,7 +8060,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_UPARROW_BACKGROUND] = {
+  [ActorType_UpArrowBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8071,7 +8071,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_GREEN_POISON_BACKGROUND] = {
+  [ActorType_GreenPoisonBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8082,7 +8082,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
   },
-  [FN_LEVEL_ACTOR_LAVA_BACKGROUND] = {
+  [ActorType_LavaBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
     .free = fn_level_actor_function_simpleanimation_free,
     .hero_touch_start = NULL,
@@ -8100,7 +8100,7 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
 
 fn_level_actor_t * fn_level_actor_create(
         fn_level_t * level,
-        fn_level_actor_type_e type,
+        FnLevelActorType type,
         Uint16 x,
         Uint16 y)
 {
@@ -8195,7 +8195,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 
 Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * hero)
 {
-  if (actor->type == FN_LEVEL_ACTOR_LIFT) {
+  if (actor->type == ActorType_Lift) {
     /* This check needs to be done for lift only because
      * if there are two lifts next to each other, the mostleft
      * lift would be chosen for interaction instead of the one on

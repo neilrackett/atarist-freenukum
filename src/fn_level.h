@@ -267,7 +267,7 @@ void fn_level_hero_interact_stop(fn_level_t * lv);
  * @return  The newly created actor.
  */
 fn_level_actor_t * fn_level_add_actor(fn_level_t * lv,
-    fn_level_actor_type_e type,
+    FnLevelActorType type,
     Uint16 x,
     Uint16 y);
 
@@ -287,7 +287,7 @@ fn_level_actor_t * fn_level_add_actor(fn_level_t * lv,
  * @return  The newly created actor.
  */
 fn_level_actor_t * fn_level_add_initial_actor(fn_level_t * lv,
-    fn_level_actor_type_e type,
+    FnLevelActorType type,
     Uint16 x,
     Uint16 y);
 
@@ -328,7 +328,7 @@ void fn_level_fire_shot(fn_level_t * lv);
  *         call fn_list_free on it in order to free the memory.
  */
 fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
-    fn_level_actor_type_e type);
+    FnLevelActorType type);
 
 /* --------------------------------------------------------------- */
 
