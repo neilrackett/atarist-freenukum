@@ -73,6 +73,12 @@ typedef enum {
 } FnInputBoxAnswer;
 
 typedef enum {
+    HorizontalDirection_Center,
+    HorizontalDirection_Left,
+    HorizontalDirection_Right,
+} HorizontalDirection;
+
+typedef enum {
     MainMenuEntry_Start,
     MainMenuEntry_Restore,
     MainMenuEntry_Instructions,
@@ -87,6 +93,12 @@ typedef enum {
     MainMenuEntry_Quit,
     MainMenuEntry_Invalid,
 } MainMenuEntry;
+
+typedef enum {
+    VerticalDirection_Center,
+    VerticalDirection_Up,
+    VerticalDirection_Down,
+} VerticalDirection;
 
 typedef struct Bot Bot;
 
@@ -129,6 +141,8 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
+typedef HorizontalDirection FnHorizontalDirection;
+
 typedef InputField FnInputField;
 
 typedef LevelSolids FnLevelSolids;
@@ -152,6 +166,8 @@ typedef struct {
 } TileHeader;
 
 typedef TileHeader FnTileHeader;
+
+typedef VerticalDirection FnVerticalDirection;
 
 FnTexture *fn_backdrop_load(FnFile *ptr, FnTextureCreationParams params);
 
@@ -212,6 +228,8 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+void fn_horizontal_direction_print(FnHorizontalDirection direction);
 
 void fn_infobox_show(SDL_Surface *screen,
                      const FnTileCache *tilecache,
@@ -342,3 +360,5 @@ FnTileCache *fn_tilecache_load(const char *path,
                                FnTextureCreationParams params);
 
 FnTileHeader fn_tileheader_load(FnFile *file);
+
+void fn_vertical_direction_print(FnVerticalDirection direction);

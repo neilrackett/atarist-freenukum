@@ -112,24 +112,6 @@
 
 /* --------------------------------------------------------------- */
 
-typedef enum fn_horizontal_direction_e {
-  fn_horizontal_direction_none,
-  fn_horizontal_direction_left,
-  fn_horizontal_direction_right,
-  fn_horizontal_direction_size
-} fn_horizontal_direction_e;
-
-/* --------------------------------------------------------------- */
-
-typedef enum fn_vertical_direction_e {
-  fn_vertical_direction_none,
-  fn_vertical_direction_up,
-  fn_vertical_direction_down,
-  fn_vertical_direction_size
-} fn_vertical_direction_e;
-
-/* --------------------------------------------------------------- */
-
 typedef enum fn_event_e {
   fn_event_timer,
   fn_event_heromoved,

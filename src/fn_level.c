@@ -1182,13 +1182,13 @@ fn_level_actor_t * fn_level_add_initial_actor(fn_level_t * lv,
 /* --------------------------------------------------------------- */
 
 fn_shot_t * fn_level_add_shot(fn_level_t * lv,
-    fn_horizontal_direction_e direction,
+    FnHorizontalDirection direction,
     Uint16 x,
     Uint16 y)
 {
   fn_shot_t * shot = fn_shot_create(x, y, direction);
 
-  int addition = (direction == fn_horizontal_direction_right ?
+  int addition = (direction == HorizontalDirection_Right ?
       1 : -1);
 
   lv->shots = fn_list_append(lv->shots, shot);

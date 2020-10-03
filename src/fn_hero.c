@@ -66,7 +66,7 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->position.w = FN_TILE_WIDTH;
   hero->position.h = FN_TILE_HEIGHT * 2;
 
-  hero->direction = fn_horizontal_direction_right;
+  hero->direction = HorizontalDirection_Right;
   hero->motion = FN_HERO_MOTION_NONE;
   hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
@@ -103,7 +103,7 @@ void fn_hero_enterlevel(
 {
   fn_hero_set_x(hero, x);
   fn_hero_set_y(hero, y);
-  hero->direction = fn_horizontal_direction_right;
+  hero->direction = HorizontalDirection_Right;
   hero->motion = FN_HERO_MOTION_NONE;
   hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
@@ -154,7 +154,7 @@ void fn_hero_blit(
 
   tilenr = hero->tilenr;
   if (hero->immunitycountdown > hero->immunityduration - 1) {
-    if (hero->direction == fn_horizontal_direction_left) {
+    if (hero->direction == HorizontalDirection_Left) {
       tilenr = HERO_SKELETON_LEFT;
     } else {
       tilenr = HERO_SKELETON_RIGHT;
@@ -236,7 +236,7 @@ int fn_hero_act(
       hero->turned_around = 0;
     } else {
       switch(hero->direction) {
-        case fn_horizontal_direction_left:
+        case HorizontalDirection_Left:
           if (!fn_hero_would_collide(hero, lv->solids,
                 fn_hero_get_x(hero) - FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
@@ -248,7 +248,7 @@ int fn_hero_act(
             hero->is_moving_horizontally = 0;
           }
           break;
-        case fn_horizontal_direction_right:
+        case HorizontalDirection_Right:
           if (!fn_hero_would_collide(hero, lv->solids,
                 fn_hero_get_x(hero) + FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
@@ -397,7 +397,7 @@ void fn_hero_update_animation(
     if (hero->motion == FN_HERO_MOTION_NONE) {
 
       /* hero is standing */
-      if (hero->direction == fn_horizontal_direction_left) {
+      if (hero->direction == HorizontalDirection_Left) {
         if (hero->shooting == FN_HERO_SHOOTING_TRUE) {
           hero->tilenr = HERO_WALKING_LEFT + 12;
         } else {
@@ -415,7 +415,7 @@ void fn_hero_update_animation(
     } else {
 
       /* hero is walking */
-      if (hero->direction == fn_horizontal_direction_left) {
+      if (hero->direction == HorizontalDirection_Left) {
         hero->tilenr = HERO_WALKING_LEFT + 4 * hero->animationframe;
       } else {
         hero->tilenr = HERO_WALKING_RIGHT + 4 * hero->animationframe;
@@ -429,7 +429,7 @@ void fn_hero_update_animation(
     if (hero->counter > 0) {
 
       /* hero is jumping */
-      if (hero->direction == fn_horizontal_direction_left) {
+      if (hero->direction == HorizontalDirection_Left) {
         hero->tilenr = HERO_JUMPING_LEFT;
       } else {
         hero->tilenr = HERO_JUMPING_RIGHT;
@@ -439,7 +439,7 @@ void fn_hero_update_animation(
     } else {
 
       /* hero is falling */
-      if (hero->direction == fn_horizontal_direction_left) {
+      if (hero->direction == HorizontalDirection_Left) {
         hero->tilenr = HERO_FALLING_LEFT;
       } else {
         hero->tilenr = HERO_FALLING_RIGHT;
@@ -455,7 +455,7 @@ void fn_hero_update_animation(
 
 void fn_hero_set_direction(
     fn_hero_t * hero,
-    fn_horizontal_direction_e direction)
+    FnHorizontalDirection direction)
 {
   if (hero->direction != direction) {
     hero->turned_around = 1;

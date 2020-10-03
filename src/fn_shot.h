@@ -57,7 +57,7 @@ struct fn_shot_t {
   /**
    * The direction to which the shot was fired.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
 
   /**
    * The counter for the animation.
@@ -88,7 +88,7 @@ struct fn_shot_t {
  * @return  The newly created shot.
  */
 fn_shot_t * fn_shot_create(
-    Uint16 x, Uint16 y, fn_horizontal_direction_e direction);
+    Uint16 x, Uint16 y, FnHorizontalDirection direction);
 
 /* --------------------------------------------------------------- */
 

@@ -36,7 +36,7 @@
 /* --------------------------------------------------------------- */
 
 fn_shot_t * fn_shot_create(
-    Uint16 x, Uint16 y, fn_horizontal_direction_e direction)
+    Uint16 x, Uint16 y, FnHorizontalDirection direction)
 {
   fn_shot_t * shot = malloc(sizeof(fn_shot_t));
   shot->position.w = 4;
@@ -73,7 +73,7 @@ Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level)
   }
 
   if (shot->countdown == 2) {
-    if (shot->direction == fn_horizontal_direction_right) {
+    if (shot->direction == HorizontalDirection_Right) {
       /* push twice so that every position gets covered. */
       fn_shot_push(shot, level, FN_HALFTILE_WIDTH);
       fn_shot_push(shot, level, FN_HALFTILE_WIDTH);

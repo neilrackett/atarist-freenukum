@@ -568,7 +568,7 @@ typedef struct fn_level_actor_robot_data_t {
   /**
    * The direction to which the robot moves.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
   /**
    * The tile number.
    */
@@ -600,7 +600,7 @@ void fn_level_actor_function_robot_create(
   actor->is_in_foreground = 1;
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
-  data->direction = fn_horizontal_direction_left;
+  data->direction = HorizontalDirection_Left;
   data->tile = ANIM_ROBOT;
   data->current_frame = 0;
   data->num_frames = 3;
@@ -665,7 +665,7 @@ void fn_level_actor_function_robot_act(
     /* on the floor, so let's walk */
     if (data->current_frame == 0) {
       int direction = (
-          data->direction == fn_horizontal_direction_left ?
+          data->direction == HorizontalDirection_Left ?
           -1 :
           2);
       if (
@@ -685,9 +685,9 @@ void fn_level_actor_function_robot_act(
         actor->position.x += direction * FN_HALFTILE_WIDTH;
       } else {
         data->direction = (
-            data->direction == fn_horizontal_direction_left ?
-            fn_horizontal_direction_right :
-            fn_horizontal_direction_left);
+            data->direction == HorizontalDirection_Left ?
+            HorizontalDirection_Right :
+            HorizontalDirection_Left);
 
         if (direction == 2) direction = 1;
         direction *= (-1);
@@ -751,7 +751,7 @@ typedef struct fn_level_actor_tankbot_data_t {
   /**
    * The direction to which the robot moves.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
   /**
    * The tile number.
    */
@@ -789,7 +789,7 @@ void fn_level_actor_function_tankbot_create(
   actor->is_in_foreground = 1;
   actor->position.w = FN_TILE_WIDTH * 2;
   actor->position.h = FN_TILE_HEIGHT;
-  data->direction = fn_horizontal_direction_left;
+  data->direction = HorizontalDirection_Left;
   data->tile = ANIM_CARBOT;
   data->current_frame = 0;
   data->num_frames = 4;
@@ -870,7 +870,7 @@ void fn_level_actor_function_tankbot_act(
       actor->position.y += FN_HALFTILE_HEIGHT;
     } else {
       /* on the floor, so let's walk */
-      int direction = (data->direction == fn_horizontal_direction_left ?
+      int direction = (data->direction == HorizontalDirection_Left ?
           -1 : 4);
       if (
           /* check if the place next to the bot is free */
@@ -892,9 +892,9 @@ void fn_level_actor_function_tankbot_act(
       } else {
         /* Reached the end, so turn around */
         data->direction = (
-            data->direction == fn_horizontal_direction_left ?
-            fn_horizontal_direction_right :
-            fn_horizontal_direction_left);
+            data->direction == HorizontalDirection_Left ?
+            HorizontalDirection_Right :
+            HorizontalDirection_Left);
         if (direction > 0) direction = 1;
         direction *= -1;
         actor->position.x += direction * FN_HALFTILE_WIDTH;
@@ -978,7 +978,7 @@ typedef struct fn_level_actor_firewheelbot_data_t {
   /**
    * The direction to which the robot moves.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
   /**
    * The tile number.
    */
@@ -1021,7 +1021,7 @@ void fn_level_actor_function_firewheelbot_create(
   fn_level_actor_firewheelbot_data_t * data = malloc(
       sizeof(fn_level_actor_firewheelbot_data_t));
   actor->data = data;
-  data->direction = fn_horizontal_direction_left;
+  data->direction = HorizontalDirection_Left;
   data->tile = ANIM_FIREWHEEL_OFF;
   data->current_frame = 0;
   data->num_frames = 4;
@@ -1109,7 +1109,7 @@ void fn_level_actor_function_firewheelbot_act(
       }
     }
 
-    int direction = (data->direction == fn_horizontal_direction_left ?
+    int direction = (data->direction == HorizontalDirection_Left ?
           -1 : 1);
     if (!fn_level_push_rect_standing_on_solid_ground(
         level,
@@ -1119,9 +1119,9 @@ void fn_level_actor_function_firewheelbot_act(
     {
       /* push was not successful, so we reverse the direction */
       data->direction =
-        (data->direction == fn_horizontal_direction_left ?
-         fn_horizontal_direction_right :
-         fn_horizontal_direction_left);
+        (data->direction == HorizontalDirection_Left ?
+         HorizontalDirection_Right :
+         HorizontalDirection_Left);
     }
 
     if (data->was_shot == 1) {
@@ -1205,11 +1205,11 @@ typedef struct fn_level_actor_wallcrawler_data_t {
   /**
    * The direction to which the wallcrawler is moving.
    */
-  fn_vertical_direction_e direction;
+  FnVerticalDirection direction;
   /**
    * The direction to which the wallcrawler is orientated.
    */
-  fn_horizontal_direction_e orientation;
+  FnHorizontalDirection orientation;
   /**
    * The tile number.
    */
@@ -1246,13 +1246,13 @@ void fn_level_actor_function_wallcrawler_create(
   actor->is_in_foreground = 1;
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
-  data->direction = fn_vertical_direction_up;
+  data->direction = VerticalDirection_Up;
   if (actor->type == FN_LEVEL_ACTOR_WALLCRAWLERBOT_LEFT) {
     data->tile = ANIM_WALLCRAWLERBOT_LEFT;
-    data->orientation = fn_horizontal_direction_left;
+    data->orientation = HorizontalDirection_Left;
   } else {
     data->tile = ANIM_WALLCRAWLERBOT_RIGHT;
-    data->orientation = fn_horizontal_direction_right;
+    data->orientation = HorizontalDirection_Right;
   }
 
   data->current_frame = 0;
@@ -1312,10 +1312,10 @@ void fn_level_actor_function_wallcrawler_act(
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
 
-  int direction = (data->direction == fn_vertical_direction_up ?
+  int direction = (data->direction == VerticalDirection_Up ?
       1 :
       -1);
-  int orientation = (data->orientation == fn_horizontal_direction_left ?
+  int orientation = (data->orientation == HorizontalDirection_Left ?
       -1 :
       1);
   if (direction > 0) {
@@ -1335,7 +1335,7 @@ void fn_level_actor_function_wallcrawler_act(
           (actor->position.y - 1) / FN_TILE_HEIGHT)
        ) {
       actor->position.y++;
-      data->direction = fn_vertical_direction_down;
+      data->direction = VerticalDirection_Down;
     } else {
       actor->position.y--;
     }
@@ -1359,7 +1359,7 @@ void fn_level_actor_function_wallcrawler_act(
           (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
        ) {
       actor->position.y--;
-      data->direction = fn_vertical_direction_up;
+      data->direction = VerticalDirection_Up;
     } else {
       actor->position.y++;
     }
@@ -1849,7 +1849,7 @@ typedef struct fn_level_actor_fire_data_t {
   /**
    * The direction to which the fire burns.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
   /**
    * The state of the fire.
    */
@@ -1880,10 +1880,10 @@ void fn_level_actor_function_fire_create(
 
   if (actor->type == FN_LEVEL_ACTOR_FIRE_RIGHT) {
     data->tile = OBJ_FIRERIGHT;
-    data->direction = fn_horizontal_direction_right;
+    data->direction = HorizontalDirection_Right;
   } else {
     data->tile = OBJ_FIRELEFT;
-    data->direction = fn_horizontal_direction_left;
+    data->direction = HorizontalDirection_Left;
     actor->position.x -= 2 * FN_TILE_WIDTH;
   }
   data->counter = 0;
@@ -1999,7 +1999,7 @@ void fn_level_actor_function_fire_blit(
       break;
     case fn_level_actor_fire_state_ignition:
       if (data->counter % 2) {
-        if (data->direction == fn_horizontal_direction_left) {
+        if (data->direction == HorizontalDirection_Left) {
           tile2 = fn_tilecache_get_tile(tilecache, data->tile);
         } else {
           tile0 = fn_tilecache_get_tile(tilecache, data->tile);
@@ -2010,7 +2010,7 @@ void fn_level_actor_function_fire_blit(
       tile1 = fn_tilecache_get_tile(
               tilecache,
               data->tile + 1 + (data->counter % 2));
-      if (data->direction == fn_horizontal_direction_left) {
+      if (data->direction == HorizontalDirection_Left) {
         tile2 = tile1;
         tile0 = fn_tilecache_get_tile(tilecache, data->tile + 3 +
             (data->counter % 2));
@@ -4737,7 +4737,7 @@ typedef struct fn_level_actor_conveyor_data_t {
   /**
    * The direction to which the conveyor runs.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
 } fn_level_actor_conveyor_data_t;
 
 /* --------------------------------------------------------------- */
@@ -4760,10 +4760,10 @@ void fn_level_actor_function_conveyor_create(
 
   switch(actor->type) {
     case FN_LEVEL_ACTOR_CONVEYOR_LEFTMOVING_RIGHTEND:
-      data->direction = fn_horizontal_direction_left;
+      data->direction = HorizontalDirection_Left;
       break;
     case FN_LEVEL_ACTOR_CONVEYOR_RIGHTMOVING_RIGHTEND:
-      data->direction = fn_horizontal_direction_right;
+      data->direction = HorizontalDirection_Right;
       break;
     default: /* error */
       printf(__FILE__ ":%d: warning: conveyor #%d"
@@ -4812,7 +4812,7 @@ void fn_level_actor_function_conveyor_act(
         fn_hero_t * hero)
 {
   fn_level_actor_conveyor_data_t * data = actor->data;
-  if (data->direction == fn_horizontal_direction_left) {
+  if (data->direction == HorizontalDirection_Left) {
     if (data->current_frame == 0) {
       data->current_frame = data->num_frames;
     }
@@ -4825,7 +4825,7 @@ void fn_level_actor_function_conveyor_act(
   FnGeometry heropos = fn_hero_get_position(hero);
 
   int direction = (
-      data->direction == fn_horizontal_direction_right ?  1 : -1);
+      data->direction == HorizontalDirection_Right ?  1 : -1);
   if (
       heropos.x + heropos.w > actor->position.x &&
       heropos.x < actor->position.x + actor->position.w &&

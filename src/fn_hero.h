@@ -68,7 +68,7 @@ struct fn_hero_t {
   /**
    * The direction to which the hero moves.
    */
-  fn_horizontal_direction_e direction;
+  FnHorizontalDirection direction;
 
   /**
    * The motion state (none or walking).
@@ -278,7 +278,7 @@ void fn_hero_enterlevel(
 
 void fn_hero_set_direction(
     fn_hero_t * hero,
-    fn_horizontal_direction_e direction);
+    FnHorizontalDirection direction);
 
 /* --------------------------------------------------------------- */
 
