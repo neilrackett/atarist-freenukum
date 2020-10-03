@@ -158,6 +158,7 @@ pub enum ActorType {
 pub struct ActorData {
     pub position: Geometry,
     pub is_in_foreground: bool,
+    pub hurts_hero: bool,
 }
 
 pub mod ffi {

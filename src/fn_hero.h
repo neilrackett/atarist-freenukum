@@ -156,9 +156,9 @@ struct fn_hero_t {
   Uint8 immunityduration;
 
   /**
-   * The dangerous actors currently hurting the hero.
+   * True as long as any actors are hurting the hero.
    */
-  fn_list_t * hurtingactors;
+  bool gets_hurt;
 
   /**
    * Indicates if the hero just turned around.
@@ -472,30 +472,6 @@ void fn_hero_add_score(fn_hero_t * hero, Uint64 score);
  * @return The current score of the hero.
  */
 Uint64 fn_hero_get_score(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Increase the number of actors which can currently hurt the hero
- * because he touches them.
- *
- * @param  hero   The hero.
- * @param  actor  The actor.
- */
-void fn_hero_increase_hurting_actors(fn_hero_t * hero,
-    fn_level_actor_t * actor);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Decrease the number of actors which can currently hurt the hero
- * because he touches them.
- *
- * @param  hero  The hero.
- * @param  actor  The actor.
- */
-void fn_hero_decrease_hurting_actors(fn_hero_t * hero,
-    fn_level_actor_t * actor);
 
 /* --------------------------------------------------------------- */
 

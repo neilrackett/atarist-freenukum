@@ -1037,10 +1037,6 @@ int fn_level_act(fn_level_t * lv) {
 
   lv->animated_frames ++;
   lv->animated_frames %= 1;
-  if (lv->animated_frames == 0) {
-    /* do some action, not just animation */
-    fn_hero_act(hero, lv);
-  }
 
   for (iter = fn_list_first(lv->shots);
       iter != NULL;
@@ -1066,6 +1062,7 @@ int fn_level_act(fn_level_t * lv) {
   }
 
   int sum = 0;
+  size_t actors_hurting_hero = 0;
 
   for (iter = fn_list_first(lv->actors);
       iter != NULL;
@@ -1074,12 +1071,14 @@ int fn_level_act(fn_level_t * lv) {
 
     if  (actor->acts_while_invisible || actor->is_visible) {
       sum++;
-      res = fn_level_actor_act(actor, lv);
-      if (res == 0) {
+      fn_level_actor_act(actor, lv);
+      if (actor->is_alive == false) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = NULL;
         fn_level_actor_free(actor, lv); actor = NULL;
+      } else if (actor->actor_data->hurts_hero) {
+          actors_hurting_hero++;
       }
     }
   }
@@ -1088,6 +1087,13 @@ int fn_level_act(fn_level_t * lv) {
     /* clean up the actors that are finished */
     cleanup = 0;
     lv->actors = fn_list_remove_all(lv->actors, NULL);
+  }
+
+  hero->gets_hurt = actors_hurting_hero > 0;
+
+  if (lv->animated_frames == 0) {
+    /* do some action, not just animation */
+    fn_hero_act(hero, lv);
   }
 
   fn_hero_next_animationframe(hero);

@@ -301,6 +301,7 @@ typedef InputField FnInputField;
 typedef struct {
     Geometry position;
     bool is_in_foreground;
+    bool hurts_hero;
 } ActorData;
 
 typedef ActorData FnLevelActorData;

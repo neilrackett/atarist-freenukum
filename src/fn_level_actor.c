@@ -347,7 +347,6 @@ void fn_level_actor_function_redball_jumping_free(
         fn_hero_t * hero)
 {
   fn_level_actor_redball_jumping_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -358,7 +357,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(
         fn_level_t * level,
         fn_hero_t * hero)
 {
-  fn_hero_increase_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = true;
 }
 
 /* --------------------------------------------------------------- */
@@ -368,7 +367,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_end(
         fn_level_t * level,
         fn_hero_t * hero)
 {
-  fn_hero_decrease_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = false;
 }
 
 /* --------------------------------------------------------------- */
@@ -497,7 +496,6 @@ void fn_level_actor_function_redball_lying_free(
         fn_hero_t * hero)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -511,7 +509,7 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
   fn_level_actor_redball_lying_data_t * data = actor->data;
   if (!data->touching_hero) {
     data->touching_hero = 1;
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
   }
 }
 
@@ -534,7 +532,7 @@ void fn_level_actor_function_redball_lying_act(
   if (data->touching_hero == 1) {
     data->touching_hero++;
   } else if (data->touching_hero > 1) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     actor->is_alive = 0;
     fn_level_add_actor(
             level,
@@ -623,8 +621,6 @@ void fn_level_actor_function_robot_free(
         fn_hero_t * hero)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
-
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -636,7 +632,7 @@ void fn_level_actor_function_robot_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_increase_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = true;
   data->touching_hero = 1;
 }
 
@@ -648,7 +644,7 @@ void fn_level_actor_function_robot_touch_end(
         fn_hero_t * hero)
 {
   fn_level_actor_robot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = false;
   data->touching_hero = 0;
 }
 
@@ -740,7 +736,7 @@ void fn_level_actor_function_robot_shot(
 
   fn_hero_add_score(hero, 100);
   if (data->touching_hero) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     data->touching_hero = 0;
   }
   fn_level_add_actor(level,
@@ -815,8 +811,6 @@ void fn_level_actor_function_tankbot_free(
         fn_hero_t * hero)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
-
   free(data); data = NULL; actor->data = NULL;
 }
 
@@ -829,7 +823,7 @@ void fn_level_actor_function_tankbot_hero_touch_start(
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
     data->touching_hero = 1;
   }
 }
@@ -843,7 +837,7 @@ void fn_level_actor_function_tankbot_hero_touch_end(
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     data->touching_hero = 0;
   }
 }
@@ -976,7 +970,7 @@ void fn_level_actor_function_tankbot_shot(
   fn_level_actor_tankbot_data_t * data = actor->data;
 
   if (data->was_shot == 1 && data->touching_hero) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     data->touching_hero = 0;
   }
   if (!(data->was_shot == 2)) {
@@ -1058,8 +1052,6 @@ void fn_level_actor_function_firewheelbot_free(
         fn_hero_t * hero)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
-
   free(data); data = NULL; actor->data = NULL;
 }
 
@@ -1072,7 +1064,7 @@ void fn_level_actor_function_firewheelbot_touch_start(
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
     data->touching_hero = 1;
   }
 }
@@ -1086,7 +1078,7 @@ void fn_level_actor_function_firewheelbot_touch_end(
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     data->touching_hero = 0;
   }
 }
@@ -1210,7 +1202,7 @@ void fn_level_actor_function_firewheelbot_shot(
 
   if (!(data->fire_is_on)) {
     if (data->was_shot == 1 && data->touching_hero) {
-      fn_hero_decrease_hurting_actors(hero, actor);
+      actor->actor_data->hurts_hero = false;
       data->touching_hero = 0;
     }
     if (!(data->was_shot == 2)) {
@@ -1294,8 +1286,6 @@ void fn_level_actor_function_wallcrawler_free(
         fn_hero_t * hero)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
-
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -1308,7 +1298,7 @@ void fn_level_actor_function_wallcrawler_touch_start(
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
   if (!data->was_shot) {
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
     data->touching_hero = 1;
   }
 }
@@ -1322,7 +1312,7 @@ void fn_level_actor_function_wallcrawler_touch_end(
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
   if (!data->was_shot) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
     data->touching_hero = 0;
   }
 }
@@ -1426,7 +1416,7 @@ void fn_level_actor_function_wallcrawler_shot(
 
   if (!data->was_shot) {
     if (data->touching_hero) {
-      fn_hero_decrease_hurting_actors(hero, actor);
+      actor->actor_data->hurts_hero = false;
       data->touching_hero = 0;
       data->current_frame = 0;
     }
@@ -1717,9 +1707,6 @@ void fn_level_actor_function_acme_free(
         fn_hero_t * hero)
 {
   fn_level_actor_acme_data_t * data = actor->data;
-
-  fn_hero_decrease_hurting_actors(hero, actor);
-
   free(data); data = NULL; actor->data = NULL;
 }
 
@@ -1862,7 +1849,7 @@ void fn_level_actor_function_acme_hero_touch_start(
 
   if (data->counter > 10 && !data->touching_hero) {
     data->touching_hero = 1;
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
   }
 }
 
@@ -1940,7 +1927,6 @@ void fn_level_actor_function_fire_free(
         fn_hero_t * hero)
 {
   fn_level_actor_fire_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -1955,7 +1941,7 @@ void fn_level_actor_function_fire_hero_touch_start(
   data->touching_hero = 1;
 
   if (data->state == fn_level_actor_fire_state_burning) {
-    fn_hero_increase_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = true;
   }
 }
 
@@ -1970,7 +1956,7 @@ void fn_level_actor_function_fire_hero_touch_end(
   data->touching_hero = 0;
 
   if (data->state == fn_level_actor_fire_state_burning) {
-    fn_hero_decrease_hurting_actors(hero, actor);
+    actor->actor_data->hurts_hero = false;
   }
 }
 
@@ -1996,7 +1982,7 @@ void fn_level_actor_function_fire_act(
         data->counter = 0;
         data->state = fn_level_actor_fire_state_burning;
         if (data->touching_hero) {
-          fn_hero_increase_hurting_actors(hero, actor);
+          actor->actor_data->hurts_hero = true;
         }
       }
       break;
@@ -2005,7 +1991,7 @@ void fn_level_actor_function_fire_act(
         data->counter = 0;
         data->state = fn_level_actor_fire_state_off;
         if (data->touching_hero) {
-          fn_hero_decrease_hurting_actors(hero, actor);
+          actor->actor_data->hurts_hero = false;
         }
       }
       break;
@@ -4269,7 +4255,6 @@ void fn_level_actor_bombfire_free(
         fn_hero_t * hero)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -4281,7 +4266,7 @@ void fn_level_actor_bombfire_hero_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
-  fn_hero_increase_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = true;
   data->touching_hero = 1;
 }
 
@@ -4292,7 +4277,7 @@ void fn_level_actor_bombfire_hero_touch_end(
         fn_level_t * level,
         fn_hero_t * hero)
 {
-  fn_hero_decrease_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = false;
   fn_level_actor_bombfire_data_t * data = actor->data;
   data->touching_hero = 0;
 }
@@ -5204,7 +5189,6 @@ void fn_level_actor_function_hostileshot_free(
         fn_hero_t * hero)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -5216,7 +5200,7 @@ void fn_level_actor_function_hostileshot_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_increase_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = true;
   data->touching_hero = 1;
 }
 
@@ -5228,7 +5212,7 @@ void fn_level_actor_function_hostileshot_touch_end(
         fn_hero_t * hero)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = false;
   data->touching_hero = 0;
 }
 
@@ -5255,7 +5239,7 @@ void fn_level_actor_function_hostileshot_act(
         actor->actor_data->position.y / FN_TILE_HEIGHT)) {
     actor->is_alive = 0;
     if (data->touching_hero) {
-      fn_hero_decrease_hurting_actors(hero, actor);
+      actor->actor_data->hurts_hero = false;
     }
   }
 }
@@ -6187,7 +6171,6 @@ void fn_level_actor_function_spikes_free(
         fn_hero_t * hero)
 {
   fn_level_actor_spike_data_t * data = actor->data;
-  fn_hero_decrease_hurting_actors(hero, actor);
   free(data); actor->data = NULL; data = NULL;
 }
 
@@ -6204,7 +6187,7 @@ void fn_level_actor_function_spikes_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_spike_data_t * data = actor->data;
-  fn_hero_increase_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = true;
   data->touching_hero = 1;
 }
 
@@ -6220,7 +6203,7 @@ void fn_level_actor_function_spikes_touch_end(
         fn_level_t * level,
         fn_hero_t * hero)
 {
-  fn_hero_decrease_hurting_actors(hero, actor);
+  actor->actor_data->hurts_hero = false;
   fn_level_actor_spike_data_t * data = actor->data;
   data->touching_hero = 0;
 }
