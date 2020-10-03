@@ -351,8 +351,8 @@ void fn_level_actor_function_redball_jumping_free(
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   actor->actor_data->hurts_hero = true;
 }
@@ -499,8 +499,8 @@ void fn_level_actor_function_redball_lying_free(
 
 void fn_level_actor_function_redball_lying_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
   if (!data->touching_hero) {
@@ -623,8 +623,8 @@ void fn_level_actor_function_robot_free(
 
 void fn_level_actor_function_robot_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_robot_data_t * data = actor->data;
   actor->actor_data->hurts_hero = true;
@@ -812,8 +812,8 @@ void fn_level_actor_function_tankbot_free(
 
 void fn_level_actor_function_tankbot_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
@@ -1052,8 +1052,8 @@ void fn_level_actor_function_firewheelbot_free(
 
 void fn_level_actor_function_firewheelbot_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
   if (data->was_shot < 2) {
@@ -1285,8 +1285,8 @@ void fn_level_actor_function_wallcrawler_free(
 
 void fn_level_actor_function_wallcrawler_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
   if (!data->was_shot) {
@@ -1832,8 +1832,8 @@ void fn_level_actor_function_acme_shot(
 
 void fn_level_actor_function_acme_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_acme_data_t * data = actor->data;
 
@@ -1923,8 +1923,8 @@ void fn_level_actor_function_fire_free(
 
 void fn_level_actor_function_fire_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_fire_data_t * data = actor->data;
   data->touching_hero = 1;
@@ -2125,7 +2125,7 @@ void fn_level_actor_function_mill_free(
 void fn_level_actor_function_mill_hero_touch_start(
         fn_level_actor_t * actor,
         fn_level_t * level,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   if (data->lives > 0) {
@@ -4240,8 +4240,8 @@ void fn_level_actor_bombfire_free(
 
 void fn_level_actor_bombfire_hero_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
   actor->actor_data->hurts_hero = true;
@@ -4704,7 +4704,7 @@ void fn_level_actor_function_unstablefloor_free(
 
 void fn_level_actor_function_unstablefloor_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
@@ -5167,8 +5167,8 @@ void fn_level_actor_function_hostileshot_free(
 
 void fn_level_actor_function_hostileshot_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
   actor->actor_data->hurts_hero = true;
@@ -6148,8 +6148,8 @@ void fn_level_actor_function_spikes_free(
  */
 void fn_level_actor_function_spikes_touch_start(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_spike_data_t * data = actor->data;
   actor->actor_data->hurts_hero = true;
