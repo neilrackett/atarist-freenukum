@@ -247,8 +247,8 @@ void fn_level_actor_function_simpleanimation_create(
  */
 void fn_level_actor_function_simpleanimation_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_simpleanimation_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -323,7 +323,7 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 
 void fn_level_actor_function_redball_jumping_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_redball_jumping_data_t * data = malloc(
@@ -340,7 +340,7 @@ void fn_level_actor_function_redball_jumping_create(
 
 void fn_level_actor_function_redball_jumping_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_redball_jumping_data_t * data = actor->data;
@@ -472,7 +472,7 @@ typedef struct fn_level_actor_redball_lying_data_t {
 
 void fn_level_actor_function_redball_lying_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_redball_lying_data_t * data = malloc(
@@ -489,7 +489,7 @@ void fn_level_actor_function_redball_lying_create(
 
 void fn_level_actor_function_redball_lying_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_redball_lying_data_t * data = actor->data;
@@ -591,7 +591,7 @@ typedef struct fn_level_actor_robot_data_t {
 
 void fn_level_actor_function_robot_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_robot_data_t * data = malloc(
@@ -611,7 +611,7 @@ void fn_level_actor_function_robot_create(
 
 void fn_level_actor_function_robot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_robot_data_t * data = actor->data;
@@ -801,7 +801,7 @@ void fn_level_actor_function_tankbot_create(
 
 void fn_level_actor_function_tankbot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_tankbot_data_t * data = actor->data;
@@ -1015,7 +1015,7 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 
 void fn_level_actor_function_firewheelbot_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_firewheelbot_data_t * data = malloc(
@@ -1037,7 +1037,7 @@ void fn_level_actor_function_firewheelbot_create(
 
 void fn_level_actor_function_firewheelbot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_firewheelbot_data_t * data = actor->data;
@@ -1265,7 +1265,7 @@ void fn_level_actor_function_wallcrawler_create(
 
 void fn_level_actor_function_wallcrawler_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_wallcrawler_data_t * data = actor->data;
@@ -1463,8 +1463,8 @@ void fn_level_actor_function_lift_create(
  */
 void fn_level_actor_function_lift_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_lift_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -1680,7 +1680,7 @@ void fn_level_actor_function_acme_create(
 
 void fn_level_actor_function_acme_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_acme_data_t * data = actor->data;
@@ -1896,7 +1896,7 @@ void fn_level_actor_function_fire_create(
 
 void fn_level_actor_function_fire_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_fire_data_t * data = actor->data;
@@ -2072,7 +2072,7 @@ typedef struct fn_level_actor_mill_data_t {
 
 void fn_level_actor_function_mill_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_mill_data_t * data = malloc(
@@ -2098,8 +2098,8 @@ void fn_level_actor_function_mill_create(
 
 void fn_level_actor_function_mill_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_mill_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -2251,8 +2251,8 @@ void fn_level_actor_function_accesscard_slot_create(
  */
 void fn_level_actor_function_accesscard_slot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_access_card_slot_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -2392,7 +2392,7 @@ typedef struct fn_level_actor_glove_slot_data_t {
 
 void fn_level_actor_function_glove_slot_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -2412,8 +2412,8 @@ void fn_level_actor_function_glove_slot_create(
 
 void fn_level_actor_function_glove_slot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_glove_slot_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -2752,8 +2752,8 @@ void fn_level_actor_function_item_create(
  */
 void fn_level_actor_function_item_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_item_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -3178,8 +3178,8 @@ void fn_level_actor_function_soda_flying_create(
 
 void fn_level_actor_function_soda_flying_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   /* nothing to do here */
 }
@@ -3272,8 +3272,8 @@ void fn_level_actor_function_balloon_create(
 
 void fn_level_actor_function_balloon_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_balloon_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3506,7 +3506,7 @@ typedef struct fn_level_actor_singleanimation_data_t {
  */
 void fn_level_actor_function_singleanimation_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids)
 {
   fn_level_actor_singleanimation_data_t * data = malloc(
@@ -3555,8 +3555,8 @@ void fn_level_actor_function_singleanimation_create(
  */
 void fn_level_actor_function_singleanimation_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_singleanimation_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -3686,8 +3686,8 @@ void fn_level_actor_function_particle_create(
 
 void fn_level_actor_function_particle_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_particle_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -3776,8 +3776,8 @@ void fn_level_actor_function_rocket_create(
 
 void fn_level_actor_function_rocket_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_rocket_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -3938,8 +3938,8 @@ void fn_level_actor_bomb_create(
 
 void fn_level_actor_bomb_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_bomb_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -4076,7 +4076,7 @@ void fn_level_actor_bombfire_create(
 
 void fn_level_actor_bombfire_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_bombfire_data_t * data = actor->data;
@@ -4198,8 +4198,8 @@ void fn_level_actor_function_explosion_create(
  */
 void fn_level_actor_function_explosion_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_explosion_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -4444,8 +4444,8 @@ void fn_level_actor_function_score_create(
  */
 void fn_level_actor_function_score_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_score_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4537,8 +4537,8 @@ void fn_level_actor_function_unstablefloor_create(
 
 void fn_level_actor_function_unstablefloor_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_unstablefloor_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -4680,8 +4680,8 @@ void fn_level_actor_function_expandingfloor_create(
 
 void fn_level_actor_function_expandingfloor_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
 }
 
@@ -4796,8 +4796,8 @@ void fn_level_actor_function_conveyor_create(
 
 void fn_level_actor_function_conveyor_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_conveyor_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
@@ -4889,8 +4889,8 @@ void fn_level_actor_function_surveillancescreen_create(
 
 void fn_level_actor_function_surveillancescreen_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
 }
 
@@ -4985,7 +4985,7 @@ void fn_level_actor_function_hostileshot_create(
 
 void fn_level_actor_function_hostileshot_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_hostileshot_data_t * data = actor->data;
@@ -5082,8 +5082,8 @@ void fn_level_actor_function_notebook_create(
 
 void fn_level_actor_function_notebook_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
 }
 
@@ -5182,8 +5182,8 @@ void fn_level_actor_function_exitdoor_create(
  */
 void fn_level_actor_function_exitdoor_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_exitdoor_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -5365,8 +5365,8 @@ void fn_level_actor_function_door_create(
  */
 void fn_level_actor_function_door_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_door_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -5490,8 +5490,8 @@ void fn_level_actor_function_keyhole_create(
  */
 void fn_level_actor_function_keyhole_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_keyhole_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -5860,8 +5860,8 @@ void fn_level_actor_function_access_card_door_create(
  */
 void fn_level_actor_function_access_card_door_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_accesscard_door_data_t * data = actor->data;
   free(data); data = NULL; actor->data = NULL;
@@ -5954,7 +5954,7 @@ void fn_level_actor_function_spikes_create(
  */
 void fn_level_actor_function_spikes_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        fn_level_t * _level,
         fn_hero_t * hero)
 {
   fn_level_actor_spike_data_t * data = actor->data;
@@ -6090,8 +6090,8 @@ void fn_level_actor_function_fan_create(
 
 void fn_level_actor_function_fan_free(
         fn_level_actor_t * actor,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   fn_level_actor_fan_data_t * data = actor->data;
   free(data); actor->data = NULL; data = NULL;
