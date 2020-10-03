@@ -38,7 +38,7 @@
 
 typedef void (* fn_level_actor_create_function_t)(
         fn_level_actor_t *,
-        fn_level_t * level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids);
 
 typedef void (* fn_level_actor_free_function_t)(
@@ -133,7 +133,7 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  */
 void fn_level_actor_function_simpleanimation_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_simpleanimation_data_t * data = malloc(
@@ -323,7 +323,7 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 
 void fn_level_actor_function_redball_jumping_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_redball_jumping_data_t * data = malloc(
@@ -472,7 +472,7 @@ typedef struct fn_level_actor_redball_lying_data_t {
 
 void fn_level_actor_function_redball_lying_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_redball_lying_data_t * data = malloc(
@@ -591,7 +591,7 @@ typedef struct fn_level_actor_robot_data_t {
 
 void fn_level_actor_function_robot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_robot_data_t * data = malloc(
@@ -779,7 +779,7 @@ typedef struct fn_level_actor_tankbot_data_t {
 
 void fn_level_actor_function_tankbot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_tankbot_data_t * data = malloc(
@@ -1014,7 +1014,7 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 
 void fn_level_actor_function_firewheelbot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_firewheelbot_data_t * data = malloc(
@@ -1235,7 +1235,7 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 
 void fn_level_actor_function_wallcrawler_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
 
@@ -1441,7 +1441,7 @@ typedef struct fn_level_actor_lift_data_t {
  */
 void fn_level_actor_function_lift_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_lift_data_t * data = malloc(
@@ -1661,7 +1661,7 @@ typedef struct fn_level_actor_acme_data_t {
 
 void fn_level_actor_function_acme_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_acme_data_t * data = malloc(
@@ -1867,7 +1867,7 @@ typedef struct fn_level_actor_fire_data_t {
 
 void fn_level_actor_function_fire_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_fire_data_t * data = malloc(
@@ -2071,7 +2071,7 @@ typedef struct fn_level_actor_mill_data_t {
 
 void fn_level_actor_function_mill_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_mill_data_t * data = malloc(
@@ -2227,7 +2227,7 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  */
 void fn_level_actor_function_accesscard_slot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -2391,7 +2391,7 @@ typedef struct fn_level_actor_glove_slot_data_t {
 
 void fn_level_actor_function_glove_slot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -2600,7 +2600,7 @@ typedef struct fn_level_actor_item_data_t {
  */
 void fn_level_actor_function_item_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_item_data_t * data = malloc(
@@ -3166,7 +3166,7 @@ void fn_level_actor_function_item_shot(
 
 void fn_level_actor_function_soda_flying_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -3255,7 +3255,7 @@ typedef struct fn_level_actor_balloon_data_t {
 
 void fn_level_actor_function_balloon_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_balloon_data_t * data =
@@ -3381,7 +3381,7 @@ void fn_level_actor_function_balloon_shot(
  */
 void fn_level_actor_function_teleporter_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -3505,7 +3505,7 @@ typedef struct fn_level_actor_singleanimation_data_t {
  */
 void fn_level_actor_function_singleanimation_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_singleanimation_data_t * data = malloc(
@@ -3640,7 +3640,7 @@ typedef struct fn_level_actor_particle_data_t {
 
 void fn_level_actor_function_particle_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_particle_data_t * data = malloc(
@@ -3760,7 +3760,7 @@ typedef struct fn_level_actor_rocket_data_t {
  */
 void fn_level_actor_function_rocket_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_rocket_data_t * data = malloc(
@@ -3914,7 +3914,7 @@ typedef struct fn_level_actor_bomb_data_t {
 
 void fn_level_actor_bomb_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_bomb_data_t * data = malloc(
@@ -4057,7 +4057,7 @@ typedef struct fn_level_actor_bombfire_data_t {
 
 void fn_level_actor_bombfire_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_bombfire_data_t * data = malloc(
@@ -4172,7 +4172,7 @@ typedef struct fn_level_actor_explosion_data_t {
  */
 void fn_level_actor_function_explosion_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_explosion_data_t * data = malloc(
@@ -4260,7 +4260,7 @@ void fn_level_actor_function_explosion_blit(
  */
 void fn_level_actor_function_camera_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -4354,7 +4354,7 @@ typedef struct fn_level_actor_score_data_t {
  */
 void fn_level_actor_function_score_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_score_data_t * data = malloc(
@@ -4519,7 +4519,7 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 
 void fn_level_actor_function_unstablefloor_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_unstablefloor_data_t * data = malloc(
@@ -4668,7 +4668,7 @@ void fn_level_actor_function_unstablefloor_blit(
 
 void fn_level_actor_function_expandingfloor_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -4743,7 +4743,7 @@ typedef struct fn_level_actor_conveyor_data_t {
 
 void fn_level_actor_function_conveyor_create(
         fn_level_actor_t * actor,
-        fn_level_t * level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_conveyor_data_t * data = malloc(
@@ -4777,14 +4777,14 @@ void fn_level_actor_function_conveyor_create(
   while(!found_begin) {
     actor->position.x -= FN_TILE_WIDTH;
     actor->position.w += FN_TILE_WIDTH;
-    tile = fn_level_tiles_get(level->tiles,
+    tile = fn_level_tiles_get(tiles,
         actor->position.x / FN_TILE_WIDTH,
         actor->position.y / FN_TILE_HEIGHT);
     if (tile == SOLID_CONVEYORBELT_LEFTEND ||
         actor->position.x == 0 ||
         tile == 0) {
       found_begin = 1;
-      fn_level_tiles_set(level->tiles,
+      fn_level_tiles_set(tiles,
           actor->position.x / FN_TILE_WIDTH,
           actor->position.y / FN_TILE_HEIGHT,
           SOLID_BLACK);
@@ -4878,7 +4878,7 @@ void fn_level_actor_function_conveyor_blit(
 
 void fn_level_actor_function_surveillancescreen_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH * 2;
@@ -4963,7 +4963,7 @@ typedef struct fn_level_actor_hostileshot_data_t {
 
 void fn_level_actor_function_hostileshot_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_hostileshot_data_t * data = malloc(
@@ -5071,7 +5071,7 @@ void fn_level_actor_function_hostileshot_blit(
 
 void fn_level_actor_function_notebook_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -5159,7 +5159,7 @@ typedef struct fn_level_actor_exitdoor_data_t {
  */
 void fn_level_actor_function_exitdoor_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_exitdoor_data_t * data = malloc(
@@ -5342,7 +5342,7 @@ typedef struct fn_level_actor_door_data_t {
  */
 void fn_level_actor_function_door_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_door_data_t * data = malloc(
@@ -5468,7 +5468,7 @@ typedef struct fn_level_actor_keyhole_data_t {
  */
 void fn_level_actor_function_keyhole_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_keyhole_data_t * data = malloc(
@@ -5650,7 +5650,7 @@ void fn_level_actor_function_keyhole_interact_start(
  */
 void fn_level_actor_function_key_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -5751,7 +5751,7 @@ void fn_level_actor_function_key_blit(
  */
 void fn_level_actor_function_shootable_wall_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   actor->position.w = FN_TILE_WIDTH;
@@ -5836,7 +5836,7 @@ typedef struct fn_level_actor_accesscard_door_data_t
  */
 void fn_level_actor_function_access_card_door_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_accesscard_door_data_t * data = malloc(
@@ -5932,7 +5932,7 @@ typedef struct fn_level_actor_spike_data_t {
  */
 void fn_level_actor_function_spikes_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_spike_data_t * data = malloc(
@@ -6071,7 +6071,7 @@ typedef struct fn_level_actor_fan_data_t {
 
 void fn_level_actor_function_fan_create(
         fn_level_actor_t * actor,
-        fn_level_t * _level,
+        FnLevelTiles * tiles,
         FnLevelSolids * solids)
 {
   fn_level_actor_fan_data_t * data = malloc(
@@ -7865,10 +7865,11 @@ fn_level_actor_functions[FN_LEVEL_ACTOR_NUM_TYPES] =
 
 /* --------------------------------------------------------------- */
 
-fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
-    fn_level_actor_type_e type,
-    Uint16 x,
-    Uint16 y)
+fn_level_actor_t * fn_level_actor_create(
+        fn_level_t * level,
+        fn_level_actor_type_e type,
+        Uint16 x,
+        Uint16 y)
 {
   fn_level_actor_create_function_t func = NULL;
   fn_level_actor_t * actor = malloc(sizeof(fn_level_actor_t));
@@ -7884,7 +7885,7 @@ fn_level_actor_t * fn_level_actor_create(fn_level_t * level,
   actor->acts_while_invisible = 0;
   func = fn_level_actor_functions[actor->type].create;
   if (func != NULL) {
-    func(actor, level, level->solids);
+    func(actor, level->tiles, level->solids);
   }
   return actor;
 }
