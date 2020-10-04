@@ -64,9 +64,56 @@ impl Health {
     }
 }
 
+#[repr(C)]
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+pub enum InventoryItem {
+    KeyRed,
+    KeyGreen,
+    KeyBlue,
+    KeyPink,
+    Boot,
+    Glove,
+    Clamp,
+    AccessCard,
+}
+
+#[derive(Default)]
+pub struct Inventory {
+    items: std::collections::BTreeSet<InventoryItem>,
+}
+
+impl Inventory {
+    pub fn clear(&mut self) {
+        self.items.clear();
+        self.emit_update();
+    }
+
+    pub fn set(&mut self, item: InventoryItem) {
+        self.items.insert(item);
+        self.emit_update();
+    }
+
+    pub fn unset(&mut self, item: InventoryItem) {
+        self.items.remove(&item);
+        self.emit_update();
+    }
+
+    pub fn is_set(&self, item: InventoryItem) -> bool {
+        self.items.contains(&item)
+    }
+
+    fn emit_update(&self) {
+        transdl::event::push_user_event(
+            UserEvent::HeroInventoryChanged as i32,
+        );
+    }
+}
+
 pub mod ffi {
     pub type FnHeroScore = super::Score;
     pub type FnHeroHealth = super::Health;
+    pub type FnHeroInventoryItem = super::InventoryItem;
+    pub type FnHeroInventory = super::Inventory;
 
     #[no_mangle]
     pub extern "C" fn fn_hero_score_create() -> *mut FnHeroScore {
@@ -161,5 +208,58 @@ pub mod ffi {
         assert!(!health.is_null());
         let health: &FnHeroHealth = unsafe { &(*health) };
         health.life
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_create() -> *mut FnHeroInventory {
+        Box::into_raw(Box::new(FnHeroInventory::default()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_free(ptr: *mut FnHeroInventory) {
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_clear(
+        inventory: *mut FnHeroInventory,
+    ) {
+        assert!(!inventory.is_null());
+        let inventory: &mut FnHeroInventory = unsafe { &mut (*inventory) };
+        inventory.clear();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_set(
+        inventory: *mut FnHeroInventory,
+        item: FnHeroInventoryItem,
+    ) {
+        assert!(!inventory.is_null());
+        let inventory: &mut FnHeroInventory = unsafe { &mut (*inventory) };
+        inventory.set(item);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_unset(
+        inventory: *mut FnHeroInventory,
+        item: FnHeroInventoryItem,
+    ) {
+        assert!(!inventory.is_null());
+        let inventory: &mut FnHeroInventory = unsafe { &mut (*inventory) };
+        inventory.unset(item);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_inventory_is_set(
+        inventory: *const FnHeroInventory,
+        item: FnHeroInventoryItem,
+    ) -> bool {
+        assert!(!inventory.is_null());
+        let inventory: &FnHeroInventory = unsafe { &(*inventory) };
+        inventory.is_set(item)
     }
 }

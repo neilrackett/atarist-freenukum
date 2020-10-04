@@ -2423,10 +2423,9 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         fn_hero_t * hero)
 {
   fn_level_actor_access_card_slot_data_t * data = specific;
-  Uint8 inventory = fn_hero_get_inventory(hero);
   fn_environment_t * env = fn_level_get_environment(level);
 
-  if (inventory & FN_INVENTORY_ACCESS_CARD) {
+  if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_AccessCard)) {
     fn_list_t * iter = NULL;
     for (iter = fn_list_first(level->actors);
         iter != NULL;
@@ -2443,8 +2442,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
     data->current_frame = 0;
     data->num_frames = 1;
     data->tile = OBJ_ACCESS_CARD_SLOT + 8;
-    inventory &= ~FN_INVENTORY_ACCESS_CARD;
-    fn_hero_set_inventory(hero, inventory);
+    fn_hero_inventory_unset(hero->inventory, InventoryItem_AccessCard);
   } else {
     fn_infobox_show(
         env->screen,
@@ -2588,7 +2586,7 @@ void fn_level_actor_function_glove_slot_interact_start(
   switch(data->state)
   {
     case fn_level_actor_glove_slot_state_idle:
-      if (fn_hero_get_inventory(hero) & FN_INVENTORY_GLOVE) {
+      if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_Glove)) {
         data->state = fn_level_actor_glove_slot_state_expanding;
       } else {
         data->state = fn_level_actor_glove_slot_state_shooting;
@@ -2936,7 +2934,6 @@ void fn_level_actor_function_item_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_item_data_t * data = specific;
-  Uint8 inventory = fn_hero_get_inventory(hero);
   Uint8 firepower = fn_hero_get_firepower(hero);
   switch(general->actor_type) {
     case ActorType_LetterD:
@@ -3010,8 +3007,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_AccessCard:
-      inventory |= FN_INVENTORY_ACCESS_CARD;
-      fn_hero_set_inventory(hero, inventory);
+      fn_hero_inventory_set(hero->inventory, InventoryItem_AccessCard);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3020,8 +3016,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Glove:
-      inventory |= FN_INVENTORY_GLOVE;
-      fn_hero_set_inventory(hero, inventory);
+      fn_hero_inventory_set(hero->inventory, InventoryItem_Glove);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3030,8 +3025,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Boots:
-      inventory |= FN_INVENTORY_BOOT;
-      fn_hero_set_inventory(hero, inventory);
+      fn_hero_inventory_set(hero->inventory, InventoryItem_Boot);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3040,8 +3034,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Clamps:
-      inventory |= FN_INVENTORY_CLAMP;
-      fn_hero_set_inventory(hero, inventory);
+      fn_hero_inventory_set(hero->inventory, InventoryItem_Clamp);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -6021,7 +6014,6 @@ void fn_level_actor_function_keyhole_interact_start(
         fn_hero_t * hero)
 {
   fn_level_actor_keyhole_data_t * data = specific;
-  Uint8 inventory = fn_hero_get_inventory(hero);
 
   char msg[40];
 
@@ -6031,22 +6023,22 @@ void fn_level_actor_function_keyhole_interact_start(
 
   switch(general->actor_type) {
     case ActorType_KeyholeRed:
-      needed_key = FN_INVENTORY_KEY_RED;
+      needed_key = InventoryItem_KeyRed;
       door_to_open = ActorType_DoorRed;
       snprintf(msg, 40, "You don't have the red key.\n");
       break;
     case ActorType_KeyholeBlue:
-      needed_key = FN_INVENTORY_KEY_BLUE;
+      needed_key = InventoryItem_KeyBlue;
       door_to_open = ActorType_DoorBlue;
       snprintf(msg, 40, "You don't have the blue key.\n");
       break;
     case ActorType_KeyholePink:
-      needed_key = FN_INVENTORY_KEY_PINK;
+      needed_key = InventoryItem_KeyPink;
       door_to_open = ActorType_DoorPink;
       snprintf(msg, 40, "You don't have the pink key.\n");
       break;
     case ActorType_KeyholeGreen:
-      needed_key = FN_INVENTORY_KEY_GREEN;
+      needed_key = InventoryItem_KeyGreen;
       door_to_open = ActorType_DoorGreen;
       snprintf(msg, 40, "You don't have the green key.\n");
       break;
@@ -6054,11 +6046,10 @@ void fn_level_actor_function_keyhole_interact_start(
       fn_error_print_commandline("Invalid keyhole actor");
   }
 
-  haskey = inventory & needed_key;
+  haskey = fn_hero_inventory_is_set(hero->inventory, needed_key);
 
   if (haskey) {
-    inventory &= ~(needed_key);
-    fn_hero_set_inventory(hero, inventory);
+    fn_hero_inventory_unset(hero->inventory, needed_key);
     data->counter = 5;
 
     /* open all doors with the real color */
@@ -6118,19 +6109,18 @@ void fn_level_actor_function_key_touch_start(
         FnHeroHealth * hero_health,
         fn_hero_t * hero)
 {
-  Uint8 inventory = fn_hero_get_inventory(hero);
   switch(general->actor_type) {
     case ActorType_KeyRed:
-      inventory |= FN_INVENTORY_KEY_RED;
+      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyRed);
       break;
     case ActorType_KeyBlue:
-      inventory |= FN_INVENTORY_KEY_BLUE;
+      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyBlue);
       break;
     case ActorType_KeyGreen:
-      inventory |= FN_INVENTORY_KEY_GREEN;
+      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyGreen);
       break;
     case ActorType_KeyPink:
-      inventory |= FN_INVENTORY_KEY_PINK;
+      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyPink);
       break;
     default:
       printf(__FILE__ ":%d: warning: key #%d"
@@ -6144,7 +6134,6 @@ void fn_level_actor_function_key_touch_start(
       general->position.x,
       general->position.y);
   general->is_alive = 0;
-  fn_hero_set_inventory(hero, inventory);
 }
 
 /* --------------------------------------------------------------- */

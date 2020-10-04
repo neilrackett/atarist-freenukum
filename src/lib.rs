@@ -73,15 +73,6 @@ const OBJECT_KEY_GREEN: usize = OBJECT_START + 125;
 const OBJECT_KEY_BLUE: usize = OBJECT_START + 126;
 const OBJECT_KEY_PINK: usize = OBJECT_START + 127;
 
-const INVENTORY_KEY_RED: u8 = 0x01 << 7;
-const INVENTORY_KEY_GREEN: u8 = 0x01 << 6;
-const INVENTORY_KEY_BLUE: u8 = 0x01 << 5;
-const INVENTORY_KEY_PINK: u8 = 0x01 << 4;
-const INVENTORY_BOOT: u8 = 0x01 << 3;
-const INVENTORY_GLOVE: u8 = 0x01 << 2;
-const INVENTORY_CLAMP: u8 = 0x01 << 1;
-const INVENTORY_ACCESS_CARD: u8 = 0x01 << 0;
-
 pub use game::Game;
 pub use settings::Settings;
 

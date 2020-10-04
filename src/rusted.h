@@ -232,6 +232,17 @@ typedef enum {
 } HorizontalDirection;
 
 typedef enum {
+    InventoryItem_KeyRed,
+    InventoryItem_KeyGreen,
+    InventoryItem_KeyBlue,
+    InventoryItem_KeyPink,
+    InventoryItem_Boot,
+    InventoryItem_Glove,
+    InventoryItem_Clamp,
+    InventoryItem_AccessCard,
+} InventoryItem;
+
+typedef enum {
     MainMenuEntry_Start,
     MainMenuEntry_Restore,
     MainMenuEntry_Instructions,
@@ -271,6 +282,8 @@ typedef struct Health Health;
 
 typedef struct InputField InputField;
 
+typedef struct Inventory Inventory;
+
 typedef struct LevelSolids LevelSolids;
 
 typedef struct LevelTiles LevelTiles;
@@ -297,6 +310,8 @@ typedef TextureCreationParams FnTextureCreationParams;
 
 typedef TileCache FnTileCache;
 
+typedef Inventory FnHeroInventory;
+
 typedef Bot FnBot;
 
 typedef BotType FnBotType;
@@ -311,6 +326,8 @@ typedef struct {
 typedef Geometry FnGeometry;
 
 typedef Health FnHeroHealth;
+
+typedef InventoryItem FnHeroInventoryItem;
 
 typedef Score FnHeroScore;
 
@@ -372,7 +389,7 @@ void fn_borders_blit_firepower(SDL_Surface *screen,
 void fn_borders_blit_inventory(SDL_Surface *screen,
                                FnTextureCreationParams params,
                                const FnTileCache *tilecache,
-                               uint8_t inventory);
+                               const FnHeroInventory *inventory);
 
 void fn_borders_blit_life(SDL_Surface *screen,
                           FnTextureCreationParams params,
@@ -431,6 +448,21 @@ uint8_t fn_hero_health_get(const FnHeroHealth *health);
 void fn_hero_health_increase(FnHeroHealth *health, uint8_t amount);
 
 void fn_hero_health_kill(FnHeroHealth *health);
+
+void fn_hero_inventory_clear(FnHeroInventory *inventory);
+
+FnHeroInventory *fn_hero_inventory_create(void);
+
+void fn_hero_inventory_free(FnHeroInventory *ptr);
+
+bool fn_hero_inventory_is_set(const FnHeroInventory *inventory,
+                              FnHeroInventoryItem item);
+
+void fn_hero_inventory_set(FnHeroInventory *inventory,
+                           FnHeroInventoryItem item);
+
+void fn_hero_inventory_unset(FnHeroInventory *inventory,
+                             FnHeroInventoryItem item);
 
 void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 

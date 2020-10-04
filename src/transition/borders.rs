@@ -1,14 +1,12 @@
 use super::geometry::Geometry;
+use super::hero::{Inventory, InventoryItem};
 use super::text;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use crate::{
     BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, INVENTORY_ACCESS_CARD, INVENTORY_BOOT,
-    INVENTORY_CLAMP, INVENTORY_GLOVE, INVENTORY_KEY_BLUE,
-    INVENTORY_KEY_GREEN, INVENTORY_KEY_PINK, INVENTORY_KEY_RED,
-    MAX_FIREPOWER, MAX_LIFE, OBJECT_ACCESS_CARD, OBJECT_BOOT,
-    OBJECT_CLAMP, OBJECT_GUN, OBJECT_HEALTH, OBJECT_KEY_BLUE,
+    HALFTILE_WIDTH, MAX_FIREPOWER, MAX_LIFE, OBJECT_ACCESS_CARD,
+    OBJECT_BOOT, OBJECT_CLAMP, OBJECT_GUN, OBJECT_HEALTH, OBJECT_KEY_BLUE,
     OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED, OBJECT_NONHEALTH,
     OBJECT_ROBOHAND, OBJECT_SHOT, SCORE_DIGITS, TILE_HEIGHT, TILE_WIDTH,
     WINDOW_HEIGHT, WINDOW_WIDTH,
@@ -291,44 +289,44 @@ impl Borders {
         screen: &mut Surface,
         texture_creation_params: TextureCreationParams,
         tilecache: &TileCache,
-        inventory: u8,
+        inventory: &Inventory,
     ) {
-        let red_key = if inventory & INVENTORY_KEY_RED > 0 {
+        let red_key = if inventory.is_set(InventoryItem::KeyRed) {
             Some(OBJECT_KEY_RED)
         } else {
             None
         };
-        let green_key = if inventory & INVENTORY_KEY_GREEN > 0 {
+        let green_key = if inventory.is_set(InventoryItem::KeyGreen) {
             Some(OBJECT_KEY_GREEN)
         } else {
             None
         };
-        let blue_key = if inventory & INVENTORY_KEY_BLUE > 0 {
+        let blue_key = if inventory.is_set(InventoryItem::KeyBlue) {
             Some(OBJECT_KEY_BLUE)
         } else {
             None
         };
-        let pink_key = if inventory & INVENTORY_KEY_PINK > 0 {
+        let pink_key = if inventory.is_set(InventoryItem::KeyPink) {
             Some(OBJECT_KEY_PINK)
         } else {
             None
         };
-        let boot = if inventory & INVENTORY_BOOT > 0 {
+        let boot = if inventory.is_set(InventoryItem::Boot) {
             Some(OBJECT_BOOT)
         } else {
             None
         };
-        let glove = if inventory & INVENTORY_GLOVE > 0 {
+        let glove = if inventory.is_set(InventoryItem::Glove) {
             Some(OBJECT_ROBOHAND)
         } else {
             None
         };
-        let clamp = if inventory & INVENTORY_CLAMP > 0 {
+        let clamp = if inventory.is_set(InventoryItem::Clamp) {
             Some(OBJECT_CLAMP)
         } else {
             None
         };
-        let access_card = if inventory & INVENTORY_ACCESS_CARD > 0 {
+        let access_card = if inventory.is_set(InventoryItem::AccessCard) {
             Some(OBJECT_ACCESS_CARD)
         } else {
             None
@@ -365,6 +363,7 @@ impl Borders {
 }
 
 pub mod ffi {
+    use super::super::hero::ffi::FnHeroInventory;
     use super::super::texture::ffi::FnTextureCreationParams;
     use super::super::tilecache::ffi::FnTileCache;
     use super::Borders;
@@ -447,13 +446,15 @@ pub mod ffi {
         screen: *mut SDL_Surface,
         params: FnTextureCreationParams,
         tilecache: *const FnTileCache,
-        inventory: u8,
+        inventory: *const FnHeroInventory,
     ) {
         assert!(!screen.is_null());
         assert!(!tilecache.is_null());
+        assert!(!inventory.is_null());
 
         let mut screen = Surface { raw: screen };
         let tilecache = unsafe { &(*tilecache) };
+        let inventory = unsafe { &(*inventory) };
 
         let borders = Borders {};
 

@@ -1,4 +1,4 @@
-/*******************************************************************
+/*******************************************************************Item
  *
  * Project: FreeNukum 2D Jump'n Run
  * File:    Hero behavior functions
@@ -42,6 +42,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 {
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
+  hero->inventory = fn_hero_inventory_create();
   hero->score = fn_hero_score_create();
   hero->health = fn_hero_health_create();
 
@@ -58,6 +59,7 @@ void fn_hero_delete(fn_hero_t * hero)
 {
   fn_hero_health_free(hero->health); hero->health = NULL;
   fn_hero_score_free(hero->score); hero->score = NULL;
+  fn_hero_inventory_free(hero->inventory); hero->inventory = NULL;
   free(hero); hero = NULL;
 }
 
@@ -83,7 +85,7 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->animationframe = 0;
   hero->num_animationframes = 1;
 
-  hero->inventory = 0x00;
+  fn_hero_inventory_clear(hero->inventory);
   fn_hero_health_fill_max(hero->health);
 
   fn_hero_score_reset(hero->score);
@@ -120,14 +122,10 @@ void fn_hero_enterlevel(
   hero->animationframe = 0;
   hero->num_animationframes = 1;
 
-  Uint8 inventory = fn_hero_get_inventory(hero);
-  inventory &= (
-      ~FN_INVENTORY_KEY_RED &
-      ~FN_INVENTORY_KEY_GREEN &
-      ~FN_INVENTORY_KEY_BLUE &
-      ~FN_INVENTORY_KEY_PINK
-      );
-  fn_hero_set_inventory(hero, inventory);
+  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyRed);
+  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyGreen);
+  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyBlue);
+  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyPink);
   hero->hidden = 0;
   hero->fetchedletter = 0;
 }
@@ -493,7 +491,7 @@ void fn_hero_set_flying(
 {
   if (flying == FN_HERO_FLYING_TRUE) {
     if (hero->flying != flying) {
-      if (hero->inventory & FN_INVENTORY_BOOT) {
+      if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_Boot)) {
         hero->counter = 7;
         hero->verticalspeed = 2;
       } else {
@@ -541,30 +539,6 @@ void fn_hero_set_counter(
     Uint8 counter)
 {
   hero->counter = counter;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_inventory(
-    fn_hero_t * hero,
-    Uint8 inventory)
-{
-  SDL_Event event;
-
-  hero->inventory = inventory;
-
-  event.type = SDL_USEREVENT;
-  event.user.code = UserEvent_HeroInventoryChanged;
-  event.user.data1 = hero;
-  event.user.data2 = 0;
-  SDL_PushEvent(&event);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_get_inventory(fn_hero_t * hero)
-{
-  return hero->inventory;
 }
 
 /* --------------------------------------------------------------- */

@@ -128,7 +128,7 @@ void fn_game_start(
           env->screen,
           fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env),
-          fn_environment_get_inventory(env));
+          env->hero->inventory);
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
@@ -352,43 +352,35 @@ int fn_game_start_in_level(
               goto cleanup;
               break;
             case SDLK_1:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_KEY_RED);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyRed);
               updateWholeScreen = 1;
               break;
             case SDLK_2:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_KEY_GREEN);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyGreen);
               updateWholeScreen = 1;
               break;
             case SDLK_3:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_KEY_BLUE);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyBlue);
               updateWholeScreen = 1;
               break;
             case SDLK_4:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_KEY_PINK);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyPink);
               updateWholeScreen = 1;
               break;
             case SDLK_5:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_BOOT);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_Boot);
               updateWholeScreen = 1;
               break;
             case SDLK_6:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_GLOVE);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_Glove);
               updateWholeScreen = 1;
               break;
             case SDLK_7:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_CLAMP);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_Clamp);
               updateWholeScreen = 1;
               break;
             case SDLK_8:
-              fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
-                  FN_INVENTORY_ACCESS_CARD);
+              fn_hero_inventory_set(hero->inventory, InventoryItem_AccessCard);
               updateWholeScreen = 1;
               break;
             case SDLK_9:
@@ -600,7 +592,7 @@ int fn_game_start_in_level(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
                   fn_environment_get_tilecache(env),
-                  fn_environment_get_inventory(env));
+                  env->hero->inventory);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

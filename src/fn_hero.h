@@ -112,7 +112,7 @@ struct fn_hero_t {
   /**
    * The inventory (one bit for each key/item)
    */
-  Uint8 inventory;
+  FnHeroInventory * inventory;
 
   /**
    * The health of our hero (0 = still alive, 8 = full life).
@@ -315,17 +315,6 @@ void fn_hero_set_firepower(
 void fn_hero_set_counter(
     fn_hero_t * hero,
     Uint8 counter);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_inventory(
-    fn_hero_t * hero,
-    Uint8 inventory);
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_get_inventory(
-    fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
