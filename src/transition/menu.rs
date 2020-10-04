@@ -76,10 +76,9 @@ impl Menu {
 
         transdl::event::enable_key_repeat();
 
-        let timer = transdl::timer::Timer::add(
-            80,
-            transdl::event::push_user_event,
-        );
+        let timer = transdl::timer::Timer::add(80, || {
+            transdl::event::push_user_event(0)
+        });
 
         let pointrect = Geometry {
             x: (FONT_WIDTH * 2 + destrect.x as usize) as i16,

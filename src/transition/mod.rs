@@ -3,6 +3,7 @@ pub mod borders;
 pub mod bot;
 pub mod file;
 pub mod geometry;
+pub mod hero;
 pub mod infobox;
 pub mod inputbox;
 pub mod inputfield;

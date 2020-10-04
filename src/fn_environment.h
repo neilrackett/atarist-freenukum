@@ -276,7 +276,7 @@ Uint8 fn_environment_get_inventory(fn_environment_t * env);
  *
  * @return The score.
  */
-Uint32 fn_environment_get_score(fn_environment_t * env);
+Uint64 fn_environment_get_score(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

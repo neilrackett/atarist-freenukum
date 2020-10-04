@@ -42,6 +42,8 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 {
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
+  hero->score = fn_hero_score_create();
+
   assert(env != NULL);
   hero->env = env;
   fn_hero_reset(hero);
@@ -53,6 +55,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 
 void fn_hero_delete(fn_hero_t * hero)
 {
+  fn_hero_score_free(hero->score);
   free(hero); hero = NULL;
 }
 
@@ -81,7 +84,7 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->inventory = 0x00;
   hero->health = 8;
 
-  hero->score = 0;
+  fn_hero_score_reset(hero->score);
 
   hero->hidden = 0;
 
@@ -698,28 +701,6 @@ int fn_hero_would_collide(
     }
   }
   return 0;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_add_score(fn_hero_t * hero, Uint64 score)
-{
-  SDL_Event event;
-
-  hero->score += score;
-
-  event.type = SDL_USEREVENT;
-  event.user.code = fn_event_heroscored;
-  event.user.data1 = hero;
-  event.user.data2 = 0;
-  SDL_PushEvent(&event);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint64 fn_hero_get_score(fn_hero_t * hero)
-{
-  return hero->score;
 }
 
 /* --------------------------------------------------------------- */

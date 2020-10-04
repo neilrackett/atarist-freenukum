@@ -477,9 +477,9 @@ Uint8 fn_environment_get_inventory(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint32 fn_environment_get_score(fn_environment_t * env)
+Uint64 fn_environment_get_score(fn_environment_t * env)
 {
-  return fn_hero_get_score(env->hero);
+  return fn_hero_score_get(env->hero->score);
 }
 
 /* --------------------------------------------------------------- */

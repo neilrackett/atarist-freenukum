@@ -113,13 +113,13 @@
 /* --------------------------------------------------------------- */
 
 typedef enum fn_event_e {
-  fn_event_timer,
-  fn_event_heromoved,
-  fn_event_heroscored,
-  fn_event_hero_firepower_changed,
-  fn_event_hero_inventory_changed,
-  fn_event_hero_health_changed,
-  fn_event_herolanded,
+  fn_event_timer = 0,
+  fn_event_heromoved = 1,
+  fn_event_heroscored = 2,
+  fn_event_hero_firepower_changed = 3,
+  fn_event_hero_inventory_changed = 4,
+  fn_event_hero_health_changed = 5,
+  fn_event_herolanded = 6,
 } fn_event_e;
 
 /* --------------------------------------------------------------- */

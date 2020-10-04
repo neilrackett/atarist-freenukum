@@ -9,6 +9,8 @@
 
 #define BACKDROP_WIDTH 13
 
+#define FN_EVENT_HEROSCORED 2
+
 #define FONT_HEIGHT 8
 
 #define FONT_WIDTH 8
@@ -263,6 +265,8 @@ typedef struct LevelTiles LevelTiles;
 
 typedef struct Menu Menu;
 
+typedef struct Score Score;
+
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
@@ -293,6 +297,8 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
+
+typedef Score FnHeroScore;
 
 typedef HorizontalDirection FnHorizontalDirection;
 
@@ -395,6 +401,16 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
+
+FnHeroScore *fn_hero_score_create(void);
+
+void fn_hero_score_free(FnHeroScore *ptr);
+
+uint64_t fn_hero_score_get(const FnHeroScore *score);
+
+void fn_hero_score_reset(FnHeroScore *score);
 
 void fn_horizontal_direction_print(FnHorizontalDirection direction);
 

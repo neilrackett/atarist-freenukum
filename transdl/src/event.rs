@@ -141,11 +141,11 @@ impl Event {
     }
 }
 
-pub fn push_user_event() {
+pub fn push_user_event(code: i32) {
     let res = unsafe {
         let mut event = ll::SDL_Event { type_: 0 };
         event.user.type_ = ll::SDL_EventType_SDL_USEREVENT as u8;
-        event.user.code = 0;
+        event.user.code = code;
         event.user.data1 = std::ptr::null_mut();
         event.user.data2 = std::ptr::null_mut();
         ll::SDL_PushEvent(&mut event as *mut ll::SDL_Event)

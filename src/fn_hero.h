@@ -126,7 +126,7 @@ struct fn_hero_t {
   /**
    * The score of the hero.
    */
-  Uint64 score;
+  FnHeroScore * score;
 
   /**
    * Blit the hero only if this is zero.
@@ -451,27 +451,6 @@ int fn_hero_would_collide(
         FnLevelSolids * solids,
         Uint32 x,
         Uint32 y);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Add score to our hero.
- *
- * @param  hero   The hero.
- * @param  score  The score to add.
- */
-void fn_hero_add_score(fn_hero_t * hero, Uint64 score);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the current score of the hero.
- *
- * @param  hero  The hero.
- *
- * @return The current score of the hero.
- */
-Uint64 fn_hero_get_score(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
