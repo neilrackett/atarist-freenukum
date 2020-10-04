@@ -51,6 +51,7 @@ typedef void (* fn_level_actor_hero_touch_start_function_t)(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * hero);
 
@@ -378,6 +379,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -539,6 +541,7 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -670,6 +673,7 @@ void fn_level_actor_function_robot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -872,6 +876,7 @@ void fn_level_actor_function_tankbot_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -1125,6 +1130,7 @@ void fn_level_actor_function_firewheelbot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -1371,6 +1377,7 @@ void fn_level_actor_function_wallcrawler_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -1947,6 +1954,7 @@ void fn_level_actor_function_acme_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -2041,6 +2049,7 @@ void fn_level_actor_function_fire_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -2252,6 +2261,7 @@ void fn_level_actor_function_mill_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -2931,6 +2941,7 @@ void fn_level_actor_function_item_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * hero)
 {
@@ -2997,7 +3008,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Gun:
-      fn_hero_firepower_increase(hero->firepower, 1);
+      fn_hero_firepower_increase(hero_firepower, 1);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3468,6 +3479,7 @@ void fn_level_actor_function_soda_flying_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -3575,6 +3587,7 @@ void fn_level_actor_function_balloon_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -4430,6 +4443,7 @@ void fn_level_actor_bombfire_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -5358,6 +5372,7 @@ void fn_level_actor_function_hostileshot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -5965,7 +5980,7 @@ void fn_level_actor_function_keyhole_interact_start(
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
         FnHeroInventory * hero_inventory,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_keyhole_data_t * data = specific;
 
@@ -6061,6 +6076,7 @@ void fn_level_actor_function_key_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -6379,6 +6395,7 @@ void fn_level_actor_function_spikes_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroFirepower * hero_firepower,
         FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
@@ -8364,7 +8381,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
     fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
-    func(actor->general, actor->specific, level, hero->score, hero->health, hero->inventory, hero);
+    func(actor->general, actor->specific, level, hero->score, hero->health, hero->firepower, hero->inventory, hero);
   }
 }
 
