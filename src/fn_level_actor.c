@@ -51,6 +51,7 @@ typedef void (* fn_level_actor_hero_touch_start_function_t)(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero);
 
 typedef void (* fn_level_actor_hero_touch_end_function_t)(
@@ -68,6 +69,7 @@ typedef void (* fn_level_actor_interact_start_function_t)(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero);
 
 typedef void (* fn_level_actor_interact_end_function_t)(
@@ -303,11 +305,11 @@ void fn_level_actor_function_simpleanimation_act(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_blit(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
-        fn_hero_t * hero,
+        fn_level_t * _level,
+        fn_hero_t * _hero,
         const FnTileCache * tilecache,
         SDL_Surface * target)
 {
@@ -378,6 +380,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   general->hurts_hero = true;
@@ -402,10 +405,10 @@ void fn_level_actor_function_redball_jumping_act(
         fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_redball_jumping_data_t * data = specific;
 
@@ -539,6 +542,7 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_redball_lying_data_t * data = specific;
@@ -670,6 +674,7 @@ void fn_level_actor_function_robot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_robot_data_t * data = specific;
@@ -776,13 +781,13 @@ void fn_level_actor_function_robot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_shot(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_robot_data_t * data = specific;
 
@@ -872,6 +877,7 @@ void fn_level_actor_function_tankbot_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_tankbot_data_t * data = specific;
@@ -907,7 +913,7 @@ void fn_level_actor_function_tankbot_act(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_tankbot_data_t * data = specific;
   data->current_frame++;
@@ -1125,6 +1131,7 @@ void fn_level_actor_function_firewheelbot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_firewheelbot_data_t * data = specific;
@@ -1160,7 +1167,7 @@ void fn_level_actor_function_firewheelbot_act(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_firewheelbot_data_t * data = specific;
   if (data->was_shot == 2) {
@@ -1371,6 +1378,7 @@ void fn_level_actor_function_wallcrawler_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_wallcrawler_data_t * data = specific;
@@ -1498,7 +1506,7 @@ void fn_level_actor_function_wallcrawler_shot(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_wallcrawler_data_t * data = specific;
 
@@ -1592,6 +1600,7 @@ void fn_level_actor_function_lift_interact_start(
         fn_level_t * _level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero)
 {
   fn_level_actor_lift_data_t * data = specific;
@@ -1722,11 +1731,11 @@ void fn_level_actor_function_lift_act(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_blit(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
-        fn_hero_t * hero,
+        fn_level_t * _level,
+        fn_hero_t * _hero,
         const FnTileCache * tilecache,
         SDL_Surface * target)
 {
@@ -1915,13 +1924,13 @@ void fn_level_actor_function_acme_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_shot(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_acme_data_t * data = specific;
 
@@ -1948,6 +1957,7 @@ void fn_level_actor_function_acme_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_acme_data_t * data = specific;
@@ -2041,6 +2051,7 @@ void fn_level_actor_function_fire_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_fire_data_t * data = specific;
@@ -2056,10 +2067,10 @@ void fn_level_actor_function_fire_hero_touch_start(
 void fn_level_actor_function_fire_hero_touch_end(
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
+        fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_fire_data_t * data = specific;
   data->touching_hero = 0;
@@ -2252,6 +2263,7 @@ void fn_level_actor_function_mill_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_mill_data_t * data = specific;
@@ -2316,7 +2328,7 @@ void fn_level_actor_function_mill_shot(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   fn_level_actor_mill_data_t * data = specific;
   
@@ -2420,12 +2432,13 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        FnHeroInventory * hero_inventory,
+        fn_hero_t * _hero)
 {
   fn_level_actor_access_card_slot_data_t * data = specific;
   fn_environment_t * env = fn_level_get_environment(level);
 
-  if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_AccessCard)) {
+  if (fn_hero_inventory_is_set(hero_inventory, InventoryItem_AccessCard)) {
     fn_list_t * iter = NULL;
     for (iter = fn_list_first(level->actors);
         iter != NULL;
@@ -2442,7 +2455,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
     data->current_frame = 0;
     data->num_frames = 1;
     data->tile = OBJ_ACCESS_CARD_SLOT + 8;
-    fn_hero_inventory_unset(hero->inventory, InventoryItem_AccessCard);
+    fn_hero_inventory_unset(hero_inventory, InventoryItem_AccessCard);
   } else {
     fn_infobox_show(
         env->screen,
@@ -2485,7 +2498,7 @@ void fn_level_actor_function_accesscard_slot_blit(
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
-        fn_hero_t * hero,
+        fn_hero_t * _hero,
         const FnTileCache * tilecache,
         SDL_Surface * target)
 {
@@ -2580,13 +2593,14 @@ void fn_level_actor_function_glove_slot_interact_start(
         fn_level_t * _level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        FnHeroInventory * hero_inventory,
+        fn_hero_t * _hero)
 {
   fn_level_actor_glove_slot_data_t * data = specific;
   switch(data->state)
   {
     case fn_level_actor_glove_slot_state_idle:
-      if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_Glove)) {
+      if (fn_hero_inventory_is_set(hero_inventory, InventoryItem_Glove)) {
         data->state = fn_level_actor_glove_slot_state_expanding;
       } else {
         data->state = fn_level_actor_glove_slot_state_shooting;
@@ -2931,6 +2945,7 @@ void fn_level_actor_function_item_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero)
 {
   fn_level_actor_item_data_t * data = specific;
@@ -3007,7 +3022,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_AccessCard:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_AccessCard);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_AccessCard);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3016,7 +3031,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Glove:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_Glove);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_Glove);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3025,7 +3040,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Boots:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_Boot);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_Boot);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3034,7 +3049,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Clamps:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_Clamp);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_Clamp);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,
@@ -3470,7 +3485,8 @@ void fn_level_actor_function_soda_flying_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
-        fn_hero_t * hero)
+        FnHeroInventory * hero_inventory,
+        fn_hero_t * _hero)
 {
   fn_hero_score_add(hero_score, 1000);
   fn_level_add_actor(level,
@@ -3577,7 +3593,8 @@ void fn_level_actor_function_balloon_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
-        fn_hero_t * hero)
+        FnHeroInventory * hero_inventory,
+        fn_hero_t * _hero)
 {
   fn_level_actor_balloon_data_t * data = specific;
   if (!data->destroyed) {
@@ -3712,6 +3729,7 @@ void fn_level_actor_function_teleporter_interact_start(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero)
 {
   FnLevelActorType othertype;
@@ -4436,6 +4454,7 @@ void fn_level_actor_bombfire_hero_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_bombfire_data_t * data = specific;
@@ -4678,7 +4697,7 @@ void fn_level_actor_function_camera_shot(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
-        fn_hero_t * hero)
+        fn_hero_t * _hero)
 {
   general->is_alive = 0;
   fn_hero_score_add(hero_score, 100);
@@ -4912,42 +4931,6 @@ void fn_level_actor_function_unstablefloor_free(
 {
   fn_level_actor_unstablefloor_data_t * data = *specific;
   free(data); *specific = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_unstablefloor_touch_start(
-        FnLevelActorData * general,
-        void * specific,
-        fn_level_t * _level,
-        fn_hero_t * hero)
-{
-  fn_level_actor_unstablefloor_data_t * data = specific;
-  if (fn_geometry_touches(
-              fn_hero_get_position(hero),
-              general->position))
-  {
-    if (!data->touched) {
-      data->touching = 1;
-    } else {
-      general->is_alive = 0;
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_unstablefloor_touch_end(
-        FnLevelActorData * general,
-        void * specific,
-        fn_level_t * _level,
-        fn_hero_t * _hero)
-{
-  fn_level_actor_unstablefloor_data_t * data = specific;
-  if (data->touching) {
-    data->touching = 0;
-    data->touched = 1;
-  }
 }
 
 /* --------------------------------------------------------------- */
@@ -5303,6 +5286,7 @@ void fn_level_actor_function_surveillancescreen_interact_start(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_environment_t * env = fn_level_get_environment(level);
@@ -5404,6 +5388,7 @@ void fn_level_actor_function_hostileshot_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_hostileshot_data_t * data = specific;
@@ -5460,11 +5445,11 @@ void fn_level_actor_function_hostileshot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_blit(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
-        fn_hero_t * hero,
+        fn_level_t * _level,
+        fn_hero_t * _hero,
         const FnTileCache * tilecache,
         SDL_Surface * target)
 {
@@ -5509,6 +5494,7 @@ void fn_level_actor_function_notebook_interact_start(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_environment_t * env = fn_level_get_environment(level);
@@ -5620,6 +5606,7 @@ void fn_level_actor_function_exitdoor_interact_start(
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_exitdoor_data_t * data = specific;
@@ -6005,12 +5992,13 @@ void fn_level_actor_function_keyhole_blit(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_interact_start(
-        fn_level_actor_t * actor,
+        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
         FnLevelSolids * solids,
         FnHeroScore * hero_score,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * hero)
 {
   fn_level_actor_keyhole_data_t * data = specific;
@@ -6046,10 +6034,10 @@ void fn_level_actor_function_keyhole_interact_start(
       fn_error_print_commandline("Invalid keyhole actor");
   }
 
-  haskey = fn_hero_inventory_is_set(hero->inventory, needed_key);
+  haskey = fn_hero_inventory_is_set(hero_inventory, needed_key);
 
   if (haskey) {
-    fn_hero_inventory_unset(hero->inventory, needed_key);
+    fn_hero_inventory_unset(hero_inventory, needed_key);
     data->counter = 5;
 
     /* open all doors with the real color */
@@ -6107,20 +6095,21 @@ void fn_level_actor_function_key_touch_start(
         fn_level_t * level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
-        fn_hero_t * hero)
+        FnHeroInventory * hero_inventory,
+        fn_hero_t * _hero)
 {
   switch(general->actor_type) {
     case ActorType_KeyRed:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyRed);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_KeyRed);
       break;
     case ActorType_KeyBlue:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyBlue);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_KeyBlue);
       break;
     case ActorType_KeyGreen:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyGreen);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_KeyGreen);
       break;
     case ActorType_KeyPink:
-      fn_hero_inventory_set(hero->inventory, InventoryItem_KeyPink);
+      fn_hero_inventory_set(hero_inventory, InventoryItem_KeyPink);
       break;
     default:
       printf(__FILE__ ":%d: warning: key #%d"
@@ -6147,8 +6136,8 @@ void fn_level_actor_function_key_blit(
         fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
-        fn_hero_t * hero,
+        fn_level_t * _level,
+        fn_hero_t * _hero,
         const FnTileCache * tilecache,
         SDL_Surface * target)
 {
@@ -6425,6 +6414,7 @@ void fn_level_actor_function_spikes_touch_start(
         fn_level_t * _level,
         FnHeroScore * hero_score,
         FnHeroHealth * hero_health,
+        FnHeroInventory * hero_inventory,
         fn_hero_t * _hero)
 {
   fn_level_actor_spike_data_t * data = specific;
@@ -8410,7 +8400,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
     fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
-    func(actor->general, actor->specific, level, hero->score, hero->health, hero);
+    func(actor->general, actor->specific, level, hero->score, hero->health, hero->inventory, hero);
   }
 }
 
@@ -8452,7 +8442,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
     fn_level_actor_functions[actor->general->actor_type].hero_interact_start;
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
-    func(actor, actor->general, actor->specific, level, level->solids, hero->score, hero);
+    func(actor, actor->general, actor->specific, level, level->solids, hero->score, hero->inventory, hero);
   }
 }
 
