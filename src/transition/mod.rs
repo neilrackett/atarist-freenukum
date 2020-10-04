@@ -34,9 +34,22 @@ pub enum VerticalDirection {
     Down,
 }
 
+#[repr(C)]
+#[derive(Debug, Eq, PartialEq)]
+pub enum UserEvent {
+    Timer,
+    HeroMoved,
+    HeroScored,
+    HeroFirepowerChanged,
+    HeroInventoryChanged,
+    HeroHealthChanged,
+    HeroLanded,
+}
+
 pub mod ffi {
     pub type FnHorizontalDirection = super::HorizontalDirection;
     pub type FnVerticalDirection = super::VerticalDirection;
+    pub type FnUserEvent = super::UserEvent;
 
     // Just a placeholder so the enum gets exported
     // without extra creating a cbindgen config.
@@ -54,5 +67,12 @@ pub mod ffi {
         direction: FnVerticalDirection,
     ) {
         println!("{:?}", direction);
+    }
+
+    // Just a placeholder so the enum gets exported
+    // without extra creating a cbindgen config.
+    #[no_mangle]
+    pub extern "C" fn fn_user_event_print(e: FnUserEvent) {
+        println!("{:?}", e);
     }
 }

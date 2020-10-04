@@ -29,8 +29,6 @@ pub const MAX_LIFE: usize = 8;
 pub const MAX_FIREPOWER: usize = 4;
 pub const SCORE_DIGITS: usize = 8;
 
-pub const FN_EVENT_HEROSCORED: i32 = 2;
-
 /// The height of the level in full tiles
 pub const LEVEL_HEIGHT: usize = 90;
 /// The width of the level in full tiles

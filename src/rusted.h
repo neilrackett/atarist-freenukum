@@ -9,8 +9,6 @@
 
 #define BACKDROP_WIDTH 13
 
-#define FN_EVENT_HEROSCORED 2
-
 #define FONT_HEIGHT 8
 
 #define FONT_WIDTH 8
@@ -32,6 +30,8 @@
  * The width of the level in full tiles
  */
 #define LEVEL_WIDTH 128
+
+#define Health_MAX 8
 
 #define MAX_FIREPOWER 4
 
@@ -248,6 +248,16 @@ typedef enum {
 } MainMenuEntry;
 
 typedef enum {
+    UserEvent_Timer,
+    UserEvent_HeroMoved,
+    UserEvent_HeroScored,
+    UserEvent_HeroFirepowerChanged,
+    UserEvent_HeroInventoryChanged,
+    UserEvent_HeroHealthChanged,
+    UserEvent_HeroLanded,
+} UserEvent;
+
+typedef enum {
     VerticalDirection_Center,
     VerticalDirection_Up,
     VerticalDirection_Down,
@@ -256,6 +266,8 @@ typedef enum {
 typedef struct Bot Bot;
 
 typedef struct File File;
+
+typedef struct Health Health;
 
 typedef struct InputField InputField;
 
@@ -298,6 +310,8 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
+typedef Health FnHeroHealth;
+
 typedef Score FnHeroScore;
 
 typedef HorizontalDirection FnHorizontalDirection;
@@ -339,6 +353,8 @@ typedef struct {
 } TileHeader;
 
 typedef TileHeader FnTileHeader;
+
+typedef UserEvent FnUserEvent;
 
 typedef VerticalDirection FnVerticalDirection;
 
@@ -401,6 +417,20 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+FnHeroHealth *fn_hero_health_create(void);
+
+void fn_hero_health_decrease(FnHeroHealth *health, uint8_t amount);
+
+void fn_hero_health_fill_max(FnHeroHealth *health);
+
+void fn_hero_health_free(FnHeroHealth *ptr);
+
+uint8_t fn_hero_health_get(const FnHeroHealth *health);
+
+void fn_hero_health_increase(FnHeroHealth *health, uint8_t amount);
+
+void fn_hero_health_kill(FnHeroHealth *health);
 
 void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 
@@ -568,5 +598,7 @@ FnTileCache *fn_tilecache_load(const char *path,
                                FnTextureCreationParams params);
 
 FnTileHeader fn_tileheader_load(FnFile *file);
+
+void fn_user_event_print(FnUserEvent e);
 
 void fn_vertical_direction_print(FnVerticalDirection direction);

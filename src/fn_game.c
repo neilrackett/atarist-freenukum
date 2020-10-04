@@ -49,7 +49,7 @@ Uint32 fn_game_timer_triggered(
 {
   SDL_Event event;
   event.type = SDL_USEREVENT;
-  event.user.code = fn_event_timer;
+  event.user.code = UserEvent_Timer;
   event.user.data1 = 0;
   event.user.data2 = 0;
   SDL_PushEvent(&event);
@@ -295,7 +295,7 @@ int fn_game_start_in_level(
     /* make the first frame appear */
     SDL_Event event;
     event.type = SDL_USEREVENT;
-    event.user.code = fn_event_heromoved;
+    event.user.code = UserEvent_HeroMoved;
     event.user.data1 = hero;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
@@ -550,11 +550,11 @@ int fn_game_start_in_level(
           break;
         case SDL_USEREVENT:
           switch(event.user.code) {
-            case fn_event_timer:
+            case UserEvent_Timer:
               fn_level_act(lv);
               doupdate = 1;
               break;
-            case fn_event_heromoved:
+            case UserEvent_HeroMoved:
               {
                 FnGeometry heropos = fn_hero_get_position(hero);
                 srcrect.x = heropos.x + heropos.w / 2 -
@@ -577,7 +577,7 @@ int fn_game_start_in_level(
                 }
               }
               break;
-            case fn_event_heroscored:
+            case UserEvent_HeroScored:
               fn_borders_blit_score(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
@@ -586,7 +586,7 @@ int fn_game_start_in_level(
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
-            case fn_event_hero_firepower_changed:
+            case UserEvent_HeroFirepowerChanged:
               fn_borders_blit_firepower(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
@@ -595,7 +595,7 @@ int fn_game_start_in_level(
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
-            case fn_event_hero_inventory_changed:
+            case UserEvent_HeroInventoryChanged:
               fn_borders_blit_inventory(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
@@ -604,7 +604,7 @@ int fn_game_start_in_level(
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
-            case fn_event_hero_health_changed:
+            case UserEvent_HeroHealthChanged:
               fn_borders_blit_life(
                       env->screen,
                       fn_environment_build_texture_creation_params(env),
@@ -613,7 +613,7 @@ int fn_game_start_in_level(
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
-            case fn_event_herolanded:
+            case UserEvent_HeroLanded:
               fn_level_add_actor(lv, ActorType_DustCloud,
                   fn_hero_get_x(hero),
                   fn_hero_get_y(hero) + FN_TILE_HEIGHT

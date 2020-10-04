@@ -458,7 +458,7 @@ const FnTexture * fn_environment_get_tile(fn_environment_t * env,
 
 const Uint8 fn_environment_get_health(fn_environment_t * env)
 {
-  return fn_hero_get_health(env->hero);
+  return fn_hero_health_get(env->hero->health);
 }
 
 /* --------------------------------------------------------------- */

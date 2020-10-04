@@ -43,6 +43,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
   hero->score = fn_hero_score_create();
+  hero->health = fn_hero_health_create();
 
   assert(env != NULL);
   hero->env = env;
@@ -55,7 +56,8 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 
 void fn_hero_delete(fn_hero_t * hero)
 {
-  fn_hero_score_free(hero->score);
+  fn_hero_health_free(hero->health); hero->health = NULL;
+  fn_hero_score_free(hero->score); hero->score = NULL;
   free(hero); hero = NULL;
 }
 
@@ -82,7 +84,7 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->num_animationframes = 1;
 
   hero->inventory = 0x00;
-  hero->health = 8;
+  fn_hero_health_fill_max(hero->health);
 
   fn_hero_score_reset(hero->score);
 
@@ -226,11 +228,11 @@ int fn_hero_act(
   }
   if (hero->immunitycountdown == 0 && hero->gets_hurt) {
     hero->immunitycountdown = hero->immunityduration;
-    fn_hero_set_health(hero, hero->health - 1);
+    fn_hero_health_decrease(hero->health, 1);
   }
 
   if (lv == NULL) {
-    return hero->health;
+    return fn_hero_health_get(hero->health);
   }
 
   if (hero->motion == FN_HERO_MOTION_WALKING) {
@@ -332,7 +334,7 @@ int fn_hero_act(
     if (hero->flying == FN_HERO_FLYING_TRUE) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
-      event.user.code = fn_event_herolanded;
+      event.user.code = UserEvent_HeroLanded;
       event.user.data1 = hero;
       event.user.data2 = 0;
       SDL_PushEvent(&event);
@@ -351,13 +353,13 @@ int fn_hero_act(
   if (heromoved) {
     SDL_Event event;
     event.type = SDL_USEREVENT;
-    event.user.code = fn_event_heromoved;
+    event.user.code = UserEvent_HeroMoved;
     event.user.data1 = hero;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
   }
 
-  return hero->health;
+  return fn_hero_health_get(hero->health);
 }
 
 /* --------------------------------------------------------------- */
@@ -369,7 +371,7 @@ void fn_hero_replace(fn_hero_t * hero,
   fn_hero_set_y(hero, y);
   SDL_Event event;
   event.type = SDL_USEREVENT;
-  event.user.code = fn_event_heromoved;
+  event.user.code = UserEvent_HeroMoved;
   event.user.data1 = hero;
   event.user.data2 = 0;
   SDL_PushEvent(&event);
@@ -526,7 +528,7 @@ void fn_hero_set_firepower(
   hero->firepower = firepower;
 
   event.type = SDL_USEREVENT;
-  event.user.code = fn_event_hero_firepower_changed;
+  event.user.code = UserEvent_HeroFirepowerChanged;
   event.user.data1 = hero;
   event.user.data2 = 0;
   SDL_PushEvent(&event);
@@ -552,7 +554,7 @@ void fn_hero_set_inventory(
   hero->inventory = inventory;
 
   event.type = SDL_USEREVENT;
-  event.user.code = fn_event_hero_inventory_changed;
+  event.user.code = UserEvent_HeroInventoryChanged;
   event.user.data1 = hero;
   event.user.data2 = 0;
   SDL_PushEvent(&event);
@@ -563,35 +565,6 @@ void fn_hero_set_inventory(
 Uint8 fn_hero_get_inventory(fn_hero_t * hero)
 {
   return hero->inventory;
-}
-
-/* --------------------------------------------------------------- */
-void fn_hero_improve_health(fn_hero_t * hero, Uint8 improvement)
-{
-  fn_hero_set_health(hero, hero->health + improvement);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_get_health(fn_hero_t * hero)
-{
-  return hero->health;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_health(fn_hero_t * hero, Uint8 health)
-{
-  SDL_Event event;
-  hero->health = health;
-  if (hero->health > 8) {
-    hero->health = 8;
-  }
-  event.type = SDL_USEREVENT;
-  event.user.code = fn_event_hero_health_changed;
-  event.user.data1 = hero;
-  event.user.data2 = 0;
-  SDL_PushEvent(&event);
 }
 
 /* --------------------------------------------------------------- */
@@ -759,7 +732,7 @@ Sint8 fn_hero_push_horizontally(
     /* no solids in the way */
     SDL_Event event;
     event.type = SDL_USEREVENT;
-    event.user.code = fn_event_heromoved;
+    event.user.code = UserEvent_HeroMoved;
     event.user.data1 = hero;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
@@ -776,7 +749,7 @@ Sint8 fn_hero_push_horizontally(
     if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
-      event.user.code = fn_event_heromoved;
+      event.user.code = UserEvent_HeroMoved;
       event.user.data1 = hero;
       event.user.data2 = 0;
       SDL_PushEvent(&event);
@@ -800,7 +773,7 @@ Sint8 fn_hero_push_vertically(
     /* no solids in the way */
     SDL_Event event;
     event.type = SDL_USEREVENT;
-    event.user.code = fn_event_heromoved;
+    event.user.code = UserEvent_HeroMoved;
     event.user.data1 = hero;
     event.user.data2 = 0;
     SDL_PushEvent(&event);
@@ -817,7 +790,7 @@ Sint8 fn_hero_push_vertically(
     if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
-      event.user.code = fn_event_heromoved;
+      event.user.code = UserEvent_HeroMoved;
       event.user.data1 = hero;
       event.user.data2 = 0;
       SDL_PushEvent(&event);
