@@ -88,7 +88,7 @@ struct fn_hero_t {
   /**
    * How much firepower does the hero have?
    */
-  Uint8 firepower;
+  FnHeroFirepower * firepower;
 
   /**
    * The counter for actions that take longer than one animation frame.
@@ -306,12 +306,6 @@ void fn_hero_set_shooting(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_firepower(
-    fn_hero_t * hero,
-    Uint8 firepower);
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_set_counter(
     fn_hero_t * hero,
     Uint8 counter);
@@ -426,15 +420,6 @@ void fn_hero_fire_start(fn_hero_t * hero);
  * @param  hero  The hero.
  */
 void fn_hero_fire_stop(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the firepower that our hero currently has.
- *
- * @param  hero  The hero.
- */
-Uint8 fn_hero_get_firepower(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 

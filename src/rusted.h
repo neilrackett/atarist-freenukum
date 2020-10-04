@@ -278,6 +278,8 @@ typedef struct Bot Bot;
 
 typedef struct File File;
 
+typedef struct Firepower Firepower;
+
 typedef struct Health Health;
 
 typedef struct InputField InputField;
@@ -309,6 +311,8 @@ typedef struct {
 typedef TextureCreationParams FnTextureCreationParams;
 
 typedef TileCache FnTileCache;
+
+typedef Firepower FnHeroFirepower;
 
 typedef Inventory FnHeroInventory;
 
@@ -384,7 +388,7 @@ void fn_borders_blit(SDL_Surface *screen,
 void fn_borders_blit_firepower(SDL_Surface *screen,
                                FnTextureCreationParams params,
                                const FnTileCache *tilecache,
-                               uint8_t firepower);
+                               const FnHeroFirepower *firepower);
 
 void fn_borders_blit_inventory(SDL_Surface *screen,
                                FnTextureCreationParams params,
@@ -434,6 +438,16 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+FnHeroFirepower *fn_hero_firepower_create(void);
+
+void fn_hero_firepower_free(FnHeroFirepower *ptr);
+
+void fn_hero_firepower_increase(FnHeroFirepower *firepower, uint8_t amount);
+
+uint8_t fn_hero_firepower_num_shots(const FnHeroFirepower *firepower);
+
+void fn_hero_firepower_reset(FnHeroFirepower *firepower);
 
 FnHeroHealth *fn_hero_health_create(void);
 

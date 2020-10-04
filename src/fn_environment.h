@@ -248,17 +248,6 @@ const Uint8 fn_environment_get_health(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the firepower of the hero in the environment.
- *
- * @param  env  The environment.
- *
- * @return The firepower.
- */
-Uint8 fn_environment_get_firepower(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the score of the player in the environment.
  *
  * @param  env  The environment.

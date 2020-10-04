@@ -1,5 +1,5 @@
 use super::geometry::Geometry;
-use super::hero::{Inventory, InventoryItem};
+use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
@@ -243,15 +243,17 @@ impl Borders {
         screen: &mut Surface,
         texture_creation_params: TextureCreationParams,
         tilecache: &TileCache,
-        firepower: u8,
+        firepower: &Firepower,
     ) {
         const GUN: Option<usize> = Some(OBJECT_GUN);
         const SHOT: Option<usize> = Some(OBJECT_SHOT);
 
-        let shot0 = if firepower > 0 { SHOT } else { None };
-        let shot1 = if firepower > 1 { SHOT } else { None };
-        let shot2 = if firepower > 2 { SHOT } else { None };
-        let shot3 = if firepower > 3 { SHOT } else { None };
+        let shots = firepower.num_shots();
+
+        let shot0 = if shots > 0 { SHOT } else { None };
+        let shot1 = if shots > 1 { SHOT } else { None };
+        let shot2 = if shots > 2 { SHOT } else { None };
+        let shot3 = if shots > 3 { SHOT } else { None };
 
         #[rustfmt::skip]
         let tiles = vec![
@@ -363,7 +365,7 @@ impl Borders {
 }
 
 pub mod ffi {
-    use super::super::hero::ffi::FnHeroInventory;
+    use super::super::hero::ffi::{FnHeroFirepower, FnHeroInventory};
     use super::super::texture::ffi::FnTextureCreationParams;
     use super::super::tilecache::ffi::FnTileCache;
     use super::Borders;
@@ -428,13 +430,14 @@ pub mod ffi {
         screen: *mut SDL_Surface,
         params: FnTextureCreationParams,
         tilecache: *const FnTileCache,
-        firepower: u8,
+        firepower: *const FnHeroFirepower,
     ) {
         assert!(!screen.is_null());
         assert!(!tilecache.is_null());
 
         let mut screen = Surface { raw: screen };
         let tilecache = unsafe { &(*tilecache) };
+        let firepower = unsafe { &(*firepower) };
 
         let borders = Borders {};
 

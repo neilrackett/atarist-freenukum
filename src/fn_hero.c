@@ -44,6 +44,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 
   hero->inventory = fn_hero_inventory_create();
   hero->score = fn_hero_score_create();
+  hero->firepower = fn_hero_firepower_create();
   hero->health = fn_hero_health_create();
 
   assert(env != NULL);
@@ -58,6 +59,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 void fn_hero_delete(fn_hero_t * hero)
 {
   fn_hero_health_free(hero->health); hero->health = NULL;
+  fn_hero_firepower_free(hero->firepower); hero->firepower = NULL;
   fn_hero_score_free(hero->score); hero->score = NULL;
   fn_hero_inventory_free(hero->inventory); hero->inventory = NULL;
   free(hero); hero = NULL;
@@ -77,7 +79,6 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->motion = FN_HERO_MOTION_NONE;
   hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
-  hero->firepower = 1;
   hero->counter = 0;
   hero->tilenr = HERO_STANDING_RIGHT;
   hero->verticalspeed = 0;
@@ -87,6 +88,7 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_inventory_clear(hero->inventory);
   fn_hero_health_fill_max(hero->health);
+  fn_hero_firepower_reset(hero->firepower);
 
   fn_hero_score_reset(hero->score);
 
@@ -514,26 +516,6 @@ void fn_hero_set_shooting(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_firepower(
-    fn_hero_t * hero,
-    Uint8 firepower)
-{
-  SDL_Event event;
-
-  if (firepower > 4) {
-    firepower = 4;
-  }
-  hero->firepower = firepower;
-
-  event.type = SDL_USEREVENT;
-  event.user.code = UserEvent_HeroFirepowerChanged;
-  event.user.data1 = hero;
-  event.user.data2 = 0;
-  SDL_PushEvent(&event);
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_set_counter(
     fn_hero_t * hero,
     Uint8 counter)
@@ -662,13 +644,6 @@ void fn_hero_fire_start(fn_hero_t * hero)
 void fn_hero_fire_stop(fn_hero_t * hero)
 {
   fn_hero_set_shooting(hero, FN_HERO_SHOOTING_FALSE);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_get_firepower(fn_hero_t * hero)
-{
-  return hero->firepower;
 }
 
 /* --------------------------------------------------------------- */

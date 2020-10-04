@@ -64,6 +64,40 @@ impl Health {
     }
 }
 
+pub struct Firepower {
+    shots: u8,
+}
+
+impl Default for Firepower {
+    fn default() -> Self {
+        Firepower { shots: 1u8 }
+    }
+}
+
+impl Firepower {
+    pub const MAX: u8 = 4;
+
+    pub fn increase(&mut self, count: u8) {
+        self.shots = std::cmp::min(Self::MAX, self.shots + count);
+        self.emit_update();
+    }
+
+    pub fn reset(&mut self) {
+        self.shots = 1;
+        self.emit_update();
+    }
+
+    pub fn num_shots(&self) -> u8 {
+        self.shots
+    }
+
+    fn emit_update(&self) {
+        transdl::event::push_user_event(
+            UserEvent::HeroFirepowerChanged as i32,
+        );
+    }
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum InventoryItem {
@@ -112,6 +146,7 @@ impl Inventory {
 pub mod ffi {
     pub type FnHeroScore = super::Score;
     pub type FnHeroHealth = super::Health;
+    pub type FnHeroFirepower = super::Firepower;
     pub type FnHeroInventoryItem = super::InventoryItem;
     pub type FnHeroInventory = super::Inventory;
 
@@ -208,6 +243,48 @@ pub mod ffi {
         assert!(!health.is_null());
         let health: &FnHeroHealth = unsafe { &(*health) };
         health.life
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_firepower_create() -> *mut FnHeroFirepower {
+        Box::into_raw(Box::new(FnHeroFirepower::default()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_firepower_free(ptr: *mut FnHeroFirepower) {
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_firepower_increase(
+        firepower: *mut FnHeroFirepower,
+        amount: u8,
+    ) {
+        assert!(!firepower.is_null());
+        let firepower: &mut FnHeroFirepower = unsafe { &mut (*firepower) };
+        firepower.increase(amount);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_firepower_reset(
+        firepower: *mut FnHeroFirepower,
+    ) {
+        assert!(!firepower.is_null());
+        let firepower: &mut FnHeroFirepower = unsafe { &mut (*firepower) };
+        firepower.reset();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_firepower_num_shots(
+        firepower: *const FnHeroFirepower,
+    ) -> u8 {
+        assert!(!firepower.is_null());
+        let firepower: &FnHeroFirepower = unsafe { &(*firepower) };
+        firepower.num_shots()
     }
 
     #[no_mangle]

@@ -2935,7 +2935,6 @@ void fn_level_actor_function_item_touch_start(
         fn_hero_t * hero)
 {
   fn_level_actor_item_data_t * data = specific;
-  Uint8 firepower = fn_hero_get_firepower(hero);
   switch(general->actor_type) {
     case ActorType_LetterD:
       fn_hero_set_fetched_letter(hero, 'D');
@@ -2998,8 +2997,7 @@ void fn_level_actor_function_item_touch_start(
           general->position.y);
       break;
     case ActorType_Gun:
-      firepower++;
-      fn_hero_set_firepower(hero, firepower);
+      fn_hero_firepower_increase(hero->firepower, 1);
       general->is_alive = 0;
       fn_hero_score_add(hero_score, 1000);
       fn_level_add_actor(level,

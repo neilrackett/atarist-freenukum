@@ -122,7 +122,7 @@ void fn_game_start(
           env->screen,
           fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env),
-          fn_environment_get_firepower(env));
+          env->hero->firepower);
 
   fn_borders_blit_inventory(
           env->screen,
@@ -384,8 +384,7 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case SDLK_9:
-              fn_hero_set_firepower(hero, fn_hero_get_firepower(hero) +
-                  1);
+              fn_hero_firepower_increase(hero->firepower, 1);
               updateWholeScreen = 1;
               break;
             case SDLK_0:
@@ -583,7 +582,7 @@ int fn_game_start_in_level(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
                   fn_environment_get_tilecache(env),
-                  fn_environment_get_firepower(env));
+                  env->hero->firepower);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
