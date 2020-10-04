@@ -2404,7 +2404,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         iter = fn_list_next(iter)) {
       fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
 
-      if (dooractor->type == ActorType_AccessCardDoor) {
+      if (dooractor->general->actor_type == ActorType_AccessCardDoor) {
         dooractor->general->is_alive = 0;
         int x = dooractor->general->position.x / FN_TILE_WIDTH;
         int y = dooractor->general->position.y / FN_TILE_HEIGHT;
@@ -2908,7 +2908,7 @@ void fn_level_actor_function_item_touch_start(
   Uint8 inventory = fn_hero_get_inventory(hero);
   Uint8 health = fn_hero_get_health(hero);
   Uint8 firepower = fn_hero_get_firepower(hero);
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_LetterD:
       fn_hero_set_fetched_letter(hero, 'D');
       general->is_alive = 0;
@@ -3188,7 +3188,7 @@ void fn_level_actor_function_item_shot(
         FnLevelSolids * solids,
         fn_hero_t * _hero)
 {
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_BoxBlueFootball:
       general->is_alive = 0;
       fn_level_add_actor(level, ActorType_Football,
@@ -3687,7 +3687,7 @@ void fn_level_actor_function_teleporter_interact_start(
         fn_hero_t * hero)
 {
   FnLevelActorType othertype;
-  if (actor->type == ActorType_Teleporter1) {
+  if (general->actor_type == ActorType_Teleporter1) {
     othertype = ActorType_Teleporter2;
   } else {
     othertype = ActorType_Teleporter1;
@@ -3698,7 +3698,7 @@ void fn_level_actor_function_teleporter_interact_start(
       iter != NULL;
       iter = fn_list_next(iter)) {
     fn_level_actor_t * otheractor = (fn_level_actor_t *)iter->data;
-    if (otheractor->type == othertype) {
+    if (otheractor->general->actor_type == othertype) {
       fn_hero_replace(hero,
           otheractor->general->position.x,
           otheractor->general->position.y - FN_TILE_HEIGHT);
@@ -3871,7 +3871,7 @@ void fn_level_actor_function_singleanimation_act(
   data->current_frame++;
   if (data->current_frame == data->num_frames) {
     general->is_alive = 0;
-    if (actor->type == ActorType_RobotDisappearing) {
+    if (general->actor_type == ActorType_RobotDisappearing) {
       fn_level_add_actor(
               level,
               ActorType_Explosion,
@@ -5410,7 +5410,7 @@ void fn_level_actor_function_hostileshot_act(
   data->current_frame++;
   data->current_frame %= data->num_frames;
 
-  if (actor->type == ActorType_HostileShotLeft) {
+  if (general->actor_type == ActorType_HostileShotLeft) {
     general->position.x -= FN_HALFTILE_WIDTH;
   } else {
     general->position.x += FN_HALFTILE_WIDTH;
@@ -5938,7 +5938,7 @@ void fn_level_actor_function_keyhole_blit(
       data->tile);
 
   if (data->counter > 1) {
-    switch(actor->type) {
+    switch(general->actor_type) {
       case ActorType_KeyholeRed:
         tile = fn_tilecache_get_tile(tilecache, OBJ_KEYHOLE_RED);
         break;
@@ -5988,7 +5988,7 @@ void fn_level_actor_function_keyhole_interact_start(
   Uint8 needed_key = 0;
   FnLevelActorType door_to_open;
 
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_KeyholeRed:
       needed_key = FN_INVENTORY_KEY_RED;
       door_to_open = ActorType_DoorRed;
@@ -6027,7 +6027,7 @@ void fn_level_actor_function_keyhole_interact_start(
         iter = fn_list_next(iter)) {
       fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
 
-      if (dooractor->type == door_to_open) {
+      if (dooractor->general->actor_type == door_to_open) {
         fn_level_actor_door_data_t * doordata = dooractor->specific;
         doordata->state = 1;
       }
@@ -6078,7 +6078,7 @@ void fn_level_actor_function_key_touch_start(
         fn_hero_t * hero)
 {
   Uint8 inventory = fn_hero_get_inventory(hero);
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_KeyRed:
       inventory |= FN_INVENTORY_KEY_RED;
       break;
@@ -6094,7 +6094,7 @@ void fn_level_actor_function_key_touch_start(
     default:
       printf(__FILE__ ":%d: warning: key #%d"
           " added which is not a key\n",
-          __LINE__, actor->type);
+          __LINE__, general->actor_type);
       break;
   }
   fn_hero_add_score(hero, 1000);
@@ -6128,7 +6128,7 @@ void fn_level_actor_function_key_blit(
   destrect.y = general->position.y;
   destrect.w = general->position.w;
   destrect.h = general->position.h;
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_KeyRed:
       tile = fn_tilecache_get_tile(tilecache, OBJ_KEY_RED);
       break;
@@ -6144,7 +6144,7 @@ void fn_level_actor_function_key_blit(
     default:
       printf(__FILE__ ":%d: warning: key #%d"
           " tried to blit which is not a key\n",
-          __LINE__, actor->type);
+          __LINE__, general->actor_type);
       return;
       break;
   }
@@ -6444,7 +6444,7 @@ void fn_level_actor_function_spikes_blit(
   destrect.y = general->position.y;
   destrect.w = general->position.w;
   destrect.h = general->position.h;
-  switch(actor->type) {
+  switch(general->actor_type) {
     case ActorType_SpikesUp:
       tile = fn_tilecache_get_tile(tilecache, OBJ_SPIKES_UP);
       break;
@@ -6462,7 +6462,7 @@ void fn_level_actor_function_spikes_blit(
     default:
       printf(__FILE__ ":%d: warning: spike #%d"
           " tried to blit which is not a spike\n",
-          __LINE__, actor->type);
+          __LINE__, general->actor_type);
       return;
       break;
   }
@@ -6581,7 +6581,7 @@ void fn_level_actor_function_fan_act(
           heropos, general->position);
 
       int fandirection = 0;
-      if (actor->type == ActorType_FanLeft) {
+      if (general->actor_type == ActorType_FanLeft) {
         fandirection = -1;
       } else {
         fandirection = 1;
@@ -8309,8 +8309,7 @@ fn_level_actor_t * fn_level_actor_create(
 {
   fn_level_actor_create_function_t func = NULL;
   fn_level_actor_t * actor = malloc(sizeof(fn_level_actor_t));
-  actor->type = type;
-  actor->general = fn_level_actor_data_create();
+  actor->general = fn_level_actor_data_create(type);
   actor->general->position.x = x;
   actor->general->position.y = y;
   actor->general->position.w = 0; /* should be changed by func */
@@ -8320,7 +8319,7 @@ fn_level_actor_t * fn_level_actor_create(
   actor->general->is_in_foreground = 0;
   actor->is_visible = 0;
   actor->acts_while_invisible = 0;
-  func = fn_level_actor_functions[actor->type].create;
+  func = fn_level_actor_functions[actor->general->actor_type].create;
   if (func != NULL) {
     func(
             type,
@@ -8337,7 +8336,7 @@ fn_level_actor_t * fn_level_actor_create(
 void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_free_function_t func =
-    fn_level_actor_functions[actor->type].free;
+    fn_level_actor_functions[actor->general->actor_type].free;
   if (func != NULL) {
     func(&(actor->specific));
   }
@@ -8377,7 +8376,7 @@ void fn_level_actor_check_hero_touch(
 void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_hero_touch_start_function_t func =
-    fn_level_actor_functions[actor->type].hero_touch_start;
+    fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
   if (func != NULL) {
     func(actor, actor->general, actor->specific, level, fn_level_get_hero(level));
   }
@@ -8388,7 +8387,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
 void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_hero_touch_end_function_t func =
-    fn_level_actor_functions[actor->type].hero_touch_end;
+    fn_level_actor_functions[actor->general->actor_type].hero_touch_end;
   if (func != NULL) {
     func(actor, actor->general, actor->specific, level, fn_level_get_hero(level));
   }
@@ -8398,7 +8397,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 
 Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * hero)
 {
-  if (actor->type == ActorType_Lift) {
+  if (actor->general->actor_type == ActorType_Lift) {
     /* This check needs to be done for lift only because
      * if there are two lifts next to each other, the mostleft
      * lift would be chosen for interaction instead of the one on
@@ -8408,7 +8407,7 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
     return (actor->general->position.x == heropos.x);
   }
   fn_level_actor_interact_start_function_t func =
-    fn_level_actor_functions[actor->type].hero_interact_start;
+    fn_level_actor_functions[actor->general->actor_type].hero_interact_start;
   return (func != NULL);
 }
 
@@ -8417,7 +8416,7 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
 void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_interact_start_function_t func =
-    fn_level_actor_functions[actor->type].hero_interact_start;
+    fn_level_actor_functions[actor->general->actor_type].hero_interact_start;
   if (func != NULL) {
     func(actor, actor->general, actor->specific, level, level->solids, fn_level_get_hero(level));
   }
@@ -8428,7 +8427,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
 void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_interact_end_function_t func =
-    fn_level_actor_functions[actor->type].hero_interact_end;
+    fn_level_actor_functions[actor->general->actor_type].hero_interact_end;
   if (func != NULL) {
     func(actor, actor->general, actor->specific, level, level->solids, fn_level_get_hero(level));
   }
@@ -8440,7 +8439,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_check_hero_touch(actor, level);
   fn_level_actor_act_function_t func =
-    fn_level_actor_functions[actor->type].act;
+    fn_level_actor_functions[actor->general->actor_type].act;
   if (func != NULL)
   {
     func(actor, actor->general, actor->specific, level, level->solids, fn_level_get_hero(level));
@@ -8453,7 +8452,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
 void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_blit_function_t func =
-    fn_level_actor_functions[actor->type].blit;
+    fn_level_actor_functions[actor->general->actor_type].blit;
   if (func != NULL) {
     SDL_Surface * target = fn_level_get_surface(level);
     func(actor, actor->general, actor->specific, level, fn_level_get_hero(level), fn_level_get_tilecache(level), target);
@@ -8473,7 +8472,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
 {
   fn_level_actor_shot_function_t func =
-    fn_level_actor_functions[actor->type].shot;
+    fn_level_actor_functions[actor->general->actor_type].shot;
   if (func != NULL) {
     func(actor, actor->general, actor->specific, level, level->solids, fn_level_get_hero(level));
     return 1;
@@ -8513,7 +8512,8 @@ Uint16 fn_level_actor_get_h(fn_level_actor_t * actor)
 
 Uint8 fn_level_actor_can_get_shot(fn_level_actor_t * actor)
 {
-  fn_level_actor_shot_function_t func = fn_level_actor_functions[actor->type].shot;
+  fn_level_actor_shot_function_t func =
+      fn_level_actor_functions[actor->general->actor_type].shot;
   return (func != NULL);
 }
 

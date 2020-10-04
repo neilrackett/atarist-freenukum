@@ -155,15 +155,17 @@ pub enum ActorType {
 
 #[repr(C)]
 pub struct ActorData {
+    pub actor_type: ActorType,
     pub position: Geometry,
     pub is_in_foreground: bool,
     pub hurts_hero: bool,
     pub is_alive: bool,
 }
 
-impl Default for ActorData {
-    fn default() -> Self {
+impl ActorData {
+    pub fn new(actor_type: ActorType) -> Self {
         ActorData {
+            actor_type,
             position: Geometry::default(),
             is_in_foreground: true,
             hurts_hero: false,
@@ -177,9 +179,10 @@ pub mod ffi {
     type FnLevelActorType = super::ActorType;
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_data_create() -> *mut FnLevelActorData
-    {
-        Box::into_raw(Box::new(FnLevelActorData::default()))
+    pub extern "C" fn fn_level_actor_data_create(
+        actor_type: FnLevelActorType,
+    ) -> *mut FnLevelActorData {
+        Box::into_raw(Box::new(FnLevelActorData::new(actor_type)))
     }
 
     #[no_mangle]

@@ -49,11 +49,6 @@ typedef struct fn_level_actor_t fn_level_actor_t;
  */
 struct fn_level_actor_t {
   /**
-   * The type of the actor.
-   */
-  FnLevelActorType type;
-
-  /**
    * The general data of the actor.
    */
   FnLevelActorData * general;

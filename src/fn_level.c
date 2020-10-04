@@ -1247,7 +1247,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
       iter != fn_list_last(lv->actors);
       iter = fn_list_next(iter)) {
     fn_level_actor_t * actor = iter->data;
-    if (actor->type == type) {
+    if (actor->general->actor_type == type) {
       ret = fn_list_append(ret, actor);
     }
   }

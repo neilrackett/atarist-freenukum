@@ -299,6 +299,7 @@ typedef HorizontalDirection FnHorizontalDirection;
 typedef InputField FnInputField;
 
 typedef struct {
+    ActorType actor_type;
     Geometry position;
     bool is_in_foreground;
     bool hurts_hero;
@@ -433,7 +434,7 @@ void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 
-FnLevelActorData *fn_level_actor_data_create(void);
+FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
