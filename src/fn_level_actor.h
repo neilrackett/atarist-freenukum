@@ -56,17 +56,12 @@ struct fn_level_actor_t {
   /**
    * The general data of the actor.
    */
-  FnLevelActorData * actor_data;
+  FnLevelActorData * general;
 
   /**
-   * Private data - depends on type.
+   * Type-specific data.
    */
-  void * data;
-
-  /**
-   * Flag that indicates if the actor is (still) alive.
-   */
-  int is_alive;
+  void * specific;
 
   /**
    * Flag that indicates if the actor is being touched by the hero

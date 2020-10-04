@@ -154,11 +154,22 @@ pub enum ActorType {
 }
 
 #[repr(C)]
-#[derive(Default)]
 pub struct ActorData {
     pub position: Geometry,
     pub is_in_foreground: bool,
     pub hurts_hero: bool,
+    pub is_alive: bool,
+}
+
+impl Default for ActorData {
+    fn default() -> Self {
+        ActorData {
+            position: Geometry::default(),
+            is_in_foreground: true,
+            hurts_hero: false,
+            is_alive: true,
+        }
+    }
 }
 
 pub mod ffi {

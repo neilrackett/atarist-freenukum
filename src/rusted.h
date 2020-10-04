@@ -302,6 +302,7 @@ typedef struct {
     Geometry position;
     bool is_in_foreground;
     bool hurts_hero;
+    bool is_alive;
 } ActorData;
 
 typedef ActorData FnLevelActorData;

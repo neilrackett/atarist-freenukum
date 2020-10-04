@@ -754,8 +754,8 @@ fn_level_t * fn_level_load(FnFile* file,
       iter != fn_list_last(cameras);
       iter = fn_list_next(iter)) {
     fn_level_actor_t * camera = iter->data;
-    Uint16 camera_y = camera->actor_data->position.y / FN_TILE_HEIGHT;
-    Uint16 camera_x = camera->actor_data->position.x / FN_TILE_WIDTH;
+    Uint16 camera_y = camera->general->position.y / FN_TILE_HEIGHT;
+    Uint16 camera_x = camera->general->position.x / FN_TILE_WIDTH;
     fn_level_tiles_copy_from_to(
             lv->tiles,
             camera_x,
@@ -1072,12 +1072,12 @@ int fn_level_act(fn_level_t * lv) {
     if  (actor->acts_while_invisible || actor->is_visible) {
       sum++;
       fn_level_actor_act(actor, lv);
-      if (actor->is_alive == false) {
+      if (actor->general->is_alive == false) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = NULL;
         fn_level_actor_free(actor, lv); actor = NULL;
-      } else if (actor->actor_data->hurts_hero) {
+      } else if (actor->general->hurts_hero) {
           actors_hurting_hero++;
       }
     }
