@@ -82,7 +82,6 @@ typedef void (* fn_level_actor_interact_end_function_t)(
         fn_hero_t * hero);
 
 typedef void (* fn_level_actor_act_function_t)(
-        fn_level_actor_t *,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -284,7 +283,6 @@ void fn_level_actor_function_simpleanimation_free(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -402,7 +400,6 @@ void fn_level_actor_function_redball_jumping_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -555,7 +552,6 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -700,7 +696,6 @@ void fn_level_actor_function_robot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_act(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -907,7 +902,6 @@ void fn_level_actor_function_tankbot_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -1161,7 +1155,6 @@ void fn_level_actor_function_firewheelbot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -1408,7 +1401,6 @@ void fn_level_actor_function_wallcrawler_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1647,7 +1639,6 @@ void fn_level_actor_function_lift_interact_end(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1816,7 +1807,6 @@ void fn_level_actor_function_acme_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -2083,7 +2073,6 @@ void fn_level_actor_function_fire_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2276,7 +2265,6 @@ void fn_level_actor_function_mill_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2473,7 +2461,6 @@ void fn_level_actor_function_accesscard_slot_interact_start(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2628,7 +2615,6 @@ void fn_level_actor_function_glove_slot_interact_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -3167,7 +3153,6 @@ void fn_level_actor_function_item_touch_end(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -3499,7 +3484,6 @@ void fn_level_actor_function_soda_flying_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -3610,7 +3594,6 @@ void fn_level_actor_function_balloon_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -3762,7 +3745,6 @@ void fn_level_actor_function_teleporter_interact_start(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -3905,7 +3887,6 @@ void fn_level_actor_function_singleanimation_free(
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_act(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -4038,7 +4019,6 @@ void fn_level_actor_function_particle_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4132,7 +4112,6 @@ void fn_level_actor_function_rocket_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -4301,7 +4280,6 @@ void fn_level_actor_bomb_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -4480,7 +4458,6 @@ void fn_level_actor_bombfire_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4586,7 +4563,6 @@ void fn_level_actor_function_explosion_free(
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4844,7 +4820,6 @@ void fn_level_actor_function_score_free(
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4936,7 +4911,6 @@ void fn_level_actor_function_unstablefloor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -5052,7 +5026,6 @@ void fn_level_actor_function_expandingfloor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5175,7 +5148,6 @@ void fn_level_actor_function_conveyor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5414,7 +5386,6 @@ void fn_level_actor_function_hostileshot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_act(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5622,7 +5593,6 @@ void fn_level_actor_function_exitdoor_interact_start(
  * @param  actor  The exitdoor actor.
  */
 void fn_level_actor_function_exitdoor_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -5791,7 +5761,6 @@ void fn_level_actor_function_door_free(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5920,7 +5889,6 @@ void fn_level_actor_function_keyhole_free(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -6338,7 +6306,6 @@ void fn_level_actor_function_access_card_door_blit(
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_act(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -6547,7 +6514,6 @@ void fn_level_actor_function_fan_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_act(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -8468,7 +8434,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
   if (func != NULL)
   {
     fn_hero_t * hero = fn_level_get_hero(level);
-    func(actor, actor->general, actor->specific, level, level->solids, hero->score, hero);
+    func(actor->general, actor->specific, level, level->solids, hero->score, hero);
   }
   return actor->general->is_alive;
 }
