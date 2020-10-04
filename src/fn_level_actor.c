@@ -46,14 +46,12 @@ typedef void (* fn_level_actor_free_function_t)(
         void ** data);
 
 typedef void (* fn_level_actor_hero_touch_start_function_t)(
-        fn_level_actor_t *,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
         fn_hero_t * hero);
 
 typedef void (* fn_level_actor_hero_touch_end_function_t)(
-        fn_level_actor_t *,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -366,7 +364,6 @@ void fn_level_actor_function_redball_jumping_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -378,11 +375,10 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_end(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
-        fn_level_t * level,
-        fn_hero_t * hero)
+        fn_level_t * _level,
+        fn_hero_t * _hero)
 {
   general->hurts_hero = false;
 }
@@ -523,7 +519,6 @@ void fn_level_actor_function_redball_lying_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -652,7 +647,6 @@ void fn_level_actor_function_robot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -666,7 +660,6 @@ void fn_level_actor_function_robot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -850,7 +843,6 @@ void fn_level_actor_function_tankbot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -866,7 +858,6 @@ void fn_level_actor_function_tankbot_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_hero_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1099,7 +1090,6 @@ void fn_level_actor_function_firewheelbot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1115,7 +1105,6 @@ void fn_level_actor_function_firewheelbot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1341,7 +1330,6 @@ void fn_level_actor_function_wallcrawler_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1357,7 +1345,6 @@ void fn_level_actor_function_wallcrawler_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -1909,7 +1896,6 @@ void fn_level_actor_function_acme_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2001,7 +1987,6 @@ void fn_level_actor_function_fire_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2018,7 +2003,6 @@ void fn_level_actor_function_fire_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_hero_touch_end(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -2209,7 +2193,6 @@ void fn_level_actor_function_mill_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -2883,7 +2866,6 @@ void fn_level_actor_function_item_free(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_touch_start(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -3097,7 +3079,6 @@ void fn_level_actor_function_item_touch_start(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -3425,7 +3406,6 @@ void fn_level_actor_function_soda_flying_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -3530,7 +3510,6 @@ void fn_level_actor_function_balloon_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -4379,7 +4358,6 @@ void fn_level_actor_bombfire_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_hero_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4393,7 +4371,6 @@ void fn_level_actor_bombfire_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_hero_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4859,7 +4836,6 @@ void fn_level_actor_function_unstablefloor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -4881,7 +4857,6 @@ void fn_level_actor_function_unstablefloor_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5339,7 +5314,6 @@ void fn_level_actor_function_hostileshot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -5353,7 +5327,6 @@ void fn_level_actor_function_hostileshot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -6035,7 +6008,6 @@ void fn_level_actor_function_key_create(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_touch_start(
-        fn_level_actor_t * actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * level,
@@ -6352,7 +6324,6 @@ void fn_level_actor_function_spikes_free(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_touch_start(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -6371,7 +6342,6 @@ void fn_level_actor_function_spikes_touch_start(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_touch_end(
-        fn_level_actor_t * _actor,
         FnLevelActorData * general,
         void * specific,
         fn_level_t * _level,
@@ -8337,7 +8307,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
   fn_level_actor_hero_touch_start_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
   if (func != NULL) {
-    func(actor, actor->general, actor->specific, level, fn_level_get_hero(level));
+    func(actor->general, actor->specific, level, fn_level_get_hero(level));
   }
 }
 
@@ -8348,7 +8318,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
   fn_level_actor_hero_touch_end_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_touch_end;
   if (func != NULL) {
-    func(actor, actor->general, actor->specific, level, fn_level_get_hero(level));
+    func(actor->general, actor->specific, level, fn_level_get_hero(level));
   }
 }
 
