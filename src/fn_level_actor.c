@@ -37,7 +37,6 @@
 /* --------------------------------------------------------------- */
 
 typedef void (* fn_level_actor_create_function_t)(
-        FnLevelActorType type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -147,7 +146,6 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  * @param  actor The animation actor.
  */
 void fn_level_actor_function_simpleanimation_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -160,7 +158,7 @@ void fn_level_actor_function_simpleanimation_create(
   general->is_in_foreground = 0;
   general->position.w = FN_TILE_WIDTH;
   general->position.h = FN_TILE_HEIGHT;
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_TextOnScreenBackground:
       data->tile = 0x0004;
       data->current_frame = 0;
@@ -250,7 +248,7 @@ void fn_level_actor_function_simpleanimation_create(
       /* we got a type which should not be an animation. */
       printf(__FILE__ ":%d: warning: animation #%d"
           " added which is not an animation\n",
-          __LINE__, actor_type);
+          __LINE__, general->actor_type);
       break;
   }
 }
@@ -341,7 +339,6 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -499,7 +496,6 @@ typedef struct fn_level_actor_redball_lying_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -626,7 +622,6 @@ typedef struct fn_level_actor_robot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -824,7 +819,6 @@ typedef struct fn_level_actor_tankbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1073,7 +1067,6 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1309,7 +1302,6 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1323,7 +1315,7 @@ void fn_level_actor_function_wallcrawler_create(
   general->position.w = FN_TILE_WIDTH;
   general->position.h = FN_TILE_HEIGHT;
   data->direction = VerticalDirection_Up;
-  if (actor_type == ActorType_WallCrawlerBotLeft) {
+  if (general->actor_type == ActorType_WallCrawlerBotLeft) {
     data->tile = ANIM_WALLCRAWLERBOT_LEFT;
     data->orientation = HorizontalDirection_Left;
   } else {
@@ -1529,7 +1521,6 @@ typedef struct fn_level_actor_lift_data_t {
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1756,7 +1747,6 @@ typedef struct fn_level_actor_acme_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1973,7 +1963,6 @@ typedef struct fn_level_actor_fire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -1986,7 +1975,7 @@ void fn_level_actor_function_fire_create(
   general->position.w = FN_TILE_WIDTH * 3;
   general->position.h = FN_TILE_HEIGHT;
 
-  if (actor_type == ActorType_FireRight) {
+  if (general->actor_type == ActorType_FireRight) {
     data->tile = OBJ_FIRERIGHT;
     data->direction = HorizontalDirection_Right;
   } else {
@@ -2184,7 +2173,6 @@ typedef struct fn_level_actor_mill_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -2347,7 +2335,6 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -2516,7 +2503,6 @@ typedef struct fn_level_actor_glove_slot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -2731,7 +2717,6 @@ typedef struct fn_level_actor_item_data_t {
  * @param  actor The item actor.
  */
 void fn_level_actor_function_item_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -2744,7 +2729,7 @@ void fn_level_actor_function_item_create(
   general->position.w = FN_TILE_WIDTH;
   general->position.h = FN_TILE_HEIGHT;
   general->is_in_foreground = 0;
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_BoxRedSoda:
     case ActorType_BoxRedChicken:
       data->tile = OBJ_BOX_RED;
@@ -2871,7 +2856,7 @@ void fn_level_actor_function_item_create(
       /* we got a type which should not be an item. */
       printf(__FILE__ ":%d: warning: item #%d"
           " added which is not an item\n",
-          __LINE__, actor_type);
+          __LINE__, general->actor_type);
       break;
   }
 }
@@ -3420,7 +3405,6 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -3520,7 +3504,6 @@ typedef struct fn_level_actor_balloon_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -3660,7 +3643,6 @@ void fn_level_actor_function_balloon_shot(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -3794,7 +3776,6 @@ typedef struct fn_level_actor_singleanimation_data_t {
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -3808,7 +3789,7 @@ void fn_level_actor_function_singleanimation_create(
   general->position.h = FN_TILE_HEIGHT;
   general->is_in_foreground = 1;
 
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_Fire:
       data->tile = ANIM_BOMBFIRE;
       data->current_frame = 0;
@@ -3832,7 +3813,7 @@ void fn_level_actor_function_singleanimation_create(
     default:
       printf(__FILE__ ":%d: warning: singleanimation #%d"
           " added which is not a singleanimation\n",
-          __LINE__, actor_type);
+          __LINE__, general->actor_type);
       break;
   }
 }
@@ -3936,7 +3917,6 @@ typedef struct fn_level_actor_particle_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -3959,7 +3939,7 @@ void fn_level_actor_function_particle_create(
   data->hspeed = hrand - hrand_max / 2;
   data->vspeed = vrand - vrand_max / 2;
 
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_ParticlePink:
       data->tile = OBJ_SPARK_PINK;
       break;
@@ -3975,7 +3955,7 @@ void fn_level_actor_function_particle_create(
     default:
       printf(__FILE__ ":%d: warning: particle #%d"
           " added which is not a particle\n",
-          __LINE__, actor_type);
+          __LINE__, general->actor_type);
       break;
   }
 }
@@ -4060,7 +4040,6 @@ typedef struct fn_level_actor_rocket_data_t {
  * @param  actor  The rocket actor.
  */
 void fn_level_actor_function_rocket_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4220,7 +4199,6 @@ typedef struct fn_level_actor_bomb_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4373,7 +4351,6 @@ typedef struct fn_level_actor_bombfire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4495,7 +4472,6 @@ typedef struct fn_level_actor_explosion_data_t {
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4587,7 +4563,6 @@ void fn_level_actor_function_explosion_blit(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4689,7 +4664,6 @@ typedef struct fn_level_actor_score_data_t {
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -4703,7 +4677,7 @@ void fn_level_actor_function_score_create(
   general->is_in_foreground = 1;
   data->countdown = 40;
 
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_Score100:
       data->tile = NUMB_100;
       break;
@@ -4858,7 +4832,6 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5020,7 +4993,6 @@ void fn_level_actor_function_unstablefloor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5099,7 +5071,6 @@ typedef struct fn_level_actor_conveyor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5116,7 +5087,7 @@ void fn_level_actor_function_conveyor_create(
 
   data->num_frames = 4;
 
-  switch(actor_type) {
+  switch(general->actor_type) {
     case ActorType_ConveyorLeftMovingRightEnd:
       data->direction = HorizontalDirection_Left;
       break;
@@ -5126,7 +5097,7 @@ void fn_level_actor_function_conveyor_create(
     default: /* error */
       printf(__FILE__ ":%d: warning: conveyor #%d"
           " added which is no conveyor\n",
-          __LINE__, actor_type);
+          __LINE__, general->actor_type);
       break;
   }
 
@@ -5248,7 +5219,6 @@ void fn_level_actor_function_conveyor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5337,7 +5307,6 @@ typedef struct fn_level_actor_hostileshot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5350,7 +5319,7 @@ void fn_level_actor_function_hostileshot_create(
   *specific = data;
   data->current_frame = 0;
   data->num_frames = 2;
-  if (actor_type == ActorType_HostileShotLeft) {
+  if (general->actor_type == ActorType_HostileShotLeft) {
     data->tile = OBJ_BADSHOT;
   } else {
     data->tile = OBJ_BADSHOT + 2;
@@ -5452,7 +5421,6 @@ void fn_level_actor_function_hostileshot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5544,7 +5512,6 @@ typedef struct fn_level_actor_exitdoor_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5733,7 +5700,6 @@ typedef struct fn_level_actor_door_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -5863,7 +5829,6 @@ typedef struct fn_level_actor_keyhole_data_t {
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -6051,7 +6016,6 @@ void fn_level_actor_function_keyhole_interact_start(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -6160,7 +6124,6 @@ void fn_level_actor_function_key_blit(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -6253,7 +6216,6 @@ typedef struct fn_level_actor_accesscard_door_data_t
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -6353,7 +6315,6 @@ typedef struct fn_level_actor_spike_data_t {
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -6497,7 +6458,6 @@ typedef struct fn_level_actor_fan_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_create(
-        FnLevelActorType actor_type,
         FnLevelActorData * general,
         void ** specific,
         FnLevelTiles * tiles,
@@ -8322,7 +8282,6 @@ fn_level_actor_t * fn_level_actor_create(
   func = fn_level_actor_functions[actor->general->actor_type].create;
   if (func != NULL) {
     func(
-            type,
             actor->general,
             &(actor->specific),
             level->tiles,
