@@ -37,16 +37,24 @@
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
+typedef struct fn_level_actor_create_params_t {
+    FnLevelActorData * general;
+    void ** specific;
+    FnLevelTiles * tiles;
+    FnLevelSolids * solids;
+} fn_level_actor_create_params_t;
+
 typedef void (* fn_level_actor_create_function_t)(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids);
+        fn_level_actor_create_params_t p);
 
 /* --------------------------------------------------------------- */
 
+typedef struct fn_level_actor_free_params_t {
+    void ** specific;
+} fn_level_actor_free_params_t;
+
 typedef void (* fn_level_actor_free_function_t)(
-        void ** data);
+        fn_level_actor_free_params_t p);
 
 /* --------------------------------------------------------------- */
 
@@ -202,19 +210,16 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  * @param  actor The animation actor.
  */
 void fn_level_actor_function_simpleanimation_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_simpleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_simpleanimation_data_t));
-  *specific = data;
+  *(p.specific) = data;
 
-  general->is_in_foreground = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  switch(general->actor_type) {
+  p.general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  switch(p.general->actor_type) {
     case ActorType_TextOnScreenBackground:
       data->tile = 0x0004;
       data->current_frame = 0;
@@ -304,7 +309,7 @@ void fn_level_actor_function_simpleanimation_create(
       /* we got a type which should not be an animation. */
       printf(__FILE__ ":%d: warning: animation #%d"
           " added which is not an animation\n",
-          __LINE__, general->actor_type);
+          __LINE__, p.general->actor_type);
       break;
   }
 }
@@ -317,10 +322,10 @@ void fn_level_actor_function_simpleanimation_create(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_simpleanimation_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_simpleanimation_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 
@@ -380,28 +385,25 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_redball_jumping_data_t * data = malloc(
       sizeof(fn_level_actor_redball_jumping_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->counter = 0;
   data->tile = ANIM_MINE;
-  data->base_y = general->position.y;
+  data->base_y = p.general->position.y;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_redball_jumping_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_redball_jumping_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -509,16 +511,13 @@ typedef struct fn_level_actor_redball_lying_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_redball_lying_data_t * data = malloc(
       sizeof(fn_level_actor_redball_lying_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->tile = ANIM_MINE;
   data->touching_hero = 0;
 }
@@ -527,10 +526,10 @@ void fn_level_actor_function_redball_lying_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_redball_lying_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_redball_lying_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -616,17 +615,14 @@ typedef struct fn_level_actor_robot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_robot_data_t * data = malloc(
       sizeof(fn_level_actor_robot_data_t));
-  *specific = data;
-  general->is_in_foreground = true;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->is_in_foreground = true;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->direction = HorizontalDirection_Left;
   data->tile = ANIM_ROBOT;
   data->current_frame = 0;
@@ -637,10 +633,10 @@ void fn_level_actor_function_robot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_robot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_robot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -785,17 +781,14 @@ typedef struct fn_level_actor_tankbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_tankbot_data_t * data = malloc(
       sizeof(fn_level_actor_tankbot_data_t));
-  *specific = data;
-  general->is_in_foreground = true;
-  general->position.w = FN_TILE_WIDTH * 2;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->is_in_foreground = true;
+  p.general->position.w = FN_TILE_WIDTH * 2;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->direction = HorizontalDirection_Left;
   data->tile = ANIM_CARBOT;
   data->current_frame = 0;
@@ -807,10 +800,10 @@ void fn_level_actor_function_tankbot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_tankbot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_tankbot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1005,14 +998,11 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_firewheelbot_data_t * data = malloc(
       sizeof(fn_level_actor_firewheelbot_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->direction = HorizontalDirection_Left;
   data->tile = ANIM_FIREWHEEL_OFF;
   data->current_frame = 0;
@@ -1021,17 +1011,17 @@ void fn_level_actor_function_firewheelbot_create(
   data->touching_hero = 0;
   data->fire_is_on = 0;
   data->counter = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_firewheelbot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_firewheelbot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1216,20 +1206,17 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
 
   fn_level_actor_wallcrawler_data_t * data = malloc(
       sizeof(fn_level_actor_wallcrawler_data_t));
-  *specific = data;
-  general->is_in_foreground = 1;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->is_in_foreground = 1;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->direction = VerticalDirection_Up;
-  if (general->actor_type == ActorType_WallCrawlerBotLeft) {
+  if (p.general->actor_type == ActorType_WallCrawlerBotLeft) {
     data->tile = ANIM_WALLCRAWLERBOT_LEFT;
     data->orientation = HorizontalDirection_Left;
   } else {
@@ -1246,10 +1233,10 @@ void fn_level_actor_function_wallcrawler_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_wallcrawler_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_wallcrawler_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1407,18 +1394,15 @@ typedef struct fn_level_actor_lift_data_t {
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_lift_data_t * data = malloc(
       sizeof(fn_level_actor_lift_data_t));
   data->state = fn_level_actor_lift_state_idle;
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = false;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = false;
 }
 
 /* --------------------------------------------------------------- */
@@ -1429,10 +1413,10 @@ void fn_level_actor_function_lift_create(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_lift_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_lift_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1602,29 +1586,26 @@ typedef struct fn_level_actor_acme_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_acme_data_t * data = malloc(
       sizeof(fn_level_actor_acme_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->tile = OBJ_FALLINGBLOCK;
   data->counter = 0;
   data->touching_hero = 0;
-  general->position.w = FN_TILE_WIDTH * 2;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 1;
+  p.general->position.w = FN_TILE_WIDTH * 2;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 1;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_acme_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_acme_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1796,39 +1777,36 @@ typedef struct fn_level_actor_fire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_fire_data_t * data = malloc(
       sizeof(fn_level_actor_fire_data_t));
-  *specific = data;
+  *(p.specific) = data;
 
-  general->position.w = FN_TILE_WIDTH * 3;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH * 3;
+  p.general->position.h = FN_TILE_HEIGHT;
 
-  if (general->actor_type == ActorType_FireRight) {
+  if (p.general->actor_type == ActorType_FireRight) {
     data->tile = OBJ_FIRERIGHT;
     data->direction = HorizontalDirection_Right;
   } else {
     data->tile = OBJ_FIRELEFT;
     data->direction = HorizontalDirection_Left;
-    general->position.x -= 2 * FN_TILE_WIDTH;
+    p.general->position.x -= 2 * FN_TILE_WIDTH;
   }
   data->counter = 0;
   data->state = fn_level_actor_fire_state_off;
   data->touching_hero = 0;
-  general->is_in_foreground = 1;
+  p.general->is_in_foreground = 1;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_fire_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_fire_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -1983,37 +1961,34 @@ typedef struct fn_level_actor_mill_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_mill_data_t * data = malloc(
       sizeof(fn_level_actor_mill_data_t));
-  *specific = data;
-  general->is_in_foreground = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->tile = OBJ_ROTATECYLINDER;
   data->current_frame = 0;
   data->num_frames = 5;
   data->lives = 10;
 
-  while (!fn_level_solids_get(solids,
-        general->position.x / FN_TILE_WIDTH,
-        general->position.y / FN_TILE_HEIGHT - 1)) {
-    general->position.y -= FN_TILE_HEIGHT;
-    general->position.h += FN_TILE_HEIGHT;
+  while (!fn_level_solids_get(p.solids,
+        p.general->position.x / FN_TILE_WIDTH,
+        p.general->position.y / FN_TILE_HEIGHT - 1)) {
+    p.general->position.y -= FN_TILE_HEIGHT;
+    p.general->position.h += FN_TILE_HEIGHT;
   }
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_mill_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_mill_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -2125,20 +2100,17 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   fn_level_actor_access_card_slot_data_t * data = malloc(
       sizeof(fn_level_actor_access_card_slot_data_t));
   data->tile = OBJ_ACCESS_CARD_SLOT;
   data->current_frame = 0;
   data->num_frames = 8;
-  *specific = data;
-  general->is_in_foreground = false;
+  *(p.specific) = data;
+  p.general->is_in_foreground = false;
 }
 
 /* --------------------------------------------------------------- */
@@ -2149,10 +2121,10 @@ void fn_level_actor_function_accesscard_slot_create(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_access_card_slot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_access_card_slot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -2271,13 +2243,10 @@ typedef struct fn_level_actor_glove_slot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   fn_level_actor_glove_slot_data_t * data = malloc(
       sizeof(fn_level_actor_glove_slot_data_t));
   data->tile = OBJ_GLOVE_SLOT;
@@ -2285,17 +2254,17 @@ void fn_level_actor_function_glove_slot_create(
   data->num_frames = 4;
   data->state = fn_level_actor_glove_slot_state_idle;
   data->countdown = 0;
-  *specific = data;
-  general->is_in_foreground = 0;
+  *(p.specific) = data;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_glove_slot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_glove_slot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -2465,19 +2434,16 @@ typedef struct fn_level_actor_item_data_t {
  * @param  actor The item actor.
  */
 void fn_level_actor_function_item_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_item_data_t * data = malloc(
       sizeof(fn_level_actor_item_data_t));
 
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 0;
-  switch(general->actor_type) {
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 0;
+  switch(p.general->actor_type) {
     case ActorType_BoxRedSoda:
     case ActorType_BoxRedChicken:
       data->tile = OBJ_BOX_RED;
@@ -2604,7 +2570,7 @@ void fn_level_actor_function_item_create(
       /* we got a type which should not be an item. */
       printf(__FILE__ ":%d: warning: item #%d"
           " added which is not an item\n",
-          __LINE__, general->actor_type);
+          __LINE__, p.general->actor_type);
       break;
   }
 }
@@ -2617,10 +2583,10 @@ void fn_level_actor_function_item_create(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_item_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_item_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3116,19 +3082,16 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
   /* nothing to do here */
 }
@@ -3196,27 +3159,24 @@ typedef struct fn_level_actor_balloon_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_balloon_data_t * data =
     malloc(sizeof(fn_level_actor_balloon_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->destroyed = 0;
   data->current_frame = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT * 2;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT * 2;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_balloon_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_balloon_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3311,14 +3271,11 @@ void fn_level_actor_function_balloon_shot(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = true;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = true;
 }
 
 /* --------------------------------------------------------------- */
@@ -3424,20 +3381,17 @@ typedef struct fn_level_actor_singleanimation_data_t {
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_singleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_singleanimation_data_t));
 
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 1;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 1;
 
-  switch(general->actor_type) {
+  switch(p.general->actor_type) {
     case ActorType_Fire:
       data->tile = ANIM_BOMBFIRE;
       data->current_frame = 0;
@@ -3461,7 +3415,7 @@ void fn_level_actor_function_singleanimation_create(
     default:
       printf(__FILE__ ":%d: warning: singleanimation #%d"
           " added which is not a singleanimation\n",
-          __LINE__, general->actor_type);
+          __LINE__, p.general->actor_type);
       break;
   }
 }
@@ -3474,10 +3428,10 @@ void fn_level_actor_function_singleanimation_create(
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_singleanimation_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_singleanimation_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3551,16 +3505,13 @@ typedef struct fn_level_actor_particle_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_particle_data_t * data = malloc(
       sizeof(fn_level_actor_particle_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->countdown = 20;
-  general->is_in_foreground = 1;
+  p.general->is_in_foreground = 1;
 
   Uint16 hrand = rand();
   Uint16 vrand = rand();
@@ -3573,7 +3524,7 @@ void fn_level_actor_function_particle_create(
   data->hspeed = hrand - hrand_max / 2;
   data->vspeed = vrand - vrand_max / 2;
 
-  switch(general->actor_type) {
+  switch(p.general->actor_type) {
     case ActorType_ParticlePink:
       data->tile = OBJ_SPARK_PINK;
       break;
@@ -3589,7 +3540,7 @@ void fn_level_actor_function_particle_create(
     default:
       printf(__FILE__ ":%d: warning: particle #%d"
           " added which is not a particle\n",
-          __LINE__, general->actor_type);
+          __LINE__, p.general->actor_type);
       break;
   }
 }
@@ -3597,10 +3548,10 @@ void fn_level_actor_function_particle_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_particle_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_particle_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3659,26 +3610,23 @@ typedef struct fn_level_actor_rocket_data_t {
  * @param  actor  The rocket actor.
  */
 void fn_level_actor_function_rocket_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_rocket_data_t * data = malloc(
       sizeof(fn_level_actor_rocket_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->state = fn_level_actor_rocket_state_idle;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_rocket_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_rocket_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3802,16 +3750,13 @@ typedef struct fn_level_actor_bomb_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_bomb_data_t * data = malloc(
       sizeof(fn_level_actor_bomb_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 
   data->tile = ANIM_BOMB;
   data->current_frame = 0;
@@ -3826,10 +3771,10 @@ void fn_level_actor_bomb_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_bomb_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_bomb_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -3939,16 +3884,13 @@ typedef struct fn_level_actor_bombfire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_bombfire_data_t * data = malloc(
       sizeof(fn_level_actor_bombfire_data_t));
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  *specific = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
   data->tile = ANIM_BOMBFIRE;
   data->current_frame = 0;
   data->num_frames = 6;
@@ -3958,10 +3900,10 @@ void fn_level_actor_bombfire_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_bombfire_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_bombfire_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4037,18 +3979,15 @@ typedef struct fn_level_actor_explosion_data_t {
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_explosion_data_t * data = malloc(
       sizeof(fn_level_actor_explosion_data_t));
 
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 0;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 0;
 
   data->tile = ANIM_EXPLODE;
   data->current_frame = 0;
@@ -4063,10 +4002,10 @@ void fn_level_actor_function_explosion_create(
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_explosion_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_explosion_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4113,14 +4052,11 @@ void fn_level_actor_function_explosion_blit(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 0;
 }
 
 /**
@@ -4201,20 +4137,17 @@ typedef struct fn_level_actor_score_data_t {
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_score_data_t * data = malloc(
       sizeof(fn_level_actor_score_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 1;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 1;
   data->countdown = 40;
 
-  switch(general->actor_type) {
+  switch(p.general->actor_type) {
     case ActorType_Score100:
       data->tile = NUMB_100;
       break;
@@ -4291,10 +4224,10 @@ void fn_level_actor_function_score_create(
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_score_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_score_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4354,28 +4287,25 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_unstablefloor_data_t * data = malloc(
       sizeof(fn_level_actor_unstablefloor_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->tile = SOLID_START + 77;
   data->touched = 0;
   data->touching = 0;
-  general->position.w = 0;
-  general->position.h = 0;
+  p.general->position.w = 0;
+  p.general->position.h = 0;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_unstablefloor_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_unstablefloor_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4460,19 +4390,16 @@ void fn_level_actor_function_unstablefloor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
 }
 
@@ -4523,23 +4450,20 @@ typedef struct fn_level_actor_conveyor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_conveyor_data_t * data = malloc(
       sizeof(fn_level_actor_conveyor_data_t));
-  *specific = data;
-  general->is_in_foreground = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 
   data->current_frame = 0;
 
   data->num_frames = 4;
 
-  switch(general->actor_type) {
+  switch(p.general->actor_type) {
     case ActorType_ConveyorLeftMovingRightEnd:
       data->direction = HorizontalDirection_Left;
       break;
@@ -4549,7 +4473,7 @@ void fn_level_actor_function_conveyor_create(
     default: /* error */
       printf(__FILE__ ":%d: warning: conveyor #%d"
           " added which is no conveyor\n",
-          __LINE__, general->actor_type);
+          __LINE__, p.general->actor_type);
       break;
   }
 
@@ -4557,18 +4481,18 @@ void fn_level_actor_function_conveyor_create(
   Uint8 found_begin = 0;
   Uint16 tile = 0;
   while(!found_begin) {
-    general->position.x -= FN_TILE_WIDTH;
-    general->position.w += FN_TILE_WIDTH;
-    tile = fn_level_tiles_get(tiles,
-        general->position.x / FN_TILE_WIDTH,
-        general->position.y / FN_TILE_HEIGHT);
+    p.general->position.x -= FN_TILE_WIDTH;
+    p.general->position.w += FN_TILE_WIDTH;
+    tile = fn_level_tiles_get(p.tiles,
+        p.general->position.x / FN_TILE_WIDTH,
+        p.general->position.y / FN_TILE_HEIGHT);
     if (tile == SOLID_CONVEYORBELT_LEFTEND ||
-        general->position.x == 0 ||
+        p.general->position.x == 0 ||
         tile == 0) {
       found_begin = 1;
-      fn_level_tiles_set(tiles,
-          general->position.x / FN_TILE_WIDTH,
-          general->position.y / FN_TILE_HEIGHT,
+      fn_level_tiles_set(p.tiles,
+          p.general->position.x / FN_TILE_WIDTH,
+          p.general->position.y / FN_TILE_HEIGHT,
           SOLID_BLACK);
     }
   }
@@ -4577,10 +4501,10 @@ void fn_level_actor_function_conveyor_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_conveyor_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_conveyor_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4652,19 +4576,16 @@ void fn_level_actor_function_conveyor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH * 2;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH * 2;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
 }
 
@@ -4724,19 +4645,16 @@ typedef struct fn_level_actor_hostileshot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_hostileshot_data_t * data = malloc(
       sizeof(fn_level_actor_hostileshot_data_t));
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  *specific = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
   data->current_frame = 0;
   data->num_frames = 2;
-  if (general->actor_type == ActorType_HostileShotLeft) {
+  if (p.general->actor_type == ActorType_HostileShotLeft) {
     data->tile = OBJ_BADSHOT;
   } else {
     data->tile = OBJ_BADSHOT + 2;
@@ -4747,10 +4665,10 @@ void fn_level_actor_function_hostileshot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_hostileshot_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_hostileshot_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4814,19 +4732,16 @@ void fn_level_actor_function_hostileshot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
 }
 
@@ -4888,20 +4803,17 @@ typedef struct fn_level_actor_exitdoor_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_exitdoor_data_t * data = malloc(
       sizeof(fn_level_actor_exitdoor_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH * 2;
-  general->position.h = FN_TILE_HEIGHT * 2;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH * 2;
+  p.general->position.h = FN_TILE_HEIGHT * 2;
   data->counter = 0;
   data->state = 0;
   data->tile = ANIM_EXITDOOR;
-  general->is_in_foreground = 0;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -4912,10 +4824,10 @@ void fn_level_actor_function_exitdoor_create(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_exitdoor_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_exitdoor_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -5056,20 +4968,17 @@ typedef struct fn_level_actor_door_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_door_data_t * data = malloc(
       sizeof(fn_level_actor_door_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->counter = 0;
   data->state = 0;
   data->tile = OBJ_DOOR;
-  general->is_in_foreground = 0;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -5080,10 +4989,10 @@ void fn_level_actor_function_door_create(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_door_data_t * data = *specific;
-  free(data); data = *specific = NULL;
+  fn_level_actor_door_data_t * data = *(p.specific);
+  free(data); data = *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -5169,19 +5078,16 @@ typedef struct fn_level_actor_keyhole_data_t {
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_keyhole_data_t * data = malloc(
       sizeof(fn_level_actor_keyhole_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
   data->counter = 0;
   data->tile = OBJ_KEYHOLE_BLACK;
-  general->is_in_foreground = 0;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -5192,10 +5098,10 @@ void fn_level_actor_function_keyhole_create(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_keyhole_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_keyhole_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -5333,14 +5239,11 @@ void fn_level_actor_function_keyhole_interact_start(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_WIDTH;
-  general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_WIDTH;
+  p.general->is_in_foreground = 0;
 }
 
 
@@ -5425,14 +5328,11 @@ void fn_level_actor_function_key_blit(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
-  general->is_in_foreground = 0;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -5502,21 +5402,18 @@ typedef struct fn_level_actor_accesscard_door_data_t
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_accesscard_door_data_t * data = malloc(
       sizeof(fn_level_actor_accesscard_door_data_t));
-  *specific = data;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_HEIGHT;
+  *(p.specific) = data;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_HEIGHT;
 
   data->tile = OBJ_LASERBEAM;
   data->current_frame = 0;
   data->num_frames = 4;
-  general->is_in_foreground = 0;
+  p.general->is_in_foreground = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -5527,10 +5424,10 @@ void fn_level_actor_function_access_card_door_create(
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_accesscard_door_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_accesscard_door_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -5586,18 +5483,15 @@ typedef struct fn_level_actor_spike_data_t {
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_spike_data_t * data = malloc(
       sizeof(fn_level_actor_spike_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->touching_hero = 0;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.h = FN_TILE_WIDTH;
-  general->is_in_foreground = 1;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.h = FN_TILE_WIDTH;
+  p.general->is_in_foreground = 1;
 }
 
 /* --------------------------------------------------------------- */
@@ -5609,10 +5503,10 @@ void fn_level_actor_function_spikes_create(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_spike_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_spike_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -5712,30 +5606,27 @@ typedef struct fn_level_actor_fan_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_create(
-        FnLevelActorData * general,
-        void ** specific,
-        FnLevelTiles * tiles,
-        FnLevelSolids * solids)
+        fn_level_actor_create_params_t p)
 {
   fn_level_actor_fan_data_t * data = malloc(
       sizeof(fn_level_actor_fan_data_t));
-  *specific = data;
+  *(p.specific) = data;
   data->tile = ANIM_FAN;
   data->num_frames = 4;
   data->current_frame = 0;
   data->running = 10;
-  general->position.h = 2 * FN_TILE_HEIGHT;
-  general->position.w = FN_TILE_WIDTH;
-  general->position.y -= FN_TILE_HEIGHT;
+  p.general->position.h = 2 * FN_TILE_HEIGHT;
+  p.general->position.w = FN_TILE_WIDTH;
+  p.general->position.y -= FN_TILE_HEIGHT;
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_free(
-        void ** specific)
+        fn_level_actor_free_params_t p)
 {
-  fn_level_actor_fan_data_t * data = *specific;
-  free(data); *specific = NULL;
+  fn_level_actor_fan_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -7516,11 +7407,14 @@ fn_level_actor_t * fn_level_actor_create(
   actor->acts_while_invisible = 0;
   func = fn_level_actor_functions[actor->general->actor_type].create;
   if (func != NULL) {
-    func(
-            actor->general,
-            &(actor->specific),
-            level->tiles,
-            level->solids);
+      struct fn_level_actor_create_params_t p ={
+          .general = actor->general,
+          .specific = &(actor->specific),
+          .tiles = level->tiles,
+          .solids = level->solids
+      };
+
+      func(p);
   }
   return actor;
 }
@@ -7532,7 +7426,10 @@ void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
   fn_level_actor_free_function_t func =
     fn_level_actor_functions[actor->general->actor_type].free;
   if (func != NULL) {
-    func(&(actor->specific));
+      struct fn_level_actor_free_params_t p ={
+          .specific = &(actor->specific),
+      };
+    func(p);
   }
   fn_level_actor_data_free(actor->general);
   actor->general = NULL;
