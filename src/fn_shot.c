@@ -62,7 +62,7 @@ void fn_shot_free(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level)
+Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level, FnLevelActorQueue * actor_queue)
 {
   shot->counter++;
   shot->counter %= 4;
@@ -75,12 +75,12 @@ Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level)
   if (shot->countdown == 2) {
     if (shot->direction == HorizontalDirection_Right) {
       /* push twice so that every position gets covered. */
-      fn_shot_push(shot, level, FN_HALFTILE_WIDTH);
-      fn_shot_push(shot, level, FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, FN_HALFTILE_WIDTH, actor_queue);
+      fn_shot_push(shot, level, FN_HALFTILE_WIDTH, actor_queue);
     } else {
       /* push twice so that every position gets covered. */
-      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH);
-      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH);
+      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH, actor_queue);
+      fn_shot_push(shot, level, -FN_HALFTILE_WIDTH, actor_queue);
     }
   }
   return shot->is_alive;
@@ -169,7 +169,7 @@ Uint8 fn_shot_hits_solid(
 
 /* --------------------------------------------------------------- */
 
-void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
+void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset, FnLevelActorQueue * actor_queue)
 {
   if (shot->countdown == 2) {
     shot->position.x += offset;
@@ -181,7 +181,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
-          fn_level_actor_shot(actor, level)) {
+          fn_level_actor_shot(actor, level, actor_queue)) {
         shot->countdown = 1;
       }
     }

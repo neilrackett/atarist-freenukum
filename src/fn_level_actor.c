@@ -61,6 +61,7 @@ typedef struct fn_level_actor_hero_touch_start_params_t {
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
+    FnLevelActorQueue * actor_queue;
     FnHeroScore * hero_score;
     FnHeroHealth * hero_health;
     FnHeroFirepower * hero_firepower;
@@ -125,6 +126,7 @@ typedef struct fn_level_actor_act_params_t {
     void * specific;
     fn_level_t * level;
     FnLevelData * level_data;
+    FnLevelActorQueue * actor_queue;
     FnHeroScore * hero_score;
     fn_hero_t * hero;
 } fn_level_actor_act_params_t;
@@ -156,6 +158,7 @@ typedef struct fn_level_actor_shot_params_t {
     void * specific;
     fn_level_t * level;
     FnLevelData * level_data;
+    FnLevelActorQueue * actor_queue;
     FnHeroScore * hero_score;
     fn_hero_t * hero;
 } fn_level_actor_shot_params_t;
@@ -561,8 +564,8 @@ void fn_level_actor_function_redball_lying_act(
   } else if (data->touching_hero > 1) {
     p.general->hurts_hero = false;
     p.general->is_alive = 0;
-    fn_level_add_actor(
-            p.level,
+    fn_level_actor_queue_push_back(
+            p.actor_queue,
             ActorType_Fire,
             p.general->position.x,
             p.general->position.y);
@@ -735,7 +738,7 @@ void fn_level_actor_function_robot_shot(
     p.general->hurts_hero = false;
     data->touching_hero = 0;
   }
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_RobotDisappearing,
       p.general->position.x,
       p.general->position.y);
@@ -839,7 +842,7 @@ void fn_level_actor_function_tankbot_act(
   if (data->was_shot == 2) {
     /* create explosion */
     p.general->is_alive = false;
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Explosion,
         p.general->position.x + FN_HALFTILE_WIDTH,
         p.general->position.y);
@@ -892,12 +895,12 @@ void fn_level_actor_function_tankbot_act(
         data->tile += 4 * direction;
 
         if (direction > 0) {
-          fn_level_add_actor(p.level,
+          fn_level_actor_queue_push_back(p.actor_queue,
              ActorType_HostileShotRight,
              p.general->position.x,
              p.general->position.y - 6);
         } else {
-          fn_level_add_actor(p.level,
+          fn_level_actor_queue_push_back(p.actor_queue,
              ActorType_HostileShotLeft,
              p.general->position.x,
              p.general->position.y - 6);
@@ -908,7 +911,7 @@ void fn_level_actor_function_tankbot_act(
   if (data->was_shot == 1) {
     /* create steam clouds */
     if (data->current_frame == 0) {
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Steam,
           p.general->position.x + FN_HALFTILE_WIDTH,
           p.general->position.y - FN_TILE_HEIGHT);
@@ -1056,7 +1059,7 @@ void fn_level_actor_function_firewheelbot_act(
   if (data->was_shot == 2) {
     /* create explosion */
     p.general->is_alive = 0;
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Explosion,
         p.general->position.x + FN_HALFTILE_WIDTH,
         p.general->position.y);
@@ -1101,7 +1104,7 @@ void fn_level_actor_function_firewheelbot_act(
     if (data->was_shot == 1) {
       /* create steam clouds */
       if (data->current_frame == 0) {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_Steam,
             p.general->position.x + FN_HALFTILE_WIDTH,
             p.general->position.y - FN_TILE_HEIGHT);
@@ -1352,11 +1355,11 @@ void fn_level_actor_function_wallcrawler_shot(
       data->current_frame = 0;
     }
     p.general->is_alive = false;
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Steam,
         p.general->position.x,
         p.general->position.y);
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Explosion,
         p.general->position.x,
         p.general->position.y);
@@ -1667,7 +1670,7 @@ void fn_level_actor_function_acme_act(
             p.general->position.x / FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_Steam,
             p.general->position.x + FN_HALFTILE_WIDTH,
             p.general->position.y);
@@ -1710,7 +1713,7 @@ void fn_level_actor_function_acme_shot(
 
   if (data->counter > 0) {
     fn_hero_score_add(p.hero_score, 500);
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score500,
         p.general->position.x,
         p.general->position.y);
@@ -2059,11 +2062,11 @@ void fn_level_actor_function_mill_shot(
         p.general->position.x + p.general->position.w / 2,
         p.general->position.y + p.general->position.h / 2,
         20);
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score10000,
         p.general->position.x,
         p.general->position.y + p.general->position.h / 2 - FN_TILE_HEIGHT);
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score10000,
         p.general->position.x,
         p.general->position.y + p.general->position.h / 2);
@@ -2350,11 +2353,11 @@ void fn_level_actor_function_glove_slot_act(
 
       data->countdown--;
       if (data->countdown % 4 == 0) {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_HostileShotRight,
             p.general->position.x, p.general->position.y);
       } else if (data->countdown % 4 == 2) {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_HostileShotLeft,
             p.general->position.x, p.general->position.y);
       }
@@ -2604,7 +2607,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_set_fetched_letter(p.hero, 'D');
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 500);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score500,
           p.general->position.x,
           p.general->position.y);
@@ -2617,7 +2620,7 @@ void fn_level_actor_function_item_touch_start(
       }
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 500);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score500,
           p.general->position.x,
           p.general->position.y);
@@ -2630,7 +2633,7 @@ void fn_level_actor_function_item_touch_start(
       }
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 500);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score500,
           p.general->position.x,
           p.general->position.y);
@@ -2638,13 +2641,13 @@ void fn_level_actor_function_item_touch_start(
     case ActorType_LetterE:
       if (fn_hero_get_fetched_letter(p.hero) == 'K') {
       fn_hero_score_add(p.hero_score, 10000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score10000,
           p.general->position.x,
           p.general->position.y);
       } else {
       fn_hero_score_add(p.hero_score, 500);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score500,
           p.general->position.x,
           p.general->position.y);
@@ -2655,7 +2658,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_health_fill_max(p.hero_health);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
@@ -2664,7 +2667,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_firepower_increase(p.hero_firepower, 1);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
@@ -2673,7 +2676,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_inventory_set(p.hero_inventory, InventoryItem_AccessCard);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
@@ -2682,7 +2685,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_inventory_set(p.hero_inventory, InventoryItem_Glove);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
@@ -2691,7 +2694,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_inventory_set(p.hero_inventory, InventoryItem_Boot);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
@@ -2700,14 +2703,14 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_inventory_set(p.hero_inventory, InventoryItem_Clamp);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 1000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Football:
       fn_hero_score_add(p.hero_score, 100);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score100,
           p.general->position.x,
           p.general->position.y);
@@ -2715,7 +2718,7 @@ void fn_level_actor_function_item_touch_start(
       break;
     case ActorType_Disk:
       fn_hero_score_add(p.hero_score, 5000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score5000,
           p.general->position.x,
           p.general->position.y);
@@ -2723,7 +2726,7 @@ void fn_level_actor_function_item_touch_start(
       break;
     case ActorType_Joystick:
       fn_hero_score_add(p.hero_score, 2000);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score2000,
           p.general->position.x,
           p.general->position.y);
@@ -2734,21 +2737,21 @@ void fn_level_actor_function_item_touch_start(
       switch(data->current_frame) {
         case 0:
           fn_hero_score_add(p.hero_score, 100);
-          fn_level_add_actor(p.level,
+          fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score100,
               p.general->position.x,
               p.general->position.y);
           break;
         case 1:
           fn_hero_score_add(p.hero_score, 2000);
-          fn_level_add_actor(p.level,
+          fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score2000,
               p.general->position.x,
               p.general->position.y);
           break;
         case 2:
           fn_hero_score_add(p.hero_score, 5000);
-          fn_level_add_actor(p.level,
+          fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score5000,
               p.general->position.x,
               p.general->position.y);
@@ -2760,7 +2763,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_health_increase(p.hero_health, 1);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 200);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score200,
           p.general->position.x,
           p.general->position.y);
@@ -2769,7 +2772,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_health_increase(p.hero_health, 1);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 100);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score100,
           p.general->position.x,
           p.general->position.y);
@@ -2778,7 +2781,7 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_health_increase(p.hero_health, 2);
       p.general->is_alive = 0;
       fn_hero_score_add(p.hero_score, 200);
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score200,
           p.general->position.x,
           p.general->position.y);
@@ -2852,7 +2855,7 @@ void fn_level_actor_function_item_shot(
   switch(p.general->actor_type) {
     case ActorType_BoxBlueFootball:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Football,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Football,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2863,7 +2866,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxBlueJoystick:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Joystick,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Joystick,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2873,7 +2876,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxBlueDisk:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Disk,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Disk,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2883,7 +2886,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxBlueBalloon:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Balloon,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Balloon,
           p.general->position.x,
           p.general->position.y - FN_TILE_HEIGHT);
       fn_level_add_particle_firework(
@@ -2894,7 +2897,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxBlueFlag:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Flag,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Flag,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2905,7 +2908,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxBlueRadio:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Radio,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Radio,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2915,7 +2918,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxRedSoda:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Soda,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Soda,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2926,7 +2929,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxRedChicken:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_ChickenSingle,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_ChickenSingle,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2945,7 +2948,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyBoots:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Boots,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Boots,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2956,7 +2959,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyClamps:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Clamps,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Clamps,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2967,7 +2970,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyGun:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Gun,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Gun,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2978,7 +2981,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyBomb:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Bomb,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Bomb,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -2989,7 +2992,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyGlove:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_Glove,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Glove,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3000,7 +3003,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyFullLife:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_FullLife,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_FullLife,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3011,7 +3014,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyAccessCard:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_AccessCard,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_AccessCard,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3022,7 +3025,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyLetterD:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_LetterD,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterD,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3032,7 +3035,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyLetterU:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_LetterU,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterU,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3042,7 +3045,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyLetterK:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_LetterK,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterK,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3052,7 +3055,7 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_BoxGreyLetterE:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_LetterE,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterE,
           p.general->position.x,
           p.general->position.y);
       fn_level_add_particle_firework(
@@ -3062,13 +3065,13 @@ void fn_level_actor_function_item_shot(
       break;
     case ActorType_ChickenSingle:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_ChickenDouble,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_ChickenDouble,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Soda:
       p.general->is_alive = 0;
-      fn_level_add_actor(p.level, ActorType_SodaFlying,
+      fn_level_actor_queue_push_back(p.actor_queue, ActorType_SodaFlying,
           p.general->position.x,
           p.general->position.y);
       break;
@@ -3101,7 +3104,7 @@ void fn_level_actor_function_soda_flying_touch_start(
         fn_level_actor_hero_touch_start_params_t p)
 {
   fn_hero_score_add(p.hero_score, 1000);
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score1000,
       p.general->position.x,
       p.general->position.y);
@@ -3117,7 +3120,7 @@ void fn_level_actor_function_soda_flying_act(
   if (fn_level_solids_get(&(p.level_data->solids),
         (p.general->position.x) / FN_TILE_WIDTH,
         (p.general->position.y) / FN_TILE_HEIGHT)) {
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Explosion,
         p.general->position.x,
         p.general->position.y);
@@ -3187,7 +3190,7 @@ void fn_level_actor_function_balloon_touch_start(
   if (!data->destroyed) {
     p.general->is_alive = 0;
     fn_hero_score_add(p.hero_score, 10000);
-    fn_level_add_actor(p.level,
+    fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score10000,
         p.general->position.x,
         p.general->position.y);
@@ -3215,7 +3218,7 @@ void fn_level_actor_function_balloon_act(
        )
     {
       data->destroyed = 1;
-      fn_level_add_actor(p.level,
+      fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Steam,
           p.general->position.x,
           p.general->position.y);
@@ -3255,7 +3258,7 @@ void fn_level_actor_function_balloon_shot(
 {
   fn_level_actor_balloon_data_t * data = p.specific;
   data->destroyed = 1;
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Steam,
       p.general->position.x,
       p.general->position.y);
@@ -3807,7 +3810,7 @@ void fn_level_actor_bomb_act(
              distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_BombFire,
             p.general->position.x - distance * FN_TILE_WIDTH,
             p.general->position.y);
@@ -3830,7 +3833,7 @@ void fn_level_actor_bomb_act(
             FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
       {
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_BombFire,
             p.general->position.x + distance * FN_TILE_WIDTH,
             p.general->position.y);
@@ -4095,11 +4098,11 @@ void fn_level_actor_function_camera_shot(
 {
   p.general->is_alive = 0;
   fn_hero_score_add(p.hero_score, 100);
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score100,
       p.general->position.x,
       p.general->position.y);
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Explosion,
       p.general->position.x,
       p.general->position.y);
@@ -4346,7 +4349,7 @@ void fn_level_actor_function_unstablefloor_act(
             p.general->position.x / FN_TILE_WIDTH + floorlength,
             p.general->position.y / FN_TILE_HEIGHT,
             0);
-        fn_level_add_actor(p.level,
+        fn_level_actor_queue_push_back(p.actor_queue,
             ActorType_Explosion,
             p.general->position.x + floorlength * FN_TILE_WIDTH,
             p.general->position.y);
@@ -5276,7 +5279,7 @@ void fn_level_actor_function_key_touch_start(
       break;
   }
   fn_hero_score_add(p.hero_score, 1000);
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score1000,
       p.general->position.x,
       p.general->position.y);
@@ -5370,7 +5373,7 @@ void fn_level_actor_function_shootable_wall_shot(
       p.general->position.x / FN_TILE_WIDTH,
       p.general->position.y / FN_TILE_HEIGHT,
       0);
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Explosion,
       p.general->position.x,
       p.general->position.y);
@@ -5736,7 +5739,7 @@ void fn_level_actor_function_fan_shot(
 {
   fn_level_actor_fan_data_t * data = p.specific;
   data->running = 9;
-  fn_level_add_actor(p.level,
+  fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Steam,
       p.general->position.x,
       p.general->position.y);
@@ -7445,12 +7448,12 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor, fn_hero_t * hero)
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_check_hero_touch(
-        fn_level_actor_t * actor, fn_level_t * level)
+        fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
 {
   if (fn_level_actor_touches_hero(actor, fn_level_get_hero(level))) {
     if (!actor->touches_hero) {
       actor->touches_hero = 1;
-      fn_level_actor_hero_touch_start(actor, level);
+      fn_level_actor_hero_touch_start(actor, level, actor_queue);
     }
   } else {
     if (actor->touches_hero) {
@@ -7462,7 +7465,7 @@ void fn_level_actor_check_hero_touch(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level)
+void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
 {
   fn_level_actor_hero_touch_start_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
@@ -7473,6 +7476,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
+        .actor_queue = actor_queue,
         .hero_score = hero->score,
         .hero_health = hero->health,
         .hero_firepower = hero->firepower,
@@ -7571,9 +7575,9 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
 
 /* --------------------------------------------------------------- */
 
-int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
+int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
 {
-  fn_level_actor_check_hero_touch(actor, level);
+  fn_level_actor_check_hero_touch(actor, level, actor_queue);
   fn_level_actor_act_function_t func =
     fn_level_actor_functions[actor->general->actor_type].act;
   if (func != NULL)
@@ -7584,6 +7588,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
         .specific = actor->specific,
         .level = level,
         .level_data = level->data,
+        .actor_queue = actor_queue,
         .hero_score = hero->score,
         .hero = hero
     };
@@ -7624,7 +7629,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
+Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
 {
   fn_level_actor_shot_function_t func =
     fn_level_actor_functions[actor->general->actor_type].shot;
@@ -7636,6 +7641,7 @@ Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
         .specific = actor->specific,
         .level = level,
         .level_data = level->data,
+        .actor_queue = actor_queue,
         .hero_score = hero->score,
         .hero = hero
     };

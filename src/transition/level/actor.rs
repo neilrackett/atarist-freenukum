@@ -174,9 +174,23 @@ impl ActorData {
     }
 }
 
+#[repr(C)]
+pub struct ActorQueueItem {
+    pub actor_type: ActorType,
+    pub x: u16,
+    pub y: u16,
+}
+
+#[derive(Default)]
+pub struct ActorQueue {
+    pub actors: Vec<ActorQueueItem>,
+}
+
 pub mod ffi {
     type FnLevelActorData = super::ActorData;
     type FnLevelActorType = super::ActorType;
+    type FnLevelActorQueue = super::ActorQueue;
+    type FnLevelActorQueueItem = super::ActorQueueItem;
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_data_create(
@@ -197,9 +211,50 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_type_print(
-        actor_type: FnLevelActorType,
+    pub extern "C" fn fn_level_actor_queue_create(
+    ) -> *mut FnLevelActorQueue {
+        Box::into_raw(Box::new(FnLevelActorQueue::default()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_queue_free(
+        ptr: *mut FnLevelActorQueue,
     ) {
-        println!("{:?}", actor_type);
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_queue_push_back(
+        ptr: *mut FnLevelActorQueue,
+        actor_type: FnLevelActorType,
+        x: u16,
+        y: u16,
+    ) {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+        queue
+            .actors
+            .push(super::ActorQueueItem { actor_type, x, y })
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_queue_has_items(
+        ptr: *const FnLevelActorQueue,
+    ) -> bool {
+        let queue = unsafe { &(*ptr) };
+        !queue.actors.is_empty()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_queue_pop_front(
+        ptr: *mut FnLevelActorQueue,
+    ) -> FnLevelActorQueueItem {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+        queue.actors.remove(0)
     }
 }

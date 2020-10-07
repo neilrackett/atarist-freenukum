@@ -274,6 +274,8 @@ typedef enum {
     VerticalDirection_Down,
 } VerticalDirection;
 
+typedef struct ActorQueue ActorQueue;
+
 typedef struct Bot Bot;
 
 typedef struct File File;
@@ -346,6 +348,16 @@ typedef struct {
 typedef ActorData FnLevelActorData;
 
 typedef ActorType FnLevelActorType;
+
+typedef ActorQueue FnLevelActorQueue;
+
+typedef struct {
+    ActorType actor_type;
+    uint16_t x;
+    uint16_t y;
+} ActorQueueItem;
+
+typedef ActorQueueItem FnLevelActorQueueItem;
 
 typedef struct {
     uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
@@ -541,7 +553,18 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
-void fn_level_actor_type_print(FnLevelActorType actor_type);
+FnLevelActorQueue *fn_level_actor_queue_create(void);
+
+void fn_level_actor_queue_free(FnLevelActorQueue *ptr);
+
+bool fn_level_actor_queue_has_items(const FnLevelActorQueue *ptr);
+
+FnLevelActorQueueItem fn_level_actor_queue_pop_front(FnLevelActorQueue *ptr);
+
+void fn_level_actor_queue_push_back(FnLevelActorQueue *ptr,
+                                    FnLevelActorType actor_type,
+                                    uint16_t x,
+                                    uint16_t y);
 
 FnLevelData *fn_level_data_create(void);
 

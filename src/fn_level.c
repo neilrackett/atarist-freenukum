@@ -1028,7 +1028,7 @@ fn_hero_t * fn_level_get_hero(fn_level_t * lv) {
 
 /* --------------------------------------------------------------- */
 
-int fn_level_act(fn_level_t * lv) {
+int fn_level_act(fn_level_t * lv, FnLevelActorQueue * actor_queue) {
   fn_list_t * iter = NULL;
   int res = 0;
   int cleanup = 0;
@@ -1044,7 +1044,7 @@ int fn_level_act(fn_level_t * lv) {
     fn_shot_t * shot = (fn_shot_t *)iter->data;
 
     if (shot != NULL) {
-      res = fn_shot_act(shot, lv);
+      res = fn_shot_act(shot, lv, actor_queue);
       if (res == 0) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1071,7 +1071,7 @@ int fn_level_act(fn_level_t * lv) {
 
     if  (actor->acts_while_invisible || actor->is_visible) {
       sum++;
-      fn_level_actor_act(actor, lv);
+      fn_level_actor_act(actor, lv, actor_queue);
       if (actor->general->is_alive == false) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1081,6 +1081,11 @@ int fn_level_act(fn_level_t * lv) {
           actors_hurting_hero++;
       }
     }
+  }
+
+  while (fn_level_actor_queue_has_items(actor_queue)) {
+      FnLevelActorQueueItem item = fn_level_actor_queue_pop_front(actor_queue);
+      fn_level_add_actor(lv, item.actor_type, item.x, item.y);
   }
 
   if (cleanup) {
@@ -1172,7 +1177,8 @@ fn_level_actor_t * fn_level_add_initial_actor(fn_level_t * lv,
 fn_shot_t * fn_level_add_shot(fn_level_t * lv,
     FnHorizontalDirection direction,
     Uint16 x,
-    Uint16 y)
+    Uint16 y,
+    FnLevelActorQueue * actor_queue)
 {
   fn_shot_t * shot = fn_shot_create(x, y, direction);
 
@@ -1181,7 +1187,7 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 
   lv->shots = fn_list_append(lv->shots, shot);
 
-  fn_shot_push(shot, lv, addition * FN_HALFTILE_WIDTH);
+  fn_shot_push(shot, lv, addition * FN_HALFTILE_WIDTH, actor_queue);
 
   Uint8 draw_collision_bounds =
     fn_environment_get_draw_collision_bounds(lv->environment);
@@ -1224,14 +1230,14 @@ void fn_level_add_particle_firework(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-void fn_level_fire_shot(fn_level_t * lv)
+void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
 {
   fn_hero_t * hero = fn_level_get_hero(lv);
 
   if (lv->num_shots < fn_hero_firepower_num_shots(hero->firepower)) {
     FnGeometry position = fn_hero_get_position(hero);
 
-    fn_level_add_shot(lv, hero->direction, position.x, position.y);
+    fn_level_add_shot(lv, hero->direction, position.x, position.y, actor_queue);
     lv->num_shots++;
   }
 }
