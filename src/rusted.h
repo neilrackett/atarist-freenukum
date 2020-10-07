@@ -286,10 +286,6 @@ typedef struct InputField InputField;
 
 typedef struct Inventory Inventory;
 
-typedef struct LevelSolids LevelSolids;
-
-typedef struct LevelTiles LevelTiles;
-
 typedef struct Menu Menu;
 
 typedef struct Score Score;
@@ -351,9 +347,24 @@ typedef ActorData FnLevelActorData;
 
 typedef ActorType FnLevelActorType;
 
-typedef LevelSolids FnLevelSolids;
+typedef struct {
+    uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelTiles;
 
 typedef LevelTiles FnLevelTiles;
+
+typedef struct {
+    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelSolids;
+
+typedef LevelSolids FnLevelSolids;
+
+typedef struct {
+    FnLevelTiles tiles;
+    FnLevelSolids solids;
+} LevelData;
+
+typedef LevelData FnLevelData;
 
 typedef MainMenuEntry FnMainMenuEntry;
 
@@ -531,6 +542,10 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
 void fn_level_actor_type_print(FnLevelActorType actor_type);
+
+FnLevelData *fn_level_data_create(void);
+
+void fn_level_data_free(FnLevelData *ptr);
 
 bool fn_level_solids_collides(const FnLevelSolids *ptr, FnGeometry rect);
 

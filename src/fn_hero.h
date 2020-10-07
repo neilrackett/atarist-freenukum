@@ -208,7 +208,7 @@ void fn_hero_blit(
  * @return Zero if the hero has died, otherwise non-zero.
  */
 int fn_hero_act(fn_hero_t * hero,
-    void * data);
+    FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
 

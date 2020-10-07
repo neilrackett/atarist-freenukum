@@ -218,9 +218,8 @@ void fn_hero_blit(
 
 int fn_hero_act(
     fn_hero_t * hero,
-    void * data)
+    FnLevelSolids * solids)
 {
-  fn_level_t * lv = (fn_level_t *)data;
   int heromoved = 0;
 
   if (hero->immunitycountdown > 0) {
@@ -231,7 +230,7 @@ int fn_hero_act(
     fn_hero_health_decrease(hero->health, 1);
   }
 
-  if (lv == NULL) {
+  if (solids == NULL) {
     return fn_hero_health_get(hero->health);
   }
 
@@ -242,7 +241,7 @@ int fn_hero_act(
     } else {
       switch(hero->direction) {
         case HorizontalDirection_Left:
-          if (!fn_hero_would_collide(hero, lv->solids,
+          if (!fn_hero_would_collide(hero, solids,
                 fn_hero_get_x(hero) - FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
                 )) {
@@ -254,7 +253,7 @@ int fn_hero_act(
           }
           break;
         case HorizontalDirection_Right:
-          if (!fn_hero_would_collide(hero, lv->solids,
+          if (!fn_hero_would_collide(hero, solids,
                 fn_hero_get_x(hero) + FN_HALFTILE_WIDTH,
                 fn_hero_get_y(hero)
                 )) {
@@ -297,7 +296,7 @@ int fn_hero_act(
       }
       int i = 0;
       for (i = 0; i < hero->verticalspeed; i++) {
-        if (!fn_hero_would_collide(hero, lv->solids,
+        if (!fn_hero_would_collide(hero, solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) - FN_HALFTILE_HEIGHT
               )) {
@@ -316,7 +315,7 @@ int fn_hero_act(
 
       int i = 0;
       for (i = 0; i < hero->verticalspeed/2; i++) {
-        if (!fn_hero_would_collide(hero, lv->solids,
+        if (!fn_hero_would_collide(hero, solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
               )) {
@@ -327,7 +326,7 @@ int fn_hero_act(
     }
   }
 
-  if (fn_hero_would_collide(hero, lv->solids,
+  if (fn_hero_would_collide(hero, solids,
         fn_hero_get_x(hero),
         fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
         )) {

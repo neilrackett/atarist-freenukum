@@ -1,6 +1,7 @@
 use super::super::geometry::Geometry;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 
+#[repr(C)]
 pub struct LevelSolids {
     solids: [[bool; LEVEL_WIDTH]; LEVEL_HEIGHT],
 }

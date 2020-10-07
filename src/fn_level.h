@@ -59,14 +59,9 @@ struct fn_level_t {
   Uint16 raw[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
 
   /**
-   * Stores if tiles are solid or not.
+   * Level data
    */
-  FnLevelSolids * solids;
-  
-  /**
-   * The solid and background tiles.
-   */
-  FnLevelTiles * tiles;
+  FnLevelData * data;
 
   /**
    * The surface which contains the always fixed tiles.

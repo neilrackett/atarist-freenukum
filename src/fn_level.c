@@ -49,8 +49,7 @@ fn_level_t * fn_level_load(FnFile* file,
   Uint8 uppertile;
   Uint8 lowertile;
 
-  lv->solids = fn_level_solids_create();
-  lv->tiles = fn_level_tiles_create();
+  lv->data = fn_level_data_create();
 
   lv->environment = env;
 
@@ -77,6 +76,8 @@ fn_level_t * fn_level_load(FnFile* file,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
       FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
 
+  FnLevelTiles * tiles = &(lv->data->tiles);
+  FnLevelSolids * solids = &(lv->data->solids);
   while (i != FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH)
   {
     size_t x = i%FN_LEVEL_WIDTH;
@@ -92,8 +93,8 @@ fn_level_t * fn_level_load(FnFile* file,
     lv->raw[y][x] = tilenr;
 
     if ((tilenr >= 4) && (tilenr <= 0x2fe0)) {
-      fn_level_tiles_set(lv->tiles, x, y, tilenr / 0x20);
-      fn_level_solids_set(lv->solids, x, y, (tilenr >= 0x1800));
+      fn_level_tiles_set(tiles, x, y, tilenr / 0x20);
+      fn_level_solids_set(solids, x, y, (tilenr >= 0x1800));
     }
 
     fn_hero_t * hero = fn_environment_get_hero(env);
@@ -152,13 +153,13 @@ fn_level_t * fn_level_load(FnFile* file,
           ActorType_LavaBackground, x, y);
         break;
       case 0x1800: /* solid wall which can be shot */
-        fn_level_tiles_set(lv->tiles, x, y, 0x17E0/0x20);
+        fn_level_tiles_set(tiles, x, y, 0x17E0/0x20);
         fn_level_add_initial_actor(lv,
           ActorType_ShootableWall, x, y);
         break;
       case 0x1C00: /* center conveyor */
-        fn_level_tiles_set(lv->tiles, x, y, SOLID_BLACK);
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_tiles_set(tiles, x, y, SOLID_BLACK);
+        fn_level_solids_set(solids, x, y, true);
 
         /*
         fn_level_add_initial_actor(lv,
@@ -167,39 +168,39 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3000: /* grey box, empty */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
           ActorType_BoxGreyEmpty, x, y);
         break;
       case 0x3001: /* lift */
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
           ActorType_Lift, x, y);
         break;
       case 0x3002: /* left end of left-moving conveyor */
-        fn_level_tiles_set(lv->tiles, x, y, SOLID_CONVEYORBELT_LEFTEND);
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_tiles_set(tiles, x, y, SOLID_CONVEYORBELT_LEFTEND);
+        fn_level_solids_set(solids, x, y, true);
         break;
       case 0x3003: /* right end of left-moving conveyor */
-        fn_level_tiles_set(lv->tiles, x, y, SOLID_BLACK);
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_tiles_set(tiles, x, y, SOLID_BLACK);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_ConveyorLeftMovingRightEnd, x, y);
         break;
       case 0x3004: /* left end of right-moving conveyor */
-        fn_level_tiles_set(lv->tiles, x, y, SOLID_CONVEYORBELT_LEFTEND);
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_tiles_set(tiles, x, y, SOLID_CONVEYORBELT_LEFTEND);
+        fn_level_solids_set(solids, x, y, true);
         break;
       case 0x3005: /* right end of right-moving conveyor */
-        fn_level_tiles_set(lv->tiles, x, y, SOLID_BLACK);
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_tiles_set(tiles, x, y, SOLID_BLACK);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_ConveyorRightMovingRightEnd, x, y);
         break;
       case 0x3006: /* grey box with boots inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyBoots, x, y);
@@ -211,63 +212,63 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3008: /* grey box with clamps inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyClamps, x, y);
         break;
       case 0x3009: /* fire burning to the right */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FireRight, x, y);
         break;
       case 0x300A: /* fire burning to the left */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FireLeft, x, y);
         break;
       case 0x300b: /* flying techbot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FlyingBot, x, y);
         break;
       case 0x300c: /* footbot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         lv->bots = fn_list_append(lv->bots, fn_bot_create(
               BotType_FootBot, x*2, y*2));
         break;
       case 0x300d: /* tankbot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_TankBot, x, y);
         break;
       case 0x300e: /* fire wheel bot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FireWheelBot, x, y);
         break;
       case 0x300F: /* grey box with gun inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyGun, x, y);
         break;
       case 0x3010: /* robot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Robot, x, y);
@@ -278,7 +279,7 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3012: /* grey box with bomb inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyBomb, x, y);
@@ -289,114 +290,114 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3014: /* water mirroring everything that is above */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_Water, x, y);
         break;
       case 0x3015: /* red box with soda inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxRedSoda, x, y);
         break;
       case 0x3016: /* crab bot crawling along wall left of him */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_WallCrawlerBotLeft, x, y);
         break;
       case 0x3017: /* crab bot crawling along wall right of him */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_WallCrawlerBotRight, x, y);
         break;
       case 0x3018: /* red box with chicken inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxRedChicken, x, y);
         break;
       case 0x3019: /* floor that breaks on second jump onto it */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_UnstableFloor, x, y);
         break;
       case 0x301a: /* horizontal laser beam which gets deactivated when mill is shot */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Laserbeam, x, y);
         break;
       case 0x301b: /* fan wheel mounted on right wall blowing to the left */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FanLeft, x, y);
         break;
       case 0x301c: /* fan wheel mounted on left wall blowing to the right*/
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_FanRight, x, y);
         break;
       case 0x301d: /* blue box with football insdie */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueFootball, x, y);
         break;
       case 0x301e: /* blue box with joystick inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueJoystick, x, y);
         break;
       case 0x301f: /* blue box with disk inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueDisk, x, y);
         break;
       case 0x3020: /* grey box with glove inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyGlove, x, y);
         break;
       case 0x3021: /* laser beam which is deactivated by access card */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_AccessCardDoor, x, y);
         break;
       case 0x3022: /* helicopter */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_HelicopterBot, x, y);
         break;
       case 0x3023: /* blue box with balloon inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueBalloon, x, y);
@@ -404,7 +405,7 @@ fn_level_t * fn_level_load(FnFile* file,
       case 0x3024: /* camera */
         /*
         if (x > 0) {
-          lv->tiles[y][x] = lv->tiles[y][x-1];
+          tiles[y][x] = tiles[y][x-1];
         }
         */
         fn_level_add_initial_actor(lv,
@@ -413,7 +414,7 @@ fn_level_t * fn_level_load(FnFile* file,
       case 0x3025: /* broken wall background */
         /* take the part from one above */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BrokenWallBackground, x, y);
@@ -430,43 +431,43 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3029: /* grey box with full life */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyFullLife, x, y);
         break;
       case 0x302a: /* "ACME" brick that comes falling down */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_Acme, x, y);
         break;
       case 0x302b: /* rotating mill that can kill duke on touch */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Mill, x, y);
         break;
       case 0x302c: /* single spike standing out of the floor */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Spike, x, y);
         break;
       case 0x302d: /* blue box with flag inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueFlag, x, y);
         break;
       case 0x302e: /* blue box with radio inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxBlueRadio, x, y);
@@ -481,7 +482,7 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x3031: /* jumping mines */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_RedBallJumping, x, y);
@@ -490,12 +491,12 @@ fn_level_t * fn_level_load(FnFile* file,
         fn_hero_enterlevel(hero,
             x * FN_TILE_WIDTH, (y - 1) * FN_TILE_HEIGHT);
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         break;
       case 0x3033: /* grey box with the access card inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyAccessCard, x, y);
@@ -509,41 +510,41 @@ fn_level_t * fn_level_load(FnFile* file,
             ActorType_GloveSlot, x, y);
         break;
       case 0x3036: /* floor which expands to right by access of glove slot */
-        fn_level_solids_set(lv->solids, x, y, 1);
+        fn_level_solids_set(solids, x, y, 1);
         fn_level_add_initial_actor(lv,
             ActorType_ExpandingFloor, x, y);
         break;
       case 0x3037: /* grey box with a D inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyLetterD, x, y);
         break;
       case 0x3038: /* grey box with a U inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyLetterU, x, y);
         break;
       case 0x3039: /* grey box with a K inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
               ActorType_BoxGreyLetterK, x, y);
         break;
       case 0x303a: /* grey box with a E inside */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_BoxGreyLetterE, x, y);
         break;
       case 0x303b: /* bunny bot */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_RabbitoidBot, x, y);
@@ -557,60 +558,60 @@ fn_level_t * fn_level_load(FnFile* file,
             ActorType_FenceBackground, x, y);
         break;
       case 0x303e: /* window - left part */
-        fn_level_tiles_set(lv->tiles, x, y, 0);
+        fn_level_tiles_set(tiles, x, y, 0);
         fn_level_add_initial_actor(lv,
             ActorType_WindowLeftBackground, x, y);
         break;
       case 0x303f: /* window - right part */
-        fn_level_tiles_set(lv->tiles, x, y, 0);
+        fn_level_tiles_set(tiles, x, y, 0);
         fn_level_add_initial_actor(lv,
             ActorType_WindowRightBackground, x, y);
         break;
       case 0x3040: /* the notebook */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Notebook, x, y);
         break;
       case 0x3041: /* the surveillance screen */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_SurveillanceScreen, x, y);
         break;
       case 0x3043: /* dr proton -the final opponent */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_DrProton, x, y);
         break;
       case 0x3044: /* red key */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_KeyRed, x, y);
         break;
       case 0x3045: /* green key */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_KeyGreen, x, y);
         break;
       case 0x3046: /* blue key */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_KeyBlue, x, y);
         break;
       case 0x3047: /* pink key */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_KeyPink, x, y);
@@ -633,102 +634,102 @@ fn_level_t * fn_level_load(FnFile* file,
         break;
       case 0x304c: /* red door */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_DoorRed, x, y);
         break;
       case 0x304d: /* green door */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_DoorGreen, x, y);
         break;
       case 0x304e: /* blue door */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_DoorBlue, x, y);
         break;
       case 0x304f: /* pink door */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        fn_level_solids_set(lv->solids, x, y, true);
+        fn_level_solids_set(solids, x, y, true);
         fn_level_add_initial_actor(lv,
             ActorType_DoorPink, x, y);
         break;
       case 0x3050: /* football on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Football, x, y);
         break;
       case 0x3051: /* single chicken on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_ChickenSingle, x, y);
         break;
       case 0x3052: /* soda on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Soda, x, y);
         break;
       case 0x3053: /* a disk on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Disk, x, y);
         break;
       case 0x3054: /* a joystick on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Joystick, x, y);
         break;
       case 0x3055: /* a flag on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Flag, x, y);
         break;
       case 0x3056: /* a radio on its own */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_Radio, x, y);
         break;
       case 0x3057: /* the red mine lying on the ground */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_RedBallLying, x, y);
         break;
       case 0x3058: /* spikes showing up */
         if (y > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x, y-1, x, y);
+          fn_level_tiles_copy_from_to(tiles, x, y-1, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_SpikesUp, x, y);
         break;
       case 0x3059: /* spikes showing down */
         if (x > 0) {
-          fn_level_tiles_copy_from_to(lv->tiles, x-1, y, x, y);
+          fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
         fn_level_add_initial_actor(lv,
             ActorType_SpikesDown, x, y);
@@ -737,7 +738,7 @@ fn_level_t * fn_level_load(FnFile* file,
         if (tilenr / 0x20 >= SOLID_END) {
           fprintf(stderr, "Unknown tile 0x%04x at x: %d, y: %d\n",
               tilenr, (int)x, (int)y);
-          fn_level_tiles_set(lv->tiles, x, y, 2);
+          fn_level_tiles_set(tiles, x, y, 2);
         }
         break;
     }
@@ -757,7 +758,7 @@ fn_level_t * fn_level_load(FnFile* file,
     Uint16 camera_y = camera->general->position.y / FN_TILE_HEIGHT;
     Uint16 camera_x = camera->general->position.x / FN_TILE_WIDTH;
     fn_level_tiles_copy_from_to(
-            lv->tiles,
+            tiles,
             camera_x,
             camera_y+1,
             camera_x,
@@ -782,7 +783,7 @@ fn_level_t * fn_level_load(FnFile* file,
   const FnTexture * tile = NULL;
   for (y = 0; y < FN_LEVEL_HEIGHT; y++) {
     for (x = 0; x < FN_LEVEL_WIDTH; x++) {
-      tilenr = fn_level_tiles_get(lv->tiles, x, y);
+      tilenr = fn_level_tiles_get(tiles, x, y);
       tile = NULL;
       if (tilenr > 1 && tilenr < (48 * 8)) {
         r.x = x * FN_TILE_WIDTH;
@@ -831,8 +832,7 @@ void fn_level_free(fn_level_t * lv)
   SDL_FreeSurface(lv->surface);
   SDL_FreeSurface(lv->surface_fixed);
 
-  fn_level_tiles_free(lv->tiles);
-  fn_level_solids_free(lv->solids);
+  fn_level_data_free(lv->data);
 
   free(lv);
 }
@@ -851,7 +851,7 @@ Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y)
   if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
     return 1;
   }
-  return fn_level_solids_get(lv->solids, x, y);
+  return fn_level_solids_get(&(lv->data->solids), x, y);
 }
 
 /* --------------------------------------------------------------- */
@@ -861,7 +861,7 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
   if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
     return;
   }
-  fn_level_solids_set(lv->solids, x, y, solid);
+  fn_level_solids_set(&(lv->data->solids), x, y, solid);
 }
 
 /* --------------------------------------------------------------- */
@@ -947,7 +947,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   /* blit the hero */
   fn_hero_blit(hero,
       lv->surface,
-      lv->solids);
+      &(lv->data->solids));
 
   /* blit the actors in the foreground */
   for (iter = fn_list_first(lv->actors);
@@ -1093,14 +1093,14 @@ int fn_level_act(fn_level_t * lv) {
 
   if (lv->animated_frames == 0) {
     /* do some action, not just animation */
-    fn_hero_act(hero, lv);
+    fn_hero_act(hero, &(lv->data->solids));
   }
 
   fn_hero_next_animationframe(hero);
   fn_hero_update_animation(hero);
 
   return 1;
-};
+}
 
 /* --------------------------------------------------------------- */
 
@@ -1303,7 +1303,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
     fn_level_t * level, FnGeometry rect, Sint8 offset,
     Uint8 gravity)
 {
-  if (fn_level_solids_collides(level->solids, rect)) {
+  if (fn_level_solids_collides(&(level->data->solids), rect)) {
     /* locked in, so don't move at all */
     return 0;
   }
@@ -1317,7 +1317,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 
   rect.x += offset;
 
-  if (fn_level_solids_collides(level->solids, rect)) {
+  if (fn_level_solids_collides(&(level->data->solids), rect)) {
     /* we collide with something, so we revert to original position */
     rect.x -= offset;
     return 0;
@@ -1342,7 +1342,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 Uint8 fn_level_rect_fall_down(
     fn_level_t * level, FnGeometry rect, Uint8 dist)
 {
-  if (fn_level_solids_collides(level->solids, rect)) {
+  if (fn_level_solids_collides(&(level->data->solids), rect)) {
     /* can't fall down because collides with solid ground */
     return 0;
   }

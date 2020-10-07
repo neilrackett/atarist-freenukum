@@ -187,7 +187,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset)
     }
   }
   if (shot->countdown == 2) {
-    if (fn_shot_hits_solid(shot, level->solids)) {
+    if (fn_shot_hits_solid(shot, &(level->data->solids))) {
       shot->countdown = 1;
 
       fn_level_add_actor(level,

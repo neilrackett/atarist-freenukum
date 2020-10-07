@@ -40,8 +40,7 @@
 typedef struct fn_level_actor_create_params_t {
     FnLevelActorData * general;
     void ** specific;
-    FnLevelTiles * tiles;
-    FnLevelSolids * solids;
+    FnLevelData * level_data;
 } fn_level_actor_create_params_t;
 
 typedef void (* fn_level_actor_create_function_t)(
@@ -93,7 +92,7 @@ typedef struct fn_level_actor_interact_start_params_t {
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
-    FnLevelSolids * solids;
+    FnLevelData * level_data;
     FnHeroScore * hero_score;
     FnHeroInventory * hero_inventory;
     FnGeometry hero_position;
@@ -110,7 +109,7 @@ typedef struct fn_level_actor_interact_end_params_t {
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
-    FnLevelSolids * solids;
+    FnLevelData * level_data;
     FnHeroScore * hero_score;
     FnGeometry hero_position;
     fn_hero_t * hero;
@@ -125,7 +124,7 @@ typedef struct fn_level_actor_act_params_t {
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
-    FnLevelSolids * solids;
+    FnLevelData * level_data;
     FnHeroScore * hero_score;
     fn_hero_t * hero;
 } fn_level_actor_act_params_t;
@@ -156,7 +155,7 @@ typedef struct fn_level_actor_shot_params_t {
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
-    FnLevelSolids * solids;
+    FnLevelData * level_data;
     FnHeroScore * hero_score;
     fn_hero_t * hero;
 } fn_level_actor_shot_params_t;
@@ -551,7 +550,7 @@ void fn_level_actor_function_redball_lying_act(
 {
   fn_level_actor_redball_lying_data_t * data = p.specific;
 
-  if (!fn_level_solids_get(p.solids,
+  if (!fn_level_solids_get(&(p.level_data->solids),
         (p.general->position.x) / FN_TILE_WIDTH,
         (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
     p.general->position.y += FN_HALFTILE_HEIGHT;
@@ -668,7 +667,7 @@ void fn_level_actor_function_robot_act(
   data->current_frame++;
 
   data->current_frame %= data->num_frames;
-  if (!fn_level_solids_get(p.solids,
+  if (!fn_level_solids_get(&(p.level_data->solids),
         (p.general->position.x) / FN_TILE_WIDTH,
         (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
     /* still in the air, so let the robot fall down. */
@@ -682,14 +681,14 @@ void fn_level_actor_function_robot_act(
           2);
       if (
           /* Check if the place next to the bot is free */
-          !fn_level_solids_get(p.solids,
+          !fn_level_solids_get(&(p.level_data->solids),
             (
              p.general->position.x +
              direction * FN_HALFTILE_WIDTH) /
             FN_TILE_WIDTH,
             (p.general->position.y) / FN_TILE_HEIGHT) &&
           /* Check if it is solid below this place */
-          fn_level_solids_get(p.solids,
+          fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x + direction * FN_HALFTILE_WIDTH) /
             FN_TILE_WIDTH,
             (p.general->position.y+FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
@@ -851,10 +850,10 @@ void fn_level_actor_function_tankbot_act(
         p.general->position.y, 4);
   } else {
     data->current_frame %= data->num_frames;
-    if (!fn_level_solids_get(p.solids,
+    if (!fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x) / FN_TILE_WIDTH,
           (p.general->position.y) / FN_TILE_HEIGHT + 1) &&
-        !fn_level_solids_get(p.solids,
+        !fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x) / FN_TILE_WIDTH + 1,
           (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
       /* still in the air, so let the robot fall down */
@@ -865,12 +864,12 @@ void fn_level_actor_function_tankbot_act(
           -1 : 4);
       if (
           /* check if the place next to the bot is free */
-          !fn_level_solids_get(p.solids,
+          !fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x +
              direction * FN_HALFTILE_WIDTH) / FN_TILE_WIDTH,
             (p.general->position.y) / FN_TILE_HEIGHT) &&
           /* check if it is solid below this place */
-          fn_level_solids_get(p.solids,
+          fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x +
              direction * FN_HALFTILE_WIDTH) / FN_TILE_WIDTH,
             (p.general->position.y + FN_TILE_HEIGHT) /
@@ -1283,11 +1282,11 @@ void fn_level_actor_function_wallcrawler_act(
 
     if (
         /* bot collides with solid tile */
-        fn_level_solids_get(p.solids,
+        fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x) / FN_TILE_WIDTH,
           (p.general->position.y - 1) / FN_TILE_HEIGHT) ||
         /* bot has no more wall to stick upon */
-        !fn_level_solids_get(p.solids,
+        !fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x +
            orientation * FN_TILE_WIDTH) /
           FN_TILE_WIDTH,
@@ -1308,12 +1307,12 @@ void fn_level_actor_function_wallcrawler_act(
 
     if (
         /* bot collides with solid tile */
-        fn_level_solids_get(p.solids,
+        fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x) / FN_TILE_WIDTH,
           (p.general->position.y + FN_TILE_HEIGHT) /
           FN_TILE_HEIGHT) ||
         /* bot has no more wall to stick upon */
-        !fn_level_solids_get(p.solids,
+        !fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x + orientation * FN_TILE_WIDTH) /
           FN_TILE_WIDTH,
           (p.general->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
@@ -1484,21 +1483,21 @@ void fn_level_actor_function_lift_act(
   switch(data->state)
   {
     case fn_level_actor_lift_state_ascending:
-      if (fn_level_solids_get(p.solids,
+      if (fn_level_solids_get(&(p.level_data->solids),
             p.general->position.x/FN_TILE_WIDTH,
             p.general->position.y/FN_TILE_HEIGHT-3)) {
         data->state = fn_level_actor_lift_state_idle;
       } else {
         Sint8 offset = fn_hero_push_vertically(
-            p.hero, p.solids, -FN_TILE_HEIGHT);
+            p.hero, &(p.level_data->solids), -FN_TILE_HEIGHT);
         if (-offset < FN_TILE_HEIGHT) {
-          offset = fn_hero_push_vertically(p.hero, p.solids, -offset);
+          offset = fn_hero_push_vertically(p.hero, &(p.level_data->solids), -offset);
           data->state = fn_level_actor_lift_state_idle;
         } else {
           p.general->position.h -= offset;
           p.general->position.y += offset;
 
-          fn_level_solids_set(p.solids,
+          fn_level_solids_set(&(p.level_data->solids),
               p.general->position.x/FN_TILE_WIDTH,
               p.general->position.y/FN_TILE_HEIGHT,
               1);
@@ -1511,7 +1510,7 @@ void fn_level_actor_function_lift_act(
         int i = 0;
         for (i = 0; i < 2; i++) {
           if (p.general->position.h > FN_TILE_HEIGHT) {
-            fn_level_solids_set(p.solids,
+            fn_level_solids_set(&(p.level_data->solids),
                 p.general->position.x/FN_TILE_WIDTH,
                 p.general->position.y/FN_TILE_HEIGHT,
                 0);
@@ -1634,9 +1633,9 @@ void fn_level_actor_function_acme_act(
           for (i = y + FN_TILE_HEIGHT;
               i < hy && !solidbetween;
               i += FN_TILE_HEIGHT) {
-            if (fn_level_solids_get(p.solids,
+            if (fn_level_solids_get(&(p.level_data->solids),
                   xl / FN_TILE_WIDTH, i / FN_TILE_WIDTH) ||
-                fn_level_solids_get(p.solids,
+                fn_level_solids_get(&(p.level_data->solids),
                   xl / FN_TILE_WIDTH + 1, i / FN_TILE_WIDTH)) {
               solidbetween = 1;
             }
@@ -1664,7 +1663,7 @@ void fn_level_actor_function_acme_act(
       data->counter++;
       break;
     default:
-      if (fn_level_solids_get(p.solids,
+      if (fn_level_solids_get(&(p.level_data->solids),
             p.general->position.x / FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
       {
@@ -1974,7 +1973,7 @@ void fn_level_actor_function_mill_create(
   data->num_frames = 5;
   data->lives = 10;
 
-  while (!fn_level_solids_get(p.solids,
+  while (!fn_level_solids_get(&(p.level_data->solids),
         p.general->position.x / FN_TILE_WIDTH,
         p.general->position.y / FN_TILE_HEIGHT - 1)) {
     p.general->position.y -= FN_TILE_HEIGHT;
@@ -2151,7 +2150,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         dooractor->general->is_alive = 0;
         int x = dooractor->general->position.x / FN_TILE_WIDTH;
         int y = dooractor->general->position.y / FN_TILE_HEIGHT;
-        fn_level_solids_set(p.solids, x, y, 0);
+        fn_level_solids_set(&(p.level_data->solids), x, y, 0);
       }
     }
     data->current_frame = 0;
@@ -2328,10 +2327,10 @@ void fn_level_actor_function_glove_slot_act(
             iter != fn_list_last(expandfloors);
             iter = fn_list_next(iter)) {
           fn_level_actor_t * floor = iter->data;
-          if (!fn_level_solids_get(p.solids,
+          if (!fn_level_solids_get(&(p.level_data->solids),
                 (floor->general->position.x + floor->general->position.w) / FN_TILE_WIDTH,
                 (floor->general->position.y) / FN_TILE_HEIGHT)) {
-            fn_level_solids_set(p.solids,
+            fn_level_solids_set(&(p.level_data->solids),
                 (floor->general->position.x + floor->general->position.w) / FN_TILE_WIDTH,
                 (floor->general->position.y) / FN_TILE_HEIGHT, 1);
             action = 1;
@@ -2816,7 +2815,7 @@ void fn_level_actor_function_item_act(
   fn_level_actor_item_data_t * data = p.specific;
   data->current_frame++;
   data->current_frame %= data->num_frames;
-  if (!fn_level_solids_get(p.solids,
+  if (!fn_level_solids_get(&(p.level_data->solids),
         (p.general->position.x) / FN_TILE_WIDTH,
         (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
     p.general->position.y += FN_HALFTILE_HEIGHT;
@@ -3115,7 +3114,7 @@ void fn_level_actor_function_soda_flying_act(
         fn_level_actor_act_params_t p)
 {
   p.general->position.y -= FN_HALFTILE_HEIGHT;
-  if (fn_level_solids_get(p.solids,
+  if (fn_level_solids_get(&(p.level_data->solids),
         (p.general->position.x) / FN_TILE_WIDTH,
         (p.general->position.y) / FN_TILE_HEIGHT)) {
     fn_level_add_actor(p.level,
@@ -3210,7 +3209,7 @@ void fn_level_actor_function_balloon_act(
     p.general->position.y--;
     if (
         /* balloon bumps against wall */
-        fn_level_solids_get(p.solids,
+        fn_level_solids_get(&(p.level_data->solids),
           (p.general->position.x) / FN_TILE_WIDTH,
           (p.general->position.y -1) / FN_TILE_HEIGHT)
        )
@@ -3641,12 +3640,12 @@ void fn_level_actor_function_rocket_act(
   }
   if (data->state == fn_level_actor_rocket_state_flying) {
     p.general->position.y -= FN_HALFTILE_HEIGHT;
-    if (fn_level_solids_collides(p.solids, p.general->position)) {
+    if (fn_level_solids_collides(&(p.level_data->solids), p.general->position)) {
       Uint16 tile_x = p.general->position.x / FN_TILE_WIDTH;
       Uint16 tile_y = p.general->position.y / FN_TILE_HEIGHT;
-      fn_level_solids_set(p.solids, tile_x, tile_y, 0);
+      fn_level_solids_set(&(p.level_data->solids), tile_x, tile_y, 0);
       fn_level_tiles_copy_from_to(
-              p.level->tiles, tile_x, tile_y - 1, tile_x, tile_y);
+              &(p.level_data->tiles), tile_x, tile_y - 1, tile_x, tile_y);
       p.general->is_alive = 0;
     }
   }
@@ -3703,9 +3702,9 @@ void fn_level_actor_function_rocket_shot(
   Uint16 tile_x = p.general->position.x / FN_TILE_WIDTH;
   Uint16 tile_y = (p.general->position.y + p.general->position.h) /
     FN_TILE_HEIGHT;
-  fn_level_solids_set(p.solids, tile_x, tile_y, 0);
+  fn_level_solids_set(&(p.level_data->solids), tile_x, tile_y, 0);
   fn_level_tiles_copy_from_to(
-          p.level->tiles, tile_x, tile_y + 1, tile_x, tile_y);
+          &(p.level_data->tiles), tile_x, tile_y + 1, tile_x, tile_y);
 }
 
 /* --------------------------------------------------------------- */
@@ -3798,12 +3797,12 @@ void fn_level_actor_bomb_act(
       /* explode to the left if possible */
       if (
           /* check if the place for the flame is free */
-          !fn_level_solids_get(p.solids,
+          !fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x -
              distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             p.general->position.y / FN_TILE_HEIGHT) &&
           /* check if there is solid place below */
-          fn_level_solids_get(p.solids,
+          fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x -
              distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
@@ -3821,12 +3820,12 @@ void fn_level_actor_bomb_act(
       /* explode to the right if possible */
       if (
           /* check if the place for the flame is free */
-          !fn_level_solids_get(p.solids,
+          !fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x + distance * FN_TILE_WIDTH) /
             FN_TILE_WIDTH,
             p.general->position.y / FN_TILE_HEIGHT) &&
           /* check if there is solid place below */
-          fn_level_solids_get(p.solids,
+          fn_level_solids_get(&(p.level_data->solids),
             (p.general->position.x + distance * FN_TILE_WIDTH) /
             FN_TILE_WIDTH,
             (p.general->position.y / FN_TILE_HEIGHT) + 1))
@@ -4322,11 +4321,11 @@ void fn_level_actor_function_unstablefloor_act(
    * the necessary information is not yet loaded from the level.
    */
   if (p.general->position.w == 0) {
-    while (!fn_level_solids_get(p.solids,
+    while (!fn_level_solids_get(&(p.level_data->solids),
           p.general->position.x / FN_TILE_WIDTH + floorlength,
           p.general->position.y / FN_TILE_HEIGHT))
     {
-      fn_level_solids_set(p.solids,
+      fn_level_solids_set(&(p.level_data->solids),
           p.general->position.x / FN_TILE_WIDTH + floorlength,
           p.general->position.y / FN_TILE_HEIGHT,
           1);
@@ -4343,7 +4342,7 @@ void fn_level_actor_function_unstablefloor_act(
     if (data->touched) {
       floorlength = 0;
       while (floorlength < p.general->position.w / FN_TILE_WIDTH) {
-        fn_level_solids_set(p.solids,
+        fn_level_solids_set(&(p.level_data->solids),
             p.general->position.x / FN_TILE_WIDTH + floorlength,
             p.general->position.y / FN_TILE_HEIGHT,
             0);
@@ -4483,14 +4482,14 @@ void fn_level_actor_function_conveyor_create(
   while(!found_begin) {
     p.general->position.x -= FN_TILE_WIDTH;
     p.general->position.w += FN_TILE_WIDTH;
-    tile = fn_level_tiles_get(p.tiles,
+    tile = fn_level_tiles_get(&(p.level_data->tiles),
         p.general->position.x / FN_TILE_WIDTH,
         p.general->position.y / FN_TILE_HEIGHT);
     if (tile == SOLID_CONVEYORBELT_LEFTEND ||
         p.general->position.x == 0 ||
         tile == 0) {
       found_begin = 1;
-      fn_level_tiles_set(p.tiles,
+      fn_level_tiles_set(&(p.level_data->tiles),
           p.general->position.x / FN_TILE_WIDTH,
           p.general->position.y / FN_TILE_HEIGHT,
           SOLID_BLACK);
@@ -4534,7 +4533,7 @@ void fn_level_actor_function_conveyor_act(
               p.general->position.w &&
       heropos.y + heropos.h == p.general->position.y) {
     fn_hero_push_horizontally(
-        p.hero, p.solids, direction * FN_HALFTILE_WIDTH);
+        p.hero, &(p.level_data->solids), direction * FN_HALFTILE_WIDTH);
   }
 }
 
@@ -4706,7 +4705,7 @@ void fn_level_actor_function_hostileshot_act(
   } else {
     p.general->position.x += FN_HALFTILE_WIDTH;
   }
-  if (fn_level_solids_get(p.solids,
+  if (fn_level_solids_get(&(p.level_data->solids),
         p.general->position.x / FN_TILE_WIDTH,
         p.general->position.y / FN_TILE_HEIGHT)) {
     p.general->is_alive = 0;
@@ -5012,7 +5011,7 @@ void fn_level_actor_function_door_act(
       break;
     case 1: /* door opening */
       if (data->counter == 0) {
-        fn_level_solids_set(p.solids,
+        fn_level_solids_set(&(p.level_data->solids),
             p.general->position.x / FN_TILE_WIDTH,
             p.general->position.y / FN_TILE_HEIGHT,
             0);
@@ -5367,7 +5366,7 @@ void fn_level_actor_function_shootable_wall_shot(
 {
   p.general->is_alive = 0;
   fn_hero_score_add(p.hero_score, 10);
-  fn_level_solids_set(p.solids,
+  fn_level_solids_set(&(p.level_data->solids),
       p.general->position.x / FN_TILE_WIDTH,
       p.general->position.y / FN_TILE_HEIGHT,
       0);
@@ -5703,7 +5702,7 @@ void fn_level_actor_function_fan_act(
       if (hdistance_abs < 8 * FN_HALFTILE_WIDTH) {
         fn_hero_push_horizontally(
             p.hero,
-            p.solids,
+            &(p.level_data->solids),
             fandirection * FN_TILE_WIDTH);
       }
     }
@@ -7410,8 +7409,7 @@ fn_level_actor_t * fn_level_actor_create(
       struct fn_level_actor_create_params_t p ={
           .general = actor->general,
           .specific = &(actor->specific),
-          .tiles = level->tiles,
-          .solids = level->solids
+          .level_data = level->data,
       };
 
       func(p);
@@ -7561,7 +7559,7 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
-        .solids = level->solids,
+        .level_data = level->data,
         .hero_score = hero->score,
         .hero_position = fn_hero_get_position(hero),
         .hero = hero
@@ -7585,7 +7583,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level)
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
-        .solids = level->solids,
+        .level_data = level->data,
         .hero_score = hero->score,
         .hero = hero
     };
@@ -7637,7 +7635,7 @@ Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level)
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
-        .solids = level->solids,
+        .level_data = level->data,
         .hero_score = hero->score,
         .hero = hero
     };
