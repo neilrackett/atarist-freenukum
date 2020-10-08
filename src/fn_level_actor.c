@@ -76,10 +76,8 @@ typedef void (* fn_level_actor_hero_touch_start_function_t)(
 typedef struct fn_level_actor_hero_touch_end_params_t {
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
     FnHeroScore * hero_score;
     FnHeroHealth * hero_health;
-    fn_hero_t * hero;
 } fn_level_actor_hero_touch_end_params_t;
 
 typedef void (* fn_level_actor_hero_touch_end_function_t)(
@@ -7493,10 +7491,8 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
     struct fn_level_actor_hero_touch_end_params_t p = {
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
         .hero_score = hero->score,
         .hero_health = hero->health,
-        .hero = hero
     };
     func(p);
   }
