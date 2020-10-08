@@ -1,4 +1,5 @@
 use super::UserEvent;
+use std::convert::TryFrom;
 
 pub struct Score {
     count: u64,
@@ -143,12 +144,66 @@ impl Inventory {
     }
 }
 
+pub struct FetchedLetterState {
+    last_fetched: Option<FetchedLetter>,
+}
+
+impl FetchedLetterState {
+    pub fn new() -> Self {
+        FetchedLetterState { last_fetched: None }
+    }
+
+    pub fn picked(&mut self, letter: FetchedLetter) {
+        use FetchedLetter as L;
+        self.last_fetched = match (self.last_fetched, letter) {
+            (_, L::D) => Some(L::D),
+            (Some(L::D), L::U) => Some(L::U),
+            (Some(L::U), L::K) => Some(L::K),
+            (Some(L::K), L::E) => Some(L::E),
+            _ => None,
+        }
+    }
+
+    pub fn succeeded(&self) -> bool {
+        self.last_fetched == Some(FetchedLetter::E)
+    }
+
+    pub fn reset(&mut self) {
+        self.last_fetched = None;
+    }
+}
+
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+pub enum FetchedLetter {
+    D,
+    U,
+    K,
+    E,
+}
+
+impl TryFrom<char> for FetchedLetter {
+    type Error = String;
+
+    fn try_from(c: char) -> Result<Self, Self::Error> {
+        match c {
+            'D' | 'd' => Ok(FetchedLetter::D),
+            'U' | 'u' => Ok(FetchedLetter::U),
+            'K' | 'k' => Ok(FetchedLetter::K),
+            'E' | 'e' => Ok(FetchedLetter::E),
+            c => Err(format!("Unknown hero letter {:?}", c)),
+        }
+    }
+}
+
 pub mod ffi {
+    use libc::c_char;
+
     pub type FnHeroScore = super::Score;
     pub type FnHeroHealth = super::Health;
     pub type FnHeroFirepower = super::Firepower;
     pub type FnHeroInventoryItem = super::InventoryItem;
     pub type FnHeroInventory = super::Inventory;
+    pub type FnHeroFetchedLetterState = super::FetchedLetterState;
 
     #[no_mangle]
     pub extern "C" fn fn_hero_score_create() -> *mut FnHeroScore {
@@ -338,5 +393,53 @@ pub mod ffi {
         assert!(!inventory.is_null());
         let inventory: &FnHeroInventory = unsafe { &(*inventory) };
         inventory.is_set(item)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_fetched_letter_state_create(
+    ) -> *mut FnHeroFetchedLetterState {
+        Box::into_raw(Box::new(FnHeroFetchedLetterState::new()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_fetched_letter_state_free(
+        ptr: *mut FnHeroFetchedLetterState,
+    ) {
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_fetched_letter_state_picked(
+        ptr: *mut FnHeroFetchedLetterState,
+        letter: c_char,
+    ) {
+        assert!(!ptr.is_null());
+        let state: &mut FnHeroFetchedLetterState = unsafe { &mut (*ptr) };
+        use std::convert::TryFrom;
+        let picked =
+            super::FetchedLetter::try_from(letter as u8 as char).unwrap();
+        state.picked(picked);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_fetched_letter_state_reset(
+        ptr: *mut FnHeroFetchedLetterState,
+    ) {
+        assert!(!ptr.is_null());
+        let state: &mut FnHeroFetchedLetterState = unsafe { &mut (*ptr) };
+        state.reset();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_fetched_letter_state_succeeded(
+        ptr: *const FnHeroFetchedLetterState,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let state: &FnHeroFetchedLetterState = unsafe { &(*ptr) };
+        state.succeeded()
     }
 }

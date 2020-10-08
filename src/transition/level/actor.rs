@@ -186,6 +186,12 @@ pub struct ActorQueue {
     pub actors: Vec<ActorQueueItem>,
 }
 
+impl ActorQueue {
+    pub fn push_back(&mut self, item: ActorQueueItem) {
+        self.actors.push(item);
+    }
+}
+
 pub mod ffi {
     type FnLevelActorData = super::ActorData;
     type FnLevelActorType = super::ActorType;

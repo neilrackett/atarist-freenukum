@@ -43,6 +43,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
   hero->inventory = fn_hero_inventory_create();
+  hero->fetched_letter_state = fn_hero_fetched_letter_state_create();
   hero->score = fn_hero_score_create();
   hero->firepower = fn_hero_firepower_create();
   hero->health = fn_hero_health_create();
@@ -61,6 +62,7 @@ void fn_hero_delete(fn_hero_t * hero)
   fn_hero_health_free(hero->health); hero->health = NULL;
   fn_hero_firepower_free(hero->firepower); hero->firepower = NULL;
   fn_hero_score_free(hero->score); hero->score = NULL;
+  fn_hero_fetched_letter_state_free(hero->fetched_letter_state); hero->fetched_letter_state = NULL;
   fn_hero_inventory_free(hero->inventory); hero->inventory = NULL;
   free(hero); hero = NULL;
 }
@@ -91,6 +93,7 @@ void fn_hero_reset(fn_hero_t * hero)
   fn_hero_firepower_reset(hero->firepower);
 
   fn_hero_score_reset(hero->score);
+  fn_hero_fetched_letter_state_reset(hero->fetched_letter_state);
 
   hero->hidden = 0;
 
@@ -129,7 +132,7 @@ void fn_hero_enterlevel(
   fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyBlue);
   fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyPink);
   hero->hidden = 0;
-  hero->fetchedletter = 0;
+  fn_hero_fetched_letter_state_reset(hero->fetched_letter_state);
 }
 
 /* --------------------------------------------------------------- */
@@ -643,20 +646,6 @@ void fn_hero_fire_start(fn_hero_t * hero)
 void fn_hero_fire_stop(fn_hero_t * hero)
 {
   fn_hero_set_shooting(hero, FN_HERO_SHOOTING_FALSE);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_get_fetched_letter(fn_hero_t * hero)
-{
-  return hero->fetchedletter;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_fetched_letter(fn_hero_t * hero, Uint8 letter)
-{
-  hero->fetchedletter = letter;
 }
 
 /* --------------------------------------------------------------- */

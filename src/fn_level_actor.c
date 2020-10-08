@@ -60,13 +60,12 @@ typedef void (* fn_level_actor_free_function_t)(
 typedef struct fn_level_actor_hero_touch_start_params_t {
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
     FnLevelActorQueue * actor_queue;
     FnHeroScore * hero_score;
     FnHeroHealth * hero_health;
     FnHeroFirepower * hero_firepower;
     FnHeroInventory * hero_inventory;
-    fn_hero_t * hero;
+    FnHeroFetchedLetterState * hero_fetched_letter_state;
 } fn_level_actor_hero_touch_start_params_t;
 
 typedef void (* fn_level_actor_hero_touch_start_function_t)(
@@ -2602,57 +2601,54 @@ void fn_level_actor_function_item_touch_start(
         fn_level_actor_hero_touch_start_params_t p)
 {
   fn_level_actor_item_data_t * data = p.specific;
+
+  FnHeroFetchedLetterState * state = p.hero_fetched_letter_state;
+
   switch(p.general->actor_type) {
     case ActorType_LetterD:
-      fn_hero_set_fetched_letter(p.hero, 'D');
       p.general->is_alive = 0;
+      fn_hero_fetched_letter_state_picked(state, 'D');
       fn_hero_score_add(p.hero_score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score500,
-          p.general->position.x,
-          p.general->position.y);
+              ActorType_Score500,
+              p.general->position.x,
+              p.general->position.y);
       break;
     case ActorType_LetterU:
-      if (fn_hero_get_fetched_letter(p.hero) == 'D') {
-        fn_hero_set_fetched_letter(p.hero, 'U');
-      } else {
-        fn_hero_set_fetched_letter(p.hero, 0);
-      }
       p.general->is_alive = 0;
+      fn_hero_fetched_letter_state_picked(state, 'U');
       fn_hero_score_add(p.hero_score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score500,
-          p.general->position.x,
-          p.general->position.y);
+              ActorType_Score500,
+              p.general->position.x,
+              p.general->position.y);
       break;
     case ActorType_LetterK:
-      if (fn_hero_get_fetched_letter(p.hero) == 'U') {
-        fn_hero_set_fetched_letter(p.hero, 'K');
-      } else {
-        fn_hero_set_fetched_letter(p.hero, 0);
-      }
       p.general->is_alive = 0;
+      fn_hero_fetched_letter_state_picked(state, 'K');
       fn_hero_score_add(p.hero_score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score500,
-          p.general->position.x,
-          p.general->position.y);
+              ActorType_Score500,
+              p.general->position.x,
+              p.general->position.y);
       break;
     case ActorType_LetterE:
-      if (fn_hero_get_fetched_letter(p.hero) == 'K') {
-      fn_hero_score_add(p.hero_score, 10000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score10000,
-          p.general->position.x,
-          p.general->position.y);
-      } else {
-      fn_hero_score_add(p.hero_score, 500);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score500,
-          p.general->position.x,
-          p.general->position.y);
-      }
       p.general->is_alive = 0;
+      fn_hero_fetched_letter_state_picked(state, 'E');
+      if (fn_hero_fetched_letter_state_succeeded(state)) {
+          fn_hero_fetched_letter_state_reset(state);
+          fn_hero_score_add(p.hero_score, 10000);
+          fn_level_actor_queue_push_back(p.actor_queue,
+              ActorType_Score10000,
+              p.general->position.x,
+              p.general->position.y);
+      } else {
+          fn_hero_score_add(p.hero_score, 500);
+          fn_level_actor_queue_push_back(p.actor_queue,
+              ActorType_Score500,
+              p.general->position.x,
+              p.general->position.y);
+      }
       break;
     case ActorType_FullLife:
       fn_hero_health_fill_max(p.hero_health);
@@ -7475,13 +7471,12 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
     struct fn_level_actor_hero_touch_start_params_t p = {
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
         .actor_queue = actor_queue,
         .hero_score = hero->score,
         .hero_health = hero->health,
         .hero_firepower = hero->firepower,
         .hero_inventory = hero->inventory,
-        .hero = hero
+        .hero_fetched_letter_state = hero->fetched_letter_state,
     };
     func(p);
   }

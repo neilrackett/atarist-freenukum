@@ -278,6 +278,8 @@ typedef struct ActorQueue ActorQueue;
 
 typedef struct Bot Bot;
 
+typedef struct FetchedLetterState FetchedLetterState;
+
 typedef struct File File;
 
 typedef struct Firepower Firepower;
@@ -326,6 +328,8 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
+
+typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
 
@@ -461,6 +465,17 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+FnHeroFetchedLetterState *fn_hero_fetched_letter_state_create(void);
+
+void fn_hero_fetched_letter_state_free(FnHeroFetchedLetterState *ptr);
+
+void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
+                                         char letter);
+
+void fn_hero_fetched_letter_state_reset(FnHeroFetchedLetterState *ptr);
+
+bool fn_hero_fetched_letter_state_succeeded(const FnHeroFetchedLetterState *ptr);
 
 FnHeroFirepower *fn_hero_firepower_create(void);
 
