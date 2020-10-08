@@ -190,6 +190,24 @@ impl ActorQueue {
     pub fn push_back(&mut self, item: ActorQueueItem) {
         self.actors.push(item);
     }
+
+    pub fn push_particle_firework(
+        &mut self,
+        x: u16,
+        y: u16,
+        count: usize,
+    ) {
+        for i in 0..count {
+            let actor_type = match i % 4 {
+                0 => ActorType::ParticlePink,
+                1 => ActorType::ParticleBlue,
+                2 => ActorType::ParticleWhite,
+                3 => ActorType::ParticleGreen,
+                _ => unreachable!(),
+            };
+            self.push_back(ActorQueueItem { actor_type, x, y });
+        }
+    }
 }
 
 pub mod ffi {
@@ -262,5 +280,17 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let queue = unsafe { &mut (*ptr) };
         queue.actors.remove(0)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_queue_push_particle_firework(
+        ptr: *mut FnLevelActorQueue,
+        x: u16,
+        y: u16,
+        count: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+        queue.push_particle_firework(x, y, count);
     }
 }

@@ -581,6 +581,11 @@ void fn_level_actor_queue_push_back(FnLevelActorQueue *ptr,
                                     uint16_t x,
                                     uint16_t y);
 
+void fn_level_actor_queue_push_particle_firework(FnLevelActorQueue *ptr,
+                                                 uint16_t x,
+                                                 uint16_t y,
+                                                 uintptr_t count);
+
 FnLevelData *fn_level_data_create(void);
 
 void fn_level_data_free(FnLevelData *ptr);

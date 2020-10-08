@@ -86,7 +86,6 @@ typedef void (* fn_level_actor_hero_touch_end_function_t)(
 /* --------------------------------------------------------------- */
 
 typedef struct fn_level_actor_interact_start_params_t {
-    fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
     fn_level_t * level;
@@ -103,14 +102,11 @@ typedef void (* fn_level_actor_interact_start_function_t)(
 /* --------------------------------------------------------------- */
 
 typedef struct fn_level_actor_interact_end_params_t {
-    fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
     FnLevelData * level_data;
     FnHeroScore * hero_score;
     FnGeometry hero_position;
-    fn_hero_t * hero;
 } fn_level_actor_interact_end_params_t;
 
 typedef void (* fn_level_actor_interact_end_function_t)(
@@ -137,8 +133,7 @@ typedef struct fn_level_actor_blit_params_t {
     fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
-    fn_hero_t * hero;
+    FnGeometry * hero_position;
     const FnTileCache * tilecache;
     SDL_Surface * target;
 } fn_level_actor_blit_params_t;
@@ -150,14 +145,11 @@ typedef void (* fn_level_actor_blit_function_t)(
 /* --------------------------------------------------------------- */
 
 typedef struct fn_level_actor_shot_params_t {
-    fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
     FnLevelData * level_data;
     FnLevelActorQueue * actor_queue;
     FnHeroScore * hero_score;
-    fn_hero_t * hero;
 } fn_level_actor_shot_params_t;
 
 typedef void (* fn_level_actor_shot_function_t)(
@@ -844,10 +836,11 @@ void fn_level_actor_function_tankbot_act(
         p.general->position.x + FN_HALFTILE_WIDTH,
         p.general->position.y);
     fn_hero_score_add(p.hero_score, 2500);
-    fn_level_add_particle_firework(
-        p.level,
+    fn_level_actor_queue_push_particle_firework(
+        p.actor_queue,
         p.general->position.x,
-        p.general->position.y, 4);
+        p.general->position.y,
+        4);
   } else {
     data->current_frame %= data->num_frames;
     if (!fn_level_solids_get(&(p.level_data->solids),
@@ -1060,8 +1053,8 @@ void fn_level_actor_function_firewheelbot_act(
         ActorType_Explosion,
         p.general->position.x + FN_HALFTILE_WIDTH,
         p.general->position.y);
-    fn_level_add_particle_firework(
-        p.level,
+    fn_level_actor_queue_push_particle_firework(
+        p.actor_queue,
         p.general->position.x,
         p.general->position.y,
         8);
@@ -1671,8 +1664,8 @@ void fn_level_actor_function_acme_act(
             ActorType_Steam,
             p.general->position.x + FN_HALFTILE_WIDTH,
             p.general->position.y);
-        fn_level_add_particle_firework(
-            p.level,
+        fn_level_actor_queue_push_particle_firework(
+            p.actor_queue,
             p.general->position.x,
             p.general->position.y,
             4);
@@ -1715,8 +1708,8 @@ void fn_level_actor_function_acme_shot(
         p.general->position.x,
         p.general->position.y);
     p.general->is_alive = 0;
-    fn_level_add_particle_firework(
-        p.level,
+    fn_level_actor_queue_push_particle_firework(
+        p.actor_queue,
         p.general->position.x,
         p.general->position.y,
         4);
@@ -2045,8 +2038,8 @@ void fn_level_actor_function_mill_shot(
   
   data->lives--;
   if (data->lives > 0) {
-    fn_level_add_particle_firework(
-        p.level,
+    fn_level_actor_queue_push_particle_firework(
+        p.actor_queue,
         p.general->position.x + p.general->position.w / 2,
         p.general->position.y + p.general->position.h / 2,
         4);
@@ -2054,8 +2047,8 @@ void fn_level_actor_function_mill_shot(
     /* TODO add removal animation (destroyed body) */
     p.general->is_alive = 0;
     fn_hero_score_add(p.hero_score, 20000);
-    fn_level_add_particle_firework(
-        p.level,
+    fn_level_actor_queue_push_particle_firework(
+        p.actor_queue,
         p.general->position.x + p.general->position.w / 2,
         p.general->position.y + p.general->position.h / 2,
         20);
@@ -2852,8 +2845,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Football,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2863,8 +2856,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Joystick,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -2873,8 +2866,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Disk,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -2883,8 +2876,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Balloon,
           p.general->position.x,
           p.general->position.y - FN_TILE_HEIGHT);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2894,8 +2887,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Flag,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2905,8 +2898,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Radio,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -2915,8 +2908,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Soda,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2926,16 +2919,16 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_ChickenSingle,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
       break;
     case ActorType_BoxGreyEmpty:
       p.general->is_alive = 0;
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2945,8 +2938,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Boots,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2956,8 +2949,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Clamps,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2967,8 +2960,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Gun,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2978,8 +2971,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Bomb,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -2989,8 +2982,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_Glove,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -3000,8 +2993,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_FullLife,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -3011,8 +3004,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_AccessCard,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y,
           4);
@@ -3022,8 +3015,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterD,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -3032,8 +3025,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterU,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -3042,8 +3035,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterK,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -3052,8 +3045,8 @@ void fn_level_actor_function_item_shot(
       fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterE,
           p.general->position.x,
           p.general->position.y);
-      fn_level_add_particle_firework(
-          p.level,
+      fn_level_actor_queue_push_particle_firework(
+          p.actor_queue,
           p.general->position.x,
           p.general->position.y, 4);
       break;
@@ -4065,7 +4058,7 @@ void fn_level_actor_function_camera_blit(
 {
   const FnTexture * tile;
 
-  size_t x = fn_hero_get_x(p.hero);
+  size_t x = p.hero_position->x;
   if (x-1 > p.general->position.x) {
     tile = fn_tilecache_get_tile(p.tilecache,
         ANIM_CAMERA_RIGHT);
@@ -4347,8 +4340,8 @@ void fn_level_actor_function_unstablefloor_act(
             ActorType_Explosion,
             p.general->position.x + floorlength * FN_TILE_WIDTH,
             p.general->position.y);
-        fn_level_add_particle_firework(
-            p.level,
+        fn_level_actor_queue_push_particle_firework(
+            p.actor_queue,
             p.general->position.x + floorlength * FN_TILE_WIDTH,
             p.general->position.y, 4);
         floorlength++;
@@ -7526,7 +7519,6 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
     fn_hero_t * hero = fn_level_get_hero(level);
 
     struct fn_level_actor_interact_start_params_t p = {
-        .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
@@ -7550,14 +7542,11 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
     fn_hero_t * hero = fn_level_get_hero(level);
 
     struct fn_level_actor_interact_end_params_t p = {
-        .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
         .level_data = level->data,
         .hero_score = hero->score,
         .hero_position = fn_hero_get_position(hero),
-        .hero = hero
     };
 
     func(p);
@@ -7601,8 +7590,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
         .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
-        .hero = hero,
+        .hero_position = &(hero->position),
         .tilecache = fn_level_get_tilecache(level),
         .target = target
     };
@@ -7627,14 +7615,11 @@ Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelA
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
     fn_level_actor_shot_params_t p = {
-        .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
         .level_data = level->data,
         .actor_queue = actor_queue,
         .hero_score = hero->score,
-        .hero = hero
     };
     func(p);
     return 1;

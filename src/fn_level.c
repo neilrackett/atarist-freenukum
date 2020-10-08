@@ -1199,37 +1199,6 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-void fn_level_add_particle_firework(fn_level_t * lv,
-    Uint16 x, Uint16 y, Uint8 num_particles)
-{
-  Uint8 i;
-  for (i = 0; i < num_particles; i++) {
-    switch(i % 4) {
-      case 0:
-        fn_level_add_actor(lv, ActorType_ParticlePink,
-            x, y);
-        break;
-      case 1:
-        fn_level_add_actor(lv, ActorType_ParticleBlue,
-            x, y);
-        break;
-      case 2:
-        fn_level_add_actor(lv, ActorType_ParticleWhite,
-            x, y);
-        break;
-      case 3:
-        fn_level_add_actor(lv, ActorType_ParticleGreen,
-            x, y);
-        break;
-      default:
-        /* Do nothing, cannot be entered. */
-        break;
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
 {
   fn_hero_t * hero = fn_level_get_hero(lv);
