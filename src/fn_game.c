@@ -97,6 +97,8 @@ void fn_game_start(
 
   fn_hero_t * hero = fn_environment_get_hero(env);
   fn_hero_reset(hero);
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
+  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
@@ -122,13 +124,13 @@ void fn_game_start(
           env->screen,
           fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env),
-          env->hero->firepower);
+          firepower);
 
   fn_borders_blit_inventory(
           env->screen,
           fn_environment_build_texture_creation_params(env),
           fn_environment_get_tilecache(env),
-          env->hero->inventory);
+          inventory);
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
@@ -341,6 +343,9 @@ int fn_game_start_in_level(
       doupdate = 0;
     }
 
+    FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
+    FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
+
     res = SDL_WaitEvent(&event);
     if (res == 1) {
       switch(event.type) {
@@ -354,39 +359,39 @@ int fn_game_start_in_level(
               goto cleanup;
               break;
             case SDLK_1:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyRed);
+              fn_hero_inventory_set(inventory, InventoryItem_KeyRed);
               updateWholeScreen = 1;
               break;
             case SDLK_2:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyGreen);
+              fn_hero_inventory_set(inventory, InventoryItem_KeyGreen);
               updateWholeScreen = 1;
               break;
             case SDLK_3:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyBlue);
+              fn_hero_inventory_set(inventory, InventoryItem_KeyBlue);
               updateWholeScreen = 1;
               break;
             case SDLK_4:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_KeyPink);
+              fn_hero_inventory_set(inventory, InventoryItem_KeyPink);
               updateWholeScreen = 1;
               break;
             case SDLK_5:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_Boot);
+              fn_hero_inventory_set(inventory, InventoryItem_Boot);
               updateWholeScreen = 1;
               break;
             case SDLK_6:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_Glove);
+              fn_hero_inventory_set(inventory, InventoryItem_Glove);
               updateWholeScreen = 1;
               break;
             case SDLK_7:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_Clamp);
+              fn_hero_inventory_set(inventory, InventoryItem_Clamp);
               updateWholeScreen = 1;
               break;
             case SDLK_8:
-              fn_hero_inventory_set(hero->inventory, InventoryItem_AccessCard);
+              fn_hero_inventory_set(inventory, InventoryItem_AccessCard);
               updateWholeScreen = 1;
               break;
             case SDLK_9:
-              fn_hero_firepower_increase(hero->firepower, 1);
+              fn_hero_firepower_increase(firepower, 1);
               updateWholeScreen = 1;
               break;
             case SDLK_0:
@@ -584,7 +589,7 @@ int fn_game_start_in_level(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
                   fn_environment_get_tilecache(env),
-                  env->hero->firepower);
+                  firepower);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;
@@ -593,7 +598,7 @@ int fn_game_start_in_level(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
                   fn_environment_get_tilecache(env),
-                  env->hero->inventory);
+                  inventory);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

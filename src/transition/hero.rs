@@ -1,11 +1,57 @@
+use super::geometry::ffi::FnGeometry;
 use super::UserEvent;
+use crate::{TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
+
+pub struct HeroData {
+    pub position: FnGeometry,
+    pub score: ffi::FnHeroScore,
+    pub health: ffi::FnHeroHealth,
+    pub firepower: ffi::FnHeroFirepower,
+    pub inventory: ffi::FnHeroInventory,
+    pub fetched_letter_state: ffi::FnHeroFetchedLetterState,
+}
+
+impl HeroData {
+    fn default_position() -> FnGeometry {
+        FnGeometry {
+            x: 0,
+            y: 0,
+            w: TILE_WIDTH as u16,
+            h: TILE_HEIGHT as u16 * 2,
+        }
+    }
+
+    pub fn new() -> Self {
+        HeroData {
+            position: Self::default_position(),
+            score: Score::new(),
+            health: Health::new(),
+            firepower: Firepower::new(),
+            inventory: Inventory::new(),
+            fetched_letter_state: FetchedLetterState::new(),
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.position = Self::default_position();
+        self.score.reset();
+        self.health.reset();
+        self.firepower.reset();
+        self.inventory.reset();
+        self.fetched_letter_state.reset();
+    }
+}
 
 pub struct Score {
     count: u64,
 }
 
 impl Score {
+    pub fn new() -> Self {
+        Score { count: 0 }
+    }
+
     pub fn add(&mut self, amount: u64) {
         self.count = self.count.saturating_add(amount);
         self.emit_update();
@@ -33,6 +79,14 @@ impl Default for Health {
 
 impl Health {
     pub const MAX: u8 = 8;
+
+    pub fn new() -> Self {
+        Health::default()
+    }
+
+    pub fn reset(&mut self) {
+        self.life = Self::MAX;
+    }
 
     pub fn increase(&mut self, count: u8) {
         self.life = std::cmp::min(Self::MAX, self.life + count);
@@ -78,6 +132,10 @@ impl Default for Firepower {
 impl Firepower {
     pub const MAX: u8 = 4;
 
+    pub fn new() -> Firepower {
+        Firepower::default()
+    }
+
     pub fn increase(&mut self, count: u8) {
         self.shots = std::cmp::min(Self::MAX, self.shots + count);
         self.emit_update();
@@ -99,8 +157,8 @@ impl Firepower {
     }
 }
 
-#[repr(C)]
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[repr(C)]
 pub enum InventoryItem {
     KeyRed,
     KeyGreen,
@@ -118,6 +176,16 @@ pub struct Inventory {
 }
 
 impl Inventory {
+    pub fn new() -> Self {
+        Inventory {
+            items: Default::default(),
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.items.clear();
+    }
+
     pub fn clear(&mut self) {
         self.items.clear();
         self.emit_update();
@@ -196,8 +264,10 @@ impl TryFrom<char> for FetchedLetter {
 }
 
 pub mod ffi {
+    use super::super::geometry::ffi::FnGeometry;
     use libc::c_char;
 
+    pub type FnHeroData = super::HeroData;
     pub type FnHeroScore = super::Score;
     pub type FnHeroHealth = super::Health;
     pub type FnHeroFirepower = super::Firepower;
@@ -206,17 +276,71 @@ pub mod ffi {
     pub type FnHeroFetchedLetterState = super::FetchedLetterState;
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_score_create() -> *mut FnHeroScore {
-        Box::into_raw(Box::new(FnHeroScore { count: 0 }))
+    pub extern "C" fn fn_hero_data_create() -> *mut FnHeroData {
+        Box::into_raw(Box::new(FnHeroData::new()))
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_score_free(ptr: *mut FnHeroScore) {
+    pub extern "C" fn fn_hero_data_free(ptr: *mut FnHeroData) {
         if !ptr.is_null() {
             unsafe {
                 Box::from_raw(ptr);
             }
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_position(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnGeometry {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.position
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_score(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroScore {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.score
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_health(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroHealth {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.health
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_firepower(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroFirepower {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.firepower
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_inventory(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroInventory {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.inventory
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_fetched_letter_state(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroFetchedLetterState {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.fetched_letter_state
     }
 
     #[no_mangle]
@@ -230,10 +354,10 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_score_reset(score: *mut FnHeroScore) {
-        assert!(!score.is_null());
-        let score: &mut FnHeroScore = unsafe { &mut (*score) };
-        score.reset();
+    pub extern "C" fn fn_hero_data_reset(data: *mut FnHeroData) {
+        assert!(!data.is_null());
+        let data: &mut FnHeroData = unsafe { &mut (*data) };
+        data.reset();
     }
 
     #[no_mangle]
@@ -241,20 +365,6 @@ pub mod ffi {
         assert!(!score.is_null());
         let score: &FnHeroScore = unsafe { &(*score) };
         score.count
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_health_create() -> *mut FnHeroHealth {
-        Box::into_raw(Box::new(FnHeroHealth::default()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_health_free(ptr: *mut FnHeroHealth) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
     }
 
     #[no_mangle]
@@ -301,20 +411,6 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_firepower_create() -> *mut FnHeroFirepower {
-        Box::into_raw(Box::new(FnHeroFirepower::default()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_firepower_free(ptr: *mut FnHeroFirepower) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_hero_firepower_increase(
         firepower: *mut FnHeroFirepower,
         amount: u8,
@@ -325,35 +421,12 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_firepower_reset(
-        firepower: *mut FnHeroFirepower,
-    ) {
-        assert!(!firepower.is_null());
-        let firepower: &mut FnHeroFirepower = unsafe { &mut (*firepower) };
-        firepower.reset();
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_hero_firepower_num_shots(
         firepower: *const FnHeroFirepower,
     ) -> u8 {
         assert!(!firepower.is_null());
         let firepower: &FnHeroFirepower = unsafe { &(*firepower) };
         firepower.num_shots()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_inventory_create() -> *mut FnHeroInventory {
-        Box::into_raw(Box::new(FnHeroInventory::default()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_inventory_free(ptr: *mut FnHeroInventory) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
     }
 
     #[no_mangle]
@@ -393,23 +466,6 @@ pub mod ffi {
         assert!(!inventory.is_null());
         let inventory: &FnHeroInventory = unsafe { &(*inventory) };
         inventory.is_set(item)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_fetched_letter_state_create(
-    ) -> *mut FnHeroFetchedLetterState {
-        Box::into_raw(Box::new(FnHeroFetchedLetterState::new()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_fetched_letter_state_free(
-        ptr: *mut FnHeroFetchedLetterState,
-    ) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
     }
 
     #[no_mangle]

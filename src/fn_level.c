@@ -1202,8 +1202,9 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
 {
   fn_hero_t * hero = fn_level_get_hero(lv);
+  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
 
-  if (lv->num_shots < fn_hero_firepower_num_shots(hero->firepower)) {
+  if (lv->num_shots < fn_hero_firepower_num_shots(firepower)) {
     FnGeometry position = fn_hero_get_position(hero);
 
     fn_level_add_shot(lv, hero->direction, position.x, position.y, actor_queue);

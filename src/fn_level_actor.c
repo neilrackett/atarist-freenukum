@@ -61,11 +61,7 @@ typedef struct fn_level_actor_hero_touch_start_params_t {
     FnLevelActorData * general;
     void * specific;
     FnLevelActorQueue * actor_queue;
-    FnHeroScore * hero_score;
-    FnHeroHealth * hero_health;
-    FnHeroFirepower * hero_firepower;
-    FnHeroInventory * hero_inventory;
-    FnHeroFetchedLetterState * hero_fetched_letter_state;
+    FnHeroData * hero_data;
 } fn_level_actor_hero_touch_start_params_t;
 
 typedef void (* fn_level_actor_hero_touch_start_function_t)(
@@ -76,8 +72,7 @@ typedef void (* fn_level_actor_hero_touch_start_function_t)(
 typedef struct fn_level_actor_hero_touch_end_params_t {
     FnLevelActorData * general;
     void * specific;
-    FnHeroScore * hero_score;
-    FnHeroHealth * hero_health;
+    FnHeroData * hero_data;
 } fn_level_actor_hero_touch_end_params_t;
 
 typedef void (* fn_level_actor_hero_touch_end_function_t)(
@@ -90,9 +85,7 @@ typedef struct fn_level_actor_interact_start_params_t {
     void * specific;
     fn_level_t * level;
     FnLevelData * level_data;
-    FnHeroScore * hero_score;
-    FnHeroInventory * hero_inventory;
-    FnGeometry hero_position;
+    FnHeroData * hero_data;
     fn_hero_t * hero;
 } fn_level_actor_interact_start_params_t;
 
@@ -105,8 +98,7 @@ typedef struct fn_level_actor_interact_end_params_t {
     FnLevelActorData * general;
     void * specific;
     FnLevelData * level_data;
-    FnHeroScore * hero_score;
-    FnGeometry hero_position;
+    FnHeroData * hero_data;
 } fn_level_actor_interact_end_params_t;
 
 typedef void (* fn_level_actor_interact_end_function_t)(
@@ -120,7 +112,7 @@ typedef struct fn_level_actor_act_params_t {
     fn_level_t * level;
     FnLevelData * level_data;
     FnLevelActorQueue * actor_queue;
-    FnHeroScore * hero_score;
+    FnHeroData * hero_data;
     fn_hero_t * hero;
 } fn_level_actor_act_params_t;
 
@@ -133,7 +125,7 @@ typedef struct fn_level_actor_blit_params_t {
     fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
-    FnGeometry * hero_position;
+    FnHeroData * hero_data;
     const FnTileCache * tilecache;
     SDL_Surface * target;
 } fn_level_actor_blit_params_t;
@@ -149,7 +141,7 @@ typedef struct fn_level_actor_shot_params_t {
     void * specific;
     FnLevelData * level_data;
     FnLevelActorQueue * actor_queue;
-    FnHeroScore * hero_score;
+    FnHeroData * hero_data;
 } fn_level_actor_shot_params_t;
 
 typedef void (* fn_level_actor_shot_function_t)(
@@ -722,7 +714,8 @@ void fn_level_actor_function_robot_shot(
 {
   fn_level_actor_robot_data_t * data = p.specific;
 
-  fn_hero_score_add(p.hero_score, 100);
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+  fn_hero_score_add(score, 100);
   if (data->touching_hero) {
     p.general->hurts_hero = false;
     data->touching_hero = 0;
@@ -835,7 +828,8 @@ void fn_level_actor_function_tankbot_act(
         ActorType_Explosion,
         p.general->position.x + FN_HALFTILE_WIDTH,
         p.general->position.y);
-    fn_hero_score_add(p.hero_score, 2500);
+    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+    fn_hero_score_add(score, 2500);
     fn_level_actor_queue_push_particle_firework(
         p.actor_queue,
         p.general->position.x,
@@ -1058,7 +1052,8 @@ void fn_level_actor_function_firewheelbot_act(
         p.general->position.x,
         p.general->position.y,
         8);
-    fn_hero_score_add(p.hero_score, 2500);
+    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+    fn_hero_score_add(score, 2500);
   } else {
     data->counter++;
     if (data->counter % 2) {
@@ -1353,7 +1348,8 @@ void fn_level_actor_function_wallcrawler_shot(
         ActorType_Explosion,
         p.general->position.x,
         p.general->position.y);
-    fn_hero_score_add(p.hero_score, 100);
+    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+    fn_hero_score_add(score, 100);
   }
 }
 
@@ -1423,8 +1419,9 @@ void fn_level_actor_function_lift_interact_start(
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
-  if (fn_geometry_touches(p.hero_position, p.general->position) &&
-      p.hero_position.y + p.hero_position.h == p.general->position.y) {
+  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
+  if (fn_geometry_touches(*hero_position, p.general->position) &&
+      hero_position->y + hero_position->h == p.general->position.y) {
     data->state = fn_level_actor_lift_state_ascending;
   }
 }
@@ -1441,8 +1438,9 @@ void fn_level_actor_function_lift_interact_end(
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
-  if (fn_geometry_touches(p.hero_position, p.general->position) &&
-      p.hero_position.x == p.general->position.x) {
+  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
+  if (fn_geometry_touches(*hero_position, p.general->position) &&
+      hero_position->x == p.general->position.x) {
     data->state = fn_level_actor_lift_state_idle;
   } else {
     data->state = fn_level_actor_lift_state_descending;
@@ -1702,7 +1700,8 @@ void fn_level_actor_function_acme_shot(
   fn_level_actor_acme_data_t * data = p.specific;
 
   if (data->counter > 0) {
-    fn_hero_score_add(p.hero_score, 500);
+    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+    fn_hero_score_add(score, 500);
     fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score500,
         p.general->position.x,
@@ -1991,7 +1990,8 @@ void fn_level_actor_function_mill_hero_touch_start(
   fn_level_actor_mill_data_t * data = p.specific;
   if (data->lives > 0) {
     /* TODO check if this is okay or if we need to go beyond 0 */
-    fn_hero_health_kill(p.hero_health);
+    FnHeroHealth * health = fn_hero_data_get_health(p.hero_data);
+    fn_hero_health_kill(health);
   }
 }
 
@@ -2046,7 +2046,8 @@ void fn_level_actor_function_mill_shot(
   } else {
     /* TODO add removal animation (destroyed body) */
     p.general->is_alive = 0;
-    fn_hero_score_add(p.hero_score, 20000);
+    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+    fn_hero_score_add(score, 20000);
     fn_level_actor_queue_push_particle_firework(
         p.actor_queue,
         p.general->position.x + p.general->position.w / 2,
@@ -2132,7 +2133,8 @@ void fn_level_actor_function_accesscard_slot_interact_start(
   fn_level_actor_access_card_slot_data_t * data = p.specific;
   fn_environment_t * env = fn_level_get_environment(p.level);
 
-  if (fn_hero_inventory_is_set(p.hero_inventory, InventoryItem_AccessCard)) {
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
+  if (fn_hero_inventory_is_set(inventory, InventoryItem_AccessCard)) {
     fn_list_t * iter = NULL;
     for (iter = fn_list_first(p.level->actors);
         iter != NULL;
@@ -2149,7 +2151,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
     data->current_frame = 0;
     data->num_frames = 1;
     data->tile = OBJ_ACCESS_CARD_SLOT + 8;
-    fn_hero_inventory_unset(p.hero_inventory, InventoryItem_AccessCard);
+    fn_hero_inventory_unset(inventory, InventoryItem_AccessCard);
   } else {
     fn_infobox_show(
         env->screen,
@@ -2265,10 +2267,11 @@ void fn_level_actor_function_glove_slot_interact_start(
         fn_level_actor_interact_start_params_t p)
 {
   fn_level_actor_glove_slot_data_t * data = p.specific;
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
   switch(data->state)
   {
     case fn_level_actor_glove_slot_state_idle:
-      if (fn_hero_inventory_is_set(p.hero_inventory, InventoryItem_Glove)) {
+      if (fn_hero_inventory_is_set(inventory, InventoryItem_Glove)) {
         data->state = fn_level_actor_glove_slot_state_expanding;
       } else {
         data->state = fn_level_actor_glove_slot_state_shooting;
@@ -2593,13 +2596,22 @@ void fn_level_actor_function_item_touch_start(
 {
   fn_level_actor_item_data_t * data = p.specific;
 
-  FnHeroFetchedLetterState * state = p.hero_fetched_letter_state;
+  FnHeroFetchedLetterState * state =
+      fn_hero_data_get_fetched_letter_state(p.hero_data);;
+  FnHeroScore * score =
+      fn_hero_data_get_score(p.hero_data);;
+  FnHeroHealth * health =
+      fn_hero_data_get_health(p.hero_data);;
+  FnHeroFirepower * firepower =
+      fn_hero_data_get_firepower(p.hero_data);;
+  FnHeroInventory * inventory =
+      fn_hero_data_get_inventory(p.hero_data);;
 
   switch(p.general->actor_type) {
     case ActorType_LetterD:
       p.general->is_alive = 0;
       fn_hero_fetched_letter_state_picked(state, 'D');
-      fn_hero_score_add(p.hero_score, 500);
+      fn_hero_score_add(score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score500,
               p.general->position.x,
@@ -2608,7 +2620,7 @@ void fn_level_actor_function_item_touch_start(
     case ActorType_LetterU:
       p.general->is_alive = 0;
       fn_hero_fetched_letter_state_picked(state, 'U');
-      fn_hero_score_add(p.hero_score, 500);
+      fn_hero_score_add(score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score500,
               p.general->position.x,
@@ -2617,7 +2629,7 @@ void fn_level_actor_function_item_touch_start(
     case ActorType_LetterK:
       p.general->is_alive = 0;
       fn_hero_fetched_letter_state_picked(state, 'K');
-      fn_hero_score_add(p.hero_score, 500);
+      fn_hero_score_add(score, 500);
       fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score500,
               p.general->position.x,
@@ -2628,13 +2640,13 @@ void fn_level_actor_function_item_touch_start(
       fn_hero_fetched_letter_state_picked(state, 'E');
       if (fn_hero_fetched_letter_state_succeeded(state)) {
           fn_hero_fetched_letter_state_reset(state);
-          fn_hero_score_add(p.hero_score, 10000);
+          fn_hero_score_add(score, 10000);
           fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score10000,
               p.general->position.x,
               p.general->position.y);
       } else {
-          fn_hero_score_add(p.hero_score, 500);
+          fn_hero_score_add(score, 500);
           fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score500,
               p.general->position.x,
@@ -2642,61 +2654,61 @@ void fn_level_actor_function_item_touch_start(
       }
       break;
     case ActorType_FullLife:
-      fn_hero_health_fill_max(p.hero_health);
+      fn_hero_health_fill_max(health);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Gun:
-      fn_hero_firepower_increase(p.hero_firepower, 1);
+      fn_hero_firepower_increase(firepower, 1);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_AccessCard:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_AccessCard);
+      fn_hero_inventory_set(inventory, InventoryItem_AccessCard);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Glove:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_Glove);
+      fn_hero_inventory_set(inventory, InventoryItem_Glove);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Boots:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_Boot);
+      fn_hero_inventory_set(inventory, InventoryItem_Boot);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Clamps:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_Clamp);
+      fn_hero_inventory_set(inventory, InventoryItem_Clamp);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 1000);
+      fn_hero_score_add(score, 1000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score1000,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_Football:
-      fn_hero_score_add(p.hero_score, 100);
+      fn_hero_score_add(score, 100);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score100,
           p.general->position.x,
@@ -2704,7 +2716,7 @@ void fn_level_actor_function_item_touch_start(
       p.general->is_alive = 0;
       break;
     case ActorType_Disk:
-      fn_hero_score_add(p.hero_score, 5000);
+      fn_hero_score_add(score, 5000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score5000,
           p.general->position.x,
@@ -2712,7 +2724,7 @@ void fn_level_actor_function_item_touch_start(
       p.general->is_alive = 0;
       break;
     case ActorType_Joystick:
-      fn_hero_score_add(p.hero_score, 2000);
+      fn_hero_score_add(score, 2000);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score2000,
           p.general->position.x,
@@ -2723,21 +2735,21 @@ void fn_level_actor_function_item_touch_start(
     case ActorType_Flag:
       switch(data->current_frame) {
         case 0:
-          fn_hero_score_add(p.hero_score, 100);
+          fn_hero_score_add(score, 100);
           fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score100,
               p.general->position.x,
               p.general->position.y);
           break;
         case 1:
-          fn_hero_score_add(p.hero_score, 2000);
+          fn_hero_score_add(score, 2000);
           fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score2000,
               p.general->position.x,
               p.general->position.y);
           break;
         case 2:
-          fn_hero_score_add(p.hero_score, 5000);
+          fn_hero_score_add(score, 5000);
           fn_level_actor_queue_push_back(p.actor_queue,
               ActorType_Score5000,
               p.general->position.x,
@@ -2747,27 +2759,27 @@ void fn_level_actor_function_item_touch_start(
       p.general->is_alive = 0;
       break;
     case ActorType_Soda:
-      fn_hero_health_increase(p.hero_health, 1);
+      fn_hero_health_increase(health, 1);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 200);
+      fn_hero_score_add(score, 200);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score200,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_ChickenSingle:
-      fn_hero_health_increase(p.hero_health, 1);
+      fn_hero_health_increase(health, 1);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 100);
+      fn_hero_score_add(score, 100);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score100,
           p.general->position.x,
           p.general->position.y);
       break;
     case ActorType_ChickenDouble:
-      fn_hero_health_increase(p.hero_health, 2);
+      fn_hero_health_increase(health, 2);
       p.general->is_alive = 0;
-      fn_hero_score_add(p.hero_score, 200);
+      fn_hero_score_add(score, 200);
       fn_level_actor_queue_push_back(p.actor_queue,
           ActorType_Score200,
           p.general->position.x,
@@ -3090,7 +3102,8 @@ void fn_level_actor_function_soda_flying_free(
 void fn_level_actor_function_soda_flying_touch_start(
         fn_level_actor_hero_touch_start_params_t p)
 {
-  fn_hero_score_add(p.hero_score, 1000);
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+  fn_hero_score_add(score, 1000);
   fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score1000,
       p.general->position.x,
@@ -3174,9 +3187,10 @@ void fn_level_actor_function_balloon_touch_start(
         fn_level_actor_hero_touch_start_params_t p)
 {
   fn_level_actor_balloon_data_t * data = p.specific;
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
   if (!data->destroyed) {
     p.general->is_alive = 0;
-    fn_hero_score_add(p.hero_score, 10000);
+    fn_hero_score_add(score, 10000);
     fn_level_actor_queue_push_back(p.actor_queue,
         ActorType_Score10000,
         p.general->position.x,
@@ -4058,7 +4072,8 @@ void fn_level_actor_function_camera_blit(
 {
   const FnTexture * tile;
 
-  size_t x = p.hero_position->x;
+  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
+  size_t x = hero_position->x;
   if (x-1 > p.general->position.x) {
     tile = fn_tilecache_get_tile(p.tilecache,
         ANIM_CAMERA_RIGHT);
@@ -4084,7 +4099,8 @@ void fn_level_actor_function_camera_shot(
         fn_level_actor_shot_params_t p)
 {
   p.general->is_alive = 0;
-  fn_hero_score_add(p.hero_score, 100);
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+  fn_hero_score_add(score, 100);
   fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score100,
       p.general->position.x,
@@ -5191,10 +5207,11 @@ void fn_level_actor_function_keyhole_interact_start(
       fn_error_print_commandline("Invalid keyhole actor");
   }
 
-  haskey = fn_hero_inventory_is_set(p.hero_inventory, needed_key);
+  FnHeroInventory * hero_inventory = fn_hero_data_get_inventory(p.hero_data);
+  haskey = fn_hero_inventory_is_set(hero_inventory, needed_key);
 
   if (haskey) {
-    fn_hero_inventory_unset(p.hero_inventory, needed_key);
+    fn_hero_inventory_unset(hero_inventory, needed_key);
     data->counter = 5;
 
     /* open all doors with the real color */
@@ -5246,18 +5263,20 @@ void fn_level_actor_function_key_create(
 void fn_level_actor_function_key_touch_start(
         fn_level_actor_hero_touch_start_params_t p)
 {
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
   switch(p.general->actor_type) {
     case ActorType_KeyRed:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_KeyRed);
+      fn_hero_inventory_set(inventory, InventoryItem_KeyRed);
       break;
     case ActorType_KeyBlue:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_KeyBlue);
+      fn_hero_inventory_set(inventory, InventoryItem_KeyBlue);
       break;
     case ActorType_KeyGreen:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_KeyGreen);
+      fn_hero_inventory_set(inventory, InventoryItem_KeyGreen);
       break;
     case ActorType_KeyPink:
-      fn_hero_inventory_set(p.hero_inventory, InventoryItem_KeyPink);
+      fn_hero_inventory_set(inventory, InventoryItem_KeyPink);
       break;
     default:
       printf(__FILE__ ":%d: warning: key #%d"
@@ -5265,7 +5284,7 @@ void fn_level_actor_function_key_touch_start(
           __LINE__, p.general->actor_type);
       break;
   }
-  fn_hero_score_add(p.hero_score, 1000);
+  fn_hero_score_add(score, 1000);
   fn_level_actor_queue_push_back(p.actor_queue,
       ActorType_Score1000,
       p.general->position.x,
@@ -5355,7 +5374,8 @@ void fn_level_actor_function_shootable_wall_shot(
         fn_level_actor_shot_params_t p)
 {
   p.general->is_alive = 0;
-  fn_hero_score_add(p.hero_score, 10);
+  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
+  fn_hero_score_add(score, 10);
   fn_level_solids_set(&(p.level_data->solids),
       p.general->position.x / FN_TILE_WIDTH,
       p.general->position.y / FN_TILE_HEIGHT,
@@ -7463,11 +7483,7 @@ void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * leve
         .general = actor->general,
         .specific = actor->specific,
         .actor_queue = actor_queue,
-        .hero_score = hero->score,
-        .hero_health = hero->health,
-        .hero_firepower = hero->firepower,
-        .hero_inventory = hero->inventory,
-        .hero_fetched_letter_state = hero->fetched_letter_state,
+        .hero_data = hero->data,
     };
     func(p);
   }
@@ -7484,8 +7500,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
     struct fn_level_actor_hero_touch_end_params_t p = {
         .general = actor->general,
         .specific = actor->specific,
-        .hero_score = hero->score,
-        .hero_health = hero->health,
+        .hero_data = hero->data,
     };
     func(p);
   }
@@ -7522,9 +7537,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
         .general = actor->general,
         .specific = actor->specific,
         .level = level,
-        .hero_score = hero->score,
-        .hero_inventory = hero->inventory,
-        .hero_position = fn_hero_get_position(hero),
+        .hero_data = hero->data,
         .hero = hero,
     };
 
@@ -7545,8 +7558,7 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
         .general = actor->general,
         .specific = actor->specific,
         .level_data = level->data,
-        .hero_score = hero->score,
-        .hero_position = fn_hero_get_position(hero),
+        .hero_data = hero->data,
     };
 
     func(p);
@@ -7569,7 +7581,7 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level, FnLevelActo
         .level = level,
         .level_data = level->data,
         .actor_queue = actor_queue,
-        .hero_score = hero->score,
+        .hero_data = hero->data,
         .hero = hero
     };
     func(p);
@@ -7590,7 +7602,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
         .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
-        .hero_position = &(hero->position),
+        .hero_data = hero->data,
         .tilecache = fn_level_get_tilecache(level),
         .target = target
     };
@@ -7619,7 +7631,7 @@ Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelA
         .specific = actor->specific,
         .level_data = level->data,
         .actor_queue = actor_queue,
-        .hero_score = hero->score,
+        .hero_data = hero->data,
     };
     func(p);
     return 1;

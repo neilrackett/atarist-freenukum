@@ -286,6 +286,8 @@ typedef struct Firepower Firepower;
 
 typedef struct Health Health;
 
+typedef struct HeroData HeroData;
+
 typedef struct InputField InputField;
 
 typedef struct Inventory Inventory;
@@ -329,13 +331,15 @@ typedef struct {
 
 typedef Geometry FnGeometry;
 
+typedef HeroData FnHeroData;
+
 typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
 
-typedef InventoryItem FnHeroInventoryItem;
-
 typedef Score FnHeroScore;
+
+typedef InventoryItem FnHeroInventoryItem;
 
 typedef HorizontalDirection FnHorizontalDirection;
 
@@ -466,9 +470,23 @@ bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
 
-FnHeroFetchedLetterState *fn_hero_fetched_letter_state_create(void);
+FnHeroData *fn_hero_data_create(void);
 
-void fn_hero_fetched_letter_state_free(FnHeroFetchedLetterState *ptr);
+void fn_hero_data_free(FnHeroData *ptr);
+
+FnHeroFetchedLetterState *fn_hero_data_get_fetched_letter_state(FnHeroData *ptr);
+
+FnHeroFirepower *fn_hero_data_get_firepower(FnHeroData *ptr);
+
+FnHeroHealth *fn_hero_data_get_health(FnHeroData *ptr);
+
+FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
+
+FnGeometry *fn_hero_data_get_position(FnHeroData *ptr);
+
+FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
+
+void fn_hero_data_reset(FnHeroData *data);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);
@@ -477,23 +495,13 @@ void fn_hero_fetched_letter_state_reset(FnHeroFetchedLetterState *ptr);
 
 bool fn_hero_fetched_letter_state_succeeded(const FnHeroFetchedLetterState *ptr);
 
-FnHeroFirepower *fn_hero_firepower_create(void);
-
-void fn_hero_firepower_free(FnHeroFirepower *ptr);
-
 void fn_hero_firepower_increase(FnHeroFirepower *firepower, uint8_t amount);
 
 uint8_t fn_hero_firepower_num_shots(const FnHeroFirepower *firepower);
 
-void fn_hero_firepower_reset(FnHeroFirepower *firepower);
-
-FnHeroHealth *fn_hero_health_create(void);
-
 void fn_hero_health_decrease(FnHeroHealth *health, uint8_t amount);
 
 void fn_hero_health_fill_max(FnHeroHealth *health);
-
-void fn_hero_health_free(FnHeroHealth *ptr);
 
 uint8_t fn_hero_health_get(const FnHeroHealth *health);
 
@@ -502,10 +510,6 @@ void fn_hero_health_increase(FnHeroHealth *health, uint8_t amount);
 void fn_hero_health_kill(FnHeroHealth *health);
 
 void fn_hero_inventory_clear(FnHeroInventory *inventory);
-
-FnHeroInventory *fn_hero_inventory_create(void);
-
-void fn_hero_inventory_free(FnHeroInventory *ptr);
 
 bool fn_hero_inventory_is_set(const FnHeroInventory *inventory,
                               FnHeroInventoryItem item);
@@ -518,13 +522,7 @@ void fn_hero_inventory_unset(FnHeroInventory *inventory,
 
 void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 
-FnHeroScore *fn_hero_score_create(void);
-
-void fn_hero_score_free(FnHeroScore *ptr);
-
 uint64_t fn_hero_score_get(const FnHeroScore *score);
-
-void fn_hero_score_reset(FnHeroScore *score);
 
 void fn_horizontal_direction_print(FnHorizontalDirection direction);
 

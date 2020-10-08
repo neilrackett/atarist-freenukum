@@ -42,11 +42,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 {
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
-  hero->inventory = fn_hero_inventory_create();
-  hero->fetched_letter_state = fn_hero_fetched_letter_state_create();
-  hero->score = fn_hero_score_create();
-  hero->firepower = fn_hero_firepower_create();
-  hero->health = fn_hero_health_create();
+  hero->data = fn_hero_data_create();
 
   assert(env != NULL);
   hero->env = env;
@@ -59,11 +55,7 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
 
 void fn_hero_delete(fn_hero_t * hero)
 {
-  fn_hero_health_free(hero->health); hero->health = NULL;
-  fn_hero_firepower_free(hero->firepower); hero->firepower = NULL;
-  fn_hero_score_free(hero->score); hero->score = NULL;
-  fn_hero_fetched_letter_state_free(hero->fetched_letter_state); hero->fetched_letter_state = NULL;
-  fn_hero_inventory_free(hero->inventory); hero->inventory = NULL;
+  fn_hero_data_free(hero->data); hero->data = NULL;
   free(hero); hero = NULL;
 }
 
@@ -74,8 +66,7 @@ void fn_hero_reset(fn_hero_t * hero)
   fn_hero_set_x(hero, 0);
   fn_hero_set_y(hero, 0);
 
-  hero->position.w = FN_TILE_WIDTH;
-  hero->position.h = FN_TILE_HEIGHT * 2;
+  fn_hero_data_reset(hero->data);
 
   hero->direction = HorizontalDirection_Right;
   hero->motion = FN_HERO_MOTION_NONE;
@@ -87,13 +78,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   hero->animationframe = 0;
   hero->num_animationframes = 1;
-
-  fn_hero_inventory_clear(hero->inventory);
-  fn_hero_health_fill_max(hero->health);
-  fn_hero_firepower_reset(hero->firepower);
-
-  fn_hero_score_reset(hero->score);
-  fn_hero_fetched_letter_state_reset(hero->fetched_letter_state);
 
   hero->hidden = 0;
 
@@ -127,12 +111,16 @@ void fn_hero_enterlevel(
   hero->animationframe = 0;
   hero->num_animationframes = 1;
 
-  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyRed);
-  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyGreen);
-  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyBlue);
-  fn_hero_inventory_unset(hero->inventory, InventoryItem_KeyPink);
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
+  fn_hero_inventory_unset(inventory, InventoryItem_KeyRed);
+  fn_hero_inventory_unset(inventory, InventoryItem_KeyGreen);
+  fn_hero_inventory_unset(inventory, InventoryItem_KeyBlue);
+  fn_hero_inventory_unset(inventory, InventoryItem_KeyPink);
   hero->hidden = 0;
-  fn_hero_fetched_letter_state_reset(hero->fetched_letter_state);
+
+  FnHeroFetchedLetterState * fetched_letter_state =
+      fn_hero_data_get_fetched_letter_state(hero->data);
+  fn_hero_fetched_letter_state_reset(fetched_letter_state);
 }
 
 /* --------------------------------------------------------------- */
@@ -187,16 +175,17 @@ void fn_hero_blit(
 
   Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
   if (fn_environment_get_draw_collision_bounds(env)) {
-    fn_geometry_draw_outline(target, hero->position, collision_color);
+    FnGeometry * position = fn_hero_data_get_position(hero->data);
+    fn_geometry_draw_outline(target, *position, collision_color);
 
     Uint16 i = 0;
     Uint16 j = 0;
 
-    for (i = hero->position.x - FN_TILE_WIDTH;
-        i < hero->position.x + FN_TILE_WIDTH * 2;
+    for (i = position->x - FN_TILE_WIDTH;
+        i < position->x + FN_TILE_WIDTH * 2;
         i += FN_TILE_WIDTH) {
-      for (j = hero->position.y - FN_TILE_HEIGHT;
-          j < hero->position.y + FN_TILE_HEIGHT * 3;
+      for (j = position->y - FN_TILE_HEIGHT;
+          j < position->y + FN_TILE_HEIGHT * 3;
           j += FN_TILE_HEIGHT) {
         Uint16 tile_x = i / FN_TILE_WIDTH;
         Uint16 tile_y = j / FN_TILE_HEIGHT;
@@ -225,16 +214,18 @@ int fn_hero_act(
 {
   int heromoved = 0;
 
+  FnHeroHealth * health = fn_hero_data_get_health(hero->data);
+
   if (hero->immunitycountdown > 0) {
     hero->immunitycountdown--;
   }
   if (hero->immunitycountdown == 0 && hero->gets_hurt) {
     hero->immunitycountdown = hero->immunityduration;
-    fn_hero_health_decrease(hero->health, 1);
+    fn_hero_health_decrease(health, 1);
   }
 
   if (solids == NULL) {
-    return fn_hero_health_get(hero->health);
+    return fn_hero_health_get(health);
   }
 
   if (hero->motion == FN_HERO_MOTION_WALKING) {
@@ -361,7 +352,7 @@ int fn_hero_act(
     SDL_PushEvent(&event);
   }
 
-  return fn_hero_health_get(hero->health);
+  return fn_hero_health_get(health);
 }
 
 /* --------------------------------------------------------------- */
@@ -493,9 +484,10 @@ void fn_hero_set_flying(
     fn_hero_t * hero,
     Uint8 flying)
 {
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
   if (flying == FN_HERO_FLYING_TRUE) {
     if (hero->flying != flying) {
-      if (fn_hero_inventory_is_set(hero->inventory, InventoryItem_Boot)) {
+      if (fn_hero_inventory_is_set(inventory, InventoryItem_Boot)) {
         hero->counter = 7;
         hero->verticalspeed = 2;
       } else {
@@ -539,9 +531,10 @@ void fn_hero_jump(
 void fn_hero_set_x(
     fn_hero_t * hero, Uint32 x)
 {
+  FnGeometry * position = fn_hero_data_get_position(hero->data);
   if (x < FN_LEVEL_WIDTH * FN_TILE_WIDTH)
   {
-    hero->position.x = x;
+    position->x = x;
   }
 }
 
@@ -550,7 +543,8 @@ void fn_hero_set_x(
 Uint32 fn_hero_get_x(
     fn_hero_t * hero)
 {
-  return hero->position.x;
+  FnGeometry * position = fn_hero_data_get_position(hero->data);
+  return position->x;
 }
 
 /* --------------------------------------------------------------- */
@@ -560,7 +554,8 @@ void fn_hero_set_y(
 {
   if (y < FN_LEVEL_HEIGHT * FN_TILE_HEIGHT)
   {
-    hero->position.y = y;
+    FnGeometry * position = fn_hero_data_get_position(hero->data);
+    position->y = y;
   }
 }
 
@@ -569,7 +564,8 @@ void fn_hero_set_y(
 Uint32 fn_hero_get_y(
     fn_hero_t * hero)
 {
-  return hero->position.y;
+  FnGeometry * position = fn_hero_data_get_position(hero->data);
+  return position->y;
 }
 
 /* --------------------------------------------------------------- */
@@ -577,7 +573,8 @@ Uint32 fn_hero_get_y(
 Uint16 fn_hero_get_w(
     fn_hero_t * hero)
 {
-  return hero->position.w;
+  FnGeometry * position = fn_hero_data_get_position(hero->data);
+  return position->w;
 }
 
 /* --------------------------------------------------------------- */
@@ -585,7 +582,8 @@ Uint16 fn_hero_get_w(
 Uint16 fn_hero_get_h(
     fn_hero_t * hero)
 {
-  return hero->position.h;
+  FnGeometry * position = fn_hero_data_get_position(hero->data);
+  return position->h;
 }
 
 /* --------------------------------------------------------------- */
@@ -600,11 +598,13 @@ int fn_hero_would_collide(
     return 1;
   }
 
+  FnGeometry * hero_position = fn_hero_data_get_position(hero->data);
+
   FnGeometry herorect;
   herorect.x = x;
   herorect.y = y;
-  herorect.w = hero->position.w;
-  herorect.h = hero->position.h;
+  herorect.w = hero_position->w;
+  herorect.h = hero_position->h;
 
   Uint16 i = 0;
   Uint16 j = 0;
@@ -652,7 +652,7 @@ void fn_hero_fire_stop(fn_hero_t * hero)
 
 FnGeometry fn_hero_get_position(fn_hero_t * hero)
 {
-  return hero->position;
+  return *fn_hero_data_get_position(hero->data);
 }
 
 /* --------------------------------------------------------------- */
@@ -660,10 +660,12 @@ FnGeometry fn_hero_get_position(fn_hero_t * hero)
 Sint8 fn_hero_push_horizontally(
     fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
 {
+  FnGeometry * hero_position = fn_hero_data_get_position(hero->data);
+
   if (offset == 0) {
     return 0;
   }
-  hero->position.x += offset;
+  hero_position->x += offset;
 
   if (!fn_hero_collides_with_solid(hero, solids)) {
     /* no solids in the way */
@@ -682,7 +684,7 @@ Sint8 fn_hero_push_horizontally(
 
   Uint8 i = 0;
   for (i = 0; i < offset_abs; i++) {
-    hero->position.x -= direction;
+    hero_position->x -= direction;
     if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
@@ -701,10 +703,12 @@ Sint8 fn_hero_push_horizontally(
 Sint8 fn_hero_push_vertically(
     fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
 {
+  FnGeometry * hero_position = fn_hero_data_get_position(hero->data);
+
   if (offset == 0) {
     return 0;
   }
-  hero->position.y += offset;
+  hero_position->y += offset;
 
   if (!fn_hero_collides_with_solid(hero, solids)) {
     /* no solids in the way */
@@ -723,7 +727,7 @@ Sint8 fn_hero_push_vertically(
 
   Uint8 i = 0;
   for (i = 0; i < offset_abs; i++) {
-    hero->position.y -= direction;
+    hero_position->y -= direction;
     if (!fn_hero_collides_with_solid(hero, solids)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;

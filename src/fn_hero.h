@@ -86,11 +86,6 @@ struct fn_hero_t {
   Uint8 shooting;
 
   /**
-   * How much firepower does the hero have?
-   */
-  FnHeroFirepower * firepower;
-
-  /**
    * The counter for actions that take longer than one animation frame.
    */
   Uint8 counter;
@@ -110,34 +105,14 @@ struct fn_hero_t {
   Uint8 num_animationframes;
 
   /**
-   * The inventory (one bit for each key/item)
+   * The hero data.
    */
-  FnHeroInventory * inventory;
-
-  /**
-   * The health of our hero (0 = still alive, 8 = full life).
-   */
-  FnHeroHealth * health;
-
-  /**
-   * The position and bounds of the hero.
-   */
-  FnGeometry position;
-
-  /**
-   * The score of the hero.
-   */
-  FnHeroScore * score;
+  FnHeroData * data;
 
   /**
    * Blit the hero only if this is zero.
    */
   Uint8 hidden;
-
-  /**
-   * The letter which was last fetched by the hero.
-   */
-  FnHeroFetchedLetterState * fetched_letter_state;
 
   /**
    * The speed with which our hero falls or jumps.

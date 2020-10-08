@@ -458,14 +458,16 @@ const FnTexture * fn_environment_get_tile(fn_environment_t * env,
 
 const Uint8 fn_environment_get_health(fn_environment_t * env)
 {
-  return fn_hero_health_get(env->hero->health);
+  FnHeroHealth * health = fn_hero_data_get_health(env->hero->data);
+  return fn_hero_health_get(health);
 }
 
 /* --------------------------------------------------------------- */
 
 Uint64 fn_environment_get_score(fn_environment_t * env)
 {
-  return fn_hero_score_get(env->hero->score);
+  FnHeroScore * score = fn_hero_data_get_score(env->hero->data);
+  return fn_hero_score_get(score);
 }
 
 /* --------------------------------------------------------------- */
