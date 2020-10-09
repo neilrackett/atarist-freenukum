@@ -79,8 +79,6 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->animationframe = 0;
   hero->num_animationframes = 1;
 
-  hero->hidden = 0;
-
   hero->immunitycountdown = 0;
   hero->immunityduration = 16;
   hero->gets_hurt = false;
@@ -116,7 +114,7 @@ void fn_hero_enterlevel(
   fn_hero_inventory_unset(inventory, InventoryItem_KeyGreen);
   fn_hero_inventory_unset(inventory, InventoryItem_KeyBlue);
   fn_hero_inventory_unset(inventory, InventoryItem_KeyPink);
-  hero->hidden = 0;
+  fn_hero_data_set_hidden(hero->data, false);
 
   FnHeroFetchedLetterState * fetched_letter_state =
       fn_hero_data_get_fetched_letter_state(hero->data);
@@ -133,7 +131,7 @@ void fn_hero_blit(
   int tilenr;
   const FnTexture * tile;
 
-  if (hero->hidden) {
+  if (fn_hero_data_get_hidden(hero->data)) {
     return;
   }
   if (hero->immunitycountdown % 2 != 0) {
@@ -618,75 +616,6 @@ FnGeometry fn_hero_get_position(fn_hero_t * hero)
 {
   FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
   return fn_hero_position_get_geometry(hero_position);
-}
-
-/* --------------------------------------------------------------- */
-
-Sint8 fn_hero_push_horizontally(
-    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
-{
-  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
-  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
-
-  if (offset == 0) {
-    return 0;
-  }
-  hero_geometry.x += offset;
-
-  if (!fn_level_solids_collides(solids, hero_geometry)) {
-    /* no solids in the way */
-    fn_hero_position_move_x_to(hero_position, hero_geometry.x);
-    return offset;
-  }
-
-  /* there was a solid in the way */
-  Uint8 offset_abs = (offset < 0 ? -offset : offset);
-  Sint8 direction = offset / offset_abs;
-
-  Uint8 i = 0;
-  for (i = 0; i < offset_abs; i++) {
-    hero_geometry.x -= direction;
-    if (!fn_level_solids_collides(solids, hero_geometry)) {
-      fn_hero_position_move_x_to(hero_position, hero_geometry.x);
-      return i * direction;
-    }
-  }
-  return 0;
-}
-
-/* --------------------------------------------------------------- */
-
-Sint8 fn_hero_push_vertically(
-    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset)
-{
-  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
-  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
-
-  if (offset == 0) {
-    return 0;
-  }
-  hero_geometry.y += offset;
-
-  if (!fn_level_solids_collides(solids, hero_geometry)) {
-    /* no solids in the way */
-    fn_hero_position_move_y_to(hero_position, hero_geometry.y);
-    return offset;
-  }
-
-  /* there was a solid in the way */
-  Uint8 offset_abs = (offset < 0 ? -offset : offset);
-  Sint8 direction = offset / offset_abs;
-
-  Uint8 i = 0;
-  for (i = 0; i < offset_abs; i++) {
-    hero_geometry.y -= direction;
-    if (!fn_level_solids_collides(solids, hero_geometry)) {
-      /* no solids in the way */
-      fn_hero_position_move_y_to(hero_position, hero_geometry.y);
-      return i * direction;
-    }
-  }
-  return 0;
 }
 
 /* --------------------------------------------------------------- */

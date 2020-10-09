@@ -110,11 +110,6 @@ struct fn_hero_t {
   FnHeroData * data;
 
   /**
-   * Blit the hero only if this is zero.
-   */
-  Uint8 hidden;
-
-  /**
    * The speed with which our hero falls or jumps.
    * Either 0, 1 or 2.
    */
@@ -393,34 +388,6 @@ void fn_hero_fire_stop(fn_hero_t * hero);
  * @return The current position.
  */
 FnGeometry fn_hero_get_position(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Try to push the hero to a horizontal direction by a given offset.
- *
- * @param  hero       The hero.
- * @param  level      The level inside which the hero currently is.
- * @param  offset     The offset. Can be positive or negative.
- *
- * @return  The offset by which the hero finally could be moved.
- */
-Sint8 fn_hero_push_horizontally(
-    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Try to push the hero to a vertical direction by a given offset.
- *
- * @param  hero       The hero.
- * @param  level      The level inside which the hero currently is.
- * @param  offset     The offset. Can be positive or negative.
- *
- * @return  The offset by which the hero finally could be moved.
- */
-Sint8 fn_hero_push_vertically(
-    fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset);
 
 /* --------------------------------------------------------------- */
 

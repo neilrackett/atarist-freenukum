@@ -345,6 +345,12 @@ typedef Score FnHeroScore;
 
 typedef InventoryItem FnHeroInventoryItem;
 
+typedef struct {
+    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelSolids;
+
+typedef LevelSolids FnLevelSolids;
+
 typedef HorizontalDirection FnHorizontalDirection;
 
 typedef InputField FnInputField;
@@ -376,12 +382,6 @@ typedef struct {
 } LevelTiles;
 
 typedef LevelTiles FnLevelTiles;
-
-typedef struct {
-    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
-} LevelSolids;
-
-typedef LevelSolids FnLevelSolids;
 
 typedef struct {
     FnLevelTiles tiles;
@@ -484,6 +484,8 @@ FnHeroFirepower *fn_hero_data_get_firepower(FnHeroData *ptr);
 
 FnHeroHealth *fn_hero_data_get_health(FnHeroData *ptr);
 
+bool fn_hero_data_get_hidden(const FnHeroData *ptr);
+
 FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
 
 FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
@@ -491,6 +493,8 @@ FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
 void fn_hero_data_reset(FnHeroData *data);
+
+void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);
@@ -537,6 +541,14 @@ void fn_hero_position_move_x_to(FnHeroPosition *position, uint16_t x);
 void fn_hero_position_move_y_by(FnHeroPosition *position, int16_t y);
 
 void fn_hero_position_move_y_to(FnHeroPosition *position, uint16_t y);
+
+int16_t fn_hero_position_push_horizontally(FnHeroPosition *position,
+                                           const FnLevelSolids *solids,
+                                           int16_t offset);
+
+int16_t fn_hero_position_push_vertically(FnHeroPosition *position,
+                                         const FnLevelSolids *solids,
+                                         int16_t offset);
 
 void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 

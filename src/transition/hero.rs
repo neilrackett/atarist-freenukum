@@ -1,4 +1,5 @@
 use super::geometry::Geometry;
+use super::level::solids::LevelSolids;
 use super::UserEvent;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
@@ -10,6 +11,7 @@ pub struct HeroData {
     pub firepower: Firepower,
     pub inventory: Inventory,
     pub fetched_letter_state: FetchedLetterState,
+    pub hidden: bool,
 }
 
 impl HeroData {
@@ -21,6 +23,7 @@ impl HeroData {
             firepower: Firepower::new(),
             inventory: Inventory::new(),
             fetched_letter_state: FetchedLetterState::new(),
+            hidden: false,
         }
     }
 
@@ -31,6 +34,7 @@ impl HeroData {
         self.firepower.reset();
         self.inventory.reset();
         self.fetched_letter_state.reset();
+        self.hidden = false;
     }
 }
 
@@ -90,6 +94,64 @@ impl Position {
 
     pub fn move_y_by(&mut self, y: i16) {
         self.move_y_to((self.geometry.y + y) as u16);
+    }
+
+    pub fn push_vertically(
+        &mut self,
+        solids: &LevelSolids,
+        offset: i16,
+    ) -> i16 {
+        if offset == 0 {
+            return 0;
+        }
+        let mut geometry = self.geometry;
+        geometry.y += offset;
+
+        if !solids.collides(geometry) {
+            self.move_y_to(geometry.y as u16);
+            return offset;
+        }
+
+        let offset_absolute = offset.abs();
+        let direction = offset / offset_absolute;
+
+        for i in 0..offset_absolute {
+            geometry.y -= direction as i16;
+            if !solids.collides(geometry) {
+                self.move_y_to(geometry.y as u16);
+                return i * direction;
+            }
+        }
+        return 0;
+    }
+
+    pub fn push_horizontally(
+        &mut self,
+        solids: &LevelSolids,
+        offset: i16,
+    ) -> i16 {
+        if offset == 0 {
+            return 0;
+        }
+        let mut geometry = self.geometry;
+        geometry.x += offset;
+
+        if !solids.collides(geometry) {
+            self.move_x_to(geometry.x as u16);
+            return offset;
+        }
+
+        let offset_absolute = offset.abs();
+        let direction = offset / offset_absolute;
+
+        for i in 0..offset_absolute {
+            geometry.x -= direction as i16;
+            if !solids.collides(geometry) {
+                self.move_x_to(geometry.x as u16);
+                return i * direction;
+            }
+        }
+        return 0;
     }
 
     fn emit_update(&self) {
@@ -319,6 +381,7 @@ impl TryFrom<char> for FetchedLetter {
 
 pub mod ffi {
     use super::super::geometry::ffi::FnGeometry;
+    use super::super::level::solids::ffi::FnLevelSolids;
     use libc::c_char;
 
     pub type FnHeroData = super::HeroData;
@@ -351,6 +414,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
         &mut d.position
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_hidden(
+        ptr: *mut FnHeroData,
+        hidden: bool,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.hidden = hidden;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_hidden(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.hidden
     }
 
     #[no_mangle]
@@ -427,6 +509,30 @@ pub mod ffi {
         assert!(!position.is_null());
         let position: &mut FnHeroPosition = unsafe { &mut (*position) };
         position.move_y_to(y);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_push_horizontally(
+        position: *mut FnHeroPosition,
+        solids: *const FnLevelSolids,
+        offset: i16,
+    ) -> i16 {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        let solids: &FnLevelSolids = unsafe { &(*solids) };
+        position.push_horizontally(solids, offset)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_push_vertically(
+        position: *mut FnHeroPosition,
+        solids: *const FnLevelSolids,
+        offset: i16,
+    ) -> i16 {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        let solids: &FnLevelSolids = unsafe { &(*solids) };
+        position.push_vertically(solids, offset)
     }
 
     #[no_mangle]

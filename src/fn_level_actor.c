@@ -112,7 +112,7 @@ typedef struct fn_level_actor_act_params_t {
     FnLevelData * level_data;
     FnLevelActorQueue * actor_queue;
     FnHeroData * hero_data;
-    fn_hero_t * hero;
+    fn_hero_t * xxx_hero;
 } fn_level_actor_act_params_t;
 
 typedef void (* fn_level_actor_act_function_t)(
@@ -1460,14 +1460,15 @@ void fn_level_actor_function_lift_act(
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
   if (data->state == fn_level_actor_lift_state_ascending ||
       (data->state == fn_level_actor_lift_state_idle &&
        p.general->position.h > FN_TILE_HEIGHT))
   {
     /* check if hero leaves elevator. */
-    FnGeometry heropos = fn_hero_get_position(p.hero);
-    if (!fn_geometry_touches(heropos, p.general->position) ||
-        p.general->position.x != heropos.x) {
+    FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+    if (!fn_geometry_touches(hero_geometry, p.general->position) ||
+        p.general->position.x != hero_geometry.x) {
       data->state = fn_level_actor_lift_state_descending;
     }
   }
@@ -1480,10 +1481,11 @@ void fn_level_actor_function_lift_act(
             p.general->position.y/FN_TILE_HEIGHT-3)) {
         data->state = fn_level_actor_lift_state_idle;
       } else {
-        Sint8 offset = fn_hero_push_vertically(
-            p.hero, &(p.level_data->solids), -FN_TILE_HEIGHT);
+        Sint16 offset = fn_hero_position_push_vertically(
+            hero_position, &(p.level_data->solids), -FN_TILE_HEIGHT);
         if (-offset < FN_TILE_HEIGHT) {
-          offset = fn_hero_push_vertically(p.hero, &(p.level_data->solids), -offset);
+          offset = fn_hero_position_push_vertically(
+                  hero_position, &(p.level_data->solids), -offset);
           data->state = fn_level_actor_lift_state_idle;
         } else {
           p.general->position.h -= offset;
@@ -1606,15 +1608,18 @@ void fn_level_actor_function_acme_act(
 {
   fn_level_actor_acme_data_t * data = p.specific;
 
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+
   switch(data->counter) {
     case 0:
       {
         Uint16 xl = p.general->position.x;
         Uint16 xr = xl + p.general->position.w;
         Uint16 y = p.general->position.y;
-        Uint32 hxl = fn_hero_get_x(p.hero);
+        Uint32 hxl = hero_geometry.x;
         Uint32 hxr = hxl + FN_TILE_WIDTH;
-        Uint32 hy = fn_hero_get_y(p.hero);
+        Uint32 hy = hero_geometry.y;
 
         if (y < hy && /* actor higher than hero */
             xl < hxr &&
@@ -4345,9 +4350,10 @@ void fn_level_actor_function_unstablefloor_act(
     p.general->position.h = FN_TILE_HEIGHT;
   }
 
-  if (fn_geometry_touches(
-              fn_hero_get_position(p.hero),
-              p.general->position))
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+
+  if (fn_geometry_touches(hero_geometry, p.general->position))
   {
     if (data->touched) {
       floorlength = 0;
@@ -4532,18 +4538,21 @@ void fn_level_actor_function_conveyor_act(
     data->current_frame %= data->num_frames;
   }
 
-  FnGeometry heropos = fn_hero_get_position(p.hero);
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
   int direction = (
       data->direction == HorizontalDirection_Right ?  1 : -1);
   if (
-      heropos.x + heropos.w > p.general->position.x &&
-      heropos.x <
+      hero_geometry.x + hero_geometry.w > p.general->position.x &&
+      hero_geometry.x <
               p.general->position.x +
               p.general->position.w &&
-      heropos.y + heropos.h == p.general->position.y) {
-    fn_hero_push_horizontally(
-        p.hero, &(p.level_data->solids), direction * FN_HALFTILE_WIDTH);
+      hero_geometry.y + hero_geometry.h == p.general->position.y) {
+      fn_hero_position_push_horizontally(
+              hero_position,
+              &(p.level_data->solids),
+              direction * FN_HALFTILE_WIDTH);
   }
 }
 
@@ -4872,7 +4881,7 @@ void fn_level_actor_function_exitdoor_act(
     case 1: /* door opening */
       data->counter++;
       if (data->counter == 4) {
-        p.hero->hidden = 1;
+        fn_hero_data_set_hidden(p.hero_data, true);
         data->state = 2;
         data->counter--;
       }
@@ -4880,7 +4889,7 @@ void fn_level_actor_function_exitdoor_act(
     case 2: /* door closing */
       if (data->counter == 0) {
         p.level->do_play = 0;
-        p.hero->hidden = 0;
+        fn_hero_data_set_hidden(p.hero_data, false);
       }
       data->counter--;
       break;
@@ -5686,12 +5695,13 @@ void fn_level_actor_function_fan_act(
   if (data->running < 10 && data->running > 0) {
     data->running--;
   } else if (data->running == 10) {
-    FnGeometry heropos = fn_hero_get_position(p.hero);
+    FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+    FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
     if (fn_geometry_overlaps_vertically(
-                heropos, p.general->position)) {
+                hero_geometry, p.general->position)) {
       int hdistance = fn_geometry_horizontal_distance(
-          heropos, p.general->position);
+          hero_geometry, p.general->position);
 
       int fandirection = 0;
       if (p.general->actor_type == ActorType_FanLeft) {
@@ -5714,10 +5724,10 @@ void fn_level_actor_function_fan_act(
       Uint16 hdistance_abs =
         (hdistance > 0 ? hdistance : -hdistance);
       if (hdistance_abs < 8 * FN_HALFTILE_WIDTH) {
-        fn_hero_push_horizontally(
-            p.hero,
-            &(p.level_data->solids),
-            fandirection * FN_TILE_WIDTH);
+          fn_hero_position_push_horizontally(
+                  hero_position,
+                  &(p.level_data->solids),
+                  fandirection * FN_TILE_WIDTH);
       }
     }
   }
@@ -7585,7 +7595,6 @@ int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level, FnLevelActo
         .level_data = level->data,
         .actor_queue = actor_queue,
         .hero_data = hero->data,
-        .hero = hero
     };
     func(p);
   }
