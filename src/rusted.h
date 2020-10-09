@@ -294,6 +294,8 @@ typedef struct Inventory Inventory;
 
 typedef struct Menu Menu;
 
+typedef struct Position Position;
+
 typedef struct Score Score;
 
 typedef struct Texture Texture;
@@ -336,6 +338,8 @@ typedef HeroData FnHeroData;
 typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
+
+typedef Position FnHeroPosition;
 
 typedef Score FnHeroScore;
 
@@ -482,7 +486,7 @@ FnHeroHealth *fn_hero_data_get_health(FnHeroData *ptr);
 
 FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
 
-FnGeometry *fn_hero_data_get_position(FnHeroData *ptr);
+FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
@@ -519,6 +523,20 @@ void fn_hero_inventory_set(FnHeroInventory *inventory,
 
 void fn_hero_inventory_unset(FnHeroInventory *inventory,
                              FnHeroInventoryItem item);
+
+FnGeometry fn_hero_position_get_geometry(const FnHeroPosition *position);
+
+void fn_hero_position_move_to(FnHeroPosition *position,
+                              uint16_t x,
+                              uint16_t y);
+
+void fn_hero_position_move_x_by(FnHeroPosition *position, int16_t x);
+
+void fn_hero_position_move_x_to(FnHeroPosition *position, uint16_t x);
+
+void fn_hero_position_move_y_by(FnHeroPosition *position, int16_t y);
+
+void fn_hero_position_move_y_to(FnHeroPosition *position, uint16_t y);
 
 void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 

@@ -280,8 +280,11 @@ int fn_game_start_in_level(
   dstrect.w = (FN_LEVELWINDOW_WIDTH + 2) * FN_TILE_WIDTH;
   dstrect.h = (FN_LEVELWINDOW_HEIGHT + 2) * FN_TILE_HEIGHT;
 
-  srcrect.x = (fn_hero_get_x(hero)+FN_TILE_WIDTH) - dstrect.w / 2;
-  srcrect.y = fn_hero_get_y(hero) - dstrect.h / 2;
+  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+
+  srcrect.x = (hero_geometry.x + FN_TILE_WIDTH) - dstrect.w / 2;
+  srcrect.y = hero_geometry.y - dstrect.h / 2;
   if (srcrect.x < 0) {
     srcrect.x = 0;
   }
@@ -345,6 +348,8 @@ int fn_game_start_in_level(
 
     FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
     FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
+    FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
+    FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
     res = SDL_WaitEvent(&event);
     if (res == 1) {
@@ -613,8 +618,8 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroLanded:
               fn_level_add_actor(lv, ActorType_DustCloud,
-                  fn_hero_get_x(hero),
-                  fn_hero_get_y(hero) + FN_TILE_HEIGHT
+                      hero_geometry.x,
+                      hero_geometry.y + FN_TILE_HEIGHT
                   );
               break;
             default:

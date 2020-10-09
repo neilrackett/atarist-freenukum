@@ -1,30 +1,21 @@
-use super::geometry::ffi::FnGeometry;
+use super::geometry::Geometry;
 use super::UserEvent;
-use crate::{TILE_HEIGHT, TILE_WIDTH};
+use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
 
 pub struct HeroData {
-    pub position: FnGeometry,
-    pub score: ffi::FnHeroScore,
-    pub health: ffi::FnHeroHealth,
-    pub firepower: ffi::FnHeroFirepower,
-    pub inventory: ffi::FnHeroInventory,
-    pub fetched_letter_state: ffi::FnHeroFetchedLetterState,
+    pub position: Position,
+    pub score: Score,
+    pub health: Health,
+    pub firepower: Firepower,
+    pub inventory: Inventory,
+    pub fetched_letter_state: FetchedLetterState,
 }
 
 impl HeroData {
-    fn default_position() -> FnGeometry {
-        FnGeometry {
-            x: 0,
-            y: 0,
-            w: TILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16 * 2,
-        }
-    }
-
     pub fn new() -> Self {
         HeroData {
-            position: Self::default_position(),
+            position: Position::new(),
             score: Score::new(),
             health: Health::new(),
             firepower: Firepower::new(),
@@ -34,12 +25,75 @@ impl HeroData {
     }
 
     pub fn reset(&mut self) {
-        self.position = Self::default_position();
+        self.position.reset();
         self.score.reset();
         self.health.reset();
         self.firepower.reset();
         self.inventory.reset();
         self.fetched_letter_state.reset();
+    }
+}
+
+pub struct Position {
+    geometry: Geometry,
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Position {
+            geometry: Self::default_geometry(),
+        }
+    }
+}
+
+impl Position {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn reset(&mut self) {
+        self.geometry = Self::default_geometry();
+    }
+
+    fn default_geometry() -> Geometry {
+        Geometry {
+            x: 0,
+            y: 0,
+            w: TILE_WIDTH as u16,
+            h: TILE_HEIGHT as u16 * 2,
+        }
+    }
+
+    pub fn move_to(&mut self, x: u16, y: u16) {
+        self.geometry.x = std::cmp::min(
+            x as i16,
+            LEVEL_WIDTH as i16 * TILE_WIDTH as i16,
+        );
+        self.geometry.y = std::cmp::min(
+            y as i16,
+            LEVEL_HEIGHT as i16 * TILE_HEIGHT as i16,
+        );
+        self.emit_update()
+    }
+
+    pub fn move_x_to(&mut self, x: u16) {
+        self.move_to(x, self.geometry.y as u16);
+    }
+
+    pub fn move_y_to(&mut self, y: u16) {
+        self.move_to(self.geometry.x as u16, y);
+    }
+
+    pub fn move_x_by(&mut self, x: i16) {
+        self.move_x_to((self.geometry.x + x) as u16);
+    }
+
+    pub fn move_y_by(&mut self, y: i16) {
+        self.move_y_to((self.geometry.y + y) as u16);
+    }
+
+    fn emit_update(&self) {
+        transdl::event::push_user_event(UserEvent::HeroMoved as i32);
     }
 }
 
@@ -268,6 +322,7 @@ pub mod ffi {
     use libc::c_char;
 
     pub type FnHeroData = super::HeroData;
+    pub type FnHeroPosition = super::Position;
     pub type FnHeroScore = super::Score;
     pub type FnHeroHealth = super::Health;
     pub type FnHeroFirepower = super::Firepower;
@@ -292,7 +347,7 @@ pub mod ffi {
     #[no_mangle]
     pub extern "C" fn fn_hero_data_get_position(
         ptr: *mut FnHeroData,
-    ) -> *mut FnGeometry {
+    ) -> *mut FnHeroPosition {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
         &mut d.position
@@ -341,6 +396,66 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
         &mut d.fetched_letter_state
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_move_to(
+        position: *mut FnHeroPosition,
+        x: u16,
+        y: u16,
+    ) {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        position.move_to(x, y);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_move_x_to(
+        position: *mut FnHeroPosition,
+        x: u16,
+    ) {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        position.move_x_to(x);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_move_y_to(
+        position: *mut FnHeroPosition,
+        y: u16,
+    ) {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        position.move_y_to(y);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_move_x_by(
+        position: *mut FnHeroPosition,
+        x: i16,
+    ) {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        position.move_x_by(x);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_move_y_by(
+        position: *mut FnHeroPosition,
+        y: i16,
+    ) {
+        assert!(!position.is_null());
+        let position: &mut FnHeroPosition = unsafe { &mut (*position) };
+        position.move_y_by(y);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_position_get_geometry(
+        position: *const FnHeroPosition,
+    ) -> FnGeometry {
+        assert!(!position.is_null());
+        let position: &FnHeroPosition = unsafe { &(*position) };
+        position.geometry
     }
 
     #[no_mangle]

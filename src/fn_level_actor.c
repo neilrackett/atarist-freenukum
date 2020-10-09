@@ -86,7 +86,6 @@ typedef struct fn_level_actor_interact_start_params_t {
     fn_level_t * level;
     FnLevelData * level_data;
     FnHeroData * hero_data;
-    fn_hero_t * hero;
 } fn_level_actor_interact_start_params_t;
 
 typedef void (* fn_level_actor_interact_start_function_t)(
@@ -1419,9 +1418,10 @@ void fn_level_actor_function_lift_interact_start(
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
-  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
-  if (fn_geometry_touches(*hero_position, p.general->position) &&
-      hero_position->y + hero_position->h == p.general->position.y) {
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+  if (fn_geometry_touches(hero_geometry, p.general->position) &&
+      hero_geometry.y + hero_geometry.h == p.general->position.y) {
     data->state = fn_level_actor_lift_state_ascending;
   }
 }
@@ -1438,9 +1438,10 @@ void fn_level_actor_function_lift_interact_end(
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
-  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
-  if (fn_geometry_touches(*hero_position, p.general->position) &&
-      hero_position->x == p.general->position.x) {
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+  if (fn_geometry_touches(hero_geometry, p.general->position) &&
+      hero_geometry.x == p.general->position.x) {
     data->state = fn_level_actor_lift_state_idle;
   } else {
     data->state = fn_level_actor_lift_state_descending;
@@ -3298,13 +3299,15 @@ void fn_level_actor_function_teleporter_interact_start(
     othertype = ActorType_Teleporter1;
   }
 
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+
   fn_list_t * iter = NULL;
   for (iter = fn_list_first(p.level->actors);
       iter != NULL;
       iter = fn_list_next(iter)) {
     fn_level_actor_t * otheractor = (fn_level_actor_t *)iter->data;
     if (otheractor->general->actor_type == othertype) {
-      fn_hero_replace(p.hero,
+      fn_hero_position_move_to(hero_position,
           otheractor->general->position.x,
           otheractor->general->position.y - FN_TILE_HEIGHT);
       return;
@@ -4072,8 +4075,9 @@ void fn_level_actor_function_camera_blit(
 {
   const FnTexture * tile;
 
-  FnGeometry * hero_position = fn_hero_data_get_position(p.hero_data);
-  size_t x = hero_position->x;
+  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
+  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
+  size_t x = hero_geometry.x;
   if (x-1 > p.general->position.x) {
     tile = fn_tilecache_get_tile(p.tilecache,
         ANIM_CAMERA_RIGHT);
@@ -7538,7 +7542,6 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
         .specific = actor->specific,
         .level = level,
         .hero_data = hero->data,
-        .hero = hero,
     };
 
     func(p);

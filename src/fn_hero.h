@@ -186,18 +186,6 @@ int fn_hero_act(fn_hero_t * hero,
 
 /* --------------------------------------------------------------- */
 
-/**
- * Put the hero to a new position (in pixels).
- *
- * @param  hero  The hero.
- * @param  x     The new x position of our hero (in pixels).
- * @param  y     The new y position of our hero (in pixels).
- */
-void fn_hero_replace(fn_hero_t * hero,
-    Uint32 x, Uint32 y);
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_next_animationframe(
     fn_hero_t * hero);
 
@@ -433,18 +421,6 @@ Sint8 fn_hero_push_horizontally(
  */
 Sint8 fn_hero_push_vertically(
     fn_hero_t * hero, FnLevelSolids * solids, Sint8 offset);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Check if the hero collides with a solid.
- *
- * @param  hero       The hero.
- * @param  level      The level inside which the hero currently is.
- *
- * @return  1 if the hero collides, otherwise 0.
- */
-int fn_hero_collides_with_solid(fn_hero_t * hero, FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
 
