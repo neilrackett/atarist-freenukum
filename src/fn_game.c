@@ -401,7 +401,7 @@ int fn_game_start_in_level(
               break;
             case SDLK_0:
               lv->levelpassed = 1;
-              lv->do_play = 0;
+              lv->data->do_play = 0;
               break;
             case SDLK_f:
               fn_environment_toggle_fullscreen(env);

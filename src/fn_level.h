@@ -100,11 +100,6 @@ struct fn_level_t {
   fn_list_t * bots;
 
   /**
-   * As long as this is non-zero, we keep on playing.
-   */
-  int do_play;
-
-  /**
    * The number of animated frames since last action.
    */
   size_t animated_frames;
@@ -325,7 +320,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
  * @return 1 if the rectangle stands on solid ground, otherwise 0.
  */
 Uint8 fn_level_stands_on_solid_ground_completely(
-        fn_level_t * lv, FnGeometry rect);
+        FnLevelSolids * solids, FnGeometry rect);
 
 /* --------------------------------------------------------------- */
 
@@ -339,7 +334,7 @@ Uint8 fn_level_stands_on_solid_ground_completely(
  * 
  * @return 1 if the rectangle stands on solid ground, otherwise 0.
  */
-Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
+Uint8 fn_level_stands_on_solid_ground_partially(FnLevelSolids * solids,
     FnGeometry rect);
 
 /* --------------------------------------------------------------- */
@@ -357,7 +352,7 @@ Uint8 fn_level_stands_on_solid_ground_partially(fn_level_t * lv,
  * @return 1 if the push was successful, otherwise 0.
  */
 Uint8 fn_level_push_rect_standing_on_solid_ground(
-    fn_level_t * level, FnGeometry rect, Sint8 offset, Uint8 gravity);
+    FnLevelSolids * solids, FnGeometry rect, Sint8 offset, Uint8 gravity);
 
 /* --------------------------------------------------------------- */
 
@@ -374,7 +369,7 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
  *         (maximally the same value as dist).
  */
 Uint8 fn_level_rect_fall_down(
-    fn_level_t * level, FnGeometry rect, Uint8 dist);
+    FnLevelSolids * solids, FnGeometry rect, Uint8 dist);
 
 /* --------------------------------------------------------------- */
 

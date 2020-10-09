@@ -112,7 +112,6 @@ typedef struct fn_level_actor_act_params_t {
     FnLevelData * level_data;
     FnLevelActorQueue * actor_queue;
     FnHeroData * hero_data;
-    fn_hero_t * xxx_hero;
 } fn_level_actor_act_params_t;
 
 typedef void (* fn_level_actor_act_function_t)(
@@ -1073,7 +1072,7 @@ void fn_level_actor_function_firewheelbot_act(
     int direction = (data->direction == HorizontalDirection_Left ?
           -1 : 1);
     if (!fn_level_push_rect_standing_on_solid_ground(
-        p.level,
+        &(p.level_data->solids),
         p.general->position,
         direction * FN_HALFTILE_WIDTH / 2,
         FN_HALFTILE_HEIGHT))
@@ -3461,11 +3460,11 @@ void fn_level_actor_function_singleanimation_act(
   if (data->current_frame == data->num_frames) {
     p.general->is_alive = 0;
     if (p.general->actor_type == ActorType_RobotDisappearing) {
-      fn_level_add_actor(
-              p.level,
-              ActorType_Explosion,
-              p.general->position.x,
-              p.general->position.y);
+        fn_level_actor_queue_push_back(
+                p.actor_queue,
+                ActorType_Explosion,
+                p.general->position.x,
+                p.general->position.y);
     }
   }
 }
@@ -4888,7 +4887,7 @@ void fn_level_actor_function_exitdoor_act(
       break;
     case 2: /* door closing */
       if (data->counter == 0) {
-        p.level->do_play = 0;
+        p.level_data->do_play = 0;
         fn_hero_data_set_hidden(p.hero_data, false);
       }
       data->counter--;

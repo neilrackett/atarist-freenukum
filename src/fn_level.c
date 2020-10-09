@@ -64,7 +64,7 @@ fn_level_t * fn_level_load(FnFile* file,
   lv->shots = NULL;
   lv->interactor = NULL;
 
-  lv->do_play = 1;
+  lv->data->do_play = 1;
 
   lv->surface_fixed = fn_environment_create_surface(
       env,
@@ -1017,7 +1017,7 @@ const FnTileCache * fn_level_get_tilecache(fn_level_t * lv)
 /* --------------------------------------------------------------- */
 
 int fn_level_keep_on_playing(fn_level_t * lv) {
-  return lv->do_play;
+  return lv->data->do_play;
 }
 
 /* --------------------------------------------------------------- */
@@ -1232,8 +1232,9 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
-    FnGeometry rect)
+Uint8 fn_level_stands_on_solid_ground_completely(
+        FnLevelSolids * solids,
+        FnGeometry rect)
 {
   if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
     return 0;
@@ -1244,7 +1245,7 @@ Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
       i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
       i++)
   {
-    if (!fn_level_is_solid(lv, i, j)) {
+    if (!fn_level_solids_get(solids, i, j)) {
       return 0;
     }
   }
@@ -1255,7 +1256,7 @@ Uint8 fn_level_stands_on_solid_ground_completely(fn_level_t * lv,
 
 
 Uint8 fn_level_stands_on_solid_ground_partially(
-        fn_level_t * lv, FnGeometry rect)
+        FnLevelSolids * solids, FnGeometry rect)
 {
   if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
     return 0;
@@ -1266,7 +1267,7 @@ Uint8 fn_level_stands_on_solid_ground_partially(
       i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
       i++)
   {
-    if (fn_level_is_solid(lv, i, j)) {
+    if (fn_level_solids_get(solids, i, j)) {
       return 1;
     }
   }
@@ -1276,31 +1277,33 @@ Uint8 fn_level_stands_on_solid_ground_partially(
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_push_rect_standing_on_solid_ground(
-    fn_level_t * level, FnGeometry rect, Sint8 offset,
-    Uint8 gravity)
+        FnLevelSolids * solids,
+        FnGeometry rect,
+        Sint8 offset,
+        Uint8 gravity)
 {
-  if (fn_level_solids_collides(&(level->data->solids), rect)) {
+  if (fn_level_solids_collides(solids, rect)) {
     /* locked in, so don't move at all */
     return 0;
   }
 
   /* fall down as far as possible */
-  fn_level_rect_fall_down(level, rect, gravity);
+  fn_level_rect_fall_down(solids, rect, gravity);
 
   /* check if we stand on solid ground before movement */
   Uint8 stood_solid = fn_level_stands_on_solid_ground_completely(
-      level, rect);
+      solids, rect);
 
   rect.x += offset;
 
-  if (fn_level_solids_collides(&(level->data->solids), rect)) {
+  if (fn_level_solids_collides(solids, rect)) {
     /* we collide with something, so we revert to original position */
     rect.x -= offset;
     return 0;
   }
 
   if (stood_solid && fn_level_stands_on_solid_ground_completely(
-        level, rect)) {
+        solids, rect)) {
     /* we stood on solid ground before, and still do. */
     return 1;
   } else if (stood_solid) {
@@ -1316,13 +1319,13 @@ Uint8 fn_level_push_rect_standing_on_solid_ground(
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_rect_fall_down(
-    fn_level_t * level, FnGeometry rect, Uint8 dist)
+    FnLevelSolids * solids, FnGeometry rect, Uint8 dist)
 {
-  if (fn_level_solids_collides(&(level->data->solids), rect)) {
+  if (fn_level_solids_collides(solids, rect)) {
     /* can't fall down because collides with solid ground */
     return 0;
   }
-  if (fn_level_stands_on_solid_ground_partially(level, rect)) {
+  if (fn_level_stands_on_solid_ground_partially(solids, rect)) {
     /* stands on solid ground so can't fall down */
     return 0;
   }
@@ -1330,7 +1333,7 @@ Uint8 fn_level_rect_fall_down(
   while (i < dist) {
     /* check how far we can fall down */
     rect.y++;
-    if (fn_level_stands_on_solid_ground_partially(level, rect)) {
+    if (fn_level_stands_on_solid_ground_partially(solids, rect)) {
       return i;
     }
     i++;

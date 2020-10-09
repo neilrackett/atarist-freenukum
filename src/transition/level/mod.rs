@@ -6,6 +6,7 @@ pub mod tiles;
 pub struct LevelData {
     pub tiles: tiles::ffi::FnLevelTiles,
     pub solids: solids::ffi::FnLevelSolids,
+    pub do_play: bool,
 }
 
 impl LevelData {
@@ -13,6 +14,7 @@ impl LevelData {
         LevelData {
             tiles: tiles::LevelTiles::new(),
             solids: solids::LevelSolids::new(),
+            do_play: true,
         }
     }
 }
