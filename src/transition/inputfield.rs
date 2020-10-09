@@ -85,11 +85,9 @@ impl InputField {
 pub mod ffi {
     pub type FnInputField = super::InputField;
 
-    use super::super::geometry::ffi::FnGeometry;
     use super::super::texture::ffi::FnTexture;
     use super::super::tilecache::ffi::FnTileCache;
     use libc::c_char;
-    use std::ffi::CStr;
 
     #[no_mangle]
     pub extern "C" fn fn_inputfield_create(
