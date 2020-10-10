@@ -1,5 +1,6 @@
 mod redball_jumping;
 mod redball_lying;
+mod robot;
 mod simpleanimation;
 mod soda_flying;
 

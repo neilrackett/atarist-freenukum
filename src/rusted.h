@@ -740,6 +740,20 @@ void fn_level_actor_function_redball_lying_hero_touch_start(FnLevelActorHeroTouc
 
 void fn_level_actor_function_redball_lying_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_robot_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_robot_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_robot_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_robot_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_robot_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_robot_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_robot_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);
