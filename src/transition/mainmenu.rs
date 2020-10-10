@@ -1,11 +1,7 @@
-use super::geometry::Geometry;
 use super::menu::{Menu, MenuEntry};
-use super::messagebox;
-use super::texture::{Texture, TextureCreationParams};
+use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
-use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
-use std::convert::{Into, TryFrom};
-use transdl::event::{Event, KeyCode, MouseButton};
+use std::convert::Into;
 use transdl::video::Surface;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
