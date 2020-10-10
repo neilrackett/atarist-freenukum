@@ -5,6 +5,7 @@ mod redball_lying;
 mod robot;
 mod simpleanimation;
 mod soda_flying;
+mod tankbot;
 mod wallcrawler;
 
 use super::super::geometry::Geometry;
