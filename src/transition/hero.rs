@@ -39,7 +39,7 @@ impl HeroData {
 }
 
 pub struct Position {
-    geometry: Geometry,
+    pub geometry: Geometry,
 }
 
 impl Default for Position {

@@ -1,3 +1,4 @@
+mod acme;
 mod fire;
 mod redball_jumping;
 mod redball_lying;

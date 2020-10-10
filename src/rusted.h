@@ -714,6 +714,18 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_acme_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_acme_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_acme_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_acme_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_acme_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_acme_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_fire_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_fire_blit(FnLevelActorBlitParams p);
