@@ -1,5 +1,4 @@
-use super::super::geometry::Geometry;
-use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
+use crate::{LEVEL_HEIGHT, LEVEL_WIDTH};
 
 #[repr(C)]
 pub struct LevelTiles {
