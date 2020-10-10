@@ -511,206 +511,6 @@ void fn_level_actor_function_firewheelbot_shot(
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-/**
- * The wallcrawler bot.
- */
-typedef struct fn_level_actor_wallcrawler_data_t {
-  /**
-   * The direction to which the wallcrawler is moving.
-   */
-  FnVerticalDirection direction;
-  /**
-   * The direction to which the wallcrawler is orientated.
-   */
-  FnHorizontalDirection orientation;
-  /**
-   * The tile number.
-   */
-  Uint16 tile;
-  /**
-   * The animation counter.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames.
-   */
-  Uint8 num_frames;
-  /**
-   * A flag indicating if the robot was shot.
-   */
-  Uint8 was_shot;
-  /**
-   * A flag indicating if the robot is currently touching the hero.
-   */
-  Uint8 touching_hero;
-} fn_level_actor_wallcrawler_data_t;
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_create(
-        FnLevelActorCreateParams p)
-{
-
-  fn_level_actor_wallcrawler_data_t * data = malloc(
-      sizeof(fn_level_actor_wallcrawler_data_t));
-  *(p.specific) = data;
-  p.general->is_in_foreground = 1;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  data->direction = VerticalDirection_Up;
-  if (p.general->actor_type == ActorType_WallCrawlerBotLeft) {
-    data->tile = ANIM_WALLCRAWLERBOT_LEFT;
-    data->orientation = HorizontalDirection_Left;
-  } else {
-    data->tile = ANIM_WALLCRAWLERBOT_RIGHT;
-    data->orientation = HorizontalDirection_Right;
-  }
-
-  data->current_frame = 0;
-  data->num_frames = 4;
-  data->was_shot = 0;
-  data->touching_hero = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = p.specific;
-  if (!data->was_shot) {
-    p.general->hurts_hero = true;
-    data->touching_hero = 1;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_touch_end(
-        FnLevelActorHeroTouchEndParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = p.specific;
-  if (!data->was_shot) {
-    p.general->hurts_hero = false;
-    data->touching_hero = 0;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = p.specific;
-
-  int direction = (data->direction == VerticalDirection_Up ?
-      1 :
-      -1);
-  int orientation = (data->orientation == HorizontalDirection_Left ?
-      -1 :
-      1);
-  if (direction > 0) {
-    /* going up */
-    data->current_frame++;
-    data->current_frame %= data->num_frames;
-
-    if (
-        /* bot collides with solid tile */
-        fn_level_solids_get(&(p.level_data->solids),
-          (p.general->position.x) / FN_TILE_WIDTH,
-          (p.general->position.y - 1) / FN_TILE_HEIGHT) ||
-        /* bot has no more wall to stick upon */
-        !fn_level_solids_get(&(p.level_data->solids),
-          (p.general->position.x +
-           orientation * FN_TILE_WIDTH) /
-          FN_TILE_WIDTH,
-          (p.general->position.y - 1) / FN_TILE_HEIGHT)
-       ) {
-      p.general->position.y++;
-      data->direction = VerticalDirection_Down;
-    } else {
-      p.general->position.y--;
-    }
-
-  } else {
-    /* going down */
-    if (data->current_frame == 0) {
-      data->current_frame = data->num_frames;
-    }
-    data->current_frame--;
-
-    if (
-        /* bot collides with solid tile */
-        fn_level_solids_get(&(p.level_data->solids),
-          (p.general->position.x) / FN_TILE_WIDTH,
-          (p.general->position.y + FN_TILE_HEIGHT) /
-          FN_TILE_HEIGHT) ||
-        /* bot has no more wall to stick upon */
-        !fn_level_solids_get(&(p.level_data->solids),
-          (p.general->position.x + orientation * FN_TILE_WIDTH) /
-          FN_TILE_WIDTH,
-          (p.general->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)
-       ) {
-      p.general->position.y--;
-      data->direction = VerticalDirection_Up;
-    } else {
-      p.general->position.y++;
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = p.specific;
-
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile + data->current_frame);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_wallcrawler_shot(
-        FnLevelActorShotParams p)
-{
-  fn_level_actor_wallcrawler_data_t * data = p.specific;
-
-  if (!data->was_shot) {
-    if (data->touching_hero) {
-      p.general->hurts_hero = false;
-      data->touching_hero = 0;
-      data->current_frame = 0;
-    }
-    p.general->is_alive = false;
-    fn_level_actor_queue_push_back(p.actor_queue,
-        ActorType_Steam,
-        p.general->position.x,
-        p.general->position.y);
-    fn_level_actor_queue_push_back(p.actor_queue,
-        ActorType_Explosion,
-        p.general->position.x,
-        p.general->position.y);
-    FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
-    fn_hero_score_add(score, 100);
-  }
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 typedef enum fn_level_actor_lift_state_e {
   fn_level_actor_lift_state_idle,
   fn_level_actor_lift_state_ascending,
@@ -5246,8 +5046,8 @@ fn_level_actor_functions[] =
   [ActorType_WallCrawlerBotLeft] = {
     .create = fn_level_actor_function_wallcrawler_create,
     .free = fn_level_actor_function_wallcrawler_free,
-    .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
-    .hero_touch_end = fn_level_actor_function_wallcrawler_touch_end,
+    .hero_touch_start = fn_level_actor_function_wallcrawler_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_wallcrawler_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_wallcrawler_act,
@@ -5258,8 +5058,8 @@ fn_level_actor_functions[] =
   [ActorType_WallCrawlerBotRight] = {
     .create = fn_level_actor_function_wallcrawler_create,
     .free = fn_level_actor_function_wallcrawler_free,
-    .hero_touch_start = fn_level_actor_function_wallcrawler_touch_start,
-    .hero_touch_end = fn_level_actor_function_wallcrawler_touch_end,
+    .hero_touch_start = fn_level_actor_function_wallcrawler_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_wallcrawler_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_wallcrawler_act,

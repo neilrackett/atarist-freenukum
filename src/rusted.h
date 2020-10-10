@@ -772,6 +772,20 @@ void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_soda_flying_touch_start(FnLevelActorHeroTouchStartParams p);
 
+void fn_level_actor_function_wallcrawler_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_wallcrawler_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_wallcrawler_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_wallcrawler_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_wallcrawler_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_wallcrawler_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_wallcrawler_shot(FnLevelActorShotParams p);
+
 FnLevelActorMessageQueue *fn_level_actor_message_queue_create(void);
 
 void fn_level_actor_message_queue_free(FnLevelActorMessageQueue *ptr);

@@ -3,6 +3,7 @@ mod redball_lying;
 mod robot;
 mod simpleanimation;
 mod soda_flying;
+mod wallcrawler;
 
 use super::super::geometry::Geometry;
 
