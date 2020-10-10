@@ -1,3 +1,4 @@
+mod redball_jumping;
 mod simpleanimation;
 mod soda_flying;
 

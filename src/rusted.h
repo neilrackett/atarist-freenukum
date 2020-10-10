@@ -714,6 +714,20 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_redball_jumping_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_redball_jumping_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_redball_jumping_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_redball_jumping_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_redball_jumping_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_redball_jumping_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);
