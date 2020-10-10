@@ -168,7 +168,8 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
 void fn_level_actor_hero_interact_start(
         fn_level_actor_t * actor,
         fn_level_t * level,
-        FnInfoMessageQueue * info_message_queue);
+        FnInfoMessageQueue * info_message_queue,
+        FnLevelActorMessageQueue * actor_message_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -214,6 +215,13 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level);
  * @return 1 if the actor absorbs the shot, otherwise 0.
  */
 Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue);
+
+/* --------------------------------------------------------------- */
+
+void fn_level_actor_receive_message(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorMessageType message);
 
 /* --------------------------------------------------------------- */
 

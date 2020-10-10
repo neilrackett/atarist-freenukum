@@ -54,6 +54,11 @@
 #define WINDOW_WIDTH 320
 
 typedef enum {
+    ActorMessageType_OpenDoor,
+    ActorMessageType_Teleport,
+} ActorMessageType;
+
+typedef enum {
     ActorType_FireWheelBot,
     ActorType_FlameGnomeBot,
     ActorType_FlyingBot,
@@ -274,6 +279,8 @@ typedef enum {
     VerticalDirection_Down,
 } VerticalDirection;
 
+typedef struct ActorMessageQueue ActorMessageQueue;
+
 typedef struct ActorQueue ActorQueue;
 
 typedef struct Bot Bot;
@@ -370,6 +377,17 @@ typedef struct {
 typedef ActorData FnLevelActorData;
 
 typedef ActorType FnLevelActorType;
+
+typedef ActorMessageQueue FnLevelActorMessageQueue;
+
+typedef struct {
+    ActorType receivers;
+    ActorMessageType message;
+} ActorMessage;
+
+typedef ActorMessage FnLevelActorMessage;
+
+typedef ActorMessageType FnLevelActorMessageType;
 
 typedef ActorQueue FnLevelActorQueue;
 
@@ -612,6 +630,18 @@ uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
+
+FnLevelActorMessageQueue *fn_level_actor_message_queue_create(void);
+
+void fn_level_actor_message_queue_free(FnLevelActorMessageQueue *ptr);
+
+bool fn_level_actor_message_queue_has_items(const FnLevelActorMessageQueue *ptr);
+
+FnLevelActorMessage fn_level_actor_message_queue_pop_front(FnLevelActorMessageQueue *ptr);
+
+void fn_level_actor_message_queue_push_back(FnLevelActorMessageQueue *ptr,
+                                            FnLevelActorType receivers,
+                                            FnLevelActorMessageType message);
 
 FnLevelActorQueue *fn_level_actor_queue_create(void);
 

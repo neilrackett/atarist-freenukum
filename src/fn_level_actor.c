@@ -83,10 +83,10 @@ typedef void (* fn_level_actor_hero_touch_end_function_t)(
 typedef struct fn_level_actor_interact_start_params_t {
     FnLevelActorData * general;
     void * specific;
-    fn_level_t * level;
     FnLevelData * level_data;
     FnHeroData * hero_data;
     FnInfoMessageQueue * info_message_queue;
+    FnLevelActorMessageQueue * actor_message_queue;
 } fn_level_actor_interact_start_params_t;
 
 typedef void (* fn_level_actor_interact_start_function_t)(
@@ -148,6 +148,19 @@ typedef void (* fn_level_actor_shot_function_t)(
 
 /* --------------------------------------------------------------- */
 
+typedef struct fn_level_actor_receive_message_params_t {
+    FnLevelActorData * general;
+    void * specific;
+    FnLevelActorMessageType message;
+    FnHeroData * hero_data;
+    FnLevelData * level_data;
+} fn_level_actor_receive_message_params_t;
+
+typedef void (* fn_level_actor_receive_message_function_t)(
+        fn_level_actor_receive_message_params_t p);
+
+/* --------------------------------------------------------------- */
+
 typedef struct fn_level_actor_functions_t {
     fn_level_actor_create_function_t create;
     fn_level_actor_free_function_t free;
@@ -158,6 +171,7 @@ typedef struct fn_level_actor_functions_t {
     fn_level_actor_act_function_t act;
     fn_level_actor_blit_function_t blit;
     fn_level_actor_shot_function_t shot;
+    fn_level_actor_receive_message_function_t receive_message;
 } fn_level_actor_functions_t;
 
 /* --------------------------------------------------------------- */
@@ -2140,19 +2154,10 @@ void fn_level_actor_function_accesscard_slot_interact_start(
 
   FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
   if (fn_hero_inventory_is_set(inventory, InventoryItem_AccessCard)) {
-    fn_list_t * iter = NULL;
-    for (iter = fn_list_first(p.level->actors);
-        iter != NULL;
-        iter = fn_list_next(iter)) {
-      fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
-
-      if (dooractor->general->actor_type == ActorType_AccessCardDoor) {
-        dooractor->general->is_alive = 0;
-        int x = dooractor->general->position.x / FN_TILE_WIDTH;
-        int y = dooractor->general->position.y / FN_TILE_HEIGHT;
-        fn_level_solids_set(&(p.level_data->solids), x, y, 0);
-      }
-    }
+    fn_level_actor_message_queue_push_back(
+            p.actor_message_queue,
+            ActorType_AccessCardDoor,
+            ActorMessageType_OpenDoor);
     data->current_frame = 0;
     data->num_frames = 1;
     data->tile = OBJ_ACCESS_CARD_SLOT + 8;
@@ -3301,21 +3306,10 @@ void fn_level_actor_function_teleporter_interact_start(
     othertype = ActorType_Teleporter1;
   }
 
-  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
-
-  fn_list_t * iter = NULL;
-  for (iter = fn_list_first(p.level->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    fn_level_actor_t * otheractor = (fn_level_actor_t *)iter->data;
-    if (otheractor->general->actor_type == othertype) {
-      fn_hero_position_move_to(hero_position,
-          otheractor->general->position.x,
-          otheractor->general->position.y - FN_TILE_HEIGHT);
-      return;
-    }
-  }
-  return;
+  fn_level_actor_message_queue_push_back(
+          p.actor_message_queue,
+          othertype,
+          ActorMessageType_Teleport);
 }
 
 /* --------------------------------------------------------------- */
@@ -3358,6 +3352,21 @@ void fn_level_actor_function_teleporter_blit(
       fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
     }
   }
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_level_actor_function_teleporter_receive_message(
+        fn_level_actor_receive_message_params_t p)
+{
+    if (p.message != ActorMessageType_Teleport) {
+        return;
+    }
+    FnHeroPosition * hero_position = fn_hero_data_get_position(
+            p.hero_data);
+    fn_hero_position_move_to(hero_position,
+            p.general->position.x,
+            p.general->position.y - FN_TILE_HEIGHT);
 }
 
 /* --------------------------------------------------------------- */
@@ -5040,6 +5049,18 @@ void fn_level_actor_function_door_act(
 
 /* --------------------------------------------------------------- */
 
+void fn_level_actor_function_door_receive_message(
+        fn_level_actor_receive_message_params_t p)
+{
+    if (p.message != ActorMessageType_OpenDoor) {
+        return;
+    }
+    fn_level_actor_door_data_t * data = p.specific;
+    data->state = 1;
+}
+
+/* --------------------------------------------------------------- */
+
 /**
  * Blit the door.
  *
@@ -5214,18 +5235,10 @@ void fn_level_actor_function_keyhole_interact_start(
     fn_hero_inventory_unset(hero_inventory, needed_key);
     data->counter = 5;
 
-    /* open all doors with the real color */
-    fn_list_t * iter = NULL;
-    for (iter = fn_list_first(p.level->actors);
-        iter != NULL;
-        iter = fn_list_next(iter)) {
-      fn_level_actor_t * dooractor = (fn_level_actor_t *)iter->data;
-
-      if (dooractor->general->actor_type == door_to_open) {
-        fn_level_actor_door_data_t * doordata = dooractor->specific;
-        doordata->state = 1;
-      }
-    }
+    fn_level_actor_message_queue_push_back(
+            p.actor_message_queue,
+            door_to_open,
+            ActorMessageType_OpenDoor);
   } else if (data->counter != 5) {
     fn_info_message_queue_push(
             p.info_message_queue,
@@ -5466,6 +5479,20 @@ void fn_level_actor_function_access_card_door_act(
   fn_level_actor_accesscard_door_data_t * data = p.specific;
   data->current_frame++;
   data->current_frame %= data->num_frames;
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_level_actor_function_access_card_door_receive_message(
+        fn_level_actor_receive_message_params_t p)
+{
+    if (p.message != ActorMessageType_OpenDoor) {
+        return;
+    }
+    p.general->is_alive = 0;
+    int x = p.general->position.x / FN_TILE_WIDTH;
+    int y = p.general->position.y / FN_TILE_HEIGHT;
+    fn_level_solids_set(&(p.level_data->solids), x, y, 0);
 }
 
 /* --------------------------------------------------------------- */
@@ -5771,6 +5798,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_firewheelbot_act,
     .blit = fn_level_actor_function_firewheelbot_blit,
     .shot = fn_level_actor_function_firewheelbot_shot,
+    .receive_message = NULL,
   },
   [ActorType_FlameGnomeBot] = {
     .create = NULL, /* TODO */
@@ -5782,6 +5810,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_FlyingBot] = {
     .create = NULL, /* TODO */
@@ -5793,6 +5822,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_FootBot] = {
     .create = NULL, /* TODO */
@@ -5804,6 +5834,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_HelicopterBot] = {
     .create = NULL, /* TODO */
@@ -5815,6 +5846,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_RabbitoidBot] = {
     .create = NULL, /* TODO */
@@ -5826,6 +5858,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_RedBallJumping] = {
     .create = fn_level_actor_function_redball_jumping_create,
@@ -5837,6 +5870,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_redball_jumping_act,
     .blit = fn_level_actor_function_redball_jumping_blit,
     .shot = fn_level_actor_function_redball_jumping_shot,
+    .receive_message = NULL,
   },
   [ActorType_RedBallLying] = {
     .create = fn_level_actor_function_redball_lying_create,
@@ -5848,6 +5882,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_redball_lying_act,
     .blit = fn_level_actor_function_redball_lying_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Robot] = {
     .create = fn_level_actor_function_robot_create,
@@ -5859,6 +5894,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_robot_act,
     .blit = fn_level_actor_function_robot_blit,
     .shot = fn_level_actor_function_robot_shot,
+    .receive_message = NULL,
   },
   [ActorType_RobotDisappearing] = {
     .create = fn_level_actor_function_singleanimation_create,
@@ -5870,6 +5906,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_singleanimation_act,
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_SnakeBot] = {
     .create = NULL, /* TODO */
@@ -5881,6 +5918,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_TankBot] = {
     .create = fn_level_actor_function_tankbot_create,
@@ -5892,6 +5930,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_tankbot_act,
     .blit = fn_level_actor_function_tankbot_blit,
     .shot = fn_level_actor_function_tankbot_shot,
+    .receive_message = NULL,
   },
   [ActorType_WallCrawlerBotLeft] = {
     .create = fn_level_actor_function_wallcrawler_create,
@@ -5903,6 +5942,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_wallcrawler_act,
     .blit = fn_level_actor_function_wallcrawler_blit,
     .shot = fn_level_actor_function_wallcrawler_shot,
+    .receive_message = NULL,
   },
   [ActorType_WallCrawlerBotRight] = {
     .create = fn_level_actor_function_wallcrawler_create,
@@ -5914,6 +5954,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_wallcrawler_act,
     .blit = fn_level_actor_function_wallcrawler_blit,
     .shot = fn_level_actor_function_wallcrawler_shot,
+    .receive_message = NULL,
   },
   [ActorType_DrProton] = {
     .create = NULL, /* TODO */
@@ -5925,6 +5966,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_Camera] = {
     .create = fn_level_actor_function_camera_create,
@@ -5936,6 +5978,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_camera_blit,
     .shot = fn_level_actor_function_camera_shot,
+    .receive_message = NULL,
   },
   [ActorType_Explosion] = {
     .create = fn_level_actor_function_explosion_create,
@@ -5947,6 +5990,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_explosion_act,
     .blit = fn_level_actor_function_explosion_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Fire] = {
     .create = fn_level_actor_function_singleanimation_create,
@@ -5958,6 +6002,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_singleanimation_act,
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_DustCloud] = {
     .create = fn_level_actor_function_singleanimation_create,
@@ -5969,6 +6014,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_singleanimation_act,
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Steam] = {
     .create = fn_level_actor_function_singleanimation_create,
@@ -5980,6 +6026,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_singleanimation_act,
     .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ParticlePink] = {
     .create = fn_level_actor_function_particle_create,
@@ -5991,6 +6038,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_particle_act,
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ParticleBlue] = {
     .create = fn_level_actor_function_particle_create,
@@ -6002,6 +6050,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_particle_act,
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ParticleWhite] = {
     .create = fn_level_actor_function_particle_create,
@@ -6013,6 +6062,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_particle_act,
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ParticleGreen] = {
     .create = fn_level_actor_function_particle_create,
@@ -6024,6 +6074,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_particle_act,
     .blit = fn_level_actor_function_particle_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Rocket] = {
     .create = fn_level_actor_function_rocket_create,
@@ -6035,6 +6086,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_rocket_act,
     .blit = fn_level_actor_function_rocket_blit,
     .shot = fn_level_actor_function_rocket_shot,
+    .receive_message = NULL,
   },
   [ActorType_Bomb] = {
     .create = fn_level_actor_bomb_create,
@@ -6046,6 +6098,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_bomb_act,
     .blit = fn_level_actor_bomb_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BombFire] = {
     .create = fn_level_actor_bombfire_create,
@@ -6057,6 +6110,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_bombfire_act,
     .blit = fn_level_actor_bombfire_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Water] = {
     .create = NULL, /* TODO */
@@ -6068,6 +6122,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_ExitDoor] = {
     .create = fn_level_actor_function_exitdoor_create,
@@ -6079,6 +6134,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_exitdoor_act,
     .blit = fn_level_actor_function_exitdoor_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Notebook] = {
     .create = fn_level_actor_function_notebook_create,
@@ -6090,6 +6146,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_notebook_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_SurveillanceScreen] = {
     .create = fn_level_actor_function_surveillancescreen_create,
@@ -6101,6 +6158,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_surveillancescreen_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_HostileShotLeft] = {
     .create = fn_level_actor_function_hostileshot_create,
@@ -6112,6 +6170,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_hostileshot_act,
     .blit = fn_level_actor_function_hostileshot_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_HostileShotRight] = {
     .create = fn_level_actor_function_hostileshot_create,
@@ -6123,6 +6182,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_hostileshot_act,
     .blit = fn_level_actor_function_hostileshot_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Soda] = {
     .create = fn_level_actor_function_item_create,
@@ -6134,6 +6194,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_SodaFlying] = {
     .create = fn_level_actor_function_soda_flying_create,
@@ -6145,6 +6206,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_soda_flying_act,
     .blit = fn_level_actor_function_soda_flying_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_UnstableFloor] = {
     .create = fn_level_actor_function_unstablefloor_create,
@@ -6156,6 +6218,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_unstablefloor_act,
     .blit = fn_level_actor_function_unstablefloor_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ExpandingFloor] = {
     .create = fn_level_actor_function_expandingfloor_create,
@@ -6167,6 +6230,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_expandingfloor_act,
     .blit = fn_level_actor_function_expandingfloor_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ConveyorLeftMovingRightEnd] = {
     .create = fn_level_actor_function_conveyor_create,
@@ -6178,6 +6242,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_conveyor_act,
     .blit = fn_level_actor_function_conveyor_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ConveyorRightMovingRightEnd] = {
     .create = fn_level_actor_function_conveyor_create,
@@ -6189,6 +6254,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_conveyor_act,
     .blit = fn_level_actor_function_conveyor_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_FanLeft] = {
     .create = fn_level_actor_function_fan_create,
@@ -6200,6 +6266,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_fan_act,
     .blit = fn_level_actor_function_fan_blit,
     .shot = fn_level_actor_function_fan_shot,
+    .receive_message = NULL,
   },
   [ActorType_FanRight] = {
     .create = fn_level_actor_function_fan_create,
@@ -6211,6 +6278,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_fan_act,
     .blit = fn_level_actor_function_fan_blit,
     .shot = fn_level_actor_function_fan_shot,
+    .receive_message = NULL,
   },
   [ActorType_BrokenWallBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -6222,6 +6290,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_StoneBackground] = {
     .create = NULL, /* TODO */
@@ -6233,6 +6302,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_Teleporter1] = {
     .create = fn_level_actor_function_teleporter_create,
@@ -6244,6 +6314,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_teleporter_act,
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_teleporter_receive_message,
   },
   [ActorType_Teleporter2] = {
     .create = fn_level_actor_function_teleporter_create,
@@ -6255,6 +6326,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_teleporter_act,
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_teleporter_receive_message,
   },
   [ActorType_FenceBackground] = {
     .create = NULL, /* TODO */
@@ -6266,6 +6338,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_StoneWindowBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -6277,6 +6350,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_WindowLeftBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -6288,6 +6362,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_WindowRightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -6299,6 +6374,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Screen] = {
     .create = NULL, /* TODO */
@@ -6310,6 +6386,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyEmpty] = {
     .create = fn_level_actor_function_item_create,
@@ -6321,6 +6398,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyBoots] = {
     .create = fn_level_actor_function_item_create,
@@ -6332,6 +6410,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Boots] = {
     .create = fn_level_actor_function_item_create,
@@ -6343,6 +6422,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyClamps] = {
     .create = fn_level_actor_function_item_create,
@@ -6354,6 +6434,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Clamps] = {
     .create = fn_level_actor_function_item_create,
@@ -6365,6 +6446,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyGun] = {
     .create = fn_level_actor_function_item_create,
@@ -6376,6 +6458,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Gun] = {
     .create = fn_level_actor_function_item_create,
@@ -6387,6 +6470,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyBomb] = {
     .create = fn_level_actor_function_item_create,
@@ -6398,6 +6482,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_BoxRedSoda] = {
     .create = fn_level_actor_function_item_create,
@@ -6409,6 +6494,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_BoxRedChicken] = {
     .create = fn_level_actor_function_item_create,
@@ -6420,6 +6506,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_ChickenSingle] = {
     .create = fn_level_actor_function_item_create,
@@ -6431,6 +6518,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_ChickenDouble] = {
     .create = fn_level_actor_function_item_create,
@@ -6442,6 +6530,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueFootball] = {
     .create = fn_level_actor_function_item_create,
@@ -6453,6 +6542,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Football] = {
     .create = fn_level_actor_function_item_create,
@@ -6464,6 +6554,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Flag] = {
     .create = fn_level_actor_function_item_create,
@@ -6475,6 +6566,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueJoystick] = {
     .create = fn_level_actor_function_item_create,
@@ -6486,6 +6578,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Joystick] = {
     .create = fn_level_actor_function_item_create,
@@ -6497,6 +6590,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueDisk] = {
     .create = fn_level_actor_function_item_create,
@@ -6508,6 +6602,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Disk] = {
     .create = fn_level_actor_function_item_create,
@@ -6519,6 +6614,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueBalloon] = {
     .create = fn_level_actor_function_item_create,
@@ -6530,6 +6626,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Balloon] = {
     .create = fn_level_actor_function_balloon_create,
@@ -6541,6 +6638,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_balloon_act,
     .blit = fn_level_actor_function_balloon_blit,
     .shot = fn_level_actor_function_balloon_shot,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyGlove] = {
     .create = fn_level_actor_function_item_create,
@@ -6552,6 +6650,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Glove] = {
     .create = fn_level_actor_function_item_create,
@@ -6563,6 +6662,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyFullLife] = {
     .create = fn_level_actor_function_item_create,
@@ -6574,6 +6674,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_FullLife] = {
     .create = fn_level_actor_function_item_create,
@@ -6585,6 +6686,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueFlag] = {
     .create = fn_level_actor_function_item_create,
@@ -6596,6 +6698,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_BlueFlag] = {
     .create = NULL, /* TODO */
@@ -6607,6 +6710,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL,
   },
   [ActorType_BoxBlueRadio] = {
     .create = fn_level_actor_function_item_create,
@@ -6618,6 +6722,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_Radio] = {
     .create = fn_level_actor_function_item_create,
@@ -6629,6 +6734,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyAccessCard] = {
     .create = fn_level_actor_function_item_create,
@@ -6640,6 +6746,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_AccessCard] = {
     .create = fn_level_actor_function_item_create,
@@ -6651,6 +6758,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyLetterD] = {
     .create = fn_level_actor_function_item_create,
@@ -6662,6 +6770,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_LetterD] = {
     .create = fn_level_actor_function_item_create,
@@ -6673,6 +6782,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyLetterU] = {
     .create = fn_level_actor_function_item_create,
@@ -6684,6 +6794,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_LetterU] = {
     .create = fn_level_actor_function_item_create,
@@ -6695,6 +6806,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyLetterK] = {
     .create = fn_level_actor_function_item_create,
@@ -6706,6 +6818,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_LetterK] = {
     .create = fn_level_actor_function_item_create,
@@ -6717,6 +6830,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BoxGreyLetterE] = {
     .create = fn_level_actor_function_item_create,
@@ -6728,6 +6842,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = fn_level_actor_function_item_shot,
+    .receive_message = NULL,
   },
   [ActorType_LetterE] = {
     .create = fn_level_actor_function_item_create,
@@ -6739,6 +6854,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_item_act,
     .blit = fn_level_actor_function_item_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_AccessCardSlot] = {
     .create = fn_level_actor_function_accesscard_slot_create,
@@ -6750,6 +6866,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_accesscard_slot_act,
     .blit = fn_level_actor_function_accesscard_slot_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_GloveSlot] = {
     .create = fn_level_actor_function_glove_slot_create,
@@ -6761,6 +6878,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_glove_slot_act,
     .blit = fn_level_actor_function_glove_slot_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeyRed] = {
     .create = fn_level_actor_function_key_create,
@@ -6772,6 +6890,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeyholeRed] = {
     .create = fn_level_actor_function_keyhole_create,
@@ -6783,6 +6902,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_DoorRed] = {
     .create = fn_level_actor_function_door_create,
@@ -6794,6 +6914,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_door_act,
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_door_receive_message,
   },
   [ActorType_KeyBlue] = {
     .create = fn_level_actor_function_key_create,
@@ -6805,6 +6926,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeyholeBlue] = {
     .create = fn_level_actor_function_keyhole_create,
@@ -6816,6 +6938,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_DoorBlue] = {
     .create = fn_level_actor_function_door_create,
@@ -6827,6 +6950,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_door_act,
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_door_receive_message,
   },
   [ActorType_KeyPink] = {
     .create = fn_level_actor_function_key_create,
@@ -6838,6 +6962,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeyholePink] = {
     .create = fn_level_actor_function_keyhole_create,
@@ -6849,6 +6974,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_DoorPink] = {
     .create = fn_level_actor_function_door_create,
@@ -6860,6 +6986,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_door_act,
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_door_receive_message,
   },
   [ActorType_KeyGreen] = {
     .create = fn_level_actor_function_key_create,
@@ -6871,6 +6998,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_key_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeyholeGreen] = {
     .create = fn_level_actor_function_keyhole_create,
@@ -6882,6 +7010,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_DoorGreen] = {
     .create = fn_level_actor_function_door_create,
@@ -6893,6 +7022,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_door_act,
     .blit = fn_level_actor_function_door_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_door_receive_message,
   },
   [ActorType_ShootableWall] = {
     .create = fn_level_actor_function_shootable_wall_create,
@@ -6904,6 +7034,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_shootable_wall_blit,
     .shot = fn_level_actor_function_shootable_wall_shot,
+    .receive_message = NULL,
   },
   [ActorType_Lift] = {
     .create = fn_level_actor_function_lift_create,
@@ -6915,6 +7046,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_lift_act,
     .blit = fn_level_actor_function_lift_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Acme] = {
     .create = fn_level_actor_function_acme_create,
@@ -6926,6 +7058,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_acme_act,
     .blit = fn_level_actor_function_acme_blit,
     .shot = fn_level_actor_function_acme_shot,
+    .receive_message = NULL,
   },
   [ActorType_FireRight] = {
     .create = fn_level_actor_function_fire_create,
@@ -6937,6 +7070,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_fire_act,
     .blit = fn_level_actor_function_fire_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_FireLeft] = {
     .create = fn_level_actor_function_fire_create,
@@ -6948,6 +7082,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_fire_act,
     .blit = fn_level_actor_function_fire_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Mill] = {
     .create = fn_level_actor_function_mill_create,
@@ -6959,6 +7094,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_mill_act,
     .blit = fn_level_actor_function_mill_blit,
     .shot = fn_level_actor_function_mill_shot,
+    .receive_message = NULL,
   },
   [ActorType_Laserbeam] = {
     .create = NULL, /* TODO */
@@ -6970,6 +7106,7 @@ fn_level_actor_functions[] =
     .act = NULL, /* TODO */
     .blit = NULL, /* TODO */
     .shot = NULL, /* TODO */
+    .receive_message = NULL, /* TODO */
   },
   [ActorType_AccessCardDoor] = {
     .create = fn_level_actor_function_access_card_door_create,
@@ -6981,6 +7118,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_access_card_door_act,
     .blit = fn_level_actor_function_access_card_door_blit,
     .shot = NULL,
+    .receive_message = fn_level_actor_function_access_card_door_receive_message,
   },
   [ActorType_SpikesUp] = {
     .create = fn_level_actor_function_spikes_create,
@@ -6992,6 +7130,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_SpikesDown] = {
     .create = fn_level_actor_function_spikes_create,
@@ -7003,6 +7142,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Spike] = {
     .create = fn_level_actor_function_spikes_create,
@@ -7014,6 +7154,7 @@ fn_level_actor_functions[] =
     .act = NULL,
     .blit = fn_level_actor_function_spikes_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score100] = {
     .create = fn_level_actor_function_score_create,
@@ -7025,6 +7166,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score200] = {
     .create = fn_level_actor_function_score_create,
@@ -7036,6 +7178,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score500] = {
     .create = fn_level_actor_function_score_create,
@@ -7047,6 +7190,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score1000] = {
     .create = fn_level_actor_function_score_create,
@@ -7058,6 +7202,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score2000] = {
     .create = fn_level_actor_function_score_create,
@@ -7069,6 +7214,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score5000] = {
     .create = fn_level_actor_function_score_create,
@@ -7080,6 +7226,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_Score10000] = {
     .create = fn_level_actor_function_score_create,
@@ -7091,6 +7238,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus1Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7102,6 +7250,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus1Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7113,6 +7262,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus2Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7124,6 +7274,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus2Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7135,6 +7286,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus3Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7146,6 +7298,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus3Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7157,6 +7310,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus4Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7168,6 +7322,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus4Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7179,6 +7334,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus5Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7190,6 +7346,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus5Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7201,6 +7358,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus6Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7212,6 +7370,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus6Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7223,6 +7382,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus7Left] = {
     .create = fn_level_actor_function_score_create,
@@ -7234,6 +7394,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_ScoreBonus7Right] = {
     .create = fn_level_actor_function_score_create,
@@ -7245,6 +7406,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_score_act,
     .blit = fn_level_actor_function_score_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BlueLightBackground1] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7256,6 +7418,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BlueLightBackground2] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7267,6 +7430,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BlueLightBackground3] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7278,6 +7442,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BlueLightBackground4] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7289,6 +7454,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_TextOnScreenBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7300,6 +7466,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_HighVoltageFlashBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7311,6 +7478,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_RedFlashlightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7322,6 +7490,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_BlueFlashlightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7333,6 +7502,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_KeypanelBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7344,6 +7514,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_RedRotationLightBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7355,6 +7526,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_UpArrowBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7366,6 +7538,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_GreenPoisonBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7377,6 +7550,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
   [ActorType_LavaBackground] = {
     .create = fn_level_actor_function_simpleanimation_create,
@@ -7388,6 +7562,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_simpleanimation_act,
     .blit = fn_level_actor_function_simpleanimation_blit,
     .shot = NULL,
+    .receive_message = NULL,
   },
 };
 
@@ -7533,7 +7708,8 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
 void fn_level_actor_hero_interact_start(
         fn_level_actor_t * actor,
         fn_level_t * level,
-        FnInfoMessageQueue * info_message_queue)
+        FnInfoMessageQueue * info_message_queue,
+        FnLevelActorMessageQueue * actor_message_queue)
 {
   fn_level_actor_interact_start_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_interact_start;
@@ -7543,9 +7719,10 @@ void fn_level_actor_hero_interact_start(
     struct fn_level_actor_interact_start_params_t p = {
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
+        .level_data = level->data,
         .hero_data = hero->data,
         .info_message_queue = info_message_queue,
+        .actor_message_queue = actor_message_queue,
     };
 
     func(p);
@@ -7629,7 +7806,10 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
+Uint8 fn_level_actor_shot(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue)
 {
   fn_level_actor_shot_function_t func =
     fn_level_actor_functions[actor->general->actor_type].shot;
@@ -7646,6 +7826,30 @@ Uint8 fn_level_actor_shot(fn_level_actor_t * actor, fn_level_t * level, FnLevelA
     return 1;
   }
   return 0;
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_level_actor_receive_message(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorMessageType message)
+{
+  fn_level_actor_receive_message_function_t func =
+    fn_level_actor_functions[actor->general->actor_type].receive_message;
+  if (func != NULL) {
+    fn_hero_t * hero = fn_level_get_hero(level);
+
+    struct fn_level_actor_receive_message_params_t p = {
+        .general = actor->general,
+        .specific = actor->specific,
+        .message = message,
+        .hero_data = hero->data,
+        .level_data = level->data,
+    };
+
+    func(p);
+  }
 }
 
 /* --------------------------------------------------------------- */

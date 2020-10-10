@@ -221,7 +221,8 @@ fn_hero_t * fn_level_get_hero(fn_level_t * lv);
  */
 int fn_level_act(
         fn_level_t * lv,
-        FnLevelActorQueue * actor_queue);
+        FnLevelActorQueue * actor_queue,
+        FnLevelActorMessageQueue * actor_message_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -232,7 +233,8 @@ int fn_level_act(
  */
 void fn_level_hero_interact_start(
         fn_level_t * lv,
-        FnInfoMessageQueue * info_message_queue);
+        FnInfoMessageQueue * info_message_queue,
+        FnLevelActorMessageQueue * actor_message_queue);
 
 /* --------------------------------------------------------------- */
 

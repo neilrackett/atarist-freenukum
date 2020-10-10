@@ -317,6 +317,8 @@ int fn_game_start_in_level(
 
   FnInfoMessageQueue * info_message_queue =
       fn_info_message_queue_create();
+  FnLevelActorMessageQueue * actor_message_queue =
+      fn_level_actor_message_queue_create();
 
   /* The mainloop of the level */
   while (fn_level_keep_on_playing(lv))
@@ -433,7 +435,8 @@ int fn_game_start_in_level(
                   srcrect.y -= FN_HALFTILE_HEIGHT;
                 }
               } else {
-                fn_level_hero_interact_start(lv, info_message_queue);
+                fn_level_hero_interact_start(
+                        lv, info_message_queue, actor_message_queue);
               }
               doupdate = 1;
               break;
@@ -536,7 +539,8 @@ int fn_game_start_in_level(
               fn_hero_update_animation(hero);
               break;
             case SDL_BUTTON_MIDDLE:
-              fn_level_hero_interact_start(lv, info_message_queue);
+              fn_level_hero_interact_start(
+                      lv, info_message_queue, actor_message_queue);
               doupdate = 1;
               break;
             default:
@@ -566,7 +570,7 @@ int fn_game_start_in_level(
         case SDL_USEREVENT:
           switch(event.user.code) {
             case UserEvent_Timer:
-              fn_level_act(lv, actor_queue);
+              fn_level_act(lv, actor_queue, actor_message_queue);
               doupdate = 1;
               break;
             case UserEvent_HeroMoved:
@@ -652,6 +656,7 @@ int fn_game_start_in_level(
 
 cleanup:
   fn_info_message_queue_free(info_message_queue);
+  fn_level_actor_message_queue_free(actor_message_queue);
 
   if (actor_queue != NULL) {
       fn_level_actor_queue_free(actor_queue);

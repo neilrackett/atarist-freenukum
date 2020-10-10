@@ -210,11 +210,31 @@ impl ActorQueue {
     }
 }
 
+#[repr(C)]
+pub enum ActorMessageType {
+    OpenDoor,
+    Teleport,
+}
+
+#[repr(C)]
+pub struct ActorMessage {
+    pub receivers: ActorType,
+    pub message: ActorMessageType,
+}
+
+#[derive(Default)]
+pub struct ActorMessageQueue {
+    pub messages: Vec<ActorMessage>,
+}
+
 pub mod ffi {
     type FnLevelActorData = super::ActorData;
     type FnLevelActorType = super::ActorType;
     type FnLevelActorQueue = super::ActorQueue;
     type FnLevelActorQueueItem = super::ActorQueueItem;
+    type FnLevelActorMessage = super::ActorMessage;
+    type FnLevelActorMessageType = super::ActorMessageType;
+    type FnLevelActorMessageQueue = super::ActorMessageQueue;
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_data_create(
@@ -292,5 +312,52 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let queue = unsafe { &mut (*ptr) };
         queue.push_particle_firework(x, y, count);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_message_queue_create(
+    ) -> *mut FnLevelActorMessageQueue {
+        Box::into_raw(Box::new(FnLevelActorMessageQueue::default()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_message_queue_free(
+        ptr: *mut FnLevelActorMessageQueue,
+    ) {
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_message_queue_push_back(
+        ptr: *mut FnLevelActorMessageQueue,
+        receivers: FnLevelActorType,
+        message: FnLevelActorMessageType,
+    ) {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+        queue
+            .messages
+            .push(super::ActorMessage { receivers, message })
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_message_queue_has_items(
+        ptr: *const FnLevelActorMessageQueue,
+    ) -> bool {
+        let queue = unsafe { &(*ptr) };
+        !queue.messages.is_empty()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_message_queue_pop_front(
+        ptr: *mut FnLevelActorMessageQueue,
+    ) -> FnLevelActorMessage {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+        queue.messages.remove(0)
     }
 }
