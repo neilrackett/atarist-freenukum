@@ -1,3 +1,4 @@
+mod simpleanimation;
 mod soda_flying;
 
 use super::super::geometry::Geometry;

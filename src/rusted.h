@@ -714,6 +714,14 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_simpleanimation_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_simpleanimation_free(FnLevelActorFreeParams p);
+
 void fn_level_actor_function_soda_flying_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_soda_flying_blit(FnLevelActorBlitParams p);
