@@ -86,98 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * The lying red ball.
- */
-typedef struct fn_level_actor_redball_lying_data_t {
-  /**
-   * The tile number which is to be blitted in the level.
-   */
-  Uint16 tile;
-  /**
-   * Flag that stores if the redball is touching the hero.
-   */
-  Uint8 touching_hero;
-} fn_level_actor_redball_lying_data_t;
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_redball_lying_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_redball_lying_data_t * data = malloc(
-      sizeof(fn_level_actor_redball_lying_data_t));
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  data->tile = ANIM_MINE;
-  data->touching_hero = 0;
-}
-
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_redball_lying_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_redball_lying_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_redball_lying_hero_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_redball_lying_data_t * data = p.specific;
-  if (!data->touching_hero) {
-    data->touching_hero = 1;
-    p.general->hurts_hero = true;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_redball_lying_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_redball_lying_data_t * data = p.specific;
-
-  if (!fn_level_solids_get(&(p.level_data->solids),
-        (p.general->position.x) / FN_TILE_WIDTH,
-        (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
-    p.general->position.y += FN_HALFTILE_HEIGHT;
-  }
-
-  if (data->touching_hero == 1) {
-    data->touching_hero++;
-  } else if (data->touching_hero > 1) {
-    p.general->hurts_hero = false;
-    p.general->is_alive = 0;
-    fn_level_actor_queue_push_back(
-            p.actor_queue,
-            ActorType_Fire,
-            p.general->position.x,
-            p.general->position.y);
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_redball_lying_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_redball_lying_data_t * data = p.specific;
-
-  FnGeometry destrect = p.general->position;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile);
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * The robot.
  */
 typedef struct fn_level_actor_robot_data_t {
@@ -5445,7 +5353,7 @@ fn_level_actor_functions[] =
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_redball_lying_act,
     .blit = fn_level_actor_function_redball_lying_blit,
-    .shot = NULL,
+    .shot = fn_level_actor_function_redball_lying_shot,
     .receive_message = NULL,
   },
   [ActorType_Robot] = {
