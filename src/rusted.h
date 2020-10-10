@@ -728,6 +728,18 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(FnLevelActorHeroTo
 
 void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_redball_lying_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_redball_lying_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_redball_lying_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_redball_lying_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_redball_lying_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_redball_lying_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);
