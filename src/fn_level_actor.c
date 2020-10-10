@@ -121,7 +121,6 @@ typedef void (* fn_level_actor_act_function_t)(
 /* --------------------------------------------------------------- */
 
 typedef struct fn_level_actor_blit_params_t {
-    fn_level_actor_t * actor;
     FnLevelActorData * general;
     void * specific;
     FnHeroData * hero_data;
@@ -7816,7 +7815,6 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
     SDL_Surface * target = fn_level_get_surface(level);
     fn_hero_t * hero = fn_level_get_hero(level);
     fn_level_actor_blit_params_t p = {
-        .actor = actor,
         .general = actor->general,
         .specific = actor->specific,
         .hero_data = hero->data,
