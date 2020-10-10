@@ -37,126 +37,35 @@
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef struct fn_level_actor_create_params_t {
-    FnLevelActorData * general;
-    void ** specific;
-    FnLevelData * level_data;
-} fn_level_actor_create_params_t;
-
 typedef void (* fn_level_actor_create_function_t)(
-        fn_level_actor_create_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_free_params_t {
-    void ** specific;
-} fn_level_actor_free_params_t;
+        FnLevelActorCreateParams p);
 
 typedef void (* fn_level_actor_free_function_t)(
-        fn_level_actor_free_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_hero_touch_start_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnLevelActorQueue * actor_queue;
-    FnHeroData * hero_data;
-} fn_level_actor_hero_touch_start_params_t;
+        FnLevelActorFreeParams p);
 
 typedef void (* fn_level_actor_hero_touch_start_function_t)(
-        fn_level_actor_hero_touch_start_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_hero_touch_end_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnHeroData * hero_data;
-} fn_level_actor_hero_touch_end_params_t;
+        FnLevelActorHeroTouchStartParams p);
 
 typedef void (* fn_level_actor_hero_touch_end_function_t)(
-        fn_level_actor_hero_touch_end_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_interact_start_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnLevelData * level_data;
-    FnHeroData * hero_data;
-    FnInfoMessageQueue * info_message_queue;
-    FnLevelActorMessageQueue * actor_message_queue;
-} fn_level_actor_interact_start_params_t;
+        FnLevelActorHeroTouchEndParams p);
 
 typedef void (* fn_level_actor_interact_start_function_t)(
-        fn_level_actor_interact_start_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_interact_end_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnLevelData * level_data;
-    FnHeroData * hero_data;
-} fn_level_actor_interact_end_params_t;
+        FnLevelActorHeroInteractStartParams p);
 
 typedef void (* fn_level_actor_interact_end_function_t)(
-        fn_level_actor_interact_end_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_act_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    fn_level_t * level;
-    FnLevelData * level_data;
-    FnLevelActorQueue * actor_queue;
-    FnHeroData * hero_data;
-} fn_level_actor_act_params_t;
+        FnLevelActorHeroInteractEndParams p);
 
 typedef void (* fn_level_actor_act_function_t)(
-        fn_level_actor_act_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_blit_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnHeroData * hero_data;
-    const FnTileCache * tilecache;
-    SDL_Surface * target;
-} fn_level_actor_blit_params_t;
-
+        FnLevelActorActParams p);
 
 typedef void (* fn_level_actor_blit_function_t)(
-        fn_level_actor_blit_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_shot_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnLevelData * level_data;
-    FnLevelActorQueue * actor_queue;
-    FnHeroData * hero_data;
-} fn_level_actor_shot_params_t;
+        FnLevelActorBlitParams p);
 
 typedef void (* fn_level_actor_shot_function_t)(
-        fn_level_actor_shot_params_t p);
-
-/* --------------------------------------------------------------- */
-
-typedef struct fn_level_actor_receive_message_params_t {
-    FnLevelActorData * general;
-    void * specific;
-    FnLevelActorMessageType message;
-    FnHeroData * hero_data;
-    FnLevelData * level_data;
-} fn_level_actor_receive_message_params_t;
+        FnLevelActorShotParams p);
 
 typedef void (* fn_level_actor_receive_message_function_t)(
-        fn_level_actor_receive_message_params_t p);
+        FnLevelActorReceiveMessageParams p);
 
 /* --------------------------------------------------------------- */
 
@@ -205,7 +114,7 @@ typedef struct fn_level_actor_simpleanimation_data_t {
  * @param  actor The animation actor.
  */
 void fn_level_actor_function_simpleanimation_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_simpleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_simpleanimation_data_t));
@@ -317,7 +226,7 @@ void fn_level_actor_function_simpleanimation_create(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_simpleanimation_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -332,7 +241,7 @@ void fn_level_actor_function_simpleanimation_free(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_simpleanimation_data_t * data = p.specific;
   data->current_frame++;
@@ -347,7 +256,7 @@ void fn_level_actor_function_simpleanimation_act(
  * @param  actor  The animation actor.
  */
 void fn_level_actor_function_simpleanimation_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_simpleanimation_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -380,7 +289,7 @@ typedef struct fn_level_actor_redball_jumping_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_redball_jumping_data_t * data = malloc(
       sizeof(fn_level_actor_redball_jumping_data_t));
@@ -395,7 +304,7 @@ void fn_level_actor_function_redball_jumping_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_redball_jumping_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -404,7 +313,7 @@ void fn_level_actor_function_redball_jumping_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   p.general->hurts_hero = true;
 }
@@ -412,7 +321,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_hero_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   p.general->hurts_hero = false;
 }
@@ -420,7 +329,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_redball_jumping_data_t * data = p.specific;
 
@@ -465,7 +374,7 @@ void fn_level_actor_function_redball_jumping_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_redball_jumping_data_t * data = p.specific;
 
@@ -478,7 +387,7 @@ void fn_level_actor_function_redball_jumping_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_jumping_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   /*
    * Do nothing. This function just exists so that the red
@@ -506,7 +415,7 @@ typedef struct fn_level_actor_redball_lying_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_redball_lying_data_t * data = malloc(
       sizeof(fn_level_actor_redball_lying_data_t));
@@ -521,7 +430,7 @@ void fn_level_actor_function_redball_lying_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_redball_lying_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -530,7 +439,7 @@ void fn_level_actor_function_redball_lying_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_redball_lying_data_t * data = p.specific;
   if (!data->touching_hero) {
@@ -542,7 +451,7 @@ void fn_level_actor_function_redball_lying_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_redball_lying_data_t * data = p.specific;
 
@@ -568,7 +477,7 @@ void fn_level_actor_function_redball_lying_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_redball_lying_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_redball_lying_data_t * data = p.specific;
 
@@ -610,7 +519,7 @@ typedef struct fn_level_actor_robot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_robot_data_t * data = malloc(
       sizeof(fn_level_actor_robot_data_t));
@@ -628,7 +537,7 @@ void fn_level_actor_function_robot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_robot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -637,7 +546,7 @@ void fn_level_actor_function_robot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_robot_data_t * data = p.specific;
   p.general->hurts_hero = true;
@@ -647,7 +556,7 @@ void fn_level_actor_function_robot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_robot_data_t * data = p.specific;
   p.general->hurts_hero = false;
@@ -657,7 +566,7 @@ void fn_level_actor_function_robot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_robot_data_t * data = p.specific;
   data->current_frame++;
@@ -709,7 +618,7 @@ void fn_level_actor_function_robot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_robot_data_t * data = p.specific;
 
@@ -722,7 +631,7 @@ void fn_level_actor_function_robot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_robot_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_robot_data_t * data = p.specific;
 
@@ -777,7 +686,7 @@ typedef struct fn_level_actor_tankbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_tankbot_data_t * data = malloc(
       sizeof(fn_level_actor_tankbot_data_t));
@@ -796,7 +705,7 @@ void fn_level_actor_function_tankbot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_tankbot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -805,7 +714,7 @@ void fn_level_actor_function_tankbot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_tankbot_data_t * data = p.specific;
   if (data->was_shot < 2) {
@@ -817,7 +726,7 @@ void fn_level_actor_function_tankbot_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_hero_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_tankbot_data_t * data = p.specific;
   if (data->was_shot < 2) {
@@ -829,7 +738,7 @@ void fn_level_actor_function_tankbot_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_tankbot_data_t * data = p.specific;
   data->current_frame++;
@@ -918,7 +827,7 @@ void fn_level_actor_function_tankbot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_tankbot_data_t * data = p.specific;
 
@@ -937,7 +846,7 @@ void fn_level_actor_function_tankbot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_tankbot_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_tankbot_data_t * data = p.specific;
 
@@ -996,7 +905,7 @@ typedef struct fn_level_actor_firewheelbot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = malloc(
       sizeof(fn_level_actor_firewheelbot_data_t));
@@ -1016,7 +925,7 @@ void fn_level_actor_function_firewheelbot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -1025,7 +934,7 @@ void fn_level_actor_function_firewheelbot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = p.specific;
   if (data->was_shot < 2) {
@@ -1037,7 +946,7 @@ void fn_level_actor_function_firewheelbot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = p.specific;
   if (data->was_shot < 2) {
@@ -1049,7 +958,7 @@ void fn_level_actor_function_firewheelbot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = p.specific;
   if (data->was_shot == 2) {
@@ -1113,7 +1022,7 @@ void fn_level_actor_function_firewheelbot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = p.specific;
 
@@ -1150,7 +1059,7 @@ void fn_level_actor_function_firewheelbot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_firewheelbot_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_firewheelbot_data_t * data = p.specific;
 
@@ -1205,7 +1114,7 @@ typedef struct fn_level_actor_wallcrawler_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
 
   fn_level_actor_wallcrawler_data_t * data = malloc(
@@ -1232,7 +1141,7 @@ void fn_level_actor_function_wallcrawler_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -1241,7 +1150,7 @@ void fn_level_actor_function_wallcrawler_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = p.specific;
   if (!data->was_shot) {
@@ -1253,7 +1162,7 @@ void fn_level_actor_function_wallcrawler_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = p.specific;
   if (!data->was_shot) {
@@ -1265,7 +1174,7 @@ void fn_level_actor_function_wallcrawler_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = p.specific;
 
@@ -1328,7 +1237,7 @@ void fn_level_actor_function_wallcrawler_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = p.specific;
 
@@ -1341,7 +1250,7 @@ void fn_level_actor_function_wallcrawler_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_wallcrawler_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_wallcrawler_data_t * data = p.specific;
 
@@ -1394,7 +1303,7 @@ typedef struct fn_level_actor_lift_data_t {
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_lift_data_t * data = malloc(
       sizeof(fn_level_actor_lift_data_t));
@@ -1413,7 +1322,7 @@ void fn_level_actor_function_lift_create(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_lift_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -1427,7 +1336,7 @@ void fn_level_actor_function_lift_free(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
@@ -1447,7 +1356,7 @@ void fn_level_actor_function_lift_interact_start(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_interact_end(
-        fn_level_actor_interact_end_params_t p)
+        FnLevelActorHeroInteractEndParams p)
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
@@ -1469,7 +1378,7 @@ void fn_level_actor_function_lift_interact_end(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_lift_data_t * data = p.specific;
 
@@ -1549,7 +1458,7 @@ void fn_level_actor_function_lift_act(
  * @param  actor  The lift actor.
  */
 void fn_level_actor_function_lift_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   FnGeometry destrect = p.general->position;
 
@@ -1592,7 +1501,7 @@ typedef struct fn_level_actor_acme_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_acme_data_t * data = malloc(
       sizeof(fn_level_actor_acme_data_t));
@@ -1608,7 +1517,7 @@ void fn_level_actor_function_acme_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_acme_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -1617,7 +1526,7 @@ void fn_level_actor_function_acme_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_acme_data_t * data = p.specific;
 
@@ -1697,7 +1606,7 @@ void fn_level_actor_function_acme_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_acme_data_t * data = p.specific;
 
@@ -1714,7 +1623,7 @@ void fn_level_actor_function_acme_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_acme_data_t * data = p.specific;
 
@@ -1737,7 +1646,7 @@ void fn_level_actor_function_acme_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_acme_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_acme_data_t * data = p.specific;
 
@@ -1787,7 +1696,7 @@ typedef struct fn_level_actor_fire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_fire_data_t * data = malloc(
       sizeof(fn_level_actor_fire_data_t));
@@ -1813,7 +1722,7 @@ void fn_level_actor_function_fire_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_fire_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -1822,7 +1731,7 @@ void fn_level_actor_function_fire_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_fire_data_t * data = p.specific;
   data->touching_hero = 1;
@@ -1835,7 +1744,7 @@ void fn_level_actor_function_fire_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_hero_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_fire_data_t * data = p.specific;
   data->touching_hero = 0;
@@ -1848,7 +1757,7 @@ void fn_level_actor_function_fire_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_fire_data_t * data = p.specific;
   switch(data->state)
@@ -1889,7 +1798,7 @@ void fn_level_actor_function_fire_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fire_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_fire_data_t * data = p.specific;
   const FnTexture * tile0 = NULL;
@@ -1971,7 +1880,7 @@ typedef struct fn_level_actor_mill_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_mill_data_t * data = malloc(
       sizeof(fn_level_actor_mill_data_t));
@@ -1995,7 +1904,7 @@ void fn_level_actor_function_mill_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_mill_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -2004,7 +1913,7 @@ void fn_level_actor_function_mill_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_mill_data_t * data = p.specific;
   if (data->lives > 0) {
@@ -2017,7 +1926,7 @@ void fn_level_actor_function_mill_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_mill_data_t * data = p.specific;
   if (data->lives > 0) {
@@ -2029,7 +1938,7 @@ void fn_level_actor_function_mill_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_mill_data_t * data = p.specific;
 
@@ -2051,7 +1960,7 @@ void fn_level_actor_function_mill_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_mill_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_mill_data_t * data = p.specific;
   
@@ -2112,7 +2021,7 @@ typedef struct fn_level_actor_acces_card_slot_data_t {
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -2133,7 +2042,7 @@ void fn_level_actor_function_accesscard_slot_create(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_access_card_slot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -2147,7 +2056,7 @@ void fn_level_actor_function_accesscard_slot_free(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   fn_level_actor_access_card_slot_data_t * data = p.specific;
 
@@ -2176,7 +2085,7 @@ void fn_level_actor_function_accesscard_slot_interact_start(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_access_card_slot_data_t * data = p.specific;
   data->current_frame++;
@@ -2191,7 +2100,7 @@ void fn_level_actor_function_accesscard_slot_act(
  * @param  actor  The accesscard slot actor.
  */
 void fn_level_actor_function_accesscard_slot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_access_card_slot_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -2243,7 +2152,7 @@ typedef struct fn_level_actor_glove_slot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -2261,7 +2170,7 @@ void fn_level_actor_function_glove_slot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_glove_slot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -2270,7 +2179,7 @@ void fn_level_actor_function_glove_slot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   fn_level_actor_glove_slot_data_t * data = p.specific;
   FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
@@ -2306,7 +2215,7 @@ void fn_level_actor_function_glove_slot_interact_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_glove_slot_data_t * data = p.specific;
 
@@ -2350,7 +2259,7 @@ void fn_level_actor_function_glove_slot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_glove_slot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_glove_slot_data_t * data = p.specific;
   Uint8 adder = (data->current_frame == 0 ? 0 : 1);
@@ -2406,7 +2315,7 @@ typedef struct fn_level_actor_item_data_t {
  * @param  actor The item actor.
  */
 void fn_level_actor_function_item_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_item_data_t * data = malloc(
       sizeof(fn_level_actor_item_data_t));
@@ -2555,7 +2464,7 @@ void fn_level_actor_function_item_create(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_item_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -2569,7 +2478,7 @@ void fn_level_actor_function_item_free(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_item_data_t * data = p.specific;
 
@@ -2776,7 +2685,7 @@ void fn_level_actor_function_item_touch_start(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   /* Nothing to do here */
 }
@@ -2789,7 +2698,7 @@ void fn_level_actor_function_item_touch_end(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_item_data_t * data = p.specific;
   data->current_frame++;
@@ -2809,7 +2718,7 @@ void fn_level_actor_function_item_act(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_item_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -2826,7 +2735,7 @@ void fn_level_actor_function_item_blit(
  * @param  actor  The item actor.
  */
 void fn_level_actor_function_item_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   switch(p.general->actor_type) {
     case ActorType_BoxBlueFootball:
@@ -3060,7 +2969,7 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -3069,7 +2978,7 @@ void fn_level_actor_function_soda_flying_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   /* nothing to do here */
 }
@@ -3077,7 +2986,7 @@ void fn_level_actor_function_soda_flying_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
   fn_hero_score_add(score, 1000);
@@ -3091,7 +3000,7 @@ void fn_level_actor_function_soda_flying_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   p.general->position.y -= FN_HALFTILE_HEIGHT;
   if (fn_level_solids_get(&(p.level_data->solids),
@@ -3108,7 +3017,7 @@ void fn_level_actor_function_soda_flying_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_soda_flying_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = fn_tilecache_get_tile(
           p.tilecache, ANIM_SODAFLY +
@@ -3138,7 +3047,7 @@ typedef struct fn_level_actor_balloon_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_balloon_data_t * data =
     malloc(sizeof(fn_level_actor_balloon_data_t));
@@ -3152,7 +3061,7 @@ void fn_level_actor_function_balloon_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_balloon_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3161,7 +3070,7 @@ void fn_level_actor_function_balloon_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_balloon_data_t * data = p.specific;
   FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
@@ -3178,7 +3087,7 @@ void fn_level_actor_function_balloon_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_balloon_data_t * data = p.specific;
 
@@ -3207,7 +3116,7 @@ void fn_level_actor_function_balloon_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_balloon_data_t * data = p.specific;
 
@@ -3232,7 +3141,7 @@ void fn_level_actor_function_balloon_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_balloon_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_balloon_data_t * data = p.specific;
   data->destroyed = 1;
@@ -3251,7 +3160,7 @@ void fn_level_actor_function_balloon_shot(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -3266,7 +3175,7 @@ void fn_level_actor_function_teleporter_create(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   FnLevelActorType othertype;
   if (p.general->actor_type == ActorType_Teleporter1) {
@@ -3289,7 +3198,7 @@ void fn_level_actor_function_teleporter_interact_start(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
 }
 
@@ -3301,7 +3210,7 @@ void fn_level_actor_function_teleporter_act(
  * @param  actor  The teleporter actor.
  */
 void fn_level_actor_function_teleporter_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile;
 
@@ -3326,7 +3235,7 @@ void fn_level_actor_function_teleporter_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_teleporter_receive_message(
-        fn_level_actor_receive_message_params_t p)
+        FnLevelActorReceiveMessageParams p)
 {
     if (p.message != ActorMessageType_Teleport) {
         return;
@@ -3367,7 +3276,7 @@ typedef struct fn_level_actor_singleanimation_data_t {
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_singleanimation_data_t * data = malloc(
       sizeof(fn_level_actor_singleanimation_data_t));
@@ -3414,7 +3323,7 @@ void fn_level_actor_function_singleanimation_create(
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_singleanimation_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3428,7 +3337,7 @@ void fn_level_actor_function_singleanimation_free(
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_singleanimation_data_t * data = p.specific;
 
@@ -3453,7 +3362,7 @@ void fn_level_actor_function_singleanimation_act(
  * @param  actor  The singleanimation actor.
  */
 void fn_level_actor_function_singleanimation_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_singleanimation_data_t * data = p.specific;
 
@@ -3491,7 +3400,7 @@ typedef struct fn_level_actor_particle_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_particle_data_t * data = malloc(
       sizeof(fn_level_actor_particle_data_t));
@@ -3534,7 +3443,7 @@ void fn_level_actor_function_particle_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_particle_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3543,7 +3452,7 @@ void fn_level_actor_function_particle_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_particle_data_t * data = p.specific;
   if (data->countdown) {
@@ -3559,7 +3468,7 @@ void fn_level_actor_function_particle_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_particle_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_particle_data_t * data = p.specific;
 
@@ -3596,7 +3505,7 @@ typedef struct fn_level_actor_rocket_data_t {
  * @param  actor  The rocket actor.
  */
 void fn_level_actor_function_rocket_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_rocket_data_t * data = malloc(
       sizeof(fn_level_actor_rocket_data_t));
@@ -3609,7 +3518,7 @@ void fn_level_actor_function_rocket_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_rocket_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3618,7 +3527,7 @@ void fn_level_actor_function_rocket_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_rocket_data_t * data = p.specific;
   if (data->state == fn_level_actor_rocket_state_idle) {
@@ -3641,7 +3550,7 @@ void fn_level_actor_function_rocket_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_rocket_data_t * data = p.specific;
   FnGeometry destrect;
@@ -3681,7 +3590,7 @@ void fn_level_actor_function_rocket_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_rocket_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_rocket_data_t * data = p.specific;
   data->state = fn_level_actor_rocket_state_flying;
@@ -3736,7 +3645,7 @@ typedef struct fn_level_actor_bomb_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_bomb_data_t * data = malloc(
       sizeof(fn_level_actor_bomb_data_t));
@@ -3757,7 +3666,7 @@ void fn_level_actor_bomb_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_bomb_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3766,7 +3675,7 @@ void fn_level_actor_bomb_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_bomb_data_t * data = p.specific;
   data->current_frame++;
@@ -3834,7 +3743,7 @@ void fn_level_actor_bomb_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bomb_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_bomb_data_t * data = p.specific;
   if (data->counter < data->explode_threshold) {
@@ -3870,7 +3779,7 @@ typedef struct fn_level_actor_bombfire_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_bombfire_data_t * data = malloc(
       sizeof(fn_level_actor_bombfire_data_t));
@@ -3886,7 +3795,7 @@ void fn_level_actor_bombfire_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_bombfire_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -3895,7 +3804,7 @@ void fn_level_actor_bombfire_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_hero_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_bombfire_data_t * data = p.specific;
   p.general->hurts_hero = true;
@@ -3905,7 +3814,7 @@ void fn_level_actor_bombfire_hero_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_hero_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   p.general->hurts_hero = false;
   fn_level_actor_bombfire_data_t * data = p.specific;
@@ -3915,7 +3824,7 @@ void fn_level_actor_bombfire_hero_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_bomb_data_t * data = p.specific;
   data->current_frame++;
@@ -3927,7 +3836,7 @@ void fn_level_actor_bombfire_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_bombfire_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_bombfire_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -3965,7 +3874,7 @@ typedef struct fn_level_actor_explosion_data_t {
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_explosion_data_t * data = malloc(
       sizeof(fn_level_actor_explosion_data_t));
@@ -3988,7 +3897,7 @@ void fn_level_actor_function_explosion_create(
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_explosion_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4002,7 +3911,7 @@ void fn_level_actor_function_explosion_free(
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_explosion_data_t * data = p.specific;
 
@@ -4020,7 +3929,7 @@ void fn_level_actor_function_explosion_act(
  * @param  actor  The explosion actor.
  */
 void fn_level_actor_function_explosion_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_explosion_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -4038,7 +3947,7 @@ void fn_level_actor_function_explosion_blit(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -4051,7 +3960,7 @@ void fn_level_actor_function_camera_create(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile;
 
@@ -4080,7 +3989,7 @@ void fn_level_actor_function_camera_blit(
  * @param  actor  The camera actor.
  */
 void fn_level_actor_function_camera_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   p.general->is_alive = 0;
   FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
@@ -4126,7 +4035,7 @@ typedef struct fn_level_actor_score_data_t {
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_score_data_t * data = malloc(
       sizeof(fn_level_actor_score_data_t));
@@ -4213,7 +4122,7 @@ void fn_level_actor_function_score_create(
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_score_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4227,7 +4136,7 @@ void fn_level_actor_function_score_free(
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_score_data_t * data = p.specific;
   data->countdown--;
@@ -4245,7 +4154,7 @@ void fn_level_actor_function_score_act(
  * @param  actor  The score actor.
  */
 void fn_level_actor_function_score_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_score_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -4276,7 +4185,7 @@ typedef struct fn_level_actor_unstablefloor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_unstablefloor_data_t * data = malloc(
       sizeof(fn_level_actor_unstablefloor_data_t));
@@ -4291,7 +4200,7 @@ void fn_level_actor_function_unstablefloor_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_unstablefloor_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4300,7 +4209,7 @@ void fn_level_actor_function_unstablefloor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_unstablefloor_data_t * data = p.specific;
 
@@ -4362,7 +4271,7 @@ void fn_level_actor_function_unstablefloor_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_unstablefloor_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_unstablefloor_data_t * data = p.specific;
   const FnTexture * tile = NULL;
@@ -4397,7 +4306,7 @@ typedef struct fn_level_actor_expandingfloor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_expandingfloor_data_t * data =
     malloc(sizeof(fn_level_actor_expandingfloor_data_t));
@@ -4412,7 +4321,7 @@ void fn_level_actor_function_expandingfloor_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_expandingfloor_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4421,7 +4330,7 @@ void fn_level_actor_function_expandingfloor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
     fn_level_actor_expandingfloor_data_t * data = p.specific;
 
@@ -4450,7 +4359,7 @@ void fn_level_actor_function_expandingfloor_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache, SOLID_EXPANDINGFLOOR);
 
@@ -4466,7 +4375,7 @@ void fn_level_actor_function_expandingfloor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_expandingfloor_receive_message(
-        fn_level_actor_receive_message_params_t p)
+        FnLevelActorReceiveMessageParams p)
 {
     if (p.message != ActorMessageType_Expand) {
         return;
@@ -4501,7 +4410,7 @@ typedef struct fn_level_actor_conveyor_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_conveyor_data_t * data = malloc(
       sizeof(fn_level_actor_conveyor_data_t));
@@ -4552,7 +4461,7 @@ void fn_level_actor_function_conveyor_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_conveyor_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4561,7 +4470,7 @@ void fn_level_actor_function_conveyor_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_conveyor_data_t * data = p.specific;
   if (data->direction == HorizontalDirection_Left) {
@@ -4595,7 +4504,7 @@ void fn_level_actor_function_conveyor_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_conveyor_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_conveyor_data_t * data = p.specific;
 
@@ -4630,7 +4539,7 @@ void fn_level_actor_function_conveyor_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH * 2;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -4639,14 +4548,14 @@ void fn_level_actor_function_surveillancescreen_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
     fn_info_message_queue_push(
             p.info_message_queue,
@@ -4656,7 +4565,7 @@ void fn_level_actor_function_surveillancescreen_interact_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_surveillancescreen_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = NULL;
   FnGeometry destrect = p.general->position;
@@ -4694,7 +4603,7 @@ typedef struct fn_level_actor_hostileshot_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_hostileshot_data_t * data = malloc(
       sizeof(fn_level_actor_hostileshot_data_t));
@@ -4714,7 +4623,7 @@ void fn_level_actor_function_hostileshot_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_hostileshot_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4723,7 +4632,7 @@ void fn_level_actor_function_hostileshot_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_hostileshot_data_t * data = p.specific;
   p.general->hurts_hero = true;
@@ -4733,7 +4642,7 @@ void fn_level_actor_function_hostileshot_touch_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   fn_level_actor_hostileshot_data_t * data = p.specific;
   p.general->hurts_hero = false;
@@ -4743,7 +4652,7 @@ void fn_level_actor_function_hostileshot_touch_end(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_hostileshot_data_t * data = p.specific;
 
@@ -4768,7 +4677,7 @@ void fn_level_actor_function_hostileshot_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_hostileshot_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_hostileshot_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -4781,7 +4690,7 @@ void fn_level_actor_function_hostileshot_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -4790,14 +4699,14 @@ void fn_level_actor_function_notebook_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
     fn_info_message_queue_push(
             p.info_message_queue,
@@ -4807,7 +4716,7 @@ void fn_level_actor_function_notebook_interact_start(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_notebook_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = NULL;
   FnGeometry destrect = p.general->position;
@@ -4847,7 +4756,7 @@ typedef struct fn_level_actor_exitdoor_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_exitdoor_data_t * data = malloc(
       sizeof(fn_level_actor_exitdoor_data_t));
@@ -4868,7 +4777,7 @@ void fn_level_actor_function_exitdoor_create(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_exitdoor_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_exitdoor_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -4882,7 +4791,7 @@ void fn_level_actor_function_exitdoor_free(
  * @param  actor  The exitdoor actor.
  */
 void fn_level_actor_function_exitdoor_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   fn_level_actor_exitdoor_data_t * data = p.specific;
   data->state = 1;
@@ -4897,7 +4806,7 @@ void fn_level_actor_function_exitdoor_interact_start(
  * @param  actor  The exitdoor actor.
  */
 void fn_level_actor_function_exitdoor_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_exitdoor_data_t * data = p.specific;
 
@@ -4933,7 +4842,7 @@ void fn_level_actor_function_exitdoor_act(
  * @param  actor  The exitdoor actor.
  */
 void fn_level_actor_function_exitdoor_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   FnGeometry destrect;
   fn_level_actor_exitdoor_data_t * data = p.specific;
@@ -5012,7 +4921,7 @@ typedef struct fn_level_actor_door_data_t {
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_door_data_t * data = malloc(
       sizeof(fn_level_actor_door_data_t));
@@ -5033,7 +4942,7 @@ void fn_level_actor_function_door_create(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_door_data_t * data = *(p.specific);
   free(data); data = *(p.specific) = NULL;
@@ -5047,7 +4956,7 @@ void fn_level_actor_function_door_free(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_door_data_t * data = p.specific;
 
@@ -5080,7 +4989,7 @@ void fn_level_actor_function_door_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_door_receive_message(
-        fn_level_actor_receive_message_params_t p)
+        FnLevelActorReceiveMessageParams p)
 {
     if (p.message != ActorMessageType_OpenDoor) {
         return;
@@ -5097,7 +5006,7 @@ void fn_level_actor_function_door_receive_message(
  * @param  actor  The door actor.
  */
 void fn_level_actor_function_door_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_door_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -5134,7 +5043,7 @@ typedef struct fn_level_actor_keyhole_data_t {
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_keyhole_data_t * data = malloc(
       sizeof(fn_level_actor_keyhole_data_t));
@@ -5154,7 +5063,7 @@ void fn_level_actor_function_keyhole_create(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_keyhole_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -5168,7 +5077,7 @@ void fn_level_actor_function_keyhole_free(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_keyhole_data_t * data = p.specific;
 
@@ -5186,7 +5095,7 @@ void fn_level_actor_function_keyhole_act(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_keyhole_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -5223,7 +5132,7 @@ void fn_level_actor_function_keyhole_blit(
  * @param  actor  The keyhole actor.
  */
 void fn_level_actor_function_keyhole_interact_start(
-        fn_level_actor_interact_start_params_t p)
+        FnLevelActorHeroInteractStartParams p)
 {
   fn_level_actor_keyhole_data_t * data = p.specific;
 
@@ -5285,7 +5194,7 @@ void fn_level_actor_function_keyhole_interact_start(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_WIDTH;
@@ -5301,7 +5210,7 @@ void fn_level_actor_function_key_create(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
   FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
@@ -5340,7 +5249,7 @@ void fn_level_actor_function_key_touch_start(
  * @param  actor  The key actor.
  */
 void fn_level_actor_function_key_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = NULL;
   FnGeometry destrect = p.general->position;
@@ -5376,7 +5285,7 @@ void fn_level_actor_function_key_blit(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
@@ -5391,7 +5300,7 @@ void fn_level_actor_function_shootable_wall_create(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = NULL;
 
@@ -5411,7 +5320,7 @@ void fn_level_actor_function_shootable_wall_blit(
  * @param  actor  The wall actor.
  */
 void fn_level_actor_function_shootable_wall_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   p.general->is_alive = 0;
   FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
@@ -5451,7 +5360,7 @@ typedef struct fn_level_actor_accesscard_door_data_t
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_accesscard_door_data_t * data = malloc(
       sizeof(fn_level_actor_accesscard_door_data_t));
@@ -5473,7 +5382,7 @@ void fn_level_actor_function_access_card_door_create(
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_accesscard_door_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -5487,7 +5396,7 @@ void fn_level_actor_function_access_card_door_free(
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_accesscard_door_data_t * data = p.specific;
   const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
@@ -5504,7 +5413,7 @@ void fn_level_actor_function_access_card_door_blit(
  * @param  actor  The accesscard door actor.
  */
 void fn_level_actor_function_access_card_door_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_accesscard_door_data_t * data = p.specific;
   data->current_frame++;
@@ -5514,7 +5423,7 @@ void fn_level_actor_function_access_card_door_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_access_card_door_receive_message(
-        fn_level_actor_receive_message_params_t p)
+        FnLevelActorReceiveMessageParams p)
 {
     if (p.message != ActorMessageType_OpenDoor) {
         return;
@@ -5546,7 +5455,7 @@ typedef struct fn_level_actor_spike_data_t {
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_spike_data_t * data = malloc(
       sizeof(fn_level_actor_spike_data_t));
@@ -5566,7 +5475,7 @@ void fn_level_actor_function_spikes_create(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_spike_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -5580,7 +5489,7 @@ void fn_level_actor_function_spikes_free(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_touch_start(
-        fn_level_actor_hero_touch_start_params_t p)
+        FnLevelActorHeroTouchStartParams p)
 {
   fn_level_actor_spike_data_t * data = p.specific;
   p.general->hurts_hero = true;
@@ -5595,7 +5504,7 @@ void fn_level_actor_function_spikes_touch_start(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_touch_end(
-        fn_level_actor_hero_touch_end_params_t p)
+        FnLevelActorHeroTouchEndParams p)
 {
   p.general->hurts_hero = false;
   fn_level_actor_spike_data_t * data = p.specific;
@@ -5610,7 +5519,7 @@ void fn_level_actor_function_spikes_touch_end(
  * @param  actor  The spikes actor.
  */
 void fn_level_actor_function_spikes_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   const FnTexture * tile = NULL;
   fn_level_actor_spike_data_t * data = p.specific;
@@ -5669,7 +5578,7 @@ typedef struct fn_level_actor_fan_data_t {
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_create(
-        fn_level_actor_create_params_t p)
+        FnLevelActorCreateParams p)
 {
   fn_level_actor_fan_data_t * data = malloc(
       sizeof(fn_level_actor_fan_data_t));
@@ -5686,7 +5595,7 @@ void fn_level_actor_function_fan_create(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_free(
-        fn_level_actor_free_params_t p)
+        FnLevelActorFreeParams p)
 {
   fn_level_actor_fan_data_t * data = *(p.specific);
   free(data); *(p.specific) = NULL;
@@ -5695,7 +5604,7 @@ void fn_level_actor_function_fan_free(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_act(
-        fn_level_actor_act_params_t p)
+        FnLevelActorActParams p)
 {
   fn_level_actor_fan_data_t * data = p.specific;
 
@@ -5777,7 +5686,7 @@ void fn_level_actor_function_fan_act(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_blit(
-        fn_level_actor_blit_params_t p)
+        FnLevelActorBlitParams p)
 {
   fn_level_actor_fan_data_t * data = p.specific;
 
@@ -5797,7 +5706,7 @@ void fn_level_actor_function_fan_blit(
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_function_fan_shot(
-        fn_level_actor_shot_params_t p)
+        FnLevelActorShotParams p)
 {
   fn_level_actor_fan_data_t * data = p.specific;
   data->running = 9;
@@ -7619,7 +7528,7 @@ fn_level_actor_t * fn_level_actor_create(
   actor->acts_while_invisible = 0;
   func = fn_level_actor_functions[actor->general->actor_type].create;
   if (func != NULL) {
-      struct fn_level_actor_create_params_t p ={
+      FnLevelActorCreateParams p ={
           .general = actor->general,
           .specific = &(actor->specific),
           .level_data = level->data,
@@ -7637,7 +7546,7 @@ void fn_level_actor_free(fn_level_actor_t * actor, fn_level_t * level)
   fn_level_actor_free_function_t func =
     fn_level_actor_functions[actor->general->actor_type].free;
   if (func != NULL) {
-      struct fn_level_actor_free_params_t p ={
+      FnLevelActorFreeParams p ={
           .specific = &(actor->specific),
       };
     func(p);
@@ -7688,7 +7597,7 @@ void fn_level_actor_hero_touch_start(
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
 
-    struct fn_level_actor_hero_touch_start_params_t p = {
+    FnLevelActorHeroTouchStartParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .actor_queue = actor_queue,
@@ -7706,7 +7615,7 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
     fn_level_actor_functions[actor->general->actor_type].hero_touch_end;
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
-    struct fn_level_actor_hero_touch_end_params_t p = {
+    FnLevelActorHeroTouchEndParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .hero_data = hero->data,
@@ -7746,7 +7655,7 @@ void fn_level_actor_hero_interact_start(
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
 
-    struct fn_level_actor_interact_start_params_t p = {
+    FnLevelActorHeroInteractStartParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .level_data = level->data,
@@ -7768,7 +7677,7 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
 
-    struct fn_level_actor_interact_end_params_t p = {
+    FnLevelActorHeroInteractEndParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .level_data = level->data,
@@ -7792,10 +7701,9 @@ int fn_level_actor_act(
   if (func != NULL)
   {
     fn_hero_t * hero = fn_level_get_hero(level);
-    fn_level_actor_act_params_t p = {
+    FnLevelActorActParams p = {
         .general = actor->general,
         .specific = actor->specific,
-        .level = level,
         .level_data = level->data,
         .actor_queue = actor_queue,
         .hero_data = hero->data,
@@ -7814,7 +7722,7 @@ void fn_level_actor_blit(fn_level_actor_t * actor, fn_level_t * level)
   if (func != NULL) {
     SDL_Surface * target = fn_level_get_surface(level);
     fn_hero_t * hero = fn_level_get_hero(level);
-    fn_level_actor_blit_params_t p = {
+    FnLevelActorBlitParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .hero_data = hero->data,
@@ -7844,7 +7752,7 @@ Uint8 fn_level_actor_shot(
     fn_level_actor_functions[actor->general->actor_type].shot;
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
-    fn_level_actor_shot_params_t p = {
+    FnLevelActorShotParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .level_data = level->data,
@@ -7869,7 +7777,7 @@ void fn_level_actor_receive_message(
   if (func != NULL) {
     fn_hero_t * hero = fn_level_get_hero(level);
 
-    struct fn_level_actor_receive_message_params_t p = {
+    FnLevelActorReceiveMessageParams p = {
         .general = actor->general,
         .specific = actor->specific,
         .message = message,

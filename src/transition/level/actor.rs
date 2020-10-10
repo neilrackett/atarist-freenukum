@@ -237,6 +237,110 @@ pub mod ffi {
     type FnLevelActorMessageType = super::ActorMessageType;
     type FnLevelActorMessageQueue = super::ActorMessageQueue;
 
+    use super::super::super::hero::ffi::FnHeroData;
+    use super::super::super::infobox::ffi::FnInfoMessageQueue;
+    use super::super::super::level::ffi::FnLevelData;
+    use super::super::super::tilecache::ffi::FnTileCache;
+    use transdl::ll::SDL_Surface;
+
+    #[repr(C)]
+    pub struct FnLevelActorCreateParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut *mut std::ffi::c_void,
+        pub level_data: *mut FnLevelData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorFreeParams {
+        pub specific: *mut *mut std::ffi::c_void,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorHeroTouchStartParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub actor_queue: *mut FnLevelActorQueue,
+        pub hero_data: *mut FnHeroData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorHeroTouchEndParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub hero_data: *mut FnHeroData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorHeroInteractStartParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub level_data: *mut FnLevelData,
+        pub hero_data: *mut FnHeroData,
+        pub info_message_queue: *mut FnInfoMessageQueue,
+        pub actor_message_queue: *mut FnLevelActorMessageQueue,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorHeroInteractEndParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub level_data: *mut FnLevelData,
+        pub hero_data: *mut FnHeroData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorActParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub level_data: *mut FnLevelData,
+        pub actor_queue: *mut FnLevelActorQueue,
+        pub hero_data: *mut FnHeroData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorBlitParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub hero_data: *mut FnHeroData,
+        pub tilecache: *const FnTileCache,
+        pub target: *mut SDL_Surface,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorShotParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub level_data: *mut FnLevelData,
+        pub actor_queue: *mut FnLevelActorQueue,
+        pub hero_data: *mut FnHeroData,
+    }
+
+    #[repr(C)]
+    pub struct FnLevelActorReceiveMessageParams {
+        pub general: *mut FnLevelActorData,
+        pub specific: *mut std::ffi::c_void,
+        pub message: FnLevelActorMessageType,
+        pub hero_data: *mut FnHeroData,
+        pub level_data: *mut FnLevelData,
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_expose_all_function_parameters(
+        a: FnLevelActorCreateParams,
+        b: FnLevelActorFreeParams,
+        c: FnLevelActorHeroTouchStartParams,
+        d: FnLevelActorHeroTouchEndParams,
+        e: FnLevelActorHeroInteractStartParams,
+        f: FnLevelActorHeroInteractEndParams,
+        g: FnLevelActorActParams,
+        h: FnLevelActorBlitParams,
+        i: FnLevelActorShotParams,
+        j: FnLevelActorReceiveMessageParams,
+    ) {
+        // TODO: remove this function once all parameters are used.
+        // Nothing to do here.
+    }
+
     #[no_mangle]
     pub extern "C" fn fn_level_actor_data_create(
         actor_type: FnLevelActorType,
