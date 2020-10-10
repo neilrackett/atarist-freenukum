@@ -120,7 +120,10 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor, fn_hero_t * hero);
  *
  * @param  actor  The actor.
  */
-void fn_level_actor_check_hero_touch(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue);
+void fn_level_actor_check_hero_touch(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -129,7 +132,10 @@ void fn_level_actor_check_hero_touch(fn_level_actor_t * actor, fn_level_t * leve
  *
  * @param  actor  The actor which got touched.
  */
-void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue);
+void fn_level_actor_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -159,7 +165,10 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
  *
  * @param  actor  The actor with whom the player interacts.
  */
-void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level);
+void fn_level_actor_hero_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnInfoMessageQueue * info_message_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -181,7 +190,10 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
  *
  * @return  Zero if the actor died, otherwise a non-zero value.
  */
-int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue);
+int fn_level_actor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 

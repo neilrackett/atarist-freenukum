@@ -315,6 +315,9 @@ int fn_game_start_in_level(
 
   FnLevelActorQueue * actor_queue = fn_level_actor_queue_create();
 
+  FnInfoMessageQueue * info_message_queue =
+      fn_info_message_queue_create();
+
   /* The mainloop of the level */
   while (fn_level_keep_on_playing(lv))
   {
@@ -345,6 +348,15 @@ int fn_game_start_in_level(
       }
       doupdate = 0;
     }
+
+    const FnTileCache * tilecache = fn_level_get_tilecache(lv);
+    FnTextureCreationParams texture_creation_params =
+        fn_environment_build_texture_creation_params(env);
+    fn_info_message_queue_process(
+            info_message_queue,
+            screen,
+            tilecache,
+            texture_creation_params);
 
     FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
     FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
@@ -421,7 +433,7 @@ int fn_game_start_in_level(
                   srcrect.y -= FN_HALFTILE_HEIGHT;
                 }
               } else {
-                fn_level_hero_interact_start(lv);
+                fn_level_hero_interact_start(lv, info_message_queue);
               }
               doupdate = 1;
               break;
@@ -524,7 +536,7 @@ int fn_game_start_in_level(
               fn_hero_update_animation(hero);
               break;
             case SDL_BUTTON_MIDDLE:
-              fn_level_hero_interact_start(lv);
+              fn_level_hero_interact_start(lv, info_message_queue);
               doupdate = 1;
               break;
             default:
@@ -639,6 +651,8 @@ int fn_game_start_in_level(
   }
 
 cleanup:
+  fn_info_message_queue_free(info_message_queue);
+
   if (actor_queue != NULL) {
       fn_level_actor_queue_free(actor_queue);
   }

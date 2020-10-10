@@ -224,7 +224,9 @@ fn_hero_t * fn_level_get_hero(fn_level_t * lv);
  *
  * @return zero if the level is finished, otherwise non-zero.
  */
-int fn_level_act(fn_level_t * lv, FnLevelActorQueue * actor_queue);
+int fn_level_act(
+        fn_level_t * lv,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -233,7 +235,9 @@ int fn_level_act(fn_level_t * lv, FnLevelActorQueue * actor_queue);
  *
  * @param  lv  The level whose hero should interact.
  */
-void fn_level_hero_interact_start(fn_level_t * lv);
+void fn_level_hero_interact_start(
+        fn_level_t * lv,
+        FnInfoMessageQueue * info_message_queue);
 
 /* --------------------------------------------------------------- */
 

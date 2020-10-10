@@ -66,6 +66,24 @@ fn show(
     }
 }
 
+#[derive(Default)]
+pub struct InfoMessageQueue {
+    pub messages: Vec<String>,
+}
+
+impl InfoMessageQueue {
+    pub fn process(
+        &mut self,
+        screen: &mut Surface,
+        tilecache: &TileCache,
+        params: TextureCreationParams,
+    ) {
+        for message in self.messages.drain(..) {
+            show(screen, tilecache, params, &message);
+        }
+    }
+}
+
 pub mod ffi {
     use super::super::texture::ffi::FnTextureCreationParams;
     use super::super::tilecache::ffi::FnTileCache;
@@ -73,6 +91,8 @@ pub mod ffi {
     use std::ffi::CStr;
     use transdl::ll::SDL_Surface;
     use transdl::video::Surface;
+
+    pub type FnInfoMessageQueue = super::InfoMessageQueue;
 
     #[no_mangle]
     pub extern "C" fn fn_infobox_show(
@@ -94,5 +114,61 @@ pub mod ffi {
         };
 
         super::show(&mut screen, tilecache, params, message);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_info_message_queue_create(
+    ) -> *mut FnInfoMessageQueue {
+        Box::into_raw(Box::new(FnInfoMessageQueue::default()))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_info_message_queue_free(
+        ptr: *mut FnInfoMessageQueue,
+    ) {
+        if !ptr.is_null() {
+            unsafe {
+                Box::from_raw(ptr);
+            }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_info_message_queue_push(
+        ptr: *mut FnInfoMessageQueue,
+        message: *const c_char,
+    ) {
+        assert!(!ptr.is_null());
+        let queue = unsafe { &mut (*ptr) };
+
+        let message = {
+            match unsafe { CStr::from_ptr(message) }.to_str() {
+                Ok(message) => message,
+                Err(e) => {
+                    eprintln!("Couldn't read info message: {:?}.", e);
+                    return;
+                }
+            }
+        };
+
+        queue.messages.push(message.to_string())
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_info_message_queue_process(
+        ptr: *mut FnInfoMessageQueue,
+        screen: *mut SDL_Surface,
+        tilecache: *const FnTileCache,
+        params: FnTextureCreationParams,
+    ) {
+        assert!(!ptr.is_null());
+        assert!(!screen.is_null());
+        assert!(!tilecache.is_null());
+
+        let queue = unsafe { &mut (*ptr) };
+        let mut screen = Surface { raw: screen };
+        let tilecache = unsafe { &(*tilecache) };
+
+        queue.process(&mut screen, tilecache, params);
     }
 }

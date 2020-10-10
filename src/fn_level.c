@@ -1028,7 +1028,9 @@ fn_hero_t * fn_level_get_hero(fn_level_t * lv) {
 
 /* --------------------------------------------------------------- */
 
-int fn_level_act(fn_level_t * lv, FnLevelActorQueue * actor_queue) {
+int fn_level_act(
+        fn_level_t * lv,
+        FnLevelActorQueue * actor_queue) {
   fn_list_t * iter = NULL;
   int res = 0;
   int cleanup = 0;
@@ -1119,7 +1121,8 @@ void fn_level_hero_interact_stop(fn_level_t * lv)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_hero_interact_start(fn_level_t * lv)
+void fn_level_hero_interact_start(
+        fn_level_t * lv, FnInfoMessageQueue * info_message_queue)
 {
   fn_list_t * iter = NULL;
   for (iter = fn_list_first(lv->actors);
@@ -1137,7 +1140,8 @@ void fn_level_hero_interact_start(fn_level_t * lv)
         fn_level_hero_interact_stop(lv);
 
         lv->interactor = actor;
-        fn_level_actor_hero_interact_start(actor, lv);
+        fn_level_actor_hero_interact_start(
+                actor, lv, info_message_queue);
         return;
       }
     }

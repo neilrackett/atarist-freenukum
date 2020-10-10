@@ -288,6 +288,8 @@ typedef struct Health Health;
 
 typedef struct HeroData HeroData;
 
+typedef struct InfoMessageQueue InfoMessageQueue;
+
 typedef struct InputField InputField;
 
 typedef struct Inventory Inventory;
@@ -352,6 +354,8 @@ typedef struct {
 typedef LevelSolids FnLevelSolids;
 
 typedef HorizontalDirection FnHorizontalDirection;
+
+typedef InfoMessageQueue FnInfoMessageQueue;
 
 typedef InputField FnInputField;
 
@@ -556,6 +560,17 @@ void fn_hero_score_add(FnHeroScore *score, uint64_t amount);
 uint64_t fn_hero_score_get(const FnHeroScore *score);
 
 void fn_horizontal_direction_print(FnHorizontalDirection direction);
+
+FnInfoMessageQueue *fn_info_message_queue_create(void);
+
+void fn_info_message_queue_free(FnInfoMessageQueue *ptr);
+
+void fn_info_message_queue_process(FnInfoMessageQueue *ptr,
+                                   SDL_Surface *screen,
+                                   const FnTileCache *tilecache,
+                                   FnTextureCreationParams params);
+
+void fn_info_message_queue_push(FnInfoMessageQueue *ptr, const char *message);
 
 void fn_infobox_show(SDL_Surface *screen,
                      const FnTileCache *tilecache,

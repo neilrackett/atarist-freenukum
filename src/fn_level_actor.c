@@ -86,6 +86,7 @@ typedef struct fn_level_actor_interact_start_params_t {
     fn_level_t * level;
     FnLevelData * level_data;
     FnHeroData * hero_data;
+    FnInfoMessageQueue * info_message_queue;
 } fn_level_actor_interact_start_params_t;
 
 typedef void (* fn_level_actor_interact_start_function_t)(
@@ -2136,7 +2137,6 @@ void fn_level_actor_function_accesscard_slot_interact_start(
         fn_level_actor_interact_start_params_t p)
 {
   fn_level_actor_access_card_slot_data_t * data = p.specific;
-  fn_environment_t * env = fn_level_get_environment(p.level);
 
   FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
   if (fn_hero_inventory_is_set(inventory, InventoryItem_AccessCard)) {
@@ -2158,11 +2158,9 @@ void fn_level_actor_function_accesscard_slot_interact_start(
     data->tile = OBJ_ACCESS_CARD_SLOT + 8;
     fn_hero_inventory_unset(inventory, InventoryItem_AccessCard);
   } else {
-    fn_infobox_show(
-        env->screen,
-        fn_environment_get_tilecache(env),
-        fn_environment_build_texture_creation_params(env),
-        "You don't have the access card\n");
+    fn_info_message_queue_push(
+            p.info_message_queue,
+            "You don't have the access card\n");
   }
 }
 
@@ -4611,14 +4609,9 @@ void fn_level_actor_function_surveillancescreen_free(
 void fn_level_actor_function_surveillancescreen_interact_start(
         fn_level_actor_interact_start_params_t p)
 {
-  fn_environment_t * env = fn_level_get_environment(p.level);
-
-  /* TODO show real note instead of this dummy */
-  fn_infobox_show(
-          env->screen,
-          fn_environment_get_tilecache(env),
-          fn_environment_build_texture_creation_params(env),
-          "Not implemented yet.\n");
+    fn_info_message_queue_push(
+            p.info_message_queue,
+            "Not implemented yet.\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -4767,14 +4760,9 @@ void fn_level_actor_function_notebook_free(
 void fn_level_actor_function_notebook_interact_start(
         fn_level_actor_interact_start_params_t p)
 {
-  fn_environment_t * env = fn_level_get_environment(p.level);
-
-  /* TODO show real note instead of this dummy */
-  fn_infobox_show(
-      env->screen,
-      fn_environment_get_tilecache(env),
-      fn_environment_build_texture_creation_params(env),
-      "Not implemented yet.\n");
+    fn_info_message_queue_push(
+            p.info_message_queue,
+            "Not implemented yet.\n");
 }
 
 /* --------------------------------------------------------------- */
@@ -5239,12 +5227,9 @@ void fn_level_actor_function_keyhole_interact_start(
       }
     }
   } else if (data->counter != 5) {
-    fn_environment_t * env = fn_level_get_environment(p.level);
-    fn_infobox_show(
-        env->screen,
-        fn_environment_get_tilecache(env),
-        fn_environment_build_texture_creation_params(env),
-        msg);
+    fn_info_message_queue_push(
+            p.info_message_queue,
+            msg);
   }
 }
 
@@ -7468,12 +7453,15 @@ int fn_level_actor_touches_hero(fn_level_actor_t * actor, fn_hero_t * hero)
 /* --------------------------------------------------------------- */
 
 void fn_level_actor_check_hero_touch(
-        fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue)
 {
   if (fn_level_actor_touches_hero(actor, fn_level_get_hero(level))) {
     if (!actor->touches_hero) {
       actor->touches_hero = 1;
-      fn_level_actor_hero_touch_start(actor, level, actor_queue);
+      fn_level_actor_hero_touch_start(
+              actor, level, actor_queue);
     }
   } else {
     if (actor->touches_hero) {
@@ -7485,7 +7473,10 @@ void fn_level_actor_check_hero_touch(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_touch_start(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
+void fn_level_actor_hero_touch_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue)
 {
   fn_level_actor_hero_touch_start_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_touch_start;
@@ -7539,7 +7530,10 @@ Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * her
 
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * level)
+void fn_level_actor_hero_interact_start(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnInfoMessageQueue * info_message_queue)
 {
   fn_level_actor_interact_start_function_t func =
     fn_level_actor_functions[actor->general->actor_type].hero_interact_start;
@@ -7551,6 +7545,7 @@ void fn_level_actor_hero_interact_start(fn_level_actor_t * actor, fn_level_t * l
         .specific = actor->specific,
         .level = level,
         .hero_data = hero->data,
+        .info_message_queue = info_message_queue,
     };
 
     func(p);
@@ -7579,7 +7574,10 @@ void fn_level_actor_hero_interact_stop(fn_level_actor_t * actor, fn_level_t * le
 
 /* --------------------------------------------------------------- */
 
-int fn_level_actor_act(fn_level_actor_t * actor, fn_level_t * level, FnLevelActorQueue * actor_queue)
+int fn_level_actor_act(
+        fn_level_actor_t * actor,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue)
 {
   fn_level_actor_check_hero_touch(actor, level, actor_queue);
   fn_level_actor_act_function_t func =
