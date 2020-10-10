@@ -1,3 +1,4 @@
+mod fire;
 mod redball_jumping;
 mod redball_lying;
 mod robot;
