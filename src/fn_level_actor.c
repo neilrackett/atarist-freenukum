@@ -2209,7 +2209,6 @@ void fn_level_actor_function_accesscard_slot_blit(
  */
 typedef enum fn_level_actor_glove_slot_state_e {
   fn_level_actor_glove_slot_state_idle,
-  fn_level_actor_glove_slot_state_expanding,
   fn_level_actor_glove_slot_state_shooting,
   fn_level_actor_glove_slot_state_expanded
 } fn_level_actor_glove_slot_state_e;
@@ -2280,14 +2279,15 @@ void fn_level_actor_function_glove_slot_interact_start(
   {
     case fn_level_actor_glove_slot_state_idle:
       if (fn_hero_inventory_is_set(inventory, InventoryItem_Glove)) {
-        data->state = fn_level_actor_glove_slot_state_expanding;
+          fn_level_actor_message_queue_push_back(
+                  p.actor_message_queue,
+                  ActorType_ExpandingFloor,
+                  ActorMessageType_Expand);
+          data->state = fn_level_actor_glove_slot_state_expanded;
       } else {
         data->state = fn_level_actor_glove_slot_state_shooting;
         data->countdown = 20;
       }
-      break;
-    case fn_level_actor_glove_slot_state_expanding:
-      /* nothing to do */
       break;
     case fn_level_actor_glove_slot_state_shooting:
       /* nothing to do */
@@ -2317,36 +2317,6 @@ void fn_level_actor_function_glove_slot_act(
     case fn_level_actor_glove_slot_state_idle:
       data->current_frame++;
       data->current_frame %= data->num_frames;
-      break;
-    case fn_level_actor_glove_slot_state_expanding:
-      data->current_frame++;
-      data->current_frame %= data->num_frames;
-      {
-        fn_list_t * expandfloors =
-          fn_level_get_items_of_type(p.level,
-              ActorType_ExpandingFloor);
-        Uint8 action = 0;
-        fn_list_t * iter = NULL;
-        for (iter = fn_list_first(expandfloors);
-            iter != fn_list_last(expandfloors);
-            iter = fn_list_next(iter)) {
-          fn_level_actor_t * floor = iter->data;
-          if (!fn_level_solids_get(&(p.level_data->solids),
-                (floor->general->position.x + floor->general->position.w) / FN_TILE_WIDTH,
-                (floor->general->position.y) / FN_TILE_HEIGHT)) {
-            fn_level_solids_set(&(p.level_data->solids),
-                (floor->general->position.x + floor->general->position.w) / FN_TILE_WIDTH,
-                (floor->general->position.y) / FN_TILE_HEIGHT, 1);
-            action = 1;
-            floor->general->position.w += FN_TILE_WIDTH;
-          }
-        }
-        fn_list_free(expandfloors); expandfloors = NULL;
-
-        if (!action) {
-          data->state = fn_level_actor_glove_slot_state_expanded;
-        }
-      }
       break;
     case fn_level_actor_glove_slot_state_shooting:
       data->current_frame++;
@@ -4410,9 +4380,32 @@ void fn_level_actor_function_unstablefloor_blit(
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
+/**
+ * The expanding floor struct.
+ */
+typedef struct fn_level_actor_expandingfloor_data_t {
+  /**
+   * A flag indicating if the actor is currently expanding.
+   */
+  Uint8 expanding;
+
+  /**
+   * A flag indicating if the actor is already expanded.
+   */
+  Uint8 finished;
+} fn_level_actor_expandingfloor_data_t;
+
+/* --------------------------------------------------------------- */
+
 void fn_level_actor_function_expandingfloor_create(
         fn_level_actor_create_params_t p)
 {
+  fn_level_actor_expandingfloor_data_t * data =
+    malloc(sizeof(fn_level_actor_expandingfloor_data_t));
+  *(p.specific) = data;
+  data->expanding = false;
+  data->finished = false;
+
   p.general->position.w = FN_TILE_WIDTH;
   p.general->position.h = FN_TILE_HEIGHT;
 }
@@ -4422,6 +4415,8 @@ void fn_level_actor_function_expandingfloor_create(
 void fn_level_actor_function_expandingfloor_free(
         fn_level_actor_free_params_t p)
 {
+  fn_level_actor_expandingfloor_data_t * data = *(p.specific);
+  free(data); *(p.specific) = NULL;
 }
 
 /* --------------------------------------------------------------- */
@@ -4429,6 +4424,28 @@ void fn_level_actor_function_expandingfloor_free(
 void fn_level_actor_function_expandingfloor_act(
         fn_level_actor_act_params_t p)
 {
+    fn_level_actor_expandingfloor_data_t * data = p.specific;
+
+    if (data->expanding) {
+        bool action = false;
+        if (!fn_level_solids_get(
+                    &(p.level_data->solids),
+                    (p.general->position.x + p.general->position.w) /
+                    FN_TILE_WIDTH,
+                    (p.general->position.y) / FN_TILE_HEIGHT))
+        {
+            fn_level_solids_set(&(p.level_data->solids),
+                    (p.general->position.x + p.general->position.w) /
+                    FN_TILE_WIDTH,
+                    (p.general->position.y) / FN_TILE_HEIGHT, 1);
+            action = true;
+            p.general->position.w += FN_TILE_WIDTH;
+        }
+        if (!action) {
+            data->expanding = false;
+            data->finished = true;
+        }
+    }
 }
 
 /* --------------------------------------------------------------- */
@@ -4445,6 +4462,20 @@ void fn_level_actor_function_expandingfloor_blit(
     fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
     destrect.x += FN_TILE_WIDTH;
   }
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_level_actor_function_expandingfloor_receive_message(
+        fn_level_actor_receive_message_params_t p)
+{
+    if (p.message != ActorMessageType_Expand) {
+        return;
+    }
+    fn_level_actor_expandingfloor_data_t * data = p.specific;
+    if (data->expanding == false && data->finished == false) {
+        data->expanding = true;
+    }
 }
 
 /* --------------------------------------------------------------- */
@@ -6230,7 +6261,7 @@ fn_level_actor_functions[] =
     .act = fn_level_actor_function_expandingfloor_act,
     .blit = fn_level_actor_function_expandingfloor_blit,
     .shot = NULL,
-    .receive_message = NULL,
+    .receive_message = fn_level_actor_function_expandingfloor_receive_message,
   },
   [ActorType_ConveyorLeftMovingRightEnd] = {
     .create = fn_level_actor_function_conveyor_create,

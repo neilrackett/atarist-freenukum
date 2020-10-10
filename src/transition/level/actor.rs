@@ -214,6 +214,7 @@ impl ActorQueue {
 pub enum ActorMessageType {
     OpenDoor,
     Teleport,
+    Expand,
 }
 
 #[repr(C)]

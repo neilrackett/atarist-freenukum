@@ -56,6 +56,7 @@
 typedef enum {
     ActorMessageType_OpenDoor,
     ActorMessageType_Teleport,
+    ActorMessageType_Expand,
 } ActorMessageType;
 
 typedef enum {
