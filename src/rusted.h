@@ -714,6 +714,16 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_soda_flying_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_soda_flying_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_soda_flying_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_soda_flying_touch_start(FnLevelActorHeroTouchStartParams p);
+
 FnLevelActorMessageQueue *fn_level_actor_message_queue_create(void);
 
 void fn_level_actor_message_queue_free(FnLevelActorMessageQueue *ptr);

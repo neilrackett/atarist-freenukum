@@ -2968,68 +2968,6 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_soda_flying_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_soda_flying_free(
-        FnLevelActorFreeParams p)
-{
-  /* nothing to do here */
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_soda_flying_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
-  fn_hero_score_add(score, 1000);
-  fn_level_actor_queue_push_back(p.actor_queue,
-      ActorType_Score1000,
-      p.general->position.x,
-      p.general->position.y);
-  p.general->is_alive = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_soda_flying_act(
-        FnLevelActorActParams p)
-{
-  p.general->position.y -= FN_HALFTILE_HEIGHT;
-  if (fn_level_solids_get(&(p.level_data->solids),
-        (p.general->position.x) / FN_TILE_WIDTH,
-        (p.general->position.y) / FN_TILE_HEIGHT)) {
-    fn_level_actor_queue_push_back(p.actor_queue,
-        ActorType_Explosion,
-        p.general->position.x,
-        p.general->position.y);
-    p.general->is_alive = 0;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_soda_flying_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile = fn_tilecache_get_tile(
-          p.tilecache, ANIM_SODAFLY +
-          (p.general->position.y/FN_HALFTILE_HEIGHT) % 4);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 /**
  * The balloon struct.
  */
