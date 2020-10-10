@@ -391,6 +391,7 @@ typedef struct {
     FnLevelTiles tiles;
     FnLevelSolids solids;
     bool do_play;
+    bool level_passed;
 } LevelData;
 
 typedef LevelData FnLevelData;

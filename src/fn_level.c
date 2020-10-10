@@ -55,7 +55,7 @@ fn_level_t * fn_level_load(FnFile* file,
 
   lv->animated_frames = 0;
 
-  lv->levelpassed = 0;
+  lv->data->level_passed = 0;
 
   lv->num_shots = 0;
 

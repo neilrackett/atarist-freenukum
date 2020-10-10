@@ -105,11 +105,6 @@ struct fn_level_t {
   size_t animated_frames;
 
   /**
-   * Non-zero if the hero passed the level, otherwise zero.
-   */
-  int levelpassed;
-
-  /**
    * The actor with which the hero interacts.
    */
   fn_level_actor_t * interactor;

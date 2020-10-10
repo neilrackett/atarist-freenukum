@@ -4847,7 +4847,7 @@ void fn_level_actor_function_exitdoor_interact_start(
 {
   fn_level_actor_exitdoor_data_t * data = p.specific;
   data->state = 1;
-  p.level->levelpassed = 1;
+  p.level_data->level_passed = 1;
 }
 
 /* --------------------------------------------------------------- */
