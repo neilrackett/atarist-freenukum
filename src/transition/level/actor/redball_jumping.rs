@@ -8,13 +8,12 @@ pub mod ffi {
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
-        FnLevelActorHeroTouchStartParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
-        ANIMATION_WINDOWBG, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
+        ANIMATION_WINDOWBG, TILE_HEIGHT, TILE_WIDTH,
     };
     use transdl::video::Surface;
 

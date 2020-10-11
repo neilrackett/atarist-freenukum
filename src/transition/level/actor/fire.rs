@@ -16,16 +16,13 @@ struct Specific {
 }
 
 pub mod ffi {
-    use super::super::super::super::{
-        HorizontalDirection, VerticalDirection,
-    };
+    use super::super::super::super::HorizontalDirection;
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
         FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
-        FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::{Specific, State};
     use crate::{
         OBJECT_FIRELEFT, OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH,
@@ -110,10 +107,8 @@ pub mod ffi {
     ) {
         assert!(!p.general.is_null());
         assert!(!p.specific.is_null());
-        assert!(!p.level_data.is_null());
         let general = unsafe { &mut (*p.general) };
         let specific = unsafe { &mut (*(p.specific as *mut Specific)) };
-        let level_data = unsafe { &mut (*p.level_data) };
 
         match specific.state {
             State::Off => {

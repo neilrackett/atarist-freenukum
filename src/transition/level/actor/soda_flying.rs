@@ -22,7 +22,7 @@ pub mod ffi {
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_soda_flying_free(
-        p: FnLevelActorFreeParams,
+        _p: FnLevelActorFreeParams,
     ) {
     }
 

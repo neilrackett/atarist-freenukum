@@ -24,7 +24,7 @@ pub mod ffi {
     use super::Specific;
     use crate::{
         ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
-        HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+        TILE_HEIGHT, TILE_WIDTH,
     };
     use transdl::video::Surface;
 

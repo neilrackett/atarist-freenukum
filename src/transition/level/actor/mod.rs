@@ -337,16 +337,16 @@ pub mod ffi {
 
     #[no_mangle]
     pub extern "C" fn fn_expose_all_function_parameters(
-        a: FnLevelActorCreateParams,
-        b: FnLevelActorFreeParams,
-        c: FnLevelActorHeroTouchStartParams,
-        d: FnLevelActorHeroTouchEndParams,
-        e: FnLevelActorHeroInteractStartParams,
-        f: FnLevelActorHeroInteractEndParams,
-        g: FnLevelActorActParams,
-        h: FnLevelActorBlitParams,
-        i: FnLevelActorShotParams,
-        j: FnLevelActorReceiveMessageParams,
+        _a: FnLevelActorCreateParams,
+        _b: FnLevelActorFreeParams,
+        _c: FnLevelActorHeroTouchStartParams,
+        _d: FnLevelActorHeroTouchEndParams,
+        _e: FnLevelActorHeroInteractStartParams,
+        _f: FnLevelActorHeroInteractEndParams,
+        _g: FnLevelActorActParams,
+        _h: FnLevelActorBlitParams,
+        _i: FnLevelActorShotParams,
+        _j: FnLevelActorReceiveMessageParams,
     ) {
         // TODO: remove this function once all parameters are used.
         // Nothing to do here.

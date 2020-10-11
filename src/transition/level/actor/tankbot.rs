@@ -10,9 +10,7 @@ struct Specific {
 }
 
 pub mod ffi {
-    use super::super::super::super::{
-        HorizontalDirection, VerticalDirection,
-    };
+    use super::super::super::super::HorizontalDirection;
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,

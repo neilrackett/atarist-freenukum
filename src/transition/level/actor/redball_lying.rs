@@ -112,7 +112,7 @@ pub mod ffi {
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_redball_jumping_shot(
-        p: FnLevelActorShotParams,
+        _p: FnLevelActorShotParams,
     ) {
         /*
          * We don't need to do anything, this is just to absorb

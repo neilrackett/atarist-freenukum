@@ -548,16 +548,16 @@ uintptr_t fn_bot_get_x(const FnBot *bot);
 
 uintptr_t fn_bot_get_y(const FnBot *bot);
 
-void fn_expose_all_function_parameters(FnLevelActorCreateParams a,
-                                       FnLevelActorFreeParams b,
-                                       FnLevelActorHeroTouchStartParams c,
-                                       FnLevelActorHeroTouchEndParams d,
-                                       FnLevelActorHeroInteractStartParams e,
-                                       FnLevelActorHeroInteractEndParams f,
-                                       FnLevelActorActParams g,
-                                       FnLevelActorBlitParams h,
-                                       FnLevelActorShotParams i,
-                                       FnLevelActorReceiveMessageParams j);
+void fn_expose_all_function_parameters(FnLevelActorCreateParams _a,
+                                       FnLevelActorFreeParams _b,
+                                       FnLevelActorHeroTouchStartParams _c,
+                                       FnLevelActorHeroTouchEndParams _d,
+                                       FnLevelActorHeroInteractStartParams _e,
+                                       FnLevelActorHeroInteractEndParams _f,
+                                       FnLevelActorActParams _g,
+                                       FnLevelActorBlitParams _h,
+                                       FnLevelActorShotParams _i,
+                                       FnLevelActorReceiveMessageParams _j);
 
 void fn_file_free(FnFile *ptr);
 
@@ -764,7 +764,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_end(FnLevelActorHeroTouc
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
-void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams p);
+void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams _p);
 
 void fn_level_actor_function_redball_lying_act(FnLevelActorActParams p);
 
@@ -776,7 +776,7 @@ void fn_level_actor_function_redball_lying_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_redball_lying_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
-void fn_level_actor_function_redball_lying_shot(FnLevelActorShotParams p);
+void fn_level_actor_function_redball_lying_shot(FnLevelActorShotParams _p);
 
 void fn_level_actor_function_robot_act(FnLevelActorActParams p);
 
@@ -806,7 +806,7 @@ void fn_level_actor_function_soda_flying_blit(FnLevelActorBlitParams p);
 
 void fn_level_actor_function_soda_flying_create(FnLevelActorCreateParams p);
 
-void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams p);
+void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams _p);
 
 void fn_level_actor_function_soda_flying_touch_start(FnLevelActorHeroTouchStartParams p);
 

@@ -38,7 +38,7 @@ impl From<char> for MainMenuEntry {
             'T' | 't' => M::TitleScreen,
             'C' | 'c' => M::Credits,
             'Q' | 'q' => M::Quit,
-            c => M::Invalid,
+            _ => M::Invalid,
         }
     }
 }

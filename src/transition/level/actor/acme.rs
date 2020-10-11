@@ -5,14 +5,10 @@ struct Specific {
 }
 
 pub mod ffi {
-    use super::super::super::super::{
-        HorizontalDirection, VerticalDirection,
-    };
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
-        FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
-        FnLevelActorShotParams,
+        FnLevelActorHeroTouchStartParams, FnLevelActorShotParams,
     };
     use super::super::{ActorQueueItem, ActorType};
     use super::Specific;
