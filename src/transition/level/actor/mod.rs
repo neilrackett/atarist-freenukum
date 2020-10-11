@@ -1,5 +1,6 @@
 mod acme;
 mod fire;
+mod firewheelbot;
 mod redball_jumping;
 mod redball_lying;
 mod robot;

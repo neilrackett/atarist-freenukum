@@ -738,6 +738,20 @@ void fn_level_actor_function_fire_hero_touch_end(FnLevelActorHeroTouchEndParams 
 
 void fn_level_actor_function_fire_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
+void fn_level_actor_function_firewheelbot_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_firewheelbot_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_firewheelbot_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_firewheelbot_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_firewheelbot_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_firewheelbot_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_firewheelbot_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_redball_jumping_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_redball_jumping_blit(FnLevelActorBlitParams p);
