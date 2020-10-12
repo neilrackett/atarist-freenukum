@@ -4,6 +4,7 @@ use super::UserEvent;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
 
+#[derive(Debug)]
 pub struct HeroData {
     pub position: Position,
     pub score: Score,
@@ -38,6 +39,7 @@ impl HeroData {
     }
 }
 
+#[derive(Debug)]
 pub struct Position {
     pub geometry: Geometry,
 }
@@ -159,6 +161,7 @@ impl Position {
     }
 }
 
+#[derive(Debug)]
 pub struct Score {
     count: u64,
 }
@@ -183,6 +186,7 @@ impl Score {
     }
 }
 
+#[derive(Debug)]
 pub struct Health {
     life: u8,
 }
@@ -235,6 +239,7 @@ impl Health {
     }
 }
 
+#[derive(Debug)]
 pub struct Firepower {
     shots: u8,
 }
@@ -286,7 +291,7 @@ pub enum InventoryItem {
     AccessCard,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Inventory {
     items: std::collections::BTreeSet<InventoryItem>,
 }
@@ -328,6 +333,7 @@ impl Inventory {
     }
 }
 
+#[derive(Debug)]
 pub struct FetchedLetterState {
     last_fetched: Option<FetchedLetter>,
 }

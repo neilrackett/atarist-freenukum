@@ -85,209 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef enum fn_level_actor_lift_state_e {
-  fn_level_actor_lift_state_idle,
-  fn_level_actor_lift_state_ascending,
-  fn_level_actor_lift_state_descending,
-} fn_level_actor_lift_state_e;
-
-/* --------------------------------------------------------------- */
-
-/**
- * The lift.
- */
-typedef struct fn_level_actor_lift_data_t {
-  /**
-   * The state of the lift.
-   */
-  fn_level_actor_lift_state_e state;
-} fn_level_actor_lift_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create a lift.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_lift_data_t * data = malloc(
-      sizeof(fn_level_actor_lift_data_t));
-  data->state = fn_level_actor_lift_state_idle;
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  p.general->is_in_foreground = false;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete the lift.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_lift_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero starts to interact with lift.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_interact_start(
-        FnLevelActorHeroInteractStartParams p)
-{
-  fn_level_actor_lift_data_t * data = p.specific;
-
-  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
-  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
-  if (fn_geometry_touches(hero_geometry, p.general->position) &&
-      hero_geometry.y + hero_geometry.h == p.general->position.y) {
-    data->state = fn_level_actor_lift_state_ascending;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero stops to interact with lift.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_interact_end(
-        FnLevelActorHeroInteractEndParams p)
-{
-  fn_level_actor_lift_data_t * data = p.specific;
-
-  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
-  FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
-  if (fn_geometry_touches(hero_geometry, p.general->position) &&
-      hero_geometry.x == p.general->position.x) {
-    data->state = fn_level_actor_lift_state_idle;
-  } else {
-    data->state = fn_level_actor_lift_state_descending;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Lift acts.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_lift_data_t * data = p.specific;
-
-  FnHeroPosition * hero_position = fn_hero_data_get_position(p.hero_data);
-  if (data->state == fn_level_actor_lift_state_ascending ||
-      (data->state == fn_level_actor_lift_state_idle &&
-       p.general->position.h > FN_TILE_HEIGHT))
-  {
-    /* check if hero leaves elevator. */
-    FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
-    if (!fn_geometry_touches(hero_geometry, p.general->position) ||
-        p.general->position.x != hero_geometry.x) {
-      data->state = fn_level_actor_lift_state_descending;
-    }
-  }
-
-  switch(data->state)
-  {
-    case fn_level_actor_lift_state_ascending:
-      if (fn_level_solids_get(&(p.level_data->solids),
-            p.general->position.x/FN_TILE_WIDTH,
-            p.general->position.y/FN_TILE_HEIGHT-3)) {
-        data->state = fn_level_actor_lift_state_idle;
-      } else {
-        Sint16 offset = fn_hero_position_push_vertically(
-            hero_position, &(p.level_data->solids), -FN_TILE_HEIGHT);
-        if (-offset < FN_TILE_HEIGHT) {
-          offset = fn_hero_position_push_vertically(
-                  hero_position, &(p.level_data->solids), -offset);
-          data->state = fn_level_actor_lift_state_idle;
-        } else {
-          p.general->position.h -= offset;
-          p.general->position.y += offset;
-
-          fn_level_solids_set(&(p.level_data->solids),
-              p.general->position.x/FN_TILE_WIDTH,
-              p.general->position.y/FN_TILE_HEIGHT,
-              1);
-        }
-
-      }
-      break;
-    case fn_level_actor_lift_state_descending:
-      {
-        int i = 0;
-        for (i = 0; i < 2; i++) {
-          if (p.general->position.h > FN_TILE_HEIGHT) {
-            fn_level_solids_set(&(p.level_data->solids),
-                p.general->position.x/FN_TILE_WIDTH,
-                p.general->position.y/FN_TILE_HEIGHT,
-                0);
-            p.general->position.y += FN_TILE_HEIGHT;
-            p.general->position.h -= FN_TILE_HEIGHT;
-          } else {
-            data->state = fn_level_actor_lift_state_idle;
-          }
-        }
-      }
-      break;
-    case fn_level_actor_lift_state_idle:
-      /* nothing to do, we stay where we are */
-      break;
-    default:
-      /* we are in an invalid state. */
-      printf(__FILE__ ":%d: warning: lift "
-          "is in invalid state.\n",
-          __LINE__);
-      break;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the lift.
- *
- * @param  actor  The lift actor.
- */
-void fn_level_actor_function_lift_blit(
-        FnLevelActorBlitParams p)
-{
-  FnGeometry destrect = p.general->position;
-
-  int i = 0;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache, SOLID_START + 23);
-  for (i = 0;
-      i < p.general->position.h - FN_TILE_HEIGHT;
-      i += FN_HALFTILE_HEIGHT) {
-    destrect.y += FN_HALFTILE_HEIGHT;
-    fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-  }
-
-  tile = fn_tilecache_get_tile(p.tilecache,
-      OBJ_ELEVATOR);
-  destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 /**
  * The rotating mill.
  */
@@ -5347,14 +5144,14 @@ fn_level_actor_functions[] =
     .receive_message = NULL,
   },
   [ActorType_Lift] = {
-    .create = fn_level_actor_function_lift_create,
-    .free = fn_level_actor_function_lift_free,
+    .create = fn_level_actor_function_elevator_create,
+    .free = fn_level_actor_function_elevator_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_lift_interact_start,
-    .hero_interact_end = fn_level_actor_function_lift_interact_end,
-    .act = fn_level_actor_function_lift_act,
-    .blit = fn_level_actor_function_lift_blit,
+    .hero_interact_start = fn_level_actor_function_elevator_hero_interact_start,
+    .hero_interact_end = fn_level_actor_function_elevator_hero_interact_end,
+    .act = fn_level_actor_function_elevator_act,
+    .blit = fn_level_actor_function_elevator_blit,
     .shot = NULL,
     .receive_message = NULL,
   },
@@ -6000,9 +5797,9 @@ void fn_level_actor_hero_touch_end(fn_level_actor_t * actor, fn_level_t * level)
 Uint8 fn_level_actor_hero_can_interact(fn_level_actor_t * actor, fn_hero_t * hero)
 {
   if (actor->general->actor_type == ActorType_Lift) {
-    /* This check needs to be done for lift only because
-     * if there are two lifts next to each other, the mostleft
-     * lift would be chosen for interaction instead of the one on
+    /* This check needs to be done for elevator only because
+     * if there are two elevators next to each other, the mostleft
+     * elevator would be chosen for interaction instead of the one on
      * which the hero stands.
      */
     FnGeometry heropos = fn_hero_get_position(hero);

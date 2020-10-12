@@ -1,4 +1,5 @@
 mod acme;
+mod elevator;
 mod fire;
 mod firewheelbot;
 mod redball_jumping;
@@ -165,6 +166,7 @@ pub enum ActorType {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
     pub position: Geometry,
