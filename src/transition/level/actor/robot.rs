@@ -16,7 +16,7 @@ pub mod ffi {
         FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
         FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         ANIMATION_ROBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
@@ -190,11 +190,11 @@ pub mod ffi {
             general.hurts_hero = false;
             specific.touching_hero = false;
         }
-        actor_queue.push_back(ActorQueueItem {
-            actor_type: ActorType::RobotDisappearing,
-            x: general.position.x as u16,
-            y: general.position.y as u16,
-        });
+        actor_queue.push_back(
+            ActorType::RobotDisappearing,
+            general.position.x as u16,
+            general.position.y as u16,
+        );
         general.is_alive = false;
     }
 }

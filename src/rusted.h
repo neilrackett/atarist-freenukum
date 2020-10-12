@@ -764,6 +764,18 @@ void fn_level_actor_function_firewheelbot_hero_touch_start(FnLevelActorHeroTouch
 
 void fn_level_actor_function_firewheelbot_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_mill_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_mill_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_mill_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_mill_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_mill_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
+void fn_level_actor_function_mill_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_redball_jumping_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_redball_jumping_blit(FnLevelActorBlitParams p);

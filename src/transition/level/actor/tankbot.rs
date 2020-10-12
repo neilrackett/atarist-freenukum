@@ -17,7 +17,7 @@ pub mod ffi {
         FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
         FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         ANIMATION_CARBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
@@ -107,11 +107,11 @@ pub mod ffi {
 
         if specific.was_shot == 2 {
             general.is_alive = false;
-            actor_queue.push_back(ActorQueueItem {
-                actor_type: ActorType::Explosion,
-                x: general.position.x as u16 + HALFTILE_WIDTH as u16,
-                y: general.position.y as u16,
-            });
+            actor_queue.push_back(
+                ActorType::Explosion,
+                general.position.x as u16 + HALFTILE_WIDTH as u16,
+                general.position.y as u16,
+            );
             actor_queue.push_particle_firework(
                 general.position.x as u16,
                 general.position.y as u16,
@@ -179,17 +179,17 @@ pub mod ffi {
                     specific.tile = tile as usize;
 
                     if direction > 0 {
-                        actor_queue.push_back(ActorQueueItem {
-                            actor_type: ActorType::HostileShotRight,
-                            x: general.position.x as u16,
-                            y: general.position.y as u16 - 6,
-                        });
+                        actor_queue.push_back(
+                            ActorType::HostileShotRight,
+                            general.position.x as u16,
+                            general.position.y as u16 - 6,
+                        );
                     } else {
-                        actor_queue.push_back(ActorQueueItem {
-                            actor_type: ActorType::HostileShotLeft,
-                            x: general.position.x as u16,
-                            y: general.position.y as u16 - 6,
-                        });
+                        actor_queue.push_back(
+                            ActorType::HostileShotLeft,
+                            general.position.x as u16,
+                            general.position.y as u16 - 6,
+                        );
                     }
                 }
             }
@@ -197,11 +197,11 @@ pub mod ffi {
         if specific.was_shot == 1 {
             // create steam clouds
             if specific.current_frame == 0 {
-                actor_queue.push_back(ActorQueueItem {
-                    actor_type: ActorType::Steam,
-                    x: general.position.x as u16 + HALFTILE_WIDTH as u16,
-                    y: general.position.y as u16 - TILE_HEIGHT as u16,
-                });
+                actor_queue.push_back(
+                    ActorType::Steam,
+                    general.position.x as u16 + HALFTILE_WIDTH as u16,
+                    general.position.y as u16 - TILE_HEIGHT as u16,
+                );
             }
         }
     }

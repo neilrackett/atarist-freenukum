@@ -10,7 +10,7 @@ pub mod ffi {
         FnLevelActorCreateParams, FnLevelActorFreeParams,
         FnLevelActorHeroTouchStartParams, FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH};
     use transdl::video::Surface;
@@ -105,11 +105,11 @@ pub mod ffi {
                     general.position.x as usize / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT + 1,
                 ) {
-                    actor_queue.push_back(ActorQueueItem {
-                        actor_type: ActorType::Steam,
-                        x: general.position.x as u16,
-                        y: general.position.y as u16,
-                    });
+                    actor_queue.push_back(
+                        ActorType::Steam,
+                        general.position.x as u16,
+                        general.position.y as u16,
+                    );
                     actor_queue.push_particle_firework(
                         general.position.x as u16,
                         general.position.y as u16,
@@ -165,11 +165,11 @@ pub mod ffi {
 
         if specific.counter > 0 {
             hero_data.score.add(500);
-            actor_queue.push_back(ActorQueueItem {
-                actor_type: ActorType::Score500,
-                x: general.position.x as u16,
-                y: general.position.y as u16,
-            });
+            actor_queue.push_back(
+                ActorType::Score500,
+                general.position.x as u16,
+                general.position.y as u16,
+            );
             actor_queue.push_particle_firework(
                 general.position.x as u16,
                 general.position.y as u16,

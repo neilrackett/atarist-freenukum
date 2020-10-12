@@ -20,7 +20,7 @@ pub mod ffi {
         FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
         FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
@@ -223,16 +223,16 @@ pub mod ffi {
             general.is_alive = false;
 
             hero_data.score.add(100);
-            actor_queue.push_back(ActorQueueItem {
-                actor_type: ActorType::Steam,
-                x: general.position.x as u16,
-                y: general.position.y as u16,
-            });
-            actor_queue.push_back(ActorQueueItem {
-                actor_type: ActorType::Explosion,
-                x: general.position.x as u16,
-                y: general.position.y as u16,
-            });
+            actor_queue.push_back(
+                ActorType::Steam,
+                general.position.x as u16,
+                general.position.y as u16,
+            );
+            actor_queue.push_back(
+                ActorType::Explosion,
+                general.position.x as u16,
+                general.position.y as u16,
+            );
         }
     }
 }

@@ -4,7 +4,7 @@ pub mod ffi {
         FnLevelActorCreateParams, FnLevelActorFreeParams,
         FnLevelActorHeroTouchStartParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use crate::{
         ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
     };
@@ -38,11 +38,11 @@ pub mod ffi {
         let actor_queue = unsafe { &mut (*p.actor_queue) };
 
         hero_data.score.add(1000);
-        actor_queue.push_back(ActorQueueItem {
-            actor_type: ActorType::Score1000,
-            x: general.position.x as u16,
-            y: general.position.y as u16,
-        });
+        actor_queue.push_back(
+            ActorType::Score1000,
+            general.position.x as u16,
+            general.position.y as u16,
+        );
         general.is_alive = false;
     }
 
@@ -62,11 +62,11 @@ pub mod ffi {
             general.position.x as usize / TILE_WIDTH,
             general.position.y as usize / TILE_HEIGHT,
         ) {
-            actor_queue.push_back(ActorQueueItem {
-                actor_type: ActorType::Explosion,
-                x: general.position.x as u16,
-                y: general.position.y as u16,
-            });
+            actor_queue.push_back(
+                ActorType::Explosion,
+                general.position.x as u16,
+                general.position.y as u16,
+            );
             general.is_alive = false;
         }
     }

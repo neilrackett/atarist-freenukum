@@ -9,7 +9,7 @@ pub mod ffi {
         FnLevelActorCreateParams, FnLevelActorFreeParams,
         FnLevelActorHeroTouchStartParams, FnLevelActorShotParams,
     };
-    use super::super::{ActorQueueItem, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
@@ -85,11 +85,11 @@ pub mod ffi {
             2 => {
                 general.hurts_hero = false;
                 general.is_alive = false;
-                actor_queue.push_back(ActorQueueItem {
-                    actor_type: ActorType::Fire,
-                    x: general.position.x as u16,
-                    y: general.position.y as u16,
-                });
+                actor_queue.push_back(
+                    ActorType::Fire,
+                    general.position.x as u16,
+                    general.position.y as u16,
+                );
             }
             _ => {}
         }

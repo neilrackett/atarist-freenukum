@@ -2,6 +2,7 @@ mod acme;
 mod elevator;
 mod fire;
 mod firewheelbot;
+mod mill;
 mod redball_jumping;
 mod redball_lying;
 mod robot;
@@ -200,8 +201,8 @@ pub struct ActorQueue {
 }
 
 impl ActorQueue {
-    pub fn push_back(&mut self, item: ActorQueueItem) {
-        self.actors.push(item);
+    pub fn push_back(&mut self, actor_type: ActorType, x: u16, y: u16) {
+        self.actors.push(ActorQueueItem { actor_type, x, y });
     }
 
     pub fn push_particle_firework(
@@ -218,7 +219,7 @@ impl ActorQueue {
                 3 => ActorType::ParticleGreen,
                 _ => unreachable!(),
             };
-            self.push_back(ActorQueueItem { actor_type, x, y });
+            self.push_back(actor_type, x, y);
         }
     }
 }
