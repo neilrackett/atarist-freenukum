@@ -67,7 +67,7 @@ pub mod ffi {
             ActorType::Soda => (ANIMATION_SODA, 4),
             ActorType::Boots => (OBJECT_BOOT, 1),
             ActorType::Gun => (OBJECT_GUN, 1),
-            ActorType::FullLife => (OBJECT_NUCLEARMOLECULE, 1),
+            ActorType::FullLife => (OBJECT_NUCLEARMOLECULE, 8),
             ActorType::ChickenSingle => (OBJECT_CHICKEN_SINGLE, 1),
             ActorType::ChickenDouble => (OBJECT_CHICKEN_DOUBLE, 1),
             ActorType::LetterD => (OBJECT_LETTER_D, 1),
