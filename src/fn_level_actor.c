@@ -85,157 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef struct fn_level_actor_bomb_data_t {
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The number of the current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames for the animation.
-   */
-  Uint8 num_frames;
-  /**
-   * The counter for the number of cycles.
-   */
-  Uint8 counter;
-  /**
-   * Flag showing if the bomb explodes to the left.
-   */
-  Uint8 explode_left;
-  /**
-   * Flag showing if the bomb explodes to the right.
-   */
-  Uint8 explode_right;
-  /**
-   * The threshold when the bomb should explode.
-   */
-  Uint8 explode_threshold;
-  /**
-   * The number of flames that should be produced by the bomb
-   * to each direction.
-   */
-  Uint8 num_flames;
-} fn_level_actor_bomb_data_t;
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_bomb_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_bomb_data_t * data = malloc(
-      sizeof(fn_level_actor_bomb_data_t));
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-
-  data->tile = ANIM_BOMB;
-  data->current_frame = 0;
-  data->num_frames = 2;
-  data->counter = 0;
-  data->explode_left = 1;
-  data->explode_right = 1;
-  data->explode_threshold = 12;
-  data->num_flames = 4;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_bomb_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_bomb_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_bomb_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_bomb_data_t * data = p.specific;
-  data->current_frame++;
-  data->current_frame %= data->num_frames;
-
-  data->counter++;
-
-  if (data->counter < data->explode_threshold) {
-    /* do nothing here, the counter counts anyway. */
-  }
-  else if (data->counter < data->explode_threshold + data->num_flames)
-  {
-    Uint8 distance = data->counter - data->explode_threshold;
-    if (data->explode_left) {
-      /* explode to the left if possible */
-      if (
-          /* check if the place for the flame is free */
-          !fn_level_solids_get(&(p.level_data->solids),
-            (p.general->position.x -
-             distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
-            p.general->position.y / FN_TILE_HEIGHT) &&
-          /* check if there is solid place below */
-          fn_level_solids_get(&(p.level_data->solids),
-            (p.general->position.x -
-             distance * FN_TILE_WIDTH) / FN_TILE_WIDTH,
-            (p.general->position.y / FN_TILE_HEIGHT) + 1))
-      {
-        fn_level_actor_queue_push_back(p.actor_queue,
-            ActorType_BombFire,
-            p.general->position.x - distance * FN_TILE_WIDTH,
-            p.general->position.y);
-      } else {
-        data->explode_left = 0;
-      }
-    }
-
-    if (data->explode_right) {
-      /* explode to the right if possible */
-      if (
-          /* check if the place for the flame is free */
-          !fn_level_solids_get(&(p.level_data->solids),
-            (p.general->position.x + distance * FN_TILE_WIDTH) /
-            FN_TILE_WIDTH,
-            p.general->position.y / FN_TILE_HEIGHT) &&
-          /* check if there is solid place below */
-          fn_level_solids_get(&(p.level_data->solids),
-            (p.general->position.x + distance * FN_TILE_WIDTH) /
-            FN_TILE_WIDTH,
-            (p.general->position.y / FN_TILE_HEIGHT) + 1))
-      {
-        fn_level_actor_queue_push_back(p.actor_queue,
-            ActorType_BombFire,
-            p.general->position.x + distance * FN_TILE_WIDTH,
-            p.general->position.y);
-      } else {
-        data->explode_right = 0;
-      }
-    }
-
-  } else {
-    p.general->is_alive = 0;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_bomb_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_bomb_data_t * data = p.specific;
-  if (data->counter < data->explode_threshold) {
-    const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-        data->tile + data->current_frame);
-    FnGeometry destrect = p.general->position;
-    fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-  }
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 typedef struct fn_level_actor_bombfire_data_t {
   /**
    * The tile number for the tilecache.
@@ -305,7 +154,7 @@ void fn_level_actor_bombfire_hero_touch_end(
 void fn_level_actor_bombfire_act(
         FnLevelActorActParams p)
 {
-  fn_level_actor_bomb_data_t * data = p.specific;
+  fn_level_actor_bombfire_data_t * data = p.specific;
   data->current_frame++;
   if (data->current_frame == data->num_frames) {
     p.general->is_alive = 0;
@@ -2391,14 +2240,14 @@ fn_level_actor_functions[] =
     .receive_message = NULL,
   },
   [ActorType_Bomb] = {
-    .create = fn_level_actor_bomb_create,
-    .free = fn_level_actor_bomb_free,
+    .create = fn_level_actor_function_bomb_create,
+    .free = fn_level_actor_function_bomb_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
-    .act = fn_level_actor_bomb_act,
-    .blit = fn_level_actor_bomb_blit,
+    .act = fn_level_actor_function_bomb_act,
+    .blit = fn_level_actor_function_bomb_blit,
     .shot = NULL,
     .receive_message = NULL,
   },

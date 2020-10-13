@@ -748,6 +748,14 @@ void fn_level_actor_function_balloon_hero_touch_start(FnLevelActorHeroTouchStart
 
 void fn_level_actor_function_balloon_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_bomb_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_bomb_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_bomb_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_bomb_free(FnLevelActorFreeParams p);
+
 void fn_level_actor_function_elevator_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_elevator_blit(FnLevelActorBlitParams p);
