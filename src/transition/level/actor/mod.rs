@@ -11,6 +11,7 @@ mod redball_lying;
 mod robot;
 mod simpleanimation;
 mod soda_flying;
+mod spikes;
 mod tankbot;
 mod wallcrawler;
 

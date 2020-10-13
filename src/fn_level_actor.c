@@ -3057,122 +3057,6 @@ void fn_level_actor_function_access_card_door_receive_message(
 /* --------------------------------------------------------------- */
 
 /**
- * The spikes data structure.
- */
-typedef struct fn_level_actor_spike_data_t {
-  /**
-   * A flag indicating if the hero is currently touching the spike.
-   */
-  Uint8 touching_hero;
-} fn_level_actor_spike_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Spikes actor creation function.
- *
- * @param  actor  The spikes actor.
- */
-void fn_level_actor_function_spikes_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_spike_data_t * data = malloc(
-      sizeof(fn_level_actor_spike_data_t));
-  *(p.specific) = data;
-  data->touching_hero = 0;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_WIDTH;
-  p.general->is_in_foreground = 1;
-}
-
-/* --------------------------------------------------------------- */
-
-
-/**
- * Spikes actor deletion function.
- *
- * @param  actor  The spikes actor.
- */
-void fn_level_actor_function_spikes_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_spike_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero touches spikes actor.
- *
- * @param  actor  The spikes actor.
- */
-void fn_level_actor_function_spikes_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_spike_data_t * data = p.specific;
-  p.general->hurts_hero = true;
-  data->touching_hero = 1;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero stops to touch spikes actor.
- *
- * @param  actor  The spikes actor.
- */
-void fn_level_actor_function_spikes_touch_end(
-        FnLevelActorHeroTouchEndParams p)
-{
-  p.general->hurts_hero = false;
-  fn_level_actor_spike_data_t * data = p.specific;
-  data->touching_hero = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the spikes.
- *
- * @param  actor  The spikes actor.
- */
-void fn_level_actor_function_spikes_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile = NULL;
-  fn_level_actor_spike_data_t * data = p.specific;
-
-  FnGeometry destrect = p.general->position;
-  switch(p.general->actor_type) {
-    case ActorType_SpikesUp:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_SPIKES_UP);
-      break;
-    case ActorType_SpikesDown:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_SPIKES_DOWN);
-      break;
-    case ActorType_Spike:
-      if (data->touching_hero) {
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_SPIKE + 1);
-      } else {
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_SPIKE);
-      }
-
-      break;
-    default:
-      printf(__FILE__ ":%d: warning: spike #%d"
-          " tried to blit which is not a spike\n",
-          __LINE__, p.general->actor_type);
-      return;
-      break;
-  }
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * The fan wheel
  */
 typedef struct fn_level_actor_fan_data_t {
@@ -4681,8 +4565,8 @@ fn_level_actor_functions[] =
   [ActorType_SpikesUp] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
-    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
-    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_touch_start = fn_level_actor_function_spikes_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = NULL,
@@ -4693,8 +4577,8 @@ fn_level_actor_functions[] =
   [ActorType_SpikesDown] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
-    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
-    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_touch_start = fn_level_actor_function_spikes_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = NULL,
@@ -4705,8 +4589,8 @@ fn_level_actor_functions[] =
   [ActorType_Spike] = {
     .create = fn_level_actor_function_spikes_create,
     .free = fn_level_actor_function_spikes_free,
-    .hero_touch_start = fn_level_actor_function_spikes_touch_start,
-    .hero_touch_end = fn_level_actor_function_spikes_touch_end,
+    .hero_touch_start = fn_level_actor_function_spikes_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_spikes_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = NULL,

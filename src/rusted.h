@@ -866,6 +866,16 @@ void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams _p);
 
 void fn_level_actor_function_soda_flying_touch_start(FnLevelActorHeroTouchStartParams p);
 
+void fn_level_actor_function_spikes_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_spikes_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_spikes_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_spikes_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_spikes_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
 void fn_level_actor_function_tankbot_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_tankbot_blit(FnLevelActorBlitParams p);

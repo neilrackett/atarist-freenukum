@@ -84,12 +84,15 @@ const OBJECT_BALLOON: usize = OBJECT_START + 69;
 const OBJECT_FALLINGBLOCK: usize = OBJECT_START + 83;
 const OBJECT_POINT: usize = OBJECT_START + 85;
 const OBJECT_ROTATINGCYLINDER: usize = OBJECT_START + 90;
+const OBJECT_SPIKE: usize = OBJECT_START + 95;
 const OBJECT_ACCESS_CARD_SLOT: usize = OBJECT_START + 105;
 const OBJECT_GLOVE_SLOT: usize = OBJECT_START + 114;
 const OBJECT_KEY_RED: usize = OBJECT_START + 124;
 const OBJECT_KEY_GREEN: usize = OBJECT_START + 125;
 const OBJECT_KEY_BLUE: usize = OBJECT_START + 126;
 const OBJECT_KEY_PINK: usize = OBJECT_START + 127;
+const OBJECT_SPIKES_UP: usize = OBJECT_START + 148;
+const OBJECT_SPIKES_DOWN: usize = OBJECT_START + 149;
 
 pub use game::Game;
 pub use settings::Settings;
