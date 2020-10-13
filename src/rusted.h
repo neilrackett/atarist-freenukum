@@ -902,6 +902,16 @@ void fn_level_actor_function_tankbot_hero_touch_start(FnLevelActorHeroTouchStart
 
 void fn_level_actor_function_tankbot_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_teleporter_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_teleporter_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_teleporter_free(FnLevelActorFreeParams _p);
+
+void fn_level_actor_function_teleporter_hero_interact_start(FnLevelActorHeroInteractStartParams p);
+
+void fn_level_actor_function_teleporter_receive_message(FnLevelActorReceiveMessageParams p);
+
 void fn_level_actor_function_wallcrawler_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_wallcrawler_blit(FnLevelActorBlitParams p);

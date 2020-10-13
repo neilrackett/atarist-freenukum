@@ -86,102 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * Create a teleporter.
- *
- * @param  actor  The teleporter actor.
- */
-void fn_level_actor_function_teleporter_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  p.general->is_in_foreground = true;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Interact with a teleporter.
- *
- * @param  actor  The teleporter actor.
- */
-void fn_level_actor_function_teleporter_interact_start(
-        FnLevelActorHeroInteractStartParams p)
-{
-  FnLevelActorType othertype;
-  if (p.general->actor_type == ActorType_Teleporter1) {
-    othertype = ActorType_Teleporter2;
-  } else {
-    othertype = ActorType_Teleporter1;
-  }
-
-  fn_level_actor_message_queue_push_back(
-          p.actor_message_queue,
-          othertype,
-          ActorMessageType_Teleport);
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * The teleporter acts.
- *
- * @param  actor  The teleporter actor.
- */
-void fn_level_actor_function_teleporter_act(
-        FnLevelActorActParams p)
-{
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit a teleporter.
- *
- * @param  actor  The teleporter actor.
- */
-void fn_level_actor_function_teleporter_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile;
-
-  FnGeometry destrect = p.general->position;
-
-  int i = 0;
-  for (i = 0; i < 3; i++) {
-    int j = 0;
-    for (j = 0; j < 3; j++) {
-      destrect.x =
-          p.general->position.x - (1 - j) * FN_TILE_WIDTH;
-      destrect.y =
-          p.general->position.y - (2 - i) * FN_TILE_HEIGHT;
-      tile = fn_tilecache_get_tile(p.tilecache,
-          ANIM_TELEPORTER1 + i * 3 + j
-          );
-      fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_teleporter_receive_message(
-        FnLevelActorReceiveMessageParams p)
-{
-    if (p.message != ActorMessageType_Teleport) {
-        return;
-    }
-    FnHeroPosition * hero_position = fn_hero_data_get_position(
-            p.hero_data);
-    fn_hero_position_move_to(hero_position,
-            p.general->position.x,
-            p.general->position.y - FN_TILE_HEIGHT);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Singleanimation data struct.
  */
 typedef struct fn_level_actor_singleanimation_data_t {
@@ -3063,9 +2967,9 @@ fn_level_actor_functions[] =
     .free = NULL,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_teleporter_interact_start,
+    .hero_interact_start = fn_level_actor_function_teleporter_hero_interact_start,
     .hero_interact_end = NULL,
-    .act = fn_level_actor_function_teleporter_act,
+    .act = NULL,
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
     .receive_message = fn_level_actor_function_teleporter_receive_message,
@@ -3075,9 +2979,9 @@ fn_level_actor_functions[] =
     .free = NULL,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_teleporter_interact_start,
+    .hero_interact_start = fn_level_actor_function_teleporter_hero_interact_start,
     .hero_interact_end = NULL,
-    .act = fn_level_actor_function_teleporter_act,
+    .act = NULL,
     .blit = fn_level_actor_function_teleporter_blit,
     .shot = NULL,
     .receive_message = fn_level_actor_function_teleporter_receive_message,

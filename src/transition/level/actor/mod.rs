@@ -14,6 +14,7 @@ mod simpleanimation;
 mod soda_flying;
 mod spikes;
 mod tankbot;
+mod teleporter;
 mod wallcrawler;
 
 use super::super::geometry::Geometry;
@@ -230,6 +231,7 @@ impl ActorQueue {
 }
 
 #[repr(C)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ActorMessageType {
     OpenDoor,
     Teleport,
