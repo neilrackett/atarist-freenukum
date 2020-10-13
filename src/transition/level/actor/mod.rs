@@ -11,6 +11,7 @@ mod redball_jumping;
 mod redball_lying;
 mod robot;
 mod simpleanimation;
+mod singleanimation;
 mod soda_flying;
 mod spikes;
 mod tankbot;

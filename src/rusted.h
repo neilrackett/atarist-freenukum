@@ -868,6 +868,14 @@ void fn_level_actor_function_simpleanimation_create(FnLevelActorCreateParams p);
 
 void fn_level_actor_function_simpleanimation_free(FnLevelActorFreeParams p);
 
+void fn_level_actor_function_singleanimation_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_singleanimation_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_singleanimation_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_singleanimation_free(FnLevelActorFreeParams p);
+
 void fn_level_actor_function_soda_flying_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_soda_flying_blit(FnLevelActorBlitParams p);
