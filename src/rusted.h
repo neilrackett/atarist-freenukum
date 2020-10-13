@@ -714,6 +714,16 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_accesscard_slot_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_accesscard_slot_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_accesscard_slot_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_accesscard_slot_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_accesscard_slot_hero_interact_start(FnLevelActorHeroInteractStartParams p);
+
 void fn_level_actor_function_acme_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_acme_blit(FnLevelActorBlitParams p);

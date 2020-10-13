@@ -68,7 +68,7 @@ fn show(
 
 #[derive(Default)]
 pub struct InfoMessageQueue {
-    pub messages: Vec<String>,
+    messages: Vec<String>,
 }
 
 impl InfoMessageQueue {
@@ -81,6 +81,10 @@ impl InfoMessageQueue {
         for message in self.messages.drain(..) {
             show(screen, tilecache, params, &message);
         }
+    }
+
+    pub fn push_back(&mut self, msg: String) {
+        self.messages.push(msg);
     }
 }
 

@@ -1,3 +1,4 @@
+mod accesscard_slot;
 mod acme;
 mod elevator;
 mod fire;
@@ -242,6 +243,16 @@ pub struct ActorMessageQueue {
     pub messages: Vec<ActorMessage>,
 }
 
+impl ActorMessageQueue {
+    pub fn push_back(
+        &mut self,
+        receivers: ActorType,
+        message: ActorMessageType,
+    ) {
+        self.messages.push(ActorMessage { receivers, message });
+    }
+}
+
 pub mod ffi {
     type FnLevelActorData = super::ActorData;
     type FnLevelActorType = super::ActorType;
@@ -458,9 +469,7 @@ pub mod ffi {
     ) {
         assert!(!ptr.is_null());
         let queue = unsafe { &mut (*ptr) };
-        queue
-            .messages
-            .push(super::ActorMessage { receivers, message })
+        queue.push_back(receivers, message);
     }
 
     #[no_mangle]

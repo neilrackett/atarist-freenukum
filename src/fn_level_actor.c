@@ -86,123 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * The accesscard slot.
- */
-typedef struct fn_level_actor_acces_card_slot_data_t {
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The number of the current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames.
-   */
-  Uint8 num_frames;
-} fn_level_actor_access_card_slot_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create an accesscard slot.
- *
- * @param  actor  The accesscard slot actor.
- */
-void fn_level_actor_function_accesscard_slot_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  fn_level_actor_access_card_slot_data_t * data = malloc(
-      sizeof(fn_level_actor_access_card_slot_data_t));
-  data->tile = OBJ_ACCESS_CARD_SLOT;
-  data->current_frame = 0;
-  data->num_frames = 8;
-  *(p.specific) = data;
-  p.general->is_in_foreground = false;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete an accesscard slot.
- *
- * @param  actor  The accesscard slot actor.
- */
-void fn_level_actor_function_accesscard_slot_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_access_card_slot_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Interact with an accesscard slot.
- *
- * @param  actor  The accesscard slot actor.
- */
-void fn_level_actor_function_accesscard_slot_interact_start(
-        FnLevelActorHeroInteractStartParams p)
-{
-  fn_level_actor_access_card_slot_data_t * data = p.specific;
-
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
-  if (fn_hero_inventory_is_set(inventory, InventoryItem_AccessCard)) {
-    fn_level_actor_message_queue_push_back(
-            p.actor_message_queue,
-            ActorType_AccessCardDoor,
-            ActorMessageType_OpenDoor);
-    data->current_frame = 0;
-    data->num_frames = 1;
-    data->tile = OBJ_ACCESS_CARD_SLOT + 8;
-    fn_hero_inventory_unset(inventory, InventoryItem_AccessCard);
-  } else {
-    fn_info_message_queue_push(
-            p.info_message_queue,
-            "You don't have the access card\n");
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Let the accesscard slot act.
- *
- * @param  actor  The accesscard slot actor.
- */
-void fn_level_actor_function_accesscard_slot_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_access_card_slot_data_t * data = p.specific;
-  data->current_frame++;
-  data->current_frame %= data->num_frames;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the accesscard slot.
- *
- * @param  actor  The accesscard slot actor.
- */
-void fn_level_actor_function_accesscard_slot_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_access_card_slot_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile + data->current_frame);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * The states in which the golve slot can be.
  */
 typedef enum fn_level_actor_glove_slot_state_e {
@@ -4828,7 +4711,7 @@ fn_level_actor_functions[] =
     .free = fn_level_actor_function_accesscard_slot_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_accesscard_slot_interact_start,
+    .hero_interact_start = fn_level_actor_function_accesscard_slot_hero_interact_start,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_accesscard_slot_act,
     .blit = fn_level_actor_function_accesscard_slot_blit,
