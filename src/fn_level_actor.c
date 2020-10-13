@@ -774,130 +774,6 @@ void fn_level_actor_function_item_shot(
 /* --------------------------------------------------------------- */
 
 /**
- * The balloon struct.
- */
-typedef struct fn_level_actor_balloon_data_t {
-  /**
-   * A flag indicating if the balloon was destroyed.
-   */
-  Uint8 destroyed;
-  /**
-   * The current frame number for the cord animation.
-   */
-  Uint8 current_frame;
-} fn_level_actor_balloon_data_t;
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_balloon_data_t * data =
-    malloc(sizeof(fn_level_actor_balloon_data_t));
-  *(p.specific) = data;
-  data->destroyed = 0;
-  data->current_frame = 0;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT * 2;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_balloon_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_balloon_data_t * data = p.specific;
-  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
-  if (!data->destroyed) {
-    p.general->is_alive = 0;
-    fn_hero_score_add(score, 10000);
-    fn_level_actor_queue_push_back(p.actor_queue,
-        ActorType_Score10000,
-        p.general->position.x,
-        p.general->position.y);
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_balloon_data_t * data = p.specific;
-
-  data->current_frame++;
-  data->current_frame %= 9;
-  if (data->destroyed) {
-    p.general->is_alive = 0;
-  } else {
-    p.general->position.y--;
-    if (
-        /* balloon bumps against wall */
-        fn_level_solids_get(&(p.level_data->solids),
-          (p.general->position.x) / FN_TILE_WIDTH,
-          (p.general->position.y -1) / FN_TILE_HEIGHT)
-       )
-    {
-      data->destroyed = 1;
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Steam,
-          p.general->position.x,
-          p.general->position.y);
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_balloon_data_t * data = p.specific;
-
-  const FnTexture * tile;
-
-  FnGeometry destrect = p.general->position;
-
-  if (data->destroyed) {
-    tile = fn_tilecache_get_tile(p.tilecache, OBJ_BALLOON + 4);
-  } else {
-    tile = fn_tilecache_get_tile(p.tilecache, OBJ_BALLOON);
-  }
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-
-  destrect.y += FN_TILE_HEIGHT;
-
-  tile = fn_tilecache_get_tile(p.tilecache,
-      OBJ_BALLOON + 1 + data->current_frame / 3);
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_balloon_shot(
-        FnLevelActorShotParams p)
-{
-  fn_level_actor_balloon_data_t * data = p.specific;
-  data->destroyed = 1;
-  fn_level_actor_queue_push_back(p.actor_queue,
-      ActorType_Steam,
-      p.general->position.x,
-      p.general->position.y);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Create a teleporter.
  *
  * @param  actor  The teleporter actor.
@@ -4313,7 +4189,7 @@ fn_level_actor_functions[] =
   [ActorType_Balloon] = {
     .create = fn_level_actor_function_balloon_create,
     .free = fn_level_actor_function_balloon_free,
-    .hero_touch_start = fn_level_actor_function_balloon_touch_start,
+    .hero_touch_start = fn_level_actor_function_balloon_hero_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,

@@ -1,5 +1,6 @@
 mod accesscard_slot;
 mod acme;
+mod balloon;
 mod elevator;
 mod fire;
 mod firewheelbot;
