@@ -18,6 +18,7 @@ serde = "1"
 serde_derive = "1"
 toml = "0.5.6"
 transdl = { path = "transdl" }
+rand = "0.7.3"
 
 [build-dependencies]
 cbindgen = "0.14.4"
