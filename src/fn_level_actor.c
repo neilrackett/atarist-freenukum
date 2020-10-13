@@ -86,694 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * The item struct.
- * Items are elements in the game which fall to the floor.
- * They are one part high, one part wide and
- * have either a single frame or a fixed number
- * of frames that appear in order and are lined up in a row
- * inside the tilecache.
- */
-typedef struct fn_level_actor_item_data_t {
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The number of the current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames for the animation.
-   */
-  Uint8 num_frames;
-  /**
-   * Are we standing on the ground? If no, this is zero, otherwise 1.
-   */
-  Uint8 standing_on_ground;
-} fn_level_actor_item_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create an item.
- *
- * @param  actor The item actor.
- */
-void fn_level_actor_function_item_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_item_data_t * data = malloc(
-      sizeof(fn_level_actor_item_data_t));
-
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  p.general->is_in_foreground = 0;
-  switch(p.general->actor_type) {
-    case ActorType_BoxRedSoda:
-    case ActorType_BoxRedChicken:
-      data->tile = OBJ_BOX_RED;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_BoxBlueFootball:
-    case ActorType_BoxBlueJoystick:
-    case ActorType_BoxBlueDisk:
-    case ActorType_BoxBlueBalloon:
-    case ActorType_BoxBlueFlag:
-    case ActorType_BoxBlueRadio:
-      data->tile = OBJ_BOX_BLUE;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_BoxGreyEmpty:
-    case ActorType_BoxGreyBoots:
-    case ActorType_BoxGreyClamps:
-    case ActorType_BoxGreyGun:
-    case ActorType_BoxGreyBomb:
-    case ActorType_BoxGreyGlove:
-    case ActorType_BoxGreyFullLife:
-    case ActorType_BoxGreyAccessCard:
-    case ActorType_BoxGreyLetterD:
-    case ActorType_BoxGreyLetterU:
-    case ActorType_BoxGreyLetterK:
-    case ActorType_BoxGreyLetterE:
-      data->tile = OBJ_BOX_GREY;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_Joystick:
-      data->tile = OBJ_JOYSTICK;
-      data->current_frame = 0;
-      data->num_frames  = 1;
-      break;
-    case ActorType_Football:
-      data->tile = OBJ_FOOTBALL;
-      data->current_frame = 0;
-      data->num_frames  = 1;
-      break;
-    case ActorType_Flag:
-      data->tile = OBJ_FLAG;
-      data->current_frame = 0;
-      data->num_frames  = 3;
-      break;
-    case ActorType_Disk:
-      data->tile = OBJ_DISK;
-      data->current_frame = 0;
-      data->num_frames  = 1;
-      break;
-    case ActorType_Radio:
-      data->tile = OBJ_RADIO;
-      data->current_frame = 0;
-      data->num_frames = 3;
-      break;
-    case ActorType_Soda:
-      data->tile = ANIM_SODA;
-      data->current_frame = 0;
-      data->num_frames = 4;
-      break;
-    case ActorType_Boots:
-      data->tile = OBJ_BOOT;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_Gun:
-      data->tile = OBJ_GUN;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_FullLife:
-      data->tile = OBJ_NUCLEARMOLECULE;
-      data->current_frame = 0;
-      data->num_frames = 8;
-      break;
-    case ActorType_ChickenSingle:
-      data->tile = OBJ_CHICKEN_SINGLE;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_ChickenDouble:
-      data->tile = OBJ_CHICKEN_DOUBLE;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_LetterD:
-      data->tile = OBJ_LETTER_D;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_LetterU:
-      data->tile = OBJ_LETTER_U;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_LetterK:
-      data->tile = OBJ_LETTER_K;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_LetterE:
-      data->tile = OBJ_LETTER_E;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_AccessCard:
-      data->tile = OBJ_ACCESS_CARD;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_Glove:
-      data->tile = OBJ_ROBOHAND;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    case ActorType_Clamps:
-      data->tile = OBJ_CLAMP;
-      data->current_frame = 0;
-      data->num_frames = 1;
-      break;
-    default:
-      /* we got a type which should not be an item. */
-      printf(__FILE__ ":%d: warning: item #%d"
-          " added which is not an item\n",
-          __LINE__, p.general->actor_type);
-      break;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete an item.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_item_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero starts to touch item.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_item_data_t * data = p.specific;
-
-  FnHeroFetchedLetterState * state =
-      fn_hero_data_get_fetched_letter_state(p.hero_data);;
-  FnHeroScore * score =
-      fn_hero_data_get_score(p.hero_data);;
-  FnHeroHealth * health =
-      fn_hero_data_get_health(p.hero_data);;
-  FnHeroFirepower * firepower =
-      fn_hero_data_get_firepower(p.hero_data);;
-  FnHeroInventory * inventory =
-      fn_hero_data_get_inventory(p.hero_data);;
-
-  switch(p.general->actor_type) {
-    case ActorType_LetterD:
-      p.general->is_alive = 0;
-      fn_hero_fetched_letter_state_picked(state, 'D');
-      fn_hero_score_add(score, 500);
-      fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score500,
-              p.general->position.x,
-              p.general->position.y);
-      break;
-    case ActorType_LetterU:
-      p.general->is_alive = 0;
-      fn_hero_fetched_letter_state_picked(state, 'U');
-      fn_hero_score_add(score, 500);
-      fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score500,
-              p.general->position.x,
-              p.general->position.y);
-      break;
-    case ActorType_LetterK:
-      p.general->is_alive = 0;
-      fn_hero_fetched_letter_state_picked(state, 'K');
-      fn_hero_score_add(score, 500);
-      fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score500,
-              p.general->position.x,
-              p.general->position.y);
-      break;
-    case ActorType_LetterE:
-      p.general->is_alive = 0;
-      fn_hero_fetched_letter_state_picked(state, 'E');
-      if (fn_hero_fetched_letter_state_succeeded(state)) {
-          fn_hero_fetched_letter_state_reset(state);
-          fn_hero_score_add(score, 10000);
-          fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score10000,
-              p.general->position.x,
-              p.general->position.y);
-      } else {
-          fn_hero_score_add(score, 500);
-          fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score500,
-              p.general->position.x,
-              p.general->position.y);
-      }
-      break;
-    case ActorType_FullLife:
-      fn_hero_health_fill_max(health);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Gun:
-      fn_hero_firepower_increase(firepower, 1);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_AccessCard:
-      fn_hero_inventory_set(inventory, InventoryItem_AccessCard);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Glove:
-      fn_hero_inventory_set(inventory, InventoryItem_Glove);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Boots:
-      fn_hero_inventory_set(inventory, InventoryItem_Boot);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Clamps:
-      fn_hero_inventory_set(inventory, InventoryItem_Clamp);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 1000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score1000,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Football:
-      fn_hero_score_add(score, 100);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score100,
-          p.general->position.x,
-          p.general->position.y);
-      p.general->is_alive = 0;
-      break;
-    case ActorType_Disk:
-      fn_hero_score_add(score, 5000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score5000,
-          p.general->position.x,
-          p.general->position.y);
-      p.general->is_alive = 0;
-      break;
-    case ActorType_Joystick:
-      fn_hero_score_add(score, 2000);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score2000,
-          p.general->position.x,
-          p.general->position.y);
-      p.general->is_alive = 0;
-      break;
-    case ActorType_Radio:
-    case ActorType_Flag:
-      switch(data->current_frame) {
-        case 0:
-          fn_hero_score_add(score, 100);
-          fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score100,
-              p.general->position.x,
-              p.general->position.y);
-          break;
-        case 1:
-          fn_hero_score_add(score, 2000);
-          fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score2000,
-              p.general->position.x,
-              p.general->position.y);
-          break;
-        case 2:
-          fn_hero_score_add(score, 5000);
-          fn_level_actor_queue_push_back(p.actor_queue,
-              ActorType_Score5000,
-              p.general->position.x,
-              p.general->position.y);
-          break;
-      }
-      p.general->is_alive = 0;
-      break;
-    case ActorType_Soda:
-      fn_hero_health_increase(health, 1);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 200);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score200,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_ChickenSingle:
-      fn_hero_health_increase(health, 1);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 100);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score100,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_ChickenDouble:
-      fn_hero_health_increase(health, 2);
-      p.general->is_alive = 0;
-      fn_hero_score_add(score, 200);
-      fn_level_actor_queue_push_back(p.actor_queue,
-          ActorType_Score200,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    default:
-      /* do nothing about other items */
-      break;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero stops to touch item.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_touch_end(
-        FnLevelActorHeroTouchEndParams p)
-{
-  /* Nothing to do here */
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Action for item.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_item_data_t * data = p.specific;
-  data->current_frame++;
-  data->current_frame %= data->num_frames;
-  if (!fn_level_solids_get(&(p.level_data->solids),
-        (p.general->position.x) / FN_TILE_WIDTH,
-        (p.general->position.y) / FN_TILE_HEIGHT + 1)) {
-    p.general->position.y += FN_HALFTILE_HEIGHT;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the item.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_item_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile + data->current_frame);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * An item gets shot.
- *
- * @param  actor  The item actor.
- */
-void fn_level_actor_function_item_shot(
-        FnLevelActorShotParams p)
-{
-  switch(p.general->actor_type) {
-    case ActorType_BoxBlueFootball:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Football,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxBlueJoystick:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Joystick,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxBlueDisk:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Disk,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxBlueBalloon:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Balloon,
-          p.general->position.x,
-          p.general->position.y - FN_TILE_HEIGHT);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxBlueFlag:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Flag,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxBlueRadio:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Radio,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxRedSoda:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Soda,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxRedChicken:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_ChickenSingle,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyEmpty:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyBoots:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Boots,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyClamps:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Clamps,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyGun:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Gun,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyBomb:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Bomb,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyGlove:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_Glove,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyFullLife:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_FullLife,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyAccessCard:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_AccessCard,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y,
-          4);
-      break;
-    case ActorType_BoxGreyLetterD:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterD,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxGreyLetterU:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterU,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxGreyLetterK:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterK,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_BoxGreyLetterE:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_LetterE,
-          p.general->position.x,
-          p.general->position.y);
-      fn_level_actor_queue_push_particle_firework(
-          p.actor_queue,
-          p.general->position.x,
-          p.general->position.y, 4);
-      break;
-    case ActorType_ChickenSingle:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_ChickenDouble,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    case ActorType_Soda:
-      p.general->is_alive = 0;
-      fn_level_actor_queue_push_back(p.actor_queue, ActorType_SodaFlying,
-          p.general->position.x,
-          p.general->position.y);
-      break;
-    default:
-      break;
-  }
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Create a teleporter.
  *
  * @param  actor  The teleporter actor.
@@ -3629,8 +2941,8 @@ fn_level_actor_functions[] =
   [ActorType_Soda] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3833,8 +3145,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyEmpty] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3845,8 +3157,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyBoots] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3857,8 +3169,8 @@ fn_level_actor_functions[] =
   [ActorType_Boots] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3869,8 +3181,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyClamps] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3881,8 +3193,8 @@ fn_level_actor_functions[] =
   [ActorType_Clamps] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3893,8 +3205,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyGun] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3905,8 +3217,8 @@ fn_level_actor_functions[] =
   [ActorType_Gun] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3917,8 +3229,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyBomb] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3929,8 +3241,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxRedSoda] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3941,8 +3253,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxRedChicken] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3953,8 +3265,8 @@ fn_level_actor_functions[] =
   [ActorType_ChickenSingle] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3965,8 +3277,8 @@ fn_level_actor_functions[] =
   [ActorType_ChickenDouble] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3977,8 +3289,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueFootball] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -3989,8 +3301,8 @@ fn_level_actor_functions[] =
   [ActorType_Football] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4001,8 +3313,8 @@ fn_level_actor_functions[] =
   [ActorType_Flag] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4013,8 +3325,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueJoystick] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4025,8 +3337,8 @@ fn_level_actor_functions[] =
   [ActorType_Joystick] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4037,8 +3349,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueDisk] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4049,8 +3361,8 @@ fn_level_actor_functions[] =
   [ActorType_Disk] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4061,8 +3373,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueBalloon] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4085,8 +3397,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyGlove] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4097,8 +3409,8 @@ fn_level_actor_functions[] =
   [ActorType_Glove] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4109,8 +3421,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyFullLife] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4121,8 +3433,8 @@ fn_level_actor_functions[] =
   [ActorType_FullLife] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4133,8 +3445,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueFlag] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4157,8 +3469,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxBlueRadio] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4169,8 +3481,8 @@ fn_level_actor_functions[] =
   [ActorType_Radio] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4181,8 +3493,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyAccessCard] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4193,8 +3505,8 @@ fn_level_actor_functions[] =
   [ActorType_AccessCard] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4205,8 +3517,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyLetterD] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4217,8 +3529,8 @@ fn_level_actor_functions[] =
   [ActorType_LetterD] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4229,8 +3541,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyLetterU] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4241,8 +3553,8 @@ fn_level_actor_functions[] =
   [ActorType_LetterU] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4253,8 +3565,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyLetterK] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4265,8 +3577,8 @@ fn_level_actor_functions[] =
   [ActorType_LetterK] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4277,8 +3589,8 @@ fn_level_actor_functions[] =
   [ActorType_BoxGreyLetterE] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
@@ -4289,8 +3601,8 @@ fn_level_actor_functions[] =
   [ActorType_LetterE] = {
     .create = fn_level_actor_function_item_create,
     .free = fn_level_actor_function_item_free,
-    .hero_touch_start = fn_level_actor_function_item_touch_start,
-    .hero_touch_end = fn_level_actor_function_item_touch_end,
+    .hero_touch_start = fn_level_actor_function_item_hero_touch_start,
+    .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_item_act,
