@@ -868,6 +868,16 @@ void fn_level_actor_function_robot_hero_touch_start(FnLevelActorHeroTouchStartPa
 
 void fn_level_actor_function_robot_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_rocket_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_rocket_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_rocket_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_rocket_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_rocket_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);

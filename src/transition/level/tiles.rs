@@ -25,6 +25,16 @@ impl LevelTiles {
 
         self.tiles[y][x]
     }
+
+    pub fn copy_from_to(
+        &mut self,
+        x_from: usize,
+        y_from: usize,
+        x_to: usize,
+        y_to: usize,
+    ) {
+        self.set(x_to, y_to, self.get(x_from, y_from));
+    }
 }
 
 pub mod ffi {
@@ -77,6 +87,6 @@ pub mod ffi {
     ) {
         assert!(!ptr.is_null());
         let tiles = unsafe { &mut (*ptr) };
-        tiles.set(x_to, y_to, tiles.get(x_from, y_from));
+        tiles.copy_from_to(x_from, y_from, x_to, y_to);
     }
 }

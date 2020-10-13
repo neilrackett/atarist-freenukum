@@ -11,6 +11,7 @@ mod particle;
 mod redball_jumping;
 mod redball_lying;
 mod robot;
+mod rocket;
 mod simpleanimation;
 mod singleanimation;
 mod soda_flying;
