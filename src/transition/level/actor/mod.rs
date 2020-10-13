@@ -3,6 +3,7 @@ mod acme;
 mod elevator;
 mod fire;
 mod firewheelbot;
+mod glove_slot;
 mod mill;
 mod redball_jumping;
 mod redball_lying;
