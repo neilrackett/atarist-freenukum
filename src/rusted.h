@@ -77,7 +77,6 @@ typedef enum {
     ActorType_DrProton,
     ActorType_Camera,
     ActorType_Explosion,
-    ActorType_Fire,
     ActorType_DustCloud,
     ActorType_Steam,
     ActorType_ParticlePink,

@@ -1,22 +1,23 @@
 struct Specific {
     tile: usize,
-    counter: u16,
-    base_y: u16,
+    touching_hero: u8,
 }
 
 pub mod ffi {
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
-        FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
-        FnLevelActorShotParams,
+        FnLevelActorHeroTouchStartParams, FnLevelActorShotParams,
     };
+    use super::super::ActorType;
     use super::Specific;
-    use crate::{ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH};
+    use crate::{
+        ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
+    };
     use transdl::video::Surface;
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_create(
+    pub extern "C" fn fn_level_actor_function_redball_lying_create(
         p: FnLevelActorCreateParams,
     ) {
         assert!(!p.general.is_null());
@@ -29,15 +30,14 @@ pub mod ffi {
 
         let data = Box::new(Specific {
             tile: ANIMATION_MINE,
-            counter: 0,
-            base_y: general.position.y as u16,
+            touching_hero: 0,
         });
 
         *specific = Box::into_raw(data) as *mut libc::c_void;
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_free(
+    pub extern "C" fn fn_level_actor_function_redball_lying_free(
         p: FnLevelActorFreeParams,
     ) {
         unsafe {
@@ -48,50 +48,55 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_hero_touch_start(
+    pub extern "C" fn fn_level_actor_function_redball_lying_hero_touch_start(
         p: FnLevelActorHeroTouchStartParams,
     ) {
         assert!(!p.general.is_null());
+        assert!(!p.specific.is_null());
         let general = unsafe { &mut (*p.general) };
+        let specific = unsafe { &mut (*(p.specific as *mut Specific)) };
+
         general.hurts_hero = true;
+        specific.touching_hero = 1;
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_hero_touch_end(
-        p: FnLevelActorHeroTouchEndParams,
-    ) {
-        assert!(!p.general.is_null());
-        let general = unsafe { &mut (*p.general) };
-        general.hurts_hero = false;
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_act(
+    pub extern "C" fn fn_level_actor_function_redball_lying_act(
         p: FnLevelActorActParams,
     ) {
         assert!(!p.general.is_null());
         assert!(!p.specific.is_null());
-        let specific = unsafe { &mut (*(p.specific as *mut Specific)) };
+        assert!(!p.level_data.is_null());
+        assert!(!p.actor_queue.is_null());
         let general = unsafe { &mut (*p.general) };
+        let specific = unsafe { &mut (*(p.specific as *mut Specific)) };
+        let level_data = unsafe { &mut (*p.level_data) };
+        let actor_queue = unsafe { &mut (*p.actor_queue) };
 
-        let distance = match specific.counter {
-            0 => 0,
-            1 | 11 => 16,
-            2 | 10 => 28,
-            3 | 9 => 36,
-            4 | 8 => 40,
-            5 | 7 => 41,
-            6 => 42,
-            _ => unreachable!(),
-        };
-        general.position.y = specific.base_y as i16 - distance as i16;
+        if !level_data.solids.get(
+            general.position.x as usize / TILE_WIDTH,
+            general.position.y as usize / TILE_HEIGHT + 1,
+        ) {
+            general.position.y += HALFTILE_HEIGHT as i16;
+        }
 
-        specific.counter += 1;
-        specific.counter %= 12;
+        match specific.touching_hero {
+            1 => specific.touching_hero += 1,
+            2 => {
+                general.hurts_hero = false;
+                general.is_alive = false;
+                actor_queue.push_back(
+                    ActorType::BombFire,
+                    general.position.x as u16,
+                    general.position.y as u16,
+                );
+            }
+            _ => {}
+        }
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_blit(
+    pub extern "C" fn fn_level_actor_function_redball_lying_blit(
         p: FnLevelActorBlitParams,
     ) {
         assert!(!p.general.is_null());
@@ -111,7 +116,7 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_redball_jumping_shot(
+    pub extern "C" fn fn_level_actor_function_redball_lying_shot(
         _p: FnLevelActorShotParams,
     ) {
         /*

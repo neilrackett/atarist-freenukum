@@ -45,7 +45,6 @@ pub enum ActorType {
     DrProton,
     Camera,
     Explosion,
-    Fire,
     DustCloud,
     Steam,
     ParticlePink,

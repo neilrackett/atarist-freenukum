@@ -1734,18 +1734,6 @@ fn_level_actor_functions[] =
     .shot = NULL,
     .receive_message = NULL,
   },
-  [ActorType_Fire] = {
-    .create = fn_level_actor_function_singleanimation_create,
-    .free = fn_level_actor_function_singleanimation_free,
-    .hero_touch_start = NULL,
-    .hero_touch_end = NULL,
-    .hero_interact_start = NULL,
-    .hero_interact_end = NULL,
-    .act = fn_level_actor_function_singleanimation_act,
-    .blit = fn_level_actor_function_singleanimation_blit,
-    .shot = NULL,
-    .receive_message = NULL,
-  },
   [ActorType_DustCloud] = {
     .create = fn_level_actor_function_singleanimation_create,
     .free = fn_level_actor_function_singleanimation_free,
