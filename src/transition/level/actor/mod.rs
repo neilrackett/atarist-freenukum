@@ -4,6 +4,7 @@ mod balloon;
 mod bomb;
 mod camera;
 mod elevator;
+mod expandingfloor;
 mod fire;
 mod firewheelbot;
 mod glove_slot;

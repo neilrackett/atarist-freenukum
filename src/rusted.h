@@ -775,6 +775,16 @@ void fn_level_actor_function_elevator_hero_interact_end(FnLevelActorHeroInteract
 
 void fn_level_actor_function_elevator_hero_interact_start(FnLevelActorHeroInteractStartParams p);
 
+void fn_level_actor_function_expandingfloor_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_expandingfloor_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_expandingfloor_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_expandingfloor_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_expandingfloor_receive_message(FnLevelActorReceiveMessageParams p);
+
 void fn_level_actor_function_fire_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_fire_blit(FnLevelActorBlitParams p);

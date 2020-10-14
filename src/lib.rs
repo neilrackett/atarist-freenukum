@@ -76,6 +76,7 @@ const NUMBER_BONUS_7_RIGHT: usize = NUMBER_START + 40;
 
 const SOLID_START: usize = 4 * 48;
 const SOLID_ELEVATOR: usize = SOLID_START + 23;
+const SOLID_EXPANDINGFLOOR: usize = SOLID_START + 191;
 
 const ANIMATION_START: usize = SOLID_START + 4 * 48;
 
