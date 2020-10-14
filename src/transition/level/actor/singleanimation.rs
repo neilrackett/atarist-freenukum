@@ -1,19 +1,24 @@
+use super::ActorType;
+
 struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
+    can_hurt_hero: bool,
+    replaced_by: Option<ActorType>,
 }
 
 pub mod ffi {
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
+        FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
     };
     use super::super::ActorType;
     use super::Specific;
     use crate::{
-        ANIMATION_BOMBFIRE, ANIMATION_ROBOT, OBJECT_DUSTCLOUD,
-        OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
+        ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
+        OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
     };
     use transdl::video::Surface;
 
@@ -30,11 +35,16 @@ pub mod ffi {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
 
-        let (tile, num_frames) = match general.actor_type {
-            ActorType::Fire => (ANIMATION_BOMBFIRE, 6),
-            ActorType::DustCloud => (OBJECT_DUSTCLOUD, 5),
-            ActorType::Steam => (OBJECT_STEAM, 5),
-            ActorType::RobotDisappearing => (ANIMATION_ROBOT + 3, 7),
+        let (tile, num_frames, can_hurt_hero, replaced_by) = match general
+            .actor_type
+        {
+            ActorType::BombFire => (ANIMATION_BOMBFIRE, 6, true, None),
+            ActorType::Explosion => (ANIMATION_EXPLOSION, 6, false, None),
+            ActorType::DustCloud => (OBJECT_DUSTCLOUD, 5, false, None),
+            ActorType::Steam => (OBJECT_STEAM, 5, false, None),
+            ActorType::RobotDisappearing => {
+                (ANIMATION_ROBOT + 3, 7, false, Some(ActorType::Explosion))
+            }
             _ => {
                 unreachable!(
                     "Actor type {:?} added as an animation \
@@ -48,6 +58,8 @@ pub mod ffi {
             tile,
             current_frame: 0,
             num_frames,
+            can_hurt_hero,
+            replaced_by,
         });
 
         *specific = Box::into_raw(data) as *mut libc::c_void;
@@ -78,14 +90,38 @@ pub mod ffi {
         specific.current_frame += 1;
         if specific.current_frame == specific.num_frames {
             general.is_alive = false;
-            if general.actor_type == ActorType::RobotDisappearing {
+            if let Some(successor) = specific.replaced_by {
                 actor_queue.push_back(
-                    ActorType::Explosion,
+                    successor,
                     general.position.x as u16,
                     general.position.y as u16,
                 );
             }
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_function_singleanimation_hero_touch_start(
+        p: FnLevelActorHeroTouchStartParams,
+    ) {
+        assert!(!p.general.is_null());
+        assert!(!p.specific.is_null());
+        let general = unsafe { &mut (*(p.general)) };
+        let specific = unsafe { &mut (*(p.specific as *mut Specific)) };
+
+        if specific.can_hurt_hero {
+            general.hurts_hero = true;
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actor_function_singleanimation_hero_touch_end(
+        p: FnLevelActorHeroTouchEndParams,
+    ) {
+        assert!(!p.general.is_null());
+        let general = unsafe { &mut (*(p.general)) };
+
+        general.hurts_hero = false;
     }
 
     #[no_mangle]

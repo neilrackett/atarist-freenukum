@@ -756,18 +756,6 @@ void fn_level_actor_function_bomb_create(FnLevelActorCreateParams p);
 
 void fn_level_actor_function_bomb_free(FnLevelActorFreeParams p);
 
-void fn_level_actor_function_bombfire_act(FnLevelActorActParams p);
-
-void fn_level_actor_function_bombfire_blit(FnLevelActorBlitParams p);
-
-void fn_level_actor_function_bombfire_create(FnLevelActorCreateParams p);
-
-void fn_level_actor_function_bombfire_free(FnLevelActorFreeParams p);
-
-void fn_level_actor_function_bombfire_hero_touch_end(FnLevelActorHeroTouchEndParams p);
-
-void fn_level_actor_function_bombfire_hero_touch_start(FnLevelActorHeroTouchStartParams p);
-
 void fn_level_actor_function_elevator_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_elevator_blit(FnLevelActorBlitParams p);
@@ -913,6 +901,10 @@ void fn_level_actor_function_singleanimation_blit(FnLevelActorBlitParams p);
 void fn_level_actor_function_singleanimation_create(FnLevelActorCreateParams p);
 
 void fn_level_actor_function_singleanimation_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_singleanimation_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_singleanimation_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
 void fn_level_actor_function_soda_flying_act(FnLevelActorActParams p);
 
