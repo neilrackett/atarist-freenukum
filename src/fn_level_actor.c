@@ -86,99 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * Explosion data struct.
- */
-typedef struct fn_level_actor_explosion_data_t {
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The number of the current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames for the animation.
-   */
-  Uint8 num_frames;
-} fn_level_actor_explosion_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create an explosion.
- *
- * @param  actor  The explosion actor.
- */
-void fn_level_actor_function_explosion_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_explosion_data_t * data = malloc(
-      sizeof(fn_level_actor_explosion_data_t));
-
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  p.general->is_in_foreground = 0;
-
-  data->tile = ANIM_EXPLODE;
-  data->current_frame = 0;
-  data->num_frames = 6;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete an explosion.
- *
- * @param  actor  The explosion actor.
- */
-void fn_level_actor_function_explosion_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_explosion_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Act an explosion.
- *
- * @param  actor  The explosion actor.
- */
-void fn_level_actor_function_explosion_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_explosion_data_t * data = p.specific;
-
-  data->current_frame++;
-  if (data->current_frame == data->num_frames) {
-    p.general->is_alive = 0;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit an explosion.
- *
- * @param  actor  The explosion actor.
- */
-void fn_level_actor_function_explosion_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_explosion_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile + data->current_frame);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Create a camera.
  *
  * @param  actor  The camera actor.
@@ -2041,14 +1948,14 @@ fn_level_actor_functions[] =
     .receive_message = NULL,
   },
   [ActorType_Explosion] = {
-    .create = fn_level_actor_function_explosion_create,
-    .free = fn_level_actor_function_explosion_free,
+    .create = fn_level_actor_function_singleanimation_create,
+    .free = fn_level_actor_function_singleanimation_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
-    .act = fn_level_actor_function_explosion_act,
-    .blit = fn_level_actor_function_explosion_blit,
+    .act = fn_level_actor_function_singleanimation_act,
+    .blit = fn_level_actor_function_singleanimation_blit,
     .shot = NULL,
     .receive_message = NULL,
   },
