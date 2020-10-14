@@ -265,26 +265,6 @@ fn_level_actor_t * fn_level_add_actor(fn_level_t * lv,
 /* --------------------------------------------------------------- */
 
 /**
- * Add an actor to the level on a multiple coordinate of
- * tile-width and tile-height.
- *
- * @param  lv     The level to which the actor gets added.
- * @param  type   The type of the actor.
- * @param  x      The x coordinate which will be interally multiplied
- *                by FN_TILE_WIDTH.
- * @param  y      The y coordinate which will be interally multiplied
- *                by FN_TILE_HEIGHT.
- *
- * @return  The newly created actor.
- */
-fn_level_actor_t * fn_level_add_initial_actor(fn_level_t * lv,
-    FnLevelActorType type,
-    Uint16 x,
-    Uint16 y);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Let the hero fire a shot.
  *
  * If there are already the maximum of shots in the level,

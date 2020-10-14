@@ -21,6 +21,7 @@ mod soda_flying;
 mod spikes;
 mod tankbot;
 mod teleporter;
+mod unstablefloor;
 mod wallcrawler;
 
 use super::super::geometry::Geometry;

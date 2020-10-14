@@ -2,6 +2,7 @@ use super::super::geometry::Geometry;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LevelSolids {
     solids: [[bool; LEVEL_WIDTH]; LEVEL_HEIGHT],
 }
@@ -11,6 +12,52 @@ impl LevelSolids {
         LevelSolids {
             solids: [[false; LEVEL_WIDTH]; LEVEL_HEIGHT],
         }
+    }
+
+    pub fn dump(&self) {
+        print!("    ");
+        for i in 0..LEVEL_WIDTH {
+            print!("{}", i % 10);
+        }
+        println!();
+
+        print!("   ┏");
+        for _ in 0..LEVEL_WIDTH {
+            print!("━");
+        }
+        println!("┓");
+
+        for (i, row) in self.solids.iter().enumerate() {
+            print!("{:>3}┃", i);
+            for col in row {
+                if *col {
+                    print!("█");
+                } else {
+                    print!("░");
+                }
+            }
+            println!("┃");
+        }
+
+        print!("   ┗");
+        for _ in 0..LEVEL_WIDTH {
+            print!("━");
+        }
+        println!("┛");
+
+        print!("    ");
+        for i in 0..LEVEL_WIDTH {
+            print!("{}", i % 10);
+        }
+        println!();
+
+        print!("    ");
+        for i in 0..LEVEL_WIDTH {
+            if i % 10 == 0 {
+                print!("^{:<9}", i / 10);
+            }
+        }
+        println!();
     }
 
     pub fn set(&mut self, x: usize, y: usize, value: bool) {

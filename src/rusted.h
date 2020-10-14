@@ -965,6 +965,14 @@ void fn_level_actor_function_teleporter_hero_interact_start(FnLevelActorHeroInte
 
 void fn_level_actor_function_teleporter_receive_message(FnLevelActorReceiveMessageParams p);
 
+void fn_level_actor_function_unstablefloor_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_unstablefloor_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_unstablefloor_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_unstablefloor_free(FnLevelActorFreeParams p);
+
 void fn_level_actor_function_wallcrawler_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_wallcrawler_blit(FnLevelActorBlitParams p);
