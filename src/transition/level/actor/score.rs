@@ -7,7 +7,6 @@ pub mod ffi {
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
-        FnLevelActorHeroTouchEndParams, FnLevelActorHeroTouchStartParams,
     };
     use super::super::ActorType;
     use super::Specific;
