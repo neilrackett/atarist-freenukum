@@ -14,6 +14,7 @@ mod redball_jumping;
 mod redball_lying;
 mod robot;
 mod rocket;
+mod score;
 mod simpleanimation;
 mod singleanimation;
 mod soda_flying;
