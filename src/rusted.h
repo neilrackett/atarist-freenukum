@@ -959,6 +959,12 @@ void fn_level_actor_function_spikes_hero_touch_end(FnLevelActorHeroTouchEndParam
 
 void fn_level_actor_function_spikes_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
+void fn_level_actor_function_surveillancescreen_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_surveillancescreen_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_surveillancescreen_hero_interact_start(FnLevelActorHeroInteractStartParams p);
+
 void fn_level_actor_function_tankbot_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_tankbot_blit(FnLevelActorBlitParams p);

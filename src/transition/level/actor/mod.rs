@@ -21,6 +21,7 @@ mod simpleanimation;
 mod singleanimation;
 mod soda_flying;
 mod spikes;
+mod surveillancescreen;
 mod tankbot;
 mod teleporter;
 mod unstablefloor;
