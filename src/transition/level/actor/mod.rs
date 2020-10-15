@@ -3,6 +3,7 @@ mod acme;
 mod balloon;
 mod bomb;
 mod camera;
+mod conveyor;
 mod elevator;
 mod expandingfloor;
 mod fire;
