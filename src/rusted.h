@@ -947,7 +947,7 @@ void fn_level_actor_function_redball_jumping_hero_touch_end(FnLevelActorHeroTouc
 
 void fn_level_actor_function_redball_jumping_hero_touch_start(FnLevelActorHeroTouchStartParams p);
 
-void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams _p);
+void fn_level_actor_function_redball_jumping_shot(FnLevelActorShotParams p);
 
 void fn_level_actor_function_redball_lying_act(FnLevelActorActParams p);
 
