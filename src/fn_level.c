@@ -751,26 +751,6 @@ fn_level_t * fn_level_load(FnFile* file,
     i++;
   }
 
-  /* Put the correct tile behind the cameras. */
-  fn_list_t * cameras =
-    fn_level_get_items_of_type(lv,
-        ActorType_Camera);
-  fn_list_t * iter = NULL;
-  for (iter = fn_list_first(cameras);
-      iter != fn_list_last(cameras);
-      iter = fn_list_next(iter)) {
-    fn_level_actor_t * camera = iter->data;
-    Uint16 camera_y = camera->general->position.y / FN_TILE_HEIGHT;
-    Uint16 camera_x = camera->general->position.x / FN_TILE_WIDTH;
-    fn_level_tiles_copy_from_to(
-            tiles,
-            camera_x,
-            camera_y+1,
-            camera_x,
-            camera_y);
-  }
-  fn_list_free(cameras);
-
   while (fn_level_actor_queue_has_items(actor_queue)) {
       FnLevelActorQueueItem item =
           fn_level_actor_queue_pop_front(actor_queue);

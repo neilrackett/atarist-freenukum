@@ -15,11 +15,17 @@ pub mod ffi {
         p: FnLevelActorCreateParams,
     ) {
         assert!(!p.general.is_null());
+        assert!(!p.level_data.is_null());
         let general = unsafe { &mut (*p.general) };
+        let level_data = unsafe { &mut (*p.level_data) };
 
         general.is_in_foreground = false;
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
+
+        let x = general.position.x as usize / TILE_WIDTH;
+        let y = general.position.y as usize / TILE_HEIGHT;
+        level_data.tiles.copy_from_to(x, y + 1, x, y);
     }
 
     #[no_mangle]
