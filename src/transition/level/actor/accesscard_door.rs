@@ -1,8 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::ActorMessageType;
-use super::{ActorData, ActorQueue};
+use super::{ActorData, ActorMessageType, ActorQueue};
 use crate::{OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
