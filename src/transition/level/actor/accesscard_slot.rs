@@ -27,7 +27,7 @@ pub mod ffi {
 
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
-        general.is_in_foreground = true;
+        general.is_in_foreground = false;
 
         let data = Box::new(Specific {
             tile: OBJECT_ACCESS_CARD_SLOT,
