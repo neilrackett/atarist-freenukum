@@ -85,44 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-void fn_level_actor_function_notebook_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_notebook_free(
-        FnLevelActorFreeParams p)
-{
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_notebook_interact_start(
-        FnLevelActorHeroInteractStartParams p)
-{
-    fn_info_message_queue_push(
-            p.info_message_queue,
-            "Not implemented yet.\n");
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_notebook_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile = NULL;
-  FnGeometry destrect = p.general->position;
-  tile = fn_tilecache_get_tile(p.tilecache, OBJ_NOTE);
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 /**
  * The exitdoor struct.
  */
@@ -1345,10 +1307,10 @@ fn_level_actor_functions[] =
   },
   [ActorType_Notebook] = {
     .create = fn_level_actor_function_notebook_create,
-    .free = fn_level_actor_function_notebook_free,
+    .free = NULL,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_notebook_interact_start,
+    .hero_interact_start = fn_level_actor_function_notebook_hero_interact_start,
     .hero_interact_end = NULL,
     .act = NULL,
     .blit = fn_level_actor_function_notebook_blit,

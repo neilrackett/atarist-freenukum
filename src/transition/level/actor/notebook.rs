@@ -3,22 +3,22 @@ pub mod ffi {
         FnLevelActorBlitParams, FnLevelActorCreateParams,
         FnLevelActorHeroInteractStartParams,
     };
-    use crate::{ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH};
+    use crate::{OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH};
     use transdl::video::Surface;
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_create(
+    pub extern "C" fn fn_level_actor_function_notebook_create(
         p: FnLevelActorCreateParams,
     ) {
         assert!(!p.general.is_null());
         let general = unsafe { &mut (*p.general) };
 
-        general.position.w = TILE_WIDTH as u16 * 2;
+        general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_hero_interact_start(
+    pub extern "C" fn fn_level_actor_function_notebook_hero_interact_start(
         p: FnLevelActorHeroInteractStartParams,
     ) {
         assert!(!p.info_message_queue.is_null());
@@ -29,7 +29,7 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_blit(
+    pub extern "C" fn fn_level_actor_function_notebook_blit(
         p: FnLevelActorBlitParams,
     ) {
         assert!(!p.general.is_null());
@@ -41,15 +41,13 @@ pub mod ffi {
 
         let mut target = Surface { raw: target };
 
-        let mut destrect = general.position;
         tilecache
-            .get_tile(ANIMATION_BADGUYSCREEN)
+            .get_tile(OBJECT_NOTEBOOK)
             .unwrap()
-            .blit_to_sdl_surface(None, &mut target, Some(destrect));
-        destrect.x += TILE_WIDTH as i16;
-        tilecache
-            .get_tile(ANIMATION_BADGUYSCREEN + 1)
-            .unwrap()
-            .blit_to_sdl_surface(None, &mut target, Some(destrect));
+            .blit_to_sdl_surface(
+                None,
+                &mut target,
+                Some(general.position),
+            );
     }
 }

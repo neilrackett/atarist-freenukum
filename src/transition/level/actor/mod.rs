@@ -12,6 +12,7 @@ mod glove_slot;
 mod hostileshot;
 mod item;
 mod mill;
+mod notebook;
 mod particle;
 mod redball_jumping;
 mod redball_lying;

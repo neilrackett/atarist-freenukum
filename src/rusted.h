@@ -865,6 +865,12 @@ void fn_level_actor_function_mill_hero_touch_start(FnLevelActorHeroTouchStartPar
 
 void fn_level_actor_function_mill_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_notebook_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_notebook_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_notebook_hero_interact_start(FnLevelActorHeroInteractStartParams p);
+
 void fn_level_actor_function_particle_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_particle_blit(FnLevelActorBlitParams p);
