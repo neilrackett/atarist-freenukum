@@ -9,6 +9,7 @@ mod expandingfloor;
 mod fire;
 mod firewheelbot;
 mod glove_slot;
+mod hostileshot;
 mod item;
 mod mill;
 mod particle;

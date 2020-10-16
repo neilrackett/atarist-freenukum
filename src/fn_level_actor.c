@@ -85,114 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef struct fn_level_actor_hostileshot_data_t {
-  /**
-   * The tile number which is to be blitted in the level.
-   */
-  Uint16 tile;
-  /**
-   * Flag indicating if the shot is touching the hero.
-   */
-  Uint8 touching_hero;
-  /**
-   * The current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames.
-   */
-  Uint8 num_frames;
-} fn_level_actor_hostileshot_data_t;
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = malloc(
-      sizeof(fn_level_actor_hostileshot_data_t));
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  *(p.specific) = data;
-  data->current_frame = 0;
-  data->num_frames = 2;
-  if (p.general->actor_type == ActorType_HostileShotLeft) {
-    data->tile = OBJ_BADSHOT;
-  } else {
-    data->tile = OBJ_BADSHOT + 2;
-  }
-  data->touching_hero = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = p.specific;
-  p.general->hurts_hero = true;
-  data->touching_hero = 1;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_touch_end(
-        FnLevelActorHeroTouchEndParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = p.specific;
-  p.general->hurts_hero = false;
-  data->touching_hero = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = p.specific;
-
-  data->current_frame++;
-  data->current_frame %= data->num_frames;
-
-  if (p.general->actor_type == ActorType_HostileShotLeft) {
-    p.general->position.x -= FN_HALFTILE_WIDTH;
-  } else {
-    p.general->position.x += FN_HALFTILE_WIDTH;
-  }
-  if (fn_level_solids_get(&(p.level_data->solids),
-        p.general->position.x / FN_TILE_WIDTH,
-        p.general->position.y / FN_TILE_HEIGHT)) {
-    p.general->is_alive = 0;
-    if (data->touching_hero) {
-      p.general->hurts_hero = false;
-    }
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_hostileshot_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_hostileshot_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 void fn_level_actor_function_notebook_create(
         FnLevelActorCreateParams p)
 {
@@ -1478,8 +1370,8 @@ fn_level_actor_functions[] =
   [ActorType_HostileShotLeft] = {
     .create = fn_level_actor_function_hostileshot_create,
     .free = fn_level_actor_function_hostileshot_free,
-    .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
-    .hero_touch_end = fn_level_actor_function_hostileshot_touch_end,
+    .hero_touch_start = fn_level_actor_function_hostileshot_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_hostileshot_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_hostileshot_act,
@@ -1490,8 +1382,8 @@ fn_level_actor_functions[] =
   [ActorType_HostileShotRight] = {
     .create = fn_level_actor_function_hostileshot_create,
     .free = fn_level_actor_function_hostileshot_free,
-    .hero_touch_start = fn_level_actor_function_hostileshot_touch_start,
-    .hero_touch_end = fn_level_actor_function_hostileshot_touch_end,
+    .hero_touch_start = fn_level_actor_function_hostileshot_hero_touch_start,
+    .hero_touch_end = fn_level_actor_function_hostileshot_hero_touch_end,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_hostileshot_act,

@@ -829,6 +829,18 @@ void fn_level_actor_function_glove_slot_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_glove_slot_hero_interact_start(FnLevelActorHeroInteractStartParams p);
 
+void fn_level_actor_function_hostileshot_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_hostileshot_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_hostileshot_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_hostileshot_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_hostileshot_hero_touch_end(FnLevelActorHeroTouchEndParams p);
+
+void fn_level_actor_function_hostileshot_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
 void fn_level_actor_function_item_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_item_blit(FnLevelActorBlitParams p);
