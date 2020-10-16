@@ -85,65 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-/**
- * Create the shootable wall.
- *
- * @param  actor  The wall actor.
- */
-void fn_level_actor_function_shootable_wall_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  p.general->is_in_foreground = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the shootable wall.
- *
- * @param  actor  The wall actor.
- */
-void fn_level_actor_function_shootable_wall_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile = NULL;
-
-  FnGeometry destrect = p.general->position;
-
-  tile = fn_tilecache_get_tile(p.tilecache, 0x8C0/0x20);
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-  tile = fn_tilecache_get_tile(p.tilecache, 0x1800/0x20);
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Shoot the shootable wall.
- *
- * @param  actor  The wall actor.
- */
-void fn_level_actor_function_shootable_wall_shot(
-        FnLevelActorShotParams p)
-{
-  p.general->is_alive = 0;
-  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
-  fn_hero_score_add(score, 10);
-  fn_level_solids_set(&(p.level_data->solids),
-      p.general->position.x / FN_TILE_WIDTH,
-      p.general->position.y / FN_TILE_HEIGHT,
-      0);
-  fn_level_actor_queue_push_back(p.actor_queue,
-      ActorType_Explosion,
-      p.general->position.x,
-      p.general->position.y);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 typedef struct fn_level_actor_accesscard_door_data_t
 {
   /**

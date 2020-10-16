@@ -973,6 +973,12 @@ void fn_level_actor_function_score_create(FnLevelActorCreateParams p);
 
 void fn_level_actor_function_score_free(FnLevelActorFreeParams p);
 
+void fn_level_actor_function_shootable_wall_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_shootable_wall_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_shootable_wall_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_simpleanimation_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_simpleanimation_blit(FnLevelActorBlitParams p);

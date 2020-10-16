@@ -23,6 +23,7 @@ mod redball_lying;
 mod robot;
 mod rocket;
 mod score;
+mod shootable_wall;
 mod simpleanimation;
 mod singleanimation;
 mod soda_flying;

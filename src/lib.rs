@@ -34,6 +34,9 @@ pub const LEVEL_HEIGHT: usize = 90;
 /// The width of the level in full tiles
 pub const LEVEL_WIDTH: usize = 128;
 
+const BACKGROUND_START: usize = 0;
+const BACKGROUND_LIGHT_GREY: usize = BACKGROUND_START + 70;
+
 const FONT_START: usize = 19 * 48 + 3 * 50;
 const FONT_ASCII_UPPERCASE: usize = FONT_START + 10;
 const FONT_ASCII_LOWERCASE: usize = FONT_START + 69;
@@ -75,6 +78,7 @@ const NUMBER_BONUS_7_LEFT: usize = NUMBER_START + 38;
 const NUMBER_BONUS_7_RIGHT: usize = NUMBER_START + 40;
 
 const SOLID_START: usize = 4 * 48;
+const SOLID_SHOOTABLE_WALL_BRICKS: usize = SOLID_START + 0;
 const SOLID_ELEVATOR: usize = SOLID_START + 23;
 const SOLID_BLACK: usize = SOLID_START + 65;
 const SOLID_EXPANDINGFLOOR: usize = SOLID_START + 191;
