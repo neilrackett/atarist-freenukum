@@ -1059,7 +1059,7 @@ void fn_level_actor_function_teleporter_blit(FnLevelActorBlitParams p);
 
 void fn_level_actor_function_teleporter_create(FnLevelActorCreateParams p);
 
-void fn_level_actor_function_teleporter_free(FnLevelActorFreeParams _p);
+void fn_level_actor_function_teleporter_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_teleporter_hero_interact_start(FnLevelActorHeroInteractStartParams p);
 
