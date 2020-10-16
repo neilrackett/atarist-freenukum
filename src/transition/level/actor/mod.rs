@@ -37,6 +37,10 @@ mod unstablefloor;
 mod wallcrawler;
 
 use super::super::geometry::Geometry;
+use super::super::hero::HeroData;
+use super::super::infobox::InfoMessageQueue;
+use super::super::level::LevelData;
+use super::super::tilecache::TileCache;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -277,6 +281,78 @@ impl ActorMessageQueue {
     }
 }
 
+pub(crate) trait ActorInterface {
+    fn create(general: &mut ActorData, level_data: &mut LevelData)
+        -> Self;
+
+    fn hero_touch_start(
+        &mut self,
+        _general: &mut ActorData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
+    ) {
+    }
+
+    fn hero_touch_end(
+        &mut self,
+        _general: &mut ActorData,
+        _hero_data: &mut HeroData,
+    ) {
+    }
+
+    fn hero_interact_start(
+        &mut self,
+        _general: &mut ActorData,
+        _level_data: &mut LevelData,
+        _hero_data: &mut HeroData,
+        _info_message_queue: &mut InfoMessageQueue,
+        _actor_message_queue: &mut ActorMessageQueue,
+    ) {
+    }
+
+    fn hero_interact_end(
+        &mut self,
+        _general: &mut ActorData,
+        _level_data: &mut LevelData,
+        _hero_data: &mut HeroData,
+    ) {
+    }
+
+    fn act(
+        &mut self,
+        general: &mut ActorData,
+        level_data: &mut LevelData,
+        actor_queue: &mut ActorQueue,
+        hero_data: &mut HeroData,
+    );
+
+    fn blit(
+        &mut self,
+        general: &mut ActorData,
+        hero_data: &mut HeroData,
+        tilecache: &TileCache,
+        target: &mut transdl::video::Surface,
+    );
+
+    fn shot(
+        &mut self,
+        _general: &mut ActorData,
+        _level_data: &mut LevelData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
+    ) {
+    }
+
+    fn receive_message(
+        &mut self,
+        _general: &mut ActorData,
+        _message: ActorMessageType,
+        _hero_data: &mut HeroData,
+        _level_data: &mut LevelData,
+    ) {
+    }
+}
+
 pub mod ffi {
     type FnLevelActorData = super::ActorData;
     type FnLevelActorType = super::ActorType;
@@ -315,6 +391,19 @@ pub mod ffi {
             *specific = Box::into_raw(Box::new(f(general, level_data)))
                 as *mut libc::c_void;
         }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*self.specific) };
+            let level_data = unsafe { &mut (*self.level_data) };
+
+            *specific =
+                Box::into_raw(Box::new(T::create(general, level_data)))
+                    as *mut libc::c_void;
+        }
     }
 
     #[repr(C)]
@@ -324,6 +413,14 @@ pub mod ffi {
 
     impl FnLevelActorFreeParams {
         pub fn call<S>(self) {
+            unsafe {
+                if !(*self.specific).is_null() {
+                    Box::from_raw(*self.specific);
+                }
+            }
+        }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
             unsafe {
                 if !(*self.specific).is_null() {
                     Box::from_raw(*self.specific);
@@ -361,6 +458,19 @@ pub mod ffi {
             let hero_data = unsafe { &mut (*self.hero_data) };
             f(general, specific, actor_queue, hero_data)
         }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+
+            specific.hero_touch_start(general, actor_queue, hero_data);
+        }
     }
 
     #[repr(C)]
@@ -383,6 +493,17 @@ pub mod ffi {
             let specific = unsafe { &mut (*(self.specific as *mut S)) };
             let hero_data = unsafe { &mut (*self.hero_data) };
             f(general, specific, hero_data)
+        }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+
+            specific.hero_touch_end(general, hero_data);
         }
     }
 
@@ -432,6 +553,30 @@ pub mod ffi {
                 actor_message_queue,
             )
         }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.info_message_queue.is_null());
+            assert!(!self.actor_message_queue.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let info_message_queue =
+                unsafe { &mut (*self.info_message_queue) };
+            let actor_message_queue =
+                unsafe { &mut (*self.actor_message_queue) };
+            specific.hero_interact_start(
+                general,
+                level_data,
+                hero_data,
+                info_message_queue,
+                actor_message_queue,
+            );
+        }
     }
 
     #[repr(C)]
@@ -462,6 +607,18 @@ pub mod ffi {
             let level_data = unsafe { &mut (*self.level_data) };
             let hero_data = unsafe { &mut (*self.hero_data) };
             f(general, specific, level_data, hero_data)
+        }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            specific.hero_interact_end(general, level_data, hero_data);
         }
     }
 
@@ -497,6 +654,20 @@ pub mod ffi {
             let actor_queue = unsafe { &mut (*self.actor_queue) };
             let hero_data = unsafe { &mut (*self.hero_data) };
             f(general, specific, level_data, actor_queue, hero_data)
+        }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            specific.act(general, level_data, actor_queue, hero_data);
         }
     }
 
@@ -536,6 +707,23 @@ pub mod ffi {
 
             f(general, specific, hero_data, tilecache, &mut target)
         }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.tilecache.is_null());
+            assert!(!self.target.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let tilecache = unsafe { &(*self.tilecache) };
+            let target = unsafe { &mut (*self.target) };
+
+            let mut target = transdl::video::Surface { raw: target };
+
+            specific.blit(general, hero_data, tilecache, &mut target);
+        }
     }
 
     #[repr(C)]
@@ -571,6 +759,20 @@ pub mod ffi {
             let hero_data = unsafe { &mut (*self.hero_data) };
             f(general, specific, level_data, actor_queue, hero_data)
         }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            specific.shot(general, level_data, actor_queue, hero_data);
+        }
     }
 
     #[repr(C)]
@@ -603,6 +805,23 @@ pub mod ffi {
             let hero_data = unsafe { &mut (*self.hero_data) };
             let level_data = unsafe { &mut (*self.level_data) };
             f(general, specific, self.message, hero_data, level_data);
+        }
+
+        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.level_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut T)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            specific.receive_message(
+                general,
+                self.message,
+                hero_data,
+                level_data,
+            );
         }
     }
 
