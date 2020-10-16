@@ -12,9 +12,8 @@ pub mod ffi {
     use super::super::ffi::{
         FnLevelActorActParams, FnLevelActorBlitParams,
         FnLevelActorCreateParams, FnLevelActorFreeParams,
-        FnLevelActorReceiveMessageParams,
     };
-    use super::super::{ActorMessageType, ActorType};
+    use super::super::ActorType;
     use super::Specific;
     use crate::{
         HALFTILE_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_CENTER,

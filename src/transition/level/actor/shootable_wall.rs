@@ -1,5 +1,4 @@
 pub mod ffi {
-    use super::super::super::super::hero::InventoryItem;
     use super::super::ffi::{
         FnLevelActorBlitParams, FnLevelActorCreateParams,
         FnLevelActorShotParams,
