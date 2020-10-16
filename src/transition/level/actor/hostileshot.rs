@@ -108,10 +108,13 @@ pub mod ffi {
             general.position.y as usize / TILE_HEIGHT,
         ) {
             general.is_alive = false;
+            if specific.touching_hero {
+                general.hurts_hero = false;
+            }
         }
-        if specific.touching_hero {
-            general.hurts_hero = false;
-        }
+
+        specific.current_frame += 1;
+        specific.current_frame %= specific.num_frames;
     }
 
     #[no_mangle]
