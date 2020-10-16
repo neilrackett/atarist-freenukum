@@ -86,97 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * Key actor creation function.
- *
- * @param  actor  The key actor.
- */
-void fn_level_actor_function_key_create(
-        FnLevelActorCreateParams p)
-{
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_WIDTH;
-  p.general->is_in_foreground = 0;
-}
-
-
-/* --------------------------------------------------------------- */
-
-/**
- * The hero touches a key actor.
- *
- * @param  actor  The key actor.
- */
-void fn_level_actor_function_key_touch_start(
-        FnLevelActorHeroTouchStartParams p)
-{
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(p.hero_data);
-  FnHeroScore * score = fn_hero_data_get_score(p.hero_data);
-  switch(p.general->actor_type) {
-    case ActorType_KeyRed:
-      fn_hero_inventory_set(inventory, InventoryItem_KeyRed);
-      break;
-    case ActorType_KeyBlue:
-      fn_hero_inventory_set(inventory, InventoryItem_KeyBlue);
-      break;
-    case ActorType_KeyGreen:
-      fn_hero_inventory_set(inventory, InventoryItem_KeyGreen);
-      break;
-    case ActorType_KeyPink:
-      fn_hero_inventory_set(inventory, InventoryItem_KeyPink);
-      break;
-    default:
-      printf(__FILE__ ":%d: warning: key #%d"
-          " added which is not a key\n",
-          __LINE__, p.general->actor_type);
-      break;
-  }
-  fn_hero_score_add(score, 1000);
-  fn_level_actor_queue_push_back(p.actor_queue,
-      ActorType_Score1000,
-      p.general->position.x,
-      p.general->position.y);
-  p.general->is_alive = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the key.
- *
- * @param  actor  The key actor.
- */
-void fn_level_actor_function_key_blit(
-        FnLevelActorBlitParams p)
-{
-  const FnTexture * tile = NULL;
-  FnGeometry destrect = p.general->position;
-  switch(p.general->actor_type) {
-    case ActorType_KeyRed:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEY_RED);
-      break;
-    case ActorType_KeyBlue:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEY_BLUE);
-      break;
-    case ActorType_KeyGreen:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEY_GREEN);
-      break;
-    case ActorType_KeyPink:
-      tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEY_PINK);
-      break;
-    default:
-      printf(__FILE__ ":%d: warning: key #%d"
-          " tried to blit which is not a key\n",
-          __LINE__, p.general->actor_type);
-      return;
-      break;
-  }
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Create the shootable wall.
  *
  * @param  actor  The wall actor.
@@ -1591,7 +1500,7 @@ fn_level_actor_functions[] =
   [ActorType_KeyRed] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
-    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_start = fn_level_actor_function_key_hero_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
@@ -1627,7 +1536,7 @@ fn_level_actor_functions[] =
   [ActorType_KeyBlue] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
-    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_start = fn_level_actor_function_key_hero_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
@@ -1663,7 +1572,7 @@ fn_level_actor_functions[] =
   [ActorType_KeyPink] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
-    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_start = fn_level_actor_function_key_hero_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
@@ -1699,7 +1608,7 @@ fn_level_actor_functions[] =
   [ActorType_KeyGreen] = {
     .create = fn_level_actor_function_key_create,
     .free = NULL,
-    .hero_touch_start = fn_level_actor_function_key_touch_start,
+    .hero_touch_start = fn_level_actor_function_key_hero_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,

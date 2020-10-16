@@ -873,6 +873,12 @@ void fn_level_actor_function_item_hero_touch_start(FnLevelActorHeroTouchStartPar
 
 void fn_level_actor_function_item_shot(FnLevelActorShotParams p);
 
+void fn_level_actor_function_key_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_key_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_key_hero_touch_start(FnLevelActorHeroTouchStartParams p);
+
 void fn_level_actor_function_keyhole_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_keyhole_blit(FnLevelActorBlitParams p);
