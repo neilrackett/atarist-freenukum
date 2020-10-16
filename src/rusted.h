@@ -771,6 +771,16 @@ void fn_level_actor_function_conveyor_create(FnLevelActorCreateParams p);
 
 void fn_level_actor_function_conveyor_free(FnLevelActorFreeParams p);
 
+void fn_level_actor_function_door_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_door_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_door_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_door_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_door_receive_message(FnLevelActorReceiveMessageParams p);
+
 void fn_level_actor_function_elevator_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_elevator_blit(FnLevelActorBlitParams p);

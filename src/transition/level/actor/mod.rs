@@ -4,6 +4,7 @@ mod balloon;
 mod bomb;
 mod camera;
 mod conveyor;
+mod door;
 mod elevator;
 mod exitdoor;
 mod expandingfloor;
