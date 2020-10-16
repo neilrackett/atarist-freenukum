@@ -299,9 +299,37 @@ pub mod ffi {
         pub level_data: *mut FnLevelData,
     }
 
+    impl FnLevelActorCreateParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(&mut FnLevelActorData, &mut FnLevelData) -> S,
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*self.specific) };
+            let level_data = unsafe { &mut (*self.level_data) };
+
+            *specific = Box::into_raw(Box::new(f(general, level_data)))
+                as *mut libc::c_void;
+        }
+    }
+
     #[repr(C)]
     pub struct FnLevelActorFreeParams {
         pub specific: *mut *mut std::ffi::c_void,
+    }
+
+    impl FnLevelActorFreeParams {
+        pub fn call<S>(self) {
+            unsafe {
+                if !(*self.specific).is_null() {
+                    Box::from_raw(*self.specific);
+                }
+            }
+        }
     }
 
     #[repr(C)]
@@ -312,11 +340,50 @@ pub mod ffi {
         pub hero_data: *mut FnHeroData,
     }
 
+    impl FnLevelActorHeroTouchStartParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnLevelActorQueue,
+                &mut FnHeroData,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            f(general, specific, actor_queue, hero_data)
+        }
+    }
+
     #[repr(C)]
     pub struct FnLevelActorHeroTouchEndParams {
         pub general: *mut FnLevelActorData,
         pub specific: *mut std::ffi::c_void,
         pub hero_data: *mut FnHeroData,
+    }
+
+    impl FnLevelActorHeroTouchEndParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(&mut FnLevelActorData, &mut S, &mut FnHeroData),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            f(general, specific, hero_data)
+        }
     }
 
     #[repr(C)]
@@ -329,12 +396,73 @@ pub mod ffi {
         pub actor_message_queue: *mut FnLevelActorMessageQueue,
     }
 
+    impl FnLevelActorHeroInteractStartParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnLevelData,
+                &mut FnHeroData,
+                &mut FnInfoMessageQueue,
+                &mut FnLevelActorMessageQueue,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.info_message_queue.is_null());
+            assert!(!self.actor_message_queue.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let info_message_queue =
+                unsafe { &mut (*self.info_message_queue) };
+            let actor_message_queue =
+                unsafe { &mut (*self.actor_message_queue) };
+            f(
+                general,
+                specific,
+                level_data,
+                hero_data,
+                info_message_queue,
+                actor_message_queue,
+            )
+        }
+    }
+
     #[repr(C)]
     pub struct FnLevelActorHeroInteractEndParams {
         pub general: *mut FnLevelActorData,
         pub specific: *mut std::ffi::c_void,
         pub level_data: *mut FnLevelData,
         pub hero_data: *mut FnHeroData,
+    }
+
+    impl FnLevelActorHeroInteractEndParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnLevelData,
+                &mut FnHeroData,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            f(general, specific, level_data, hero_data)
+        }
     }
 
     #[repr(C)]
@@ -346,6 +474,32 @@ pub mod ffi {
         pub hero_data: *mut FnHeroData,
     }
 
+    impl FnLevelActorActParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnLevelData,
+                &mut FnLevelActorQueue,
+                &mut FnHeroData,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            f(general, specific, level_data, actor_queue, hero_data)
+        }
+    }
+
     #[repr(C)]
     pub struct FnLevelActorBlitParams {
         pub general: *mut FnLevelActorData,
@@ -353,6 +507,35 @@ pub mod ffi {
         pub hero_data: *mut FnHeroData,
         pub tilecache: *const FnTileCache,
         pub target: *mut SDL_Surface,
+    }
+
+    impl FnLevelActorBlitParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnHeroData,
+                &FnTileCache,
+                &mut transdl::video::Surface,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.tilecache.is_null());
+            assert!(!self.target.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let tilecache = unsafe { &(*self.tilecache) };
+            let target = unsafe { &mut (*self.target) };
+
+            let mut target = transdl::video::Surface { raw: target };
+
+            f(general, specific, hero_data, tilecache, &mut target)
+        }
     }
 
     #[repr(C)]
@@ -364,6 +547,32 @@ pub mod ffi {
         pub hero_data: *mut FnHeroData,
     }
 
+    impl FnLevelActorShotParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                &mut FnLevelData,
+                &mut FnLevelActorQueue,
+                &mut FnHeroData,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.level_data.is_null());
+            assert!(!self.actor_queue.is_null());
+            assert!(!self.hero_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            let actor_queue = unsafe { &mut (*self.actor_queue) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            f(general, specific, level_data, actor_queue, hero_data)
+        }
+    }
+
     #[repr(C)]
     pub struct FnLevelActorReceiveMessageParams {
         pub general: *mut FnLevelActorData,
@@ -371,6 +580,30 @@ pub mod ffi {
         pub message: FnLevelActorMessageType,
         pub hero_data: *mut FnHeroData,
         pub level_data: *mut FnLevelData,
+    }
+
+    impl FnLevelActorReceiveMessageParams {
+        pub fn call<F, S>(self, mut f: F)
+        where
+            F: FnMut(
+                &mut FnLevelActorData,
+                &mut S,
+                FnLevelActorMessageType,
+                &mut FnHeroData,
+                &mut FnLevelData,
+            ),
+            S: std::fmt::Debug,
+        {
+            assert!(!self.general.is_null());
+            assert!(!self.specific.is_null());
+            assert!(!self.hero_data.is_null());
+            assert!(!self.level_data.is_null());
+            let general = unsafe { &mut (*self.general) };
+            let specific = unsafe { &mut (*(self.specific as *mut S)) };
+            let hero_data = unsafe { &mut (*self.hero_data) };
+            let level_data = unsafe { &mut (*self.level_data) };
+            f(general, specific, self.message, hero_data, level_data);
+        }
     }
 
     #[no_mangle]
