@@ -86,175 +86,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 
 /**
- * The keyhole struct.
- */
-typedef struct fn_level_actor_keyhole_data_t {
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The counter which defines for how many steps the exitdoor
-   * has to be animated until the hero disappears.
-   * time the act function is called.
-   */
-  Uint8 counter;
-} fn_level_actor_keyhole_data_t;
-
-/* --------------------------------------------------------------- */
-
-/**
- * Create a keyhole.
- *
- * @param  actor  The keyhole actor.
- */
-void fn_level_actor_function_keyhole_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_keyhole_data_t * data = malloc(
-      sizeof(fn_level_actor_keyhole_data_t));
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-  data->counter = 0;
-  data->tile = OBJ_KEYHOLE_BLACK;
-  p.general->is_in_foreground = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete a keyhole.
- *
- * @param  actor  The keyhole actor.
- */
-void fn_level_actor_function_keyhole_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_keyhole_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Action for keyhole.
- * 
- * @param  actor  The keyhole actor.
- */
-void fn_level_actor_function_keyhole_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_keyhole_data_t * data = p.specific;
-
-  if (data->counter != 5) {
-    data->counter++;
-    data->counter %= 4;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit the keyhole.
- *
- * @param  actor  The keyhole actor.
- */
-void fn_level_actor_function_keyhole_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_keyhole_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile);
-
-  if (data->counter > 1) {
-    switch(p.general->actor_type) {
-      case ActorType_KeyholeRed:
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEYHOLE_RED);
-        break;
-      case ActorType_KeyholeBlue:
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEYHOLE_BLUE);
-        break;
-      case ActorType_KeyholePink:
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEYHOLE_PINK);
-        break;
-      case ActorType_KeyholeGreen:
-        tile = fn_tilecache_get_tile(p.tilecache, OBJ_KEYHOLE_GREEN);
-        break;
-      default:
-        fn_error_print_commandline("Invalid keyhole actor");
-    }
-  }
-
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Hero interacts with keyhole.
- *
- * @param  actor  The keyhole actor.
- */
-void fn_level_actor_function_keyhole_interact_start(
-        FnLevelActorHeroInteractStartParams p)
-{
-  fn_level_actor_keyhole_data_t * data = p.specific;
-
-  char msg[40];
-
-  Uint8 haskey = 0;
-  Uint8 needed_key = 0;
-  FnLevelActorType door_to_open;
-
-  switch(p.general->actor_type) {
-    case ActorType_KeyholeRed:
-      needed_key = InventoryItem_KeyRed;
-      door_to_open = ActorType_DoorRed;
-      snprintf(msg, 40, "You don't have the red key.\n");
-      break;
-    case ActorType_KeyholeBlue:
-      needed_key = InventoryItem_KeyBlue;
-      door_to_open = ActorType_DoorBlue;
-      snprintf(msg, 40, "You don't have the blue key.\n");
-      break;
-    case ActorType_KeyholePink:
-      needed_key = InventoryItem_KeyPink;
-      door_to_open = ActorType_DoorPink;
-      snprintf(msg, 40, "You don't have the pink key.\n");
-      break;
-    case ActorType_KeyholeGreen:
-      needed_key = InventoryItem_KeyGreen;
-      door_to_open = ActorType_DoorGreen;
-      snprintf(msg, 40, "You don't have the green key.\n");
-      break;
-    default:
-      fn_error_print_commandline("Invalid keyhole actor");
-  }
-
-  FnHeroInventory * hero_inventory = fn_hero_data_get_inventory(p.hero_data);
-  haskey = fn_hero_inventory_is_set(hero_inventory, needed_key);
-
-  if (haskey) {
-    fn_hero_inventory_unset(hero_inventory, needed_key);
-    data->counter = 5;
-
-    fn_level_actor_message_queue_push_back(
-            p.actor_message_queue,
-            door_to_open,
-            ActorMessageType_OpenDoor);
-  } else if (data->counter != 5) {
-    fn_info_message_queue_push(
-            p.info_message_queue,
-            msg);
-  }
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
-/**
  * Key actor creation function.
  *
  * @param  actor  The key actor.
@@ -1774,7 +1605,7 @@ fn_level_actor_functions[] =
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_start = fn_level_actor_function_keyhole_hero_interact_start,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
@@ -1810,7 +1641,7 @@ fn_level_actor_functions[] =
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_start = fn_level_actor_function_keyhole_hero_interact_start,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
@@ -1846,7 +1677,7 @@ fn_level_actor_functions[] =
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_start = fn_level_actor_function_keyhole_hero_interact_start,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,
@@ -1882,7 +1713,7 @@ fn_level_actor_functions[] =
     .free = fn_level_actor_function_keyhole_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
-    .hero_interact_start = fn_level_actor_function_keyhole_interact_start,
+    .hero_interact_start = fn_level_actor_function_keyhole_hero_interact_start,
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_keyhole_act,
     .blit = fn_level_actor_function_keyhole_blit,

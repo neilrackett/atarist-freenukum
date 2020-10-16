@@ -13,6 +13,7 @@ mod firewheelbot;
 mod glove_slot;
 mod hostileshot;
 mod item;
+mod keyhole;
 mod mill;
 mod notebook;
 mod particle;
