@@ -783,6 +783,16 @@ void fn_level_actor_function_elevator_hero_interact_end(FnLevelActorHeroInteract
 
 void fn_level_actor_function_elevator_hero_interact_start(FnLevelActorHeroInteractStartParams p);
 
+void fn_level_actor_function_exitdoor_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_exitdoor_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_exitdoor_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_exitdoor_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_exitdoor_hero_interact_start(FnLevelActorHeroInteractStartParams p);
+
 void fn_level_actor_function_expandingfloor_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_expandingfloor_blit(FnLevelActorBlitParams p);

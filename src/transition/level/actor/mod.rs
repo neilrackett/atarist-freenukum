@@ -5,6 +5,7 @@ mod bomb;
 mod camera;
 mod conveyor;
 mod elevator;
+mod exitdoor;
 mod expandingfloor;
 mod fire;
 mod firewheelbot;
