@@ -1023,8 +1023,6 @@ void fn_level_actor_function_soda_flying_blit(FnLevelActorBlitParams p);
 
 void fn_level_actor_function_soda_flying_create(FnLevelActorCreateParams p);
 
-void fn_level_actor_function_soda_flying_free(FnLevelActorFreeParams _p);
-
 void fn_level_actor_function_soda_flying_touch_start(FnLevelActorHeroTouchStartParams p);
 
 void fn_level_actor_function_spikes_blit(FnLevelActorBlitParams p);

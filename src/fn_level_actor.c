@@ -490,7 +490,7 @@ fn_level_actor_functions[] =
   },
   [ActorType_SodaFlying] = {
     .create = fn_level_actor_function_soda_flying_create,
-    .free = fn_level_actor_function_soda_flying_free,
+    .free = NULL,
     .hero_touch_start = fn_level_actor_function_soda_flying_touch_start,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
