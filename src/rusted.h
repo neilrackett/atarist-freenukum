@@ -823,6 +823,16 @@ void fn_level_actor_function_expandingfloor_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_expandingfloor_receive_message(FnLevelActorReceiveMessageParams p);
 
+void fn_level_actor_function_fan_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_fan_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_fan_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_fan_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_fan_shot(FnLevelActorShotParams p);
+
 void fn_level_actor_function_fire_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_fire_blit(FnLevelActorBlitParams p);

@@ -9,6 +9,7 @@ mod door;
 mod elevator;
 mod exitdoor;
 mod expandingfloor;
+mod fan;
 mod fire;
 mod firewheelbot;
 mod glove_slot;
