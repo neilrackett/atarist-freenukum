@@ -1,7 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorQueue, ActorType};
+use super::{ActorData, ActorInterface, ActorQueue, ActorType};
 use crate::{OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
@@ -12,140 +12,143 @@ struct Specific {
     touching_hero: bool,
 }
 
-fn create(
-    general: &mut ActorData,
-    _level_data: &mut LevelData,
-) -> Specific {
-    general.position.w = TILE_WIDTH as u16 * 2;
-    general.position.h = TILE_HEIGHT as u16;
-    general.is_in_foreground = true;
+impl ActorInterface for Specific {
+    fn create(
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+    ) -> Self {
+        general.position.w = TILE_WIDTH as u16 * 2;
+        general.position.h = TILE_HEIGHT as u16;
+        general.is_in_foreground = true;
 
-    Specific {
-        tile: OBJECT_FALLINGBLOCK,
-        counter: 0,
-        touching_hero: false,
+        Specific {
+            tile: OBJECT_FALLINGBLOCK,
+            counter: 0,
+            touching_hero: false,
+        }
     }
-}
 
-fn act(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    level_data: &mut LevelData,
-    actor_queue: &mut ActorQueue,
-    hero_data: &mut HeroData,
-) {
-    let hero_geometry = hero_data.position.geometry;
+    fn act(
+        &mut self,
+        general: &mut ActorData,
+        level_data: &mut LevelData,
+        actor_queue: &mut ActorQueue,
+        hero_data: &mut HeroData,
+    ) {
+        let hero_geometry = hero_data.position.geometry;
 
-    match specific.counter {
-        0 => {
-            let xl = general.position.x as u16;
-            let xr = xl + general.position.w;
-            let y = general.position.y;
-            let hxl = hero_geometry.x as u16;
-            let hxr = hxl + hero_geometry.w;
-            let hy = hero_geometry.y;
+        match self.counter {
+            0 => {
+                let xl = general.position.x as u16;
+                let xr = xl + general.position.w;
+                let y = general.position.y;
+                let hxl = hero_geometry.x as u16;
+                let hxr = hxl + hero_geometry.w;
+                let hy = hero_geometry.y;
 
-            if y < hy && xl < hxr && xr > hxl {
-                let mut solid_between = false;
-                for i in (y as usize / TILE_HEIGHT) + 1
-                    ..hy as usize / TILE_HEIGHT
-                {
-                    let x = xl as usize / TILE_WIDTH;
-                    if level_data.solids.get(x, i)
-                        || level_data.solids.get(x + 1, i)
+                if y < hy && xl < hxr && xr > hxl {
+                    let mut solid_between = false;
+                    for i in (y as usize / TILE_HEIGHT) + 1
+                        ..hy as usize / TILE_HEIGHT
                     {
-                        solid_between = true;
-                        break;
+                        let x = xl as usize / TILE_WIDTH;
+                        if level_data.solids.get(x, i)
+                            || level_data.solids.get(x + 1, i)
+                        {
+                            solid_between = true;
+                            break;
+                        }
+                    }
+                    if !solid_between {
+                        self.counter += 1;
                     }
                 }
-                if !solid_between {
-                    specific.counter += 1;
+            }
+            c if c <= 10 && c % 2 == 0 => {
+                general.position.y -= 1;
+                self.counter += 1;
+            }
+            c if c <= 10 && c % 2 == 1 => {
+                general.position.y += 1;
+                self.counter += 1;
+            }
+            _ => {
+                if level_data.solids.get(
+                    general.position.x as usize / TILE_WIDTH,
+                    general.position.y as usize / TILE_HEIGHT + 1,
+                ) {
+                    actor_queue.push_back(
+                        ActorType::Steam,
+                        general.position.x as u16,
+                        general.position.y as u16,
+                    );
+                    actor_queue.push_particle_firework(
+                        general.position.x as u16,
+                        general.position.y as u16,
+                        4,
+                    );
+                    general.is_alive = false;
+                } else {
+                    general.position.y += TILE_HEIGHT as i16;
                 }
             }
         }
-        c if c <= 10 && c % 2 == 0 => {
-            general.position.y -= 1;
-            specific.counter += 1;
-        }
-        c if c <= 10 && c % 2 == 1 => {
-            general.position.y += 1;
-            specific.counter += 1;
-        }
-        _ => {
-            if level_data.solids.get(
-                general.position.x as usize / TILE_WIDTH,
-                general.position.y as usize / TILE_HEIGHT + 1,
-            ) {
-                actor_queue.push_back(
-                    ActorType::Steam,
-                    general.position.x as u16,
-                    general.position.y as u16,
-                );
-                actor_queue.push_particle_firework(
-                    general.position.x as u16,
-                    general.position.y as u16,
-                    4,
-                );
-                general.is_alive = false;
-            } else {
-                general.position.y += TILE_HEIGHT as i16;
-            }
+    }
+
+    fn blit(
+        &mut self,
+        general: &mut ActorData,
+        _hero_data: &mut HeroData,
+        tilecache: &TileCache,
+        target: &mut Surface,
+    ) {
+        let mut destrect = general.position;
+        tilecache.get_tile(self.tile).unwrap().blit_to_sdl_surface(
+            None,
+            target,
+            Some(destrect),
+        );
+        destrect.x += TILE_WIDTH as i16;
+        tilecache
+            .get_tile(self.tile + 1)
+            .unwrap()
+            .blit_to_sdl_surface(None, target, Some(destrect));
+    }
+
+    fn shot(
+        &mut self,
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+        actor_queue: &mut ActorQueue,
+        hero_data: &mut HeroData,
+    ) {
+        if self.counter > 0 {
+            hero_data.score.add(500);
+            actor_queue.push_back(
+                ActorType::Score500,
+                general.position.x as u16,
+                general.position.y as u16,
+            );
+            actor_queue.push_particle_firework(
+                general.position.x as u16,
+                general.position.y as u16,
+                4,
+            );
+
+            general.is_alive = false;
         }
     }
-}
 
-fn blit(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _hero_data: &mut HeroData,
-    tilecache: &TileCache,
-    target: &mut Surface,
-) {
-    let mut destrect = general.position;
-    tilecache
-        .get_tile(specific.tile)
-        .unwrap()
-        .blit_to_sdl_surface(None, target, Some(destrect));
-    destrect.x += TILE_WIDTH as i16;
-    tilecache
-        .get_tile(specific.tile + 1)
-        .unwrap()
-        .blit_to_sdl_surface(None, target, Some(destrect));
-}
-
-fn shot(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _level_data: &mut LevelData,
-    actor_queue: &mut ActorQueue,
-    hero_data: &mut HeroData,
-) {
-    if specific.counter > 0 {
-        hero_data.score.add(500);
-        actor_queue.push_back(
-            ActorType::Score500,
-            general.position.x as u16,
-            general.position.y as u16,
-        );
-        actor_queue.push_particle_firework(
-            general.position.x as u16,
-            general.position.y as u16,
-            4,
-        );
-
-        general.is_alive = false;
-    }
-}
-
-fn hero_touch_start(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _actor_queue: &mut ActorQueue,
-    _hero_data: &mut HeroData,
-) {
-    if specific.counter > 10 && !specific.touching_hero {
-        specific.touching_hero = true;
-        general.hurts_hero = true;
+    fn hero_touch_start(
+        &mut self,
+        general: &mut ActorData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
+    ) {
+        if self.counter > 10 && !self.touching_hero {
+            self.touching_hero = true;
+            general.hurts_hero = true;
+        }
     }
 }
 
@@ -160,41 +163,41 @@ pub mod ffi {
     pub extern "C" fn fn_level_actor_function_acme_create(
         p: FnLevelActorCreateParams,
     ) {
-        p.call(super::create);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_acme_free(
         p: FnLevelActorFreeParams,
     ) {
-        p.call::<super::Specific>();
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_acme_act(
         p: FnLevelActorActParams,
     ) {
-        p.call(super::act);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_acme_blit(
         p: FnLevelActorBlitParams,
     ) {
-        p.call(super::blit);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_acme_shot(
         p: FnLevelActorShotParams,
     ) {
-        p.call(super::shot);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_acme_hero_touch_start(
         p: FnLevelActorHeroTouchStartParams,
     ) {
-        p.call(super::hero_touch_start);
+        p.call_interface::<super::Specific>();
     }
 }
