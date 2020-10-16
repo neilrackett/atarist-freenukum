@@ -713,6 +713,16 @@ FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
 
 void fn_level_actor_data_free(FnLevelActorData *ptr);
 
+void fn_level_actor_function_accesscard_door_act(FnLevelActorActParams p);
+
+void fn_level_actor_function_accesscard_door_blit(FnLevelActorBlitParams p);
+
+void fn_level_actor_function_accesscard_door_create(FnLevelActorCreateParams p);
+
+void fn_level_actor_function_accesscard_door_free(FnLevelActorFreeParams p);
+
+void fn_level_actor_function_accesscard_door_receive_message(FnLevelActorReceiveMessageParams p);
+
 void fn_level_actor_function_accesscard_slot_act(FnLevelActorActParams p);
 
 void fn_level_actor_function_accesscard_slot_blit(FnLevelActorBlitParams p);

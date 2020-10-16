@@ -1,3 +1,4 @@
+mod accesscard_door;
 mod accesscard_slot;
 mod acme;
 mod balloon;

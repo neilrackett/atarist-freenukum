@@ -85,105 +85,6 @@ typedef struct fn_level_actor_functions_t {
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
 
-typedef struct fn_level_actor_accesscard_door_data_t
-{
-  /**
-   * The tile number for the tilecache.
-   */
-  Uint16 tile;
-  /**
-   * The number of the current frame.
-   */
-  Uint8 current_frame;
-  /**
-   * The number of frames for the animation.
-   */
-  Uint8 num_frames;
-} fn_level_actor_accesscard_door_data_t;
-
-/**
- * Create an accesscard door.
- *
- * @param  actor  The accesscard door actor.
- */
-void fn_level_actor_function_access_card_door_create(
-        FnLevelActorCreateParams p)
-{
-  fn_level_actor_accesscard_door_data_t * data = malloc(
-      sizeof(fn_level_actor_accesscard_door_data_t));
-  *(p.specific) = data;
-  p.general->position.w = FN_TILE_WIDTH;
-  p.general->position.h = FN_TILE_HEIGHT;
-
-  data->tile = OBJ_LASERBEAM;
-  data->current_frame = 0;
-  data->num_frames = 4;
-  p.general->is_in_foreground = 0;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Delete an accesscard door.
- *
- * @param  actor  The accesscard door actor.
- */
-void fn_level_actor_function_access_card_door_free(
-        FnLevelActorFreeParams p)
-{
-  fn_level_actor_accesscard_door_data_t * data = *(p.specific);
-  free(data); *(p.specific) = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Blit an accesscard door.
- *
- * @param  actor  The accesscard door actor.
- */
-void fn_level_actor_function_access_card_door_blit(
-        FnLevelActorBlitParams p)
-{
-  fn_level_actor_accesscard_door_data_t * data = p.specific;
-  const FnTexture * tile = fn_tilecache_get_tile(p.tilecache,
-      data->tile + data->current_frame);
-  FnGeometry destrect = p.general->position;
-  fn_texture_blit_to_sdl_surface(tile, NULL, p.target, &destrect);
-}
-
-/* --------------------------------------------------------------- */
-
-/**
- * Act an accesscard door.
- *
- * @param  actor  The accesscard door actor.
- */
-void fn_level_actor_function_access_card_door_act(
-        FnLevelActorActParams p)
-{
-  fn_level_actor_accesscard_door_data_t * data = p.specific;
-  data->current_frame++;
-  data->current_frame %= data->num_frames;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_actor_function_access_card_door_receive_message(
-        FnLevelActorReceiveMessageParams p)
-{
-    if (p.message != ActorMessageType_OpenDoor) {
-        return;
-    }
-    p.general->is_alive = 0;
-    int x = p.general->position.x / FN_TILE_WIDTH;
-    int y = p.general->position.y / FN_TILE_HEIGHT;
-    fn_level_solids_set(&(p.level_data->solids), x, y, 0);
-}
-
-/* --------------------------------------------------------------- */
-/* --------------------------------------------------------------- */
-
 /**
  * The fan wheel
  */
@@ -1667,16 +1568,16 @@ fn_level_actor_functions[] =
     .receive_message = NULL, /* TODO */
   },
   [ActorType_AccessCardDoor] = {
-    .create = fn_level_actor_function_access_card_door_create,
-    .free = fn_level_actor_function_access_card_door_free,
+    .create = fn_level_actor_function_accesscard_door_create,
+    .free = fn_level_actor_function_accesscard_door_free,
     .hero_touch_start = NULL,
     .hero_touch_end = NULL,
     .hero_interact_start = NULL,
     .hero_interact_end = NULL,
-    .act = fn_level_actor_function_access_card_door_act,
-    .blit = fn_level_actor_function_access_card_door_blit,
+    .act = fn_level_actor_function_accesscard_door_act,
+    .blit = fn_level_actor_function_accesscard_door_blit,
     .shot = NULL,
-    .receive_message = fn_level_actor_function_access_card_door_receive_message,
+    .receive_message = fn_level_actor_function_accesscard_door_receive_message,
   },
   [ActorType_SpikesUp] = {
     .create = fn_level_actor_function_spikes_create,
