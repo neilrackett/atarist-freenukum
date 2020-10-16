@@ -769,7 +769,7 @@ void fn_level_actor_function_camera_blit(FnLevelActorBlitParams p);
 
 void fn_level_actor_function_camera_create(FnLevelActorCreateParams p);
 
-void fn_level_actor_function_camera_free(FnLevelActorFreeParams _p);
+void fn_level_actor_function_camera_free(FnLevelActorFreeParams p);
 
 void fn_level_actor_function_camera_shot(FnLevelActorShotParams p);
 
