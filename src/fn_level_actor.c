@@ -185,7 +185,7 @@ fn_level_actor_functions[] =
     .hero_interact_end = NULL,
     .act = fn_level_actor_function_redball_lying_act,
     .blit = fn_level_actor_function_redball_lying_blit,
-    .shot = fn_level_actor_function_redball_lying_shot,
+    .shot = NULL,
     .receive_message = NULL,
   },
   [ActorType_Robot] = {
