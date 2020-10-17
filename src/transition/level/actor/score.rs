@@ -16,7 +16,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     countdown: usize,
 }

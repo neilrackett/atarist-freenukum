@@ -11,7 +11,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {}
+pub(crate) struct Specific {}
 
 impl ActorCreateInterface for Specific {
     fn create(
@@ -34,6 +34,10 @@ impl ActorInterface for Specific {
         _actor_queue: &mut ActorQueue,
         _hero_data: &mut HeroData,
     ) {
+    }
+
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
+        true
     }
 
     fn shot(

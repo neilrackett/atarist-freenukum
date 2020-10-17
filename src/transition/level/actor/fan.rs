@@ -8,7 +8,7 @@ use crate::{ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -119,6 +119,10 @@ impl ActorInterface for Specific {
             .get_tile(self.tile + self.current_frame * 2 + 1)
             .unwrap()
             .blit_to_sdl_surface(None, target, Some(destrect));
+    }
+
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
+        true
     }
 
     fn shot(

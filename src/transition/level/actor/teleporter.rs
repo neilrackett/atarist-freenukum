@@ -10,7 +10,7 @@ use crate::{ANIMATION_TELEPORTER1, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {}
+pub(crate) struct Specific {}
 
 impl ActorCreateInterface for Specific {
     fn create(
@@ -26,6 +26,10 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
+    fn hero_can_interact(&self) -> bool {
+        true
+    }
+
     fn hero_interact_start(
         &mut self,
         general: &mut ActorData,

@@ -184,3 +184,7 @@ fn config_dir() -> std::path::PathBuf {
         .config_dir()
         .to_path_buf()
 }
+
+fn collision_bounds_color(format: &transdl::video::PixelFormat) -> u32 {
+    transdl::video::map_rgb(format, 182, 6, 0)
+}

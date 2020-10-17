@@ -11,7 +11,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     touching_hero: bool,
 }
 

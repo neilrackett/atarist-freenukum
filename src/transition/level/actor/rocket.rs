@@ -12,7 +12,7 @@ enum State {
 }
 
 #[derive(Debug, PartialEq)]
-struct Specific {
+pub(crate) struct Specific {
     state: State,
 }
 
@@ -99,6 +99,10 @@ impl ActorInterface for Specific {
             destrect.y += TILE_HEIGHT as i16;
             tile.blit_to_sdl_surface(None, target, Some(destrect));
         }
+    }
+
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
+        true
     }
 
     fn shot(

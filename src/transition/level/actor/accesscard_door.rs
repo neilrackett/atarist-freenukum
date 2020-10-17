@@ -9,7 +9,7 @@ use crate::{OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,

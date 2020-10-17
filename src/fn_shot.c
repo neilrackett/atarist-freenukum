@@ -145,7 +145,7 @@ Uint16 fn_shot_get_h(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_shot_touches_actor(fn_shot_t * shot, fn_level_actor_t * actor)
+Uint8 fn_shot_touches_actor(fn_shot_t * shot, FnLevelActor * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
   return fn_geometry_touches(actorpos, shot->position);
@@ -171,17 +171,18 @@ Uint8 fn_shot_hits_solid(
 
 void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset, FnLevelActorQueue * actor_queue)
 {
+  fn_hero_t * hero = fn_level_get_hero(level);
   if (shot->countdown == 2) {
     shot->position.x += offset;
     fn_list_t * iter = NULL;
     for (iter = fn_list_first(level->actors);
         iter != NULL && shot->countdown != 1;
         iter = fn_list_next(iter)) {
-      fn_level_actor_t * actor = (fn_level_actor_t *)iter->data;
+      FnLevelActor * actor = (FnLevelActor *)iter->data;
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
-          fn_level_actor_shot(actor, level, actor_queue)) {
+          fn_level_actor_shot(actor, level->data, hero->data, actor_queue)) {
         shot->countdown = 1;
       }
     }

@@ -17,7 +17,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -322,6 +322,34 @@ impl ActorInterface for Specific {
             .get_tile(self.tile + self.current_frame)
             .unwrap()
             .blit_to_sdl_surface(None, target, Some(general.position));
+    }
+
+    fn can_get_shot(&self, general: &ActorData) -> bool {
+        match general.actor_type {
+            ActorType::BoxBlueFootball
+            | ActorType::BoxBlueJoystick
+            | ActorType::BoxBlueDisk
+            | ActorType::BoxBlueBalloon
+            | ActorType::BoxBlueFlag
+            | ActorType::BoxBlueRadio
+            | ActorType::BoxRedSoda
+            | ActorType::BoxRedChicken
+            | ActorType::BoxGreyEmpty
+            | ActorType::BoxGreyBoots
+            | ActorType::BoxGreyClamps
+            | ActorType::BoxGreyGun
+            | ActorType::BoxGreyBomb
+            | ActorType::BoxGreyGlove
+            | ActorType::BoxGreyFullLife
+            | ActorType::BoxGreyAccessCard
+            | ActorType::BoxGreyLetterD
+            | ActorType::BoxGreyLetterU
+            | ActorType::BoxGreyLetterK
+            | ActorType::BoxGreyLetterE
+            | ActorType::ChickenSingle
+            | ActorType::Soda => true,
+            _ => false,
+        }
     }
 
     fn shot(

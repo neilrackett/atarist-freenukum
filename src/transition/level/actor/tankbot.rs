@@ -12,7 +12,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     orientation: HorizontalDirection,
     tile: usize,
     current_frame: usize,
@@ -190,6 +190,10 @@ impl ActorInterface for Specific {
             .unwrap();
         destrect.x += TILE_WIDTH as i16;
         tile.blit_to_sdl_surface(None, target, Some(destrect));
+    }
+
+    fn can_get_shot(&self, _gerenal: &ActorData) -> bool {
+        true
     }
 
     fn shot(

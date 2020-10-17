@@ -279,6 +279,8 @@ typedef enum {
     VerticalDirection_Down,
 } VerticalDirection;
 
+typedef struct Actor Actor;
+
 typedef struct ActorMessageQueue ActorMessageQueue;
 
 typedef struct ActorQueue ActorQueue;
@@ -340,6 +342,53 @@ typedef struct {
     uint16_t h;
 } Geometry;
 
+typedef Geometry FnGeometry;
+
+typedef HeroData FnHeroData;
+
+typedef FetchedLetterState FnHeroFetchedLetterState;
+
+typedef Health FnHeroHealth;
+
+typedef Position FnHeroPosition;
+
+typedef Score FnHeroScore;
+
+typedef InventoryItem FnHeroInventoryItem;
+
+typedef struct {
+    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelSolids;
+
+typedef LevelSolids FnLevelSolids;
+
+typedef HorizontalDirection FnHorizontalDirection;
+
+typedef InfoMessageQueue FnInfoMessageQueue;
+
+typedef InputField FnInputField;
+
+typedef Actor FnLevelActor;
+
+typedef struct {
+    uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelTiles;
+
+typedef LevelTiles FnLevelTiles;
+
+typedef struct {
+    FnLevelTiles tiles;
+    FnLevelSolids solids;
+    bool do_play;
+    bool level_passed;
+} LevelData;
+
+typedef LevelData FnLevelData;
+
+typedef ActorQueue FnLevelActorQueue;
+
+typedef ActorType FnLevelActorType;
+
 typedef struct {
     ActorType actor_type;
     Geometry position;
@@ -352,74 +401,6 @@ typedef struct {
 } ActorData;
 
 typedef ActorData FnLevelActorData;
-
-typedef struct {
-    uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
-} LevelTiles;
-
-typedef LevelTiles FnLevelTiles;
-
-typedef struct {
-    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
-} LevelSolids;
-
-typedef LevelSolids FnLevelSolids;
-
-typedef struct {
-    FnLevelTiles tiles;
-    FnLevelSolids solids;
-    bool do_play;
-    bool level_passed;
-} LevelData;
-
-typedef LevelData FnLevelData;
-
-typedef struct {
-    FnLevelActorData *general;
-    void **specific;
-    FnLevelData *level_data;
-} FnLevelActorCreateParams;
-
-typedef struct {
-    void **specific;
-} FnLevelActorFreeParams;
-
-typedef ActorQueue FnLevelActorQueue;
-
-typedef HeroData FnHeroData;
-
-typedef struct {
-    FnLevelActorData *general;
-    void *specific;
-    FnLevelActorQueue *actor_queue;
-    FnHeroData *hero_data;
-} FnLevelActorHeroTouchStartParams;
-
-typedef struct {
-    FnLevelActorData *general;
-    void *specific;
-    FnHeroData *hero_data;
-} FnLevelActorHeroTouchEndParams;
-
-typedef InfoMessageQueue FnInfoMessageQueue;
-
-typedef ActorMessageQueue FnLevelActorMessageQueue;
-
-typedef struct {
-    FnLevelActorData *general;
-    void *specific;
-    FnLevelData *level_data;
-    FnHeroData *hero_data;
-    FnInfoMessageQueue *info_message_queue;
-    FnLevelActorMessageQueue *actor_message_queue;
-} FnLevelActorHeroInteractStartParams;
-
-typedef struct {
-    FnLevelActorData *general;
-    void *specific;
-    FnLevelData *level_data;
-    FnHeroData *hero_data;
-} FnLevelActorHeroInteractEndParams;
 
 typedef struct {
     FnLevelActorData *general;
@@ -439,11 +420,13 @@ typedef struct {
 
 typedef struct {
     FnLevelActorData *general;
-    void *specific;
+    void **specific;
     FnLevelData *level_data;
-    FnLevelActorQueue *actor_queue;
-    FnHeroData *hero_data;
-} FnLevelActorShotParams;
+} FnLevelActorCreateParams;
+
+typedef struct {
+    void **specific;
+} FnLevelActorFreeParams;
 
 typedef ActorMessageType FnLevelActorMessageType;
 
@@ -455,23 +438,44 @@ typedef struct {
     FnLevelData *level_data;
 } FnLevelActorReceiveMessageParams;
 
-typedef Geometry FnGeometry;
+typedef ActorMessageQueue FnLevelActorMessageQueue;
 
-typedef FetchedLetterState FnHeroFetchedLetterState;
+typedef struct {
+    FnLevelActorData *general;
+    void *specific;
+    FnLevelData *level_data;
+    FnHeroData *hero_data;
+    FnInfoMessageQueue *info_message_queue;
+    FnLevelActorMessageQueue *actor_message_queue;
+} FnLevelActorHeroInteractStartParams;
 
-typedef Health FnHeroHealth;
+typedef struct {
+    FnLevelActorData *general;
+    void *specific;
+    FnLevelActorQueue *actor_queue;
+    FnHeroData *hero_data;
+} FnLevelActorHeroTouchStartParams;
 
-typedef Position FnHeroPosition;
+typedef struct {
+    FnLevelActorData *general;
+    void *specific;
+    FnLevelData *level_data;
+    FnLevelActorQueue *actor_queue;
+    FnHeroData *hero_data;
+} FnLevelActorShotParams;
 
-typedef Score FnHeroScore;
+typedef struct {
+    FnLevelActorData *general;
+    void *specific;
+    FnLevelData *level_data;
+    FnHeroData *hero_data;
+} FnLevelActorHeroInteractEndParams;
 
-typedef InventoryItem FnHeroInventoryItem;
-
-typedef HorizontalDirection FnHorizontalDirection;
-
-typedef InputField FnInputField;
-
-typedef ActorType FnLevelActorType;
+typedef struct {
+    FnLevelActorData *general;
+    void *specific;
+    FnHeroData *hero_data;
+} FnLevelActorHeroTouchEndParams;
 
 typedef struct {
     ActorType receivers;
@@ -549,17 +553,6 @@ void fn_bot_free(FnBot *ptr);
 uintptr_t fn_bot_get_x(const FnBot *bot);
 
 uintptr_t fn_bot_get_y(const FnBot *bot);
-
-void fn_expose_all_function_parameters(FnLevelActorCreateParams _a,
-                                       FnLevelActorFreeParams _b,
-                                       FnLevelActorHeroTouchStartParams _c,
-                                       FnLevelActorHeroTouchEndParams _d,
-                                       FnLevelActorHeroInteractStartParams _e,
-                                       FnLevelActorHeroInteractEndParams _f,
-                                       FnLevelActorActParams _g,
-                                       FnLevelActorBlitParams _h,
-                                       FnLevelActorShotParams _i,
-                                       FnLevelActorReceiveMessageParams _j);
 
 void fn_file_free(FnFile *ptr);
 
@@ -712,9 +705,27 @@ void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 
-FnLevelActorData *fn_level_actor_data_create(FnLevelActorType actor_type);
+bool fn_level_actor_act(FnLevelActor *actor,
+                        FnLevelData *level_data,
+                        FnHeroData *hero_data,
+                        FnLevelActorQueue *actor_queue);
 
-void fn_level_actor_data_free(FnLevelActorData *ptr);
+bool fn_level_actor_acts_while_invisible(const FnLevelActor *actor);
+
+void fn_level_actor_blit(FnLevelActor *actor,
+                         FnHeroData *hero_data,
+                         const FnTileCache *tilecache,
+                         SDL_Surface *target,
+                         bool draw_collision_bounds);
+
+bool fn_level_actor_can_get_shot(const FnLevelActor *actor);
+
+FnLevelActor *fn_level_actor_create(FnLevelActorType actor_type,
+                                    FnLevelData *level_data,
+                                    int16_t x,
+                                    int16_t y);
+
+void fn_level_actor_free(FnLevelActor *ptr);
 
 void fn_level_actor_function_accesscard_door_act(FnLevelActorActParams p);
 
@@ -1090,6 +1101,29 @@ void fn_level_actor_function_wallcrawler_hero_touch_start(FnLevelActorHeroTouchS
 
 void fn_level_actor_function_wallcrawler_shot(FnLevelActorShotParams p);
 
+FnGeometry fn_level_actor_get_position(const FnLevelActor *actor);
+
+bool fn_level_actor_hero_can_interact(const FnLevelActor *actor,
+                                      const FnHeroData *hero_data);
+
+void fn_level_actor_hero_interact_end(FnLevelActor *actor,
+                                      FnLevelData *level_data,
+                                      FnHeroData *hero_data);
+
+void fn_level_actor_hero_interact_start(FnLevelActor *actor,
+                                        FnLevelData *level_data,
+                                        FnHeroData *hero_data,
+                                        FnInfoMessageQueue *info_message_queue,
+                                        FnLevelActorMessageQueue *actor_message_queue);
+
+bool fn_level_actor_hurts_hero(const FnLevelActor *actor);
+
+bool fn_level_actor_in_foreground(const FnLevelActor *actor);
+
+bool fn_level_actor_is_alive(const FnLevelActor *actor);
+
+bool fn_level_actor_is_visible(const FnLevelActor *actor);
+
 FnLevelActorMessageQueue *fn_level_actor_message_queue_create(void);
 
 void fn_level_actor_message_queue_free(FnLevelActorMessageQueue *ptr);
@@ -1119,6 +1153,23 @@ void fn_level_actor_queue_push_particle_firework(FnLevelActorQueue *ptr,
                                                  uint16_t x,
                                                  uint16_t y,
                                                  uintptr_t count);
+
+void fn_level_actor_receive_message(FnLevelActor *actor,
+                                    FnLevelActorMessageType message,
+                                    FnHeroData *hero_data,
+                                    FnLevelData *level_data);
+
+void fn_level_actor_set_visible(FnLevelActor *actor, bool visible);
+
+bool fn_level_actor_shot(FnLevelActor *actor,
+                         FnLevelData *level_data,
+                         FnHeroData *hero_data,
+                         FnLevelActorQueue *actor_queue);
+
+bool fn_level_actor_touches_hero(const FnLevelActor *actor,
+                                 const FnHeroData *hero_data);
+
+FnLevelActorType fn_level_actor_type(const FnLevelActor *actor);
 
 FnLevelData *fn_level_data_create(void);
 

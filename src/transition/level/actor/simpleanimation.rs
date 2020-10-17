@@ -11,7 +11,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: u16,
     current_frame: u16,
     num_frames: u16,

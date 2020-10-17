@@ -8,7 +8,7 @@ use crate::{SOLID_START, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     touch_count: usize,
     touching_hero: bool,

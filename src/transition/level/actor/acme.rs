@@ -8,7 +8,7 @@ use crate::{OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     touching_hero: bool,
@@ -117,6 +117,10 @@ impl ActorInterface for Specific {
             .get_tile(self.tile + 1)
             .unwrap()
             .blit_to_sdl_surface(None, target, Some(destrect));
+    }
+
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
+        true
     }
 
     fn shot(

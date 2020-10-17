@@ -8,7 +8,7 @@ use crate::{ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {}
+pub(crate) struct Specific {}
 
 impl ActorCreateInterface for Specific {
     fn create(

@@ -41,7 +41,6 @@ typedef struct fn_level_t fn_level_t;
  * not yet defined there.
  */
 #include "fn_hero.h"
-#include "fn_level_actor.h"
 #include "fn_shot.h"
 #include "fn_list.h"
 #include "fn_environment.h"
@@ -107,7 +106,7 @@ struct fn_level_t {
   /**
    * The actor with which the hero interacts.
    */
-  fn_level_actor_t * interactor;
+  FnLevelActor * interactor;
 };
 
 /* --------------------------------------------------------------- */
@@ -257,7 +256,7 @@ void fn_level_hero_interact_stop(fn_level_t * lv);
  *
  * @return  The newly created actor.
  */
-fn_level_actor_t * fn_level_add_actor(fn_level_t * lv,
+FnLevelActor * fn_level_add_actor(fn_level_t * lv,
     FnLevelActorType type,
     Uint16 x,
     Uint16 y);

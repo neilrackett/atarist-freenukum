@@ -6,7 +6,7 @@ use crate::{ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     counter: u16,
     base_y: u16,
@@ -81,17 +81,12 @@ impl ActorInterface for Specific {
         tile.blit_to_sdl_surface(None, target, Some(destrect));
     }
 
-    fn shot(
-        &mut self,
-        _general: &mut ActorData,
-        _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
-        _hero_data: &mut HeroData,
-    ) {
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
         /*
          * We don't need to do anything, this is just to absorb
          * the bullet when the actor is shot.
          */
+        true
     }
 }
 

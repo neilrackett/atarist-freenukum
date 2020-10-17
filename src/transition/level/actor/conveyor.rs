@@ -13,7 +13,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     direction: HorizontalDirection,

@@ -175,7 +175,7 @@ Uint16 fn_shot_get_h(fn_shot_t * shot);
  *
  * @return 1 if they touch, otherwise 0.
  */
-Uint8 fn_shot_touches_actor(fn_shot_t * shot, fn_level_actor_t * actor);
+Uint8 fn_shot_touches_actor(fn_shot_t * shot, FnLevelActor * actor);
 
 /* --------------------------------------------------------------- */
 

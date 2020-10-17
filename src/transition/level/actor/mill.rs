@@ -8,7 +8,7 @@ use crate::{OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -81,6 +81,10 @@ impl ActorInterface for Specific {
             tile.blit_to_sdl_surface(None, target, Some(destrect));
             destrect.y += TILE_HEIGHT as i16;
         }
+    }
+
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
+        true
     }
 
     fn shot(

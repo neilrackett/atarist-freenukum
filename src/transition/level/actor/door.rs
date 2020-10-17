@@ -16,7 +16,7 @@ enum State {
 }
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     state: State,

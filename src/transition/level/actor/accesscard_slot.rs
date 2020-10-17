@@ -10,7 +10,7 @@ use crate::{OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -34,6 +34,10 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
+    fn hero_can_interact(&self) -> bool {
+        true
+    }
+
     fn hero_interact_start(
         &mut self,
         _general: &mut ActorData,

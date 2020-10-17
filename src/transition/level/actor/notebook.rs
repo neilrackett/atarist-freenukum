@@ -10,7 +10,7 @@ use crate::{OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {}
+pub(crate) struct Specific {}
 
 impl ActorCreateInterface for Specific {
     fn create(
@@ -31,6 +31,10 @@ impl ActorInterface for Specific {
         _actor_queue: &mut ActorQueue,
         _hero_data: &mut HeroData,
     ) {
+    }
+
+    fn hero_can_interact(&self) -> bool {
+        true
     }
 
     fn hero_interact_start(

@@ -20,7 +20,7 @@ enum State {
 }
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     state: State,
 }
 
@@ -106,6 +106,10 @@ impl ActorInterface for Specific {
             }
             State::Idle => {}
         }
+    }
+
+    fn hero_can_interact(&self) -> bool {
+        true
     }
 
     fn hero_interact_start(

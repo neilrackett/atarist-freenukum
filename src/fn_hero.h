@@ -40,8 +40,8 @@ typedef struct fn_hero_t fn_hero_t;
 /* --------------------------------------------------------------- */
 
 #include "fn_environment.h"
-#include "fn_level_actor.h"
 #include "fn_list.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 

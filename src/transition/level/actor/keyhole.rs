@@ -13,7 +13,7 @@ use crate::{
 use transdl::video::Surface;
 
 #[derive(Debug)]
-struct Specific {
+pub(crate) struct Specific {
     tile: usize,
     counter: usize,
 }
@@ -69,6 +69,10 @@ impl ActorInterface for Specific {
             target,
             Some(general.position),
         );
+    }
+
+    fn hero_can_interact(&self) -> bool {
+        true
     }
 
     fn hero_interact_start(
