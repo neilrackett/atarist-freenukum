@@ -346,6 +346,9 @@ typedef struct {
     bool is_in_foreground;
     bool hurts_hero;
     bool is_alive;
+    bool touches_hero;
+    bool is_visible;
+    bool acts_while_invisible;
 } ActorData;
 
 typedef ActorData FnLevelActorData;

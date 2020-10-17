@@ -1080,7 +1080,7 @@ int fn_level_act(
       iter = fn_list_next(iter)) {
     fn_level_actor_t * actor = (fn_level_actor_t *)iter->data;
 
-    if  (actor->acts_while_invisible || actor->is_visible) {
+    if  (actor->general->acts_while_invisible || actor->general->is_visible) {
       sum++;
       fn_level_actor_act(actor, lv, actor_queue);
       if (actor->general->is_alive == false) {

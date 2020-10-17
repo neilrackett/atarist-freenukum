@@ -57,21 +57,6 @@ struct fn_level_actor_t {
    * Type-specific data.
    */
   void * specific;
-
-  /**
-   * Flag that indicates if the actor is being touched by the hero
-   */
-  int touches_hero;
-
-  /**
-   * Is the actor visible in the currently shown area?
-   */
-  Uint8 is_visible;
-
-  /**
-   * Does the actor act even if outside the visible area?
-   */
-  Uint8 acts_while_invisible;
 };
 
 /* --------------------------------------------------------------- */

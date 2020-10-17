@@ -1872,13 +1872,6 @@ fn_level_actor_t * fn_level_actor_create(
   actor->general = fn_level_actor_data_create(type);
   actor->general->position.x = x;
   actor->general->position.y = y;
-  actor->general->position.w = 0; /* should be changed by func */
-  actor->general->position.h = 0; /* should be changed by func */
-  actor->general->is_alive = 1;
-  actor->touches_hero = 0;
-  actor->general->is_in_foreground = 0;
-  actor->is_visible = 0;
-  actor->acts_while_invisible = 0;
   func = fn_level_actor_functions[actor->general->actor_type].create;
   if (func != NULL) {
       FnLevelActorCreateParams p ={
@@ -1925,15 +1918,15 @@ void fn_level_actor_check_hero_touch(
         FnLevelActorQueue * actor_queue)
 {
   if (fn_level_actor_touches_hero(actor, fn_level_get_hero(level))) {
-    if (!actor->touches_hero) {
-      actor->touches_hero = 1;
+    if (!actor->general->touches_hero) {
+      actor->general->touches_hero = 1;
       fn_level_actor_hero_touch_start(
               actor, level, actor_queue);
     }
   } else {
-    if (actor->touches_hero) {
+    if (actor->general->touches_hero) {
       fn_level_actor_hero_touch_end(actor, level);
-      actor->touches_hero = 0;
+      actor->general->touches_hero = 0;
     }
   }
 }
@@ -2197,12 +2190,12 @@ FnGeometry fn_level_actor_get_position(fn_level_actor_t * actor)
 
 void fn_level_actor_set_visible(fn_level_actor_t * actor, Uint8 visibility)
 {
-  actor->is_visible = visibility;
+  actor->general->is_visible = visibility;
 }
 
 /* --------------------------------------------------------------- */
 
 Uint8 fn_level_actor_is_visible(fn_level_actor_t * actor)
 {
-  return actor->is_visible;
+  return actor->general->is_visible;
 }

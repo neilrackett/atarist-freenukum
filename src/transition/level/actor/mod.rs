@@ -202,6 +202,9 @@ pub struct ActorData {
     pub is_in_foreground: bool,
     pub hurts_hero: bool,
     pub is_alive: bool,
+    pub touches_hero: bool,
+    pub is_visible: bool,
+    pub acts_while_invisible: bool,
 }
 
 impl ActorData {
@@ -212,6 +215,9 @@ impl ActorData {
             is_in_foreground: true,
             hurts_hero: false,
             is_alive: true,
+            touches_hero: false,
+            is_visible: false,
+            acts_while_invisible: false,
         }
     }
 }
