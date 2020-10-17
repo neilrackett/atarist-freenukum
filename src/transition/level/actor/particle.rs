@@ -1,7 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorQueue, ActorType};
+use super::{ActorData, ActorInterface, ActorQueue, ActorType};
 use crate::{
     HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
@@ -16,62 +16,64 @@ struct Specific {
     vspeed: i16,
 }
 
-fn create(
-    general: &mut ActorData,
-    _level_data: &mut LevelData,
-) -> Specific {
-    general.is_in_foreground = true;
-    general.position.w = HALFTILE_WIDTH as u16;
-    general.position.h = HALFTILE_HEIGHT as u16;
+impl ActorInterface for Specific {
+    fn create(
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+    ) -> Specific {
+        general.is_in_foreground = true;
+        general.position.w = HALFTILE_WIDTH as u16;
+        general.position.h = HALFTILE_HEIGHT as u16;
 
-    use rand::Rng;
-    let mut rng = rand::thread_rng();
-    let vspeed = rng.gen_range(-12, 5);
-    let hspeed = rng.gen_range(-8, 9);
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        let vspeed = rng.gen_range(-12, 5);
+        let hspeed = rng.gen_range(-8, 9);
 
-    let tile = match general.actor_type {
-        ActorType::ParticlePink => OBJECT_SPARK_PINK,
-        ActorType::ParticleBlue => OBJECT_SPARK_BLUE,
-        ActorType::ParticleWhite => OBJECT_SPARK_WHITE,
-        ActorType::ParticleGreen => OBJECT_SPARK_GREEN,
-        _ => unreachable!(),
-    };
+        let tile = match general.actor_type {
+            ActorType::ParticlePink => OBJECT_SPARK_PINK,
+            ActorType::ParticleBlue => OBJECT_SPARK_BLUE,
+            ActorType::ParticleWhite => OBJECT_SPARK_WHITE,
+            ActorType::ParticleGreen => OBJECT_SPARK_GREEN,
+            _ => unreachable!(),
+        };
 
-    Specific {
-        tile,
-        countdown: 20,
-        hspeed,
-        vspeed,
+        Specific {
+            tile,
+            countdown: 20,
+            hspeed,
+            vspeed,
+        }
     }
-}
 
-fn act(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _level_data: &mut LevelData,
-    _actor_queue: &mut ActorQueue,
-    _hero_data: &mut HeroData,
-) {
-    if specific.countdown > 0 {
-        specific.countdown -= 1;
-        general.position.x += specific.hspeed;
-        general.position.y += specific.vspeed;
-        specific.vspeed += 2;
-    } else {
-        general.is_alive = false;
+    fn act(
+        &mut self,
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
+    ) {
+        if self.countdown > 0 {
+            self.countdown -= 1;
+            general.position.x += self.hspeed;
+            general.position.y += self.vspeed;
+            self.vspeed += 2;
+        } else {
+            general.is_alive = false;
+        }
     }
-}
 
-fn blit(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _hero_data: &mut HeroData,
-    tilecache: &TileCache,
-    target: &mut Surface,
-) {
-    let tile = tilecache.get_tile((specific.tile) as usize).unwrap();
-    let destrect = general.position;
-    tile.blit_to_sdl_surface(None, target, Some(destrect));
+    fn blit(
+        &mut self,
+        general: &mut ActorData,
+        _hero_data: &mut HeroData,
+        tilecache: &TileCache,
+        target: &mut Surface,
+    ) {
+        let tile = tilecache.get_tile((self.tile) as usize).unwrap();
+        let destrect = general.position;
+        tile.blit_to_sdl_surface(None, target, Some(destrect));
+    }
 }
 
 pub mod ffi {
@@ -84,27 +86,27 @@ pub mod ffi {
     pub extern "C" fn fn_level_actor_function_particle_create(
         p: FnLevelActorCreateParams,
     ) {
-        p.call(super::create);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_particle_free(
         p: FnLevelActorFreeParams,
     ) {
-        p.call::<super::Specific>();
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_particle_act(
         p: FnLevelActorActParams,
     ) {
-        p.call(super::act);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_particle_blit(
         p: FnLevelActorBlitParams,
     ) {
-        p.call(super::blit);
+        p.call_interface::<super::Specific>();
     }
 }
