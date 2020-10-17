@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
-use super::{ActorData, ActorQueue, ActorType};
+use super::{ActorData, ActorInterface, ActorQueue, ActorType};
 use crate::{
     ANIMATION_ROBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
     TILE_WIDTH,
@@ -18,68 +18,69 @@ struct Specific {
     touching_hero: bool,
 }
 
-fn create(
-    general: &mut ActorData,
-    _level_data: &mut LevelData,
-) -> Specific {
-    general.position.w = TILE_WIDTH as u16;
-    general.position.h = TILE_HEIGHT as u16;
-    general.is_in_foreground = true;
+impl ActorInterface for Specific {
+    fn create(
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+    ) -> Specific {
+        general.position.w = TILE_WIDTH as u16;
+        general.position.h = TILE_HEIGHT as u16;
+        general.is_in_foreground = true;
 
-    Specific {
-        direction: HorizontalDirection::Left,
-        tile: ANIMATION_ROBOT,
-        current_frame: 0,
-        num_frames: 3,
-        touching_hero: false,
+        Specific {
+            direction: HorizontalDirection::Left,
+            tile: ANIMATION_ROBOT,
+            current_frame: 0,
+            num_frames: 3,
+            touching_hero: false,
+        }
     }
-}
 
-fn hero_touch_start(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _actor_queue: &mut ActorQueue,
-    _hero_data: &mut HeroData,
-) {
-    general.hurts_hero = true;
-    specific.touching_hero = true;
-}
-
-fn hero_touch_end(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _hero_data: &mut HeroData,
-) {
-    general.hurts_hero = false;
-    specific.touching_hero = false;
-}
-
-fn act(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    level_data: &mut LevelData,
-    _actor_queue: &mut ActorQueue,
-    _hero_data: &mut HeroData,
-) {
-    specific.current_frame += 1;
-    specific.current_frame %= specific.num_frames;
-
-    if !level_data.solids.get(
-        general.position.x as usize / TILE_WIDTH,
-        general.position.y as usize / TILE_HEIGHT + 1,
+    fn hero_touch_start(
+        &mut self,
+        general: &mut ActorData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
     ) {
-        // In the air, falling down.
-        general.position.y += HALFTILE_HEIGHT as i16;
-    } else {
-        // On the floor, walking.
-        if specific.current_frame == 0 {
-            let mut direction = match specific.direction {
-                HorizontalDirection::Left => -1,
-                HorizontalDirection::Right => 2,
-                HorizontalDirection::Center => unreachable!(),
-            };
-            // Check if the place next to the bot is free
-            if !level_data.solids.get(
+        general.hurts_hero = true;
+        self.touching_hero = true;
+    }
+
+    fn hero_touch_end(
+        &mut self,
+        general: &mut ActorData,
+        _hero_data: &mut HeroData,
+    ) {
+        general.hurts_hero = false;
+        self.touching_hero = false;
+    }
+
+    fn act(
+        &mut self,
+        general: &mut ActorData,
+        level_data: &mut LevelData,
+        _actor_queue: &mut ActorQueue,
+        _hero_data: &mut HeroData,
+    ) {
+        self.current_frame += 1;
+        self.current_frame %= self.num_frames;
+
+        if !level_data.solids.get(
+            general.position.x as usize / TILE_WIDTH,
+            general.position.y as usize / TILE_HEIGHT + 1,
+        ) {
+            // In the air, falling down.
+            general.position.y += HALFTILE_HEIGHT as i16;
+        } else {
+            // On the floor, walking.
+            if self.current_frame == 0 {
+                let mut direction = match self.direction {
+                    HorizontalDirection::Left => -1,
+                    HorizontalDirection::Right => 2,
+                    HorizontalDirection::Center => unreachable!(),
+                };
+                // Check if the place next to the bot is free
+                if !level_data.solids.get(
                 (
                     general.position.x as isize +
                     direction * HALFTILE_WIDTH as isize
@@ -94,59 +95,60 @@ fn act(
                 ) as usize / TILE_WIDTH,
                 (general.position.y as usize + TILE_HEIGHT) / TILE_HEIGHT
             ) {
-                if direction == 2 {
-                    direction = 1;
-                }
-                general.position.x +=
-                    direction as i16 * HALFTILE_WIDTH as i16;
-            } else {
-                specific.direction =
-                    if specific.direction == HorizontalDirection::Left {
-                        HorizontalDirection::Right
-                    } else {
-                        HorizontalDirection::Left
+                    if direction == 2 {
+                        direction = 1;
+                    }
+                    general.position.x +=
+                        direction as i16 * HALFTILE_WIDTH as i16;
+                } else {
+                    self.direction =
+                        if self.direction == HorizontalDirection::Left {
+                            HorizontalDirection::Right
+                        } else {
+                            HorizontalDirection::Left
+                        };
+                    if direction == 2 {
+                        direction = 1
                     };
-                if direction == 2 {
-                    direction = 1
-                };
-                direction *= -1;
-                general.position.x +=
-                    direction as i16 * HALFTILE_WIDTH as i16;
+                    direction *= -1;
+                    general.position.x +=
+                        direction as i16 * HALFTILE_WIDTH as i16;
+                }
             }
         }
     }
-}
 
-fn blit(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _hero_data: &mut HeroData,
-    tilecache: &TileCache,
-    target: &mut Surface,
-) {
-    let tile = tilecache.get_tile(specific.tile as usize).unwrap();
-    let destrect = general.position;
-    tile.blit_to_sdl_surface(None, target, Some(destrect));
-}
-
-fn shot(
-    general: &mut ActorData,
-    specific: &mut Specific,
-    _level_data: &mut LevelData,
-    actor_queue: &mut ActorQueue,
-    hero_data: &mut HeroData,
-) {
-    hero_data.score.add(100);
-    if specific.touching_hero {
-        general.hurts_hero = false;
-        specific.touching_hero = false;
+    fn blit(
+        &mut self,
+        general: &mut ActorData,
+        _hero_data: &mut HeroData,
+        tilecache: &TileCache,
+        target: &mut Surface,
+    ) {
+        let tile = tilecache.get_tile(self.tile as usize).unwrap();
+        let destrect = general.position;
+        tile.blit_to_sdl_surface(None, target, Some(destrect));
     }
-    actor_queue.push_back(
-        ActorType::RobotDisappearing,
-        general.position.x as u16,
-        general.position.y as u16,
-    );
-    general.is_alive = false;
+
+    fn shot(
+        &mut self,
+        general: &mut ActorData,
+        _level_data: &mut LevelData,
+        actor_queue: &mut ActorQueue,
+        hero_data: &mut HeroData,
+    ) {
+        hero_data.score.add(100);
+        if self.touching_hero {
+            general.hurts_hero = false;
+            self.touching_hero = false;
+        }
+        actor_queue.push_back(
+            ActorType::RobotDisappearing,
+            general.position.x as u16,
+            general.position.y as u16,
+        );
+        general.is_alive = false;
+    }
 }
 
 pub mod ffi {
@@ -161,48 +163,48 @@ pub mod ffi {
     pub extern "C" fn fn_level_actor_function_robot_create(
         p: FnLevelActorCreateParams,
     ) {
-        p.call(super::create);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_free(
         p: FnLevelActorFreeParams,
     ) {
-        p.call::<super::Specific>();
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_hero_touch_start(
         p: FnLevelActorHeroTouchStartParams,
     ) {
-        p.call(super::hero_touch_start);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_hero_touch_end(
         p: FnLevelActorHeroTouchEndParams,
     ) {
-        p.call(super::hero_touch_end);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_act(
         p: FnLevelActorActParams,
     ) {
-        p.call(super::act);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_blit(
         p: FnLevelActorBlitParams,
     ) {
-        p.call(super::blit);
+        p.call_interface::<super::Specific>();
     }
 
     #[no_mangle]
     pub extern "C" fn fn_level_actor_function_robot_shot(
         p: FnLevelActorShotParams,
     ) {
-        p.call(super::shot);
+        p.call_interface::<super::Specific>();
     }
 }
