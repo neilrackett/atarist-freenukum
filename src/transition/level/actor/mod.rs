@@ -287,10 +287,12 @@ impl ActorMessageQueue {
     }
 }
 
-pub(crate) trait ActorInterface {
+pub(crate) trait ActorCreateInterface {
     fn create(general: &mut ActorData, level_data: &mut LevelData)
         -> Self;
+}
 
+pub(crate) trait ActorInterface: std::fmt::Debug {
     fn hero_touch_start(
         &mut self,
         _general: &mut ActorData,
@@ -398,7 +400,11 @@ pub mod ffi {
                 as *mut libc::c_void;
         }
 
-        pub(crate) fn call_interface<T: super::ActorInterface>(self) {
+        pub(crate) fn call_interface<
+            T: super::ActorCreateInterface + super::ActorInterface,
+        >(
+            self,
+        ) {
             assert!(!self.general.is_null());
             assert!(!self.specific.is_null());
             assert!(!self.level_data.is_null());

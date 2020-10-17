@@ -1,7 +1,9 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200, NUMBER_2000,
     NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT, NUMBER_BONUS_1_RIGHT,
@@ -19,7 +21,7 @@ struct Specific {
     countdown: usize,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -64,7 +66,9 @@ impl ActorInterface for Specific {
             countdown: 40,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,

@@ -1,7 +1,9 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
@@ -16,7 +18,7 @@ struct Specific {
     vspeed: i16,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -45,7 +47,9 @@ impl ActorInterface for Specific {
             vspeed,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,

@@ -2,14 +2,17 @@ use super::super::super::hero::HeroData;
 use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorMessageQueue, ActorQueue};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
+    ActorQueue,
+};
 use crate::{OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
 #[derive(Debug)]
 struct Specific {}
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -18,7 +21,9 @@ impl ActorInterface for Specific {
         general.position.h = TILE_HEIGHT as u16;
         Specific {}
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,

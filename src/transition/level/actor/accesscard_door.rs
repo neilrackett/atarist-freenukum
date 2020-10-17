@@ -1,7 +1,10 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorMessageType, ActorQueue};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorMessageType,
+    ActorQueue,
+};
 use crate::{OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
@@ -12,7 +15,7 @@ struct Specific {
     num_frames: usize,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -27,7 +30,9 @@ impl ActorInterface for Specific {
             num_frames: 4,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,

@@ -1,7 +1,9 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
@@ -13,7 +15,7 @@ struct Specific {
     lives: usize,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         level_data: &mut LevelData,
@@ -39,7 +41,9 @@ impl ActorInterface for Specific {
             lives: 10,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         _general: &mut ActorData,

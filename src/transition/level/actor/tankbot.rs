@@ -2,7 +2,9 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     ANIMATION_CARBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
     TILE_WIDTH,
@@ -19,7 +21,7 @@ struct Specific {
     touching_hero: bool,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -37,7 +39,9 @@ impl ActorInterface for Specific {
             touching_hero: false,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,

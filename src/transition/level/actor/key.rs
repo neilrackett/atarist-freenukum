@@ -1,7 +1,9 @@
 use super::super::super::hero::{HeroData, InventoryItem};
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
     TILE_HEIGHT, TILE_WIDTH,
@@ -11,7 +13,7 @@ use transdl::video::Surface;
 #[derive(Debug)]
 pub struct Specific {}
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -22,7 +24,9 @@ impl ActorInterface for Specific {
 
         Specific {}
     }
+}
 
+impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,

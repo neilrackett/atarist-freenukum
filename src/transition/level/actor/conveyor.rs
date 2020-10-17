@@ -2,7 +2,9 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     HALFTILE_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_CENTER,
     SOLID_CONVEYORBELT_LEFTEND, SOLID_CONVEYORBELT_RIGHTEND, TILE_HEIGHT,
@@ -17,7 +19,7 @@ struct Specific {
     direction: HorizontalDirection,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         level_data: &mut LevelData,
@@ -64,7 +66,9 @@ impl ActorInterface for Specific {
             direction,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,

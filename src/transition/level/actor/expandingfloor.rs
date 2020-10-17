@@ -1,8 +1,10 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::ActorMessageType;
-use super::{ActorData, ActorInterface, ActorQueue};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorMessageType,
+    ActorQueue,
+};
 use crate::{SOLID_EXPANDINGFLOOR, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
@@ -12,7 +14,7 @@ struct Specific {
     finished: bool,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -25,7 +27,9 @@ impl ActorInterface for Specific {
             finished: false,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,

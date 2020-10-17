@@ -2,7 +2,10 @@ use super::super::super::hero::HeroData;
 use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorMessageQueue, ActorQueue};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
+    ActorQueue,
+};
 use crate::{
     HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR, TILE_HEIGHT,
     TILE_WIDTH,
@@ -21,7 +24,7 @@ struct Specific {
     state: State,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -32,7 +35,9 @@ impl ActorInterface for Specific {
 
         Specific { state: State::Idle }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,

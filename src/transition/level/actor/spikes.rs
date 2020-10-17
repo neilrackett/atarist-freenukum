@@ -1,7 +1,9 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP, TILE_HEIGHT,
     TILE_WIDTH,
@@ -13,7 +15,7 @@ struct Specific {
     touching_hero: bool,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -26,7 +28,9 @@ impl ActorInterface for Specific {
             touching_hero: false,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,

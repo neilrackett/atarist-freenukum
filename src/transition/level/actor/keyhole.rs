@@ -3,8 +3,8 @@ use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorData, ActorInterface, ActorMessageQueue, ActorMessageType,
-    ActorQueue, ActorType,
+    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
+    ActorMessageType, ActorQueue, ActorType,
 };
 use crate::{
     OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN,
@@ -18,7 +18,7 @@ struct Specific {
     counter: usize,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -32,7 +32,9 @@ impl ActorInterface for Specific {
             counter: 0,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,

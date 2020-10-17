@@ -1,7 +1,9 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorData, ActorInterface, ActorQueue, ActorType};
+use super::{
+    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+};
 use crate::{
     ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG, ANIMATION_WINDOWBG,
     TILE_HEIGHT, TILE_WIDTH,
@@ -15,7 +17,7 @@ struct Specific {
     num_frames: u16,
 }
 
-impl ActorInterface for Specific {
+impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _level_data: &mut LevelData,
@@ -65,7 +67,9 @@ impl ActorInterface for Specific {
             num_frames,
         }
     }
+}
 
+impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,
