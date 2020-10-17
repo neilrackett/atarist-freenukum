@@ -118,38 +118,3 @@ impl ActorInterface for Specific {
         }
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorActParams, FnLevelActorBlitParams,
-        FnLevelActorCreateParams, FnLevelActorFreeParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_bomb_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_bomb_free(
-        p: FnLevelActorFreeParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_bomb_act(
-        p: FnLevelActorActParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_bomb_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

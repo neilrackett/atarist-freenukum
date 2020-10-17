@@ -79,38 +79,3 @@ impl ActorInterface for Specific {
         tile.blit_to_sdl_surface(None, target, Some(destrect));
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorActParams, FnLevelActorBlitParams,
-        FnLevelActorCreateParams, FnLevelActorFreeParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_particle_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_particle_free(
-        p: FnLevelActorFreeParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_particle_act(
-        p: FnLevelActorActParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_particle_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

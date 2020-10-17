@@ -82,31 +82,3 @@ impl ActorInterface for Specific {
         );
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorBlitParams, FnLevelActorCreateParams,
-        FnLevelActorHeroTouchStartParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_key_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_key_hero_touch_start(
-        p: FnLevelActorHeroTouchStartParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_key_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

@@ -77,38 +77,3 @@ impl ActorInterface for Specific {
         tile.blit_to_sdl_surface(None, target, Some(destrect));
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorActParams, FnLevelActorBlitParams,
-        FnLevelActorCreateParams, FnLevelActorHeroTouchStartParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_soda_flying_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_soda_flying_touch_start(
-        p: FnLevelActorHeroTouchStartParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_soda_flying_act(
-        p: FnLevelActorActParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_soda_flying_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

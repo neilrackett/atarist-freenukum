@@ -110,38 +110,3 @@ impl ActorInterface for Specific {
         }
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorActParams, FnLevelActorBlitParams,
-        FnLevelActorCreateParams, FnLevelActorFreeParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_unstablefloor_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_unstablefloor_free(
-        p: FnLevelActorFreeParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_unstablefloor_act(
-        p: FnLevelActorActParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_unstablefloor_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

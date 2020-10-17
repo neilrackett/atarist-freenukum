@@ -78,31 +78,3 @@ impl ActorInterface for Specific {
             .blit_to_sdl_surface(None, target, Some(general.position));
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorBlitParams, FnLevelActorCreateParams,
-        FnLevelActorShotParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_shootable_wall_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_shootable_wall_shot(
-        p: FnLevelActorShotParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_shootable_wall_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

@@ -97,38 +97,3 @@ impl ActorInterface for Specific {
         tile.blit_to_sdl_surface(None, target, Some(destrect));
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorActParams, FnLevelActorBlitParams,
-        FnLevelActorCreateParams, FnLevelActorFreeParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_score_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_score_free(
-        p: FnLevelActorFreeParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_score_act(
-        p: FnLevelActorActParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_score_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}

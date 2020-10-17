@@ -63,7 +63,7 @@ impl ActorInterface for Specific {
         );
     }
 
-    fn can_get_shot(&self, general: &ActorData) -> bool {
+    fn can_get_shot(&self, _general: &ActorData) -> bool {
         true
     }
 
@@ -86,40 +86,5 @@ impl ActorInterface for Specific {
             general.position.x as u16,
             general.position.y as u16,
         );
-    }
-}
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorBlitParams, FnLevelActorCreateParams,
-        FnLevelActorFreeParams, FnLevelActorShotParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_camera_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_camera_free(
-        p: FnLevelActorFreeParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_camera_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_camera_shot(
-        p: FnLevelActorShotParams,
-    ) {
-        p.call_interface::<super::Specific>();
     }
 }

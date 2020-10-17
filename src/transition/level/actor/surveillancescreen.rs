@@ -69,31 +69,3 @@ impl ActorInterface for Specific {
             .blit_to_sdl_surface(None, target, Some(destrect));
     }
 }
-
-pub mod ffi {
-    use super::super::ffi::{
-        FnLevelActorBlitParams, FnLevelActorCreateParams,
-        FnLevelActorHeroInteractStartParams,
-    };
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_create(
-        p: FnLevelActorCreateParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_hero_interact_start(
-        p: FnLevelActorHeroInteractStartParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_function_surveillancescreen_blit(
-        p: FnLevelActorBlitParams,
-    ) {
-        p.call_interface::<super::Specific>();
-    }
-}
