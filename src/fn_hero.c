@@ -126,6 +126,7 @@ void fn_hero_enterlevel(
 void fn_hero_blit(
     fn_hero_t * hero,
     SDL_Surface * target,
+    const FnTileCache * tilecache,
     FnLevelSolids * solids)
 {
   int tilenr;
@@ -154,20 +155,20 @@ void fn_hero_blit(
     }
   }
 
-  tile = fn_environment_get_tile(env, tilenr);
+  tile = fn_tilecache_get_tile(tilecache, tilenr);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   dstrect.x += dstrect.w;
-  tile = fn_environment_get_tile(env, tilenr+1);
+  tile = fn_tilecache_get_tile(tilecache, tilenr+1);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   dstrect.x -= dstrect.w;
   dstrect.y += dstrect.h / 2;
-  tile = fn_environment_get_tile(env, tilenr+2);
+  tile = fn_tilecache_get_tile(tilecache, tilenr+2);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   dstrect.x += dstrect.w;
-  tile = fn_environment_get_tile(env, tilenr+3);
+  tile = fn_tilecache_get_tile(tilecache, tilenr+3);
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);

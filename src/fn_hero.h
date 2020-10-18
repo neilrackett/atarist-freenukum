@@ -158,6 +158,7 @@ typedef void (*fn_hero_changed_f)(fn_hero_t *);
 void fn_hero_blit(
     fn_hero_t * hero,
     SDL_Surface * target,
+    const FnTileCache * tilecache,
     FnLevelSolids * solids);
 
 /* --------------------------------------------------------------- */
