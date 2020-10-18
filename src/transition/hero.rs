@@ -92,6 +92,10 @@ impl HeroData {
 
     pub fn reset_for_level(&mut self) {
         self.direction = HorizontalDirection::Right;
+        self.inventory.unset(InventoryItem::KeyRed);
+        self.inventory.unset(InventoryItem::KeyGreen);
+        self.inventory.unset(InventoryItem::KeyBlue);
+        self.inventory.unset(InventoryItem::KeyPink);
         self.fetched_letter_state.reset();
         self.hidden = false;
         self.just_turned_around = false;
@@ -208,6 +212,12 @@ impl HeroData {
                 }
             }
         }
+    }
+
+    fn enter_level(&mut self, x: i16, y: i16) {
+        self.position.geometry.x = x;
+        self.position.geometry.y = y;
+        self.reset_for_level();
     }
 }
 
@@ -1046,10 +1056,14 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_data_reset_for_level(data: *mut FnHeroData) {
+    pub extern "C" fn fn_hero_data_enter_level(
+        data: *mut FnHeroData,
+        x: i16,
+        y: i16,
+    ) {
         assert!(!data.is_null());
         let data: &mut FnHeroData = unsafe { &mut (*data) };
-        data.reset_for_level();
+        data.enter_level(x, y);
     }
 
     #[no_mangle]

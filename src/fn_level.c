@@ -492,7 +492,7 @@ fn_level_t * fn_level_load(FnFile* file,
             ActorType_RedBallJumping, tx, ty);
         break;
       case 0x3032: /* we found our hero! */
-        fn_hero_enterlevel(hero,
+        fn_hero_data_enter_level(hero->data,
             x * FN_TILE_WIDTH, (y - 1) * FN_TILE_HEIGHT);
         if (x > 0) {
           fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);

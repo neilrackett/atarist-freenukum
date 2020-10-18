@@ -509,6 +509,8 @@ uintptr_t fn_hero_data_counter_subtract(FnHeroData *ptr, uintptr_t count);
 
 FnHeroData *fn_hero_data_create(void);
 
+void fn_hero_data_enter_level(FnHeroData *data, int16_t x, int16_t y);
+
 void fn_hero_data_free(FnHeroData *ptr);
 
 uintptr_t fn_hero_data_get_base_tile_number(const FnHeroData *ptr);
@@ -560,8 +562,6 @@ void fn_hero_data_increase_vertical_speed(FnHeroData *ptr,
 void fn_hero_data_next_frame(FnHeroData *ptr);
 
 void fn_hero_data_reset(FnHeroData *data);
-
-void fn_hero_data_reset_for_level(FnHeroData *data);
 
 void fn_hero_data_reset_just_turned_around(FnHeroData *ptr);
 

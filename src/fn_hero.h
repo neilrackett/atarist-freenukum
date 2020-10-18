@@ -116,20 +116,6 @@ void fn_hero_reset(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
-/**
- * Update a hero for a new level.
- *
- * @param  hero  The hero that is to be updated.
- * @param  x     The initial x position of our hero (in pixels)
- * @param  y     The initial x position of our hero (in pixels)
- */
-void fn_hero_enterlevel(
-    fn_hero_t * hero,
-    Uint32 x,
-    Uint32 y);
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
     bool is_in_the_air);

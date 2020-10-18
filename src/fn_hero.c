@@ -69,29 +69,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_enterlevel(
-    fn_hero_t * hero,
-    Uint32 x,
-    Uint32 y)
-{
-  fn_hero_set_x(hero, x);
-  fn_hero_set_y(hero, y);
-  fn_hero_data_reset_for_level(hero->data);
-
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
-  fn_hero_inventory_unset(inventory, InventoryItem_KeyRed);
-  fn_hero_inventory_unset(inventory, InventoryItem_KeyGreen);
-  fn_hero_inventory_unset(inventory, InventoryItem_KeyBlue);
-  fn_hero_inventory_unset(inventory, InventoryItem_KeyPink);
-  fn_hero_data_set_hidden(hero->data, false);
-
-  FnHeroFetchedLetterState * fetched_letter_state =
-      fn_hero_data_get_fetched_letter_state(hero->data);
-  fn_hero_fetched_letter_state_reset(fetched_letter_state);
-}
-
-/* --------------------------------------------------------------- */
-
 int fn_hero_act(
     fn_hero_t * hero,
     FnLevelSolids * solids)
