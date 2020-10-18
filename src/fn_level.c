@@ -1127,7 +1127,7 @@ int fn_level_act(
 
   if (lv->animated_frames == 0) {
     /* do some action, not just animation */
-    fn_hero_act(hero, &(lv->data->solids));
+    fn_hero_data_act(hero->data, &(lv->data->solids));
   }
 
   fn_hero_data_next_frame(hero->data);

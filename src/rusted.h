@@ -503,6 +503,8 @@ bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
 
+uint8_t fn_hero_data_act(FnHeroData *ptr, const FnLevelSolids *solids);
+
 void fn_hero_data_blit(const FnHeroData *ptr,
                        SDL_Surface *target,
                        const FnTileCache *tilecache,

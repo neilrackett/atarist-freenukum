@@ -3,12 +3,13 @@ use super::level::solids::LevelSolids;
 use super::tilecache::TileCache;
 use super::{HorizontalDirection, UserEvent};
 use crate::{
-    HALFTILE_WIDTH, HERO_FALLING_LEFT, HERO_FALLING_RIGHT,
-    HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT, HERO_NUM_FALLING,
-    HERO_NUM_JUMPING, HERO_NUM_STANDING, HERO_NUM_WALKING,
-    HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT, HERO_STANDING_LEFT,
-    HERO_STANDING_RIGHT, HERO_WALKING_LEFT, HERO_WALKING_RIGHT,
-    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    HALFTILE_HEIGHT, HALFTILE_WIDTH, HERO_FALLING_LEFT,
+    HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT,
+    HERO_NUM_FALLING, HERO_NUM_JUMPING, HERO_NUM_STANDING,
+    HERO_NUM_WALKING, HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT,
+    HERO_STANDING_LEFT, HERO_STANDING_RIGHT, HERO_WALKING_LEFT,
+    HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT,
+    TILE_WIDTH,
 };
 use std::convert::TryFrom;
 use transdl::video::Surface;
@@ -301,6 +302,124 @@ impl HeroData {
     fn fall(&mut self) {
         self.is_in_the_air = true;
         self.counter = 0;
+    }
+
+    /// Returns the remaining health
+    fn act(&mut self, solids: &LevelSolids) -> u8 {
+        let mut hero_moved = false;
+
+        self.immunity.count_down();
+        if !self.immunity.hero_is_protected() && self.gets_hurt {
+            self.immunity.enable();
+            self.health.decrease(1);
+        }
+
+        if self.motion == Motion::Walking {
+            // the hero is moving
+            if self.just_turned_around {
+                self.just_turned_around = false;
+            } else {
+                let mut new_position = self.position.geometry;
+                match self.direction {
+                    HorizontalDirection::Left => {
+                        new_position.x -= HALFTILE_WIDTH as i16;
+                    }
+                    HorizontalDirection::Right => {
+                        new_position.x += HALFTILE_WIDTH as i16;
+                    }
+                    HorizontalDirection::Center => unreachable!(),
+                }
+                if !self.would_collide(
+                    solids,
+                    new_position.x,
+                    new_position.y,
+                ) {
+                    self.position.move_to(
+                        new_position.x as u16,
+                        new_position.y as u16,
+                    );
+                    hero_moved = true;
+                }
+            }
+        }
+
+        if !self.is_in_the_air {
+            // the hero is standing or walking
+            self.vertical_speed = 0;
+        } else {
+            // the hero is jumping or falling
+            if self.counter > 0 {
+                // the hero is jumping
+                self.counter -= 1;
+                self.vertical_speed = match self.counter {
+                    3 | 2 => 1,
+                    1 | 0 => 0,
+                    _ => 2,
+                };
+
+                for _ in 0..self.vertical_speed {
+                    let geometry = self.position.geometry;
+                    if !self.would_collide(
+                        solids,
+                        geometry.x,
+                        geometry.y - HALFTILE_HEIGHT as i16,
+                    ) {
+                        self.position.move_y_to(
+                            (geometry.y as usize - HALFTILE_HEIGHT) as u16,
+                        );
+                        hero_moved = true;
+                    } else {
+                        // hero bumped against the ceiling
+                        self.counter = 0;
+                    }
+                }
+            } else {
+                // the hero is falling
+                self.vertical_speed =
+                    std::cmp::min(self.vertical_speed + 1, 6);
+
+                for _ in 0..self.vertical_speed / 2 {
+                    let geometry = self.position.geometry;
+                    if !self.would_collide(
+                        solids,
+                        geometry.x,
+                        geometry.y + HALFTILE_HEIGHT as i16,
+                    ) {
+                        self.position.move_y_to(
+                            (geometry.y as usize + HALFTILE_HEIGHT) as u16,
+                        );
+                        hero_moved = true;
+                    }
+                }
+            }
+        }
+
+        let geometry = self.position.geometry;
+        if self.would_collide(
+            solids,
+            geometry.x,
+            geometry.y + HALFTILE_HEIGHT as i16,
+        ) {
+            if self.is_in_the_air {
+                transdl::event::push_user_event(
+                    UserEvent::HeroLanded as i32,
+                );
+            }
+            // the hero is standing on solid ground
+            self.land();
+            self.counter = 0;
+        } else {
+            // the hero is falling down
+            if self.counter == 0 {
+                self.fall();
+            }
+        }
+
+        if hero_moved {
+            transdl::event::push_user_event(UserEvent::HeroMoved as i32);
+        }
+
+        self.health.life
     }
 }
 
@@ -720,6 +839,22 @@ pub mod ffi {
             unsafe {
                 Box::from_raw(ptr);
             }
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_act(
+        ptr: *mut FnHeroData,
+        solids: *const FnLevelSolids,
+    ) -> u8 {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+
+        if solids.is_null() {
+            d.health.life
+        } else {
+            let solids = unsafe { &(*solids) };
+            d.act(solids)
         }
     }
 
