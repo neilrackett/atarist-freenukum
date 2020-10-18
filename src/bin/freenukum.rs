@@ -1,9 +1,12 @@
+/* TODO: reactivate for SDL2 migration when required
 use freenukum_rs::{
     tile, Game, Settings, MAX_TILES_PER_FILE, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::create_dir_all;
+*/
 
 fn main() -> Result<(), String> {
+    /*
     println!("Starting FreeNukum…");
 
     let scale = 2f32;
@@ -46,4 +49,6 @@ fn main() -> Result<(), String> {
     let mut game = Game::new(settings, canvas, sdl_context, &tiles);
 
     game.run()
+    */
+    Ok(())
 }

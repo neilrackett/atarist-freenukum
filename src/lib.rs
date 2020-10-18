@@ -3,12 +3,15 @@ extern crate serde_derive;
 
 use anyhow::Result;
 
-mod borders;
-mod game;
 mod settings;
-mod sprite;
-mod text;
 pub mod tile;
+
+// TODO: reactivate when required for SDL2 migration
+// mod sprite;
+// mod borders;
+// mod game;
+// pub use game::Game;
+// mod text;
 
 pub const HALFTILE_WIDTH: usize = 8;
 pub const HALFTILE_HEIGHT: usize = 8;
@@ -170,7 +173,6 @@ const OBJECT_KEYHOLE_PINK: usize = OBJECT_START + 140;
 const OBJECT_SPIKES_UP: usize = OBJECT_START + 148;
 const OBJECT_SPIKES_DOWN: usize = OBJECT_START + 149;
 
-pub use game::Game;
 pub use settings::Settings;
 
 pub mod transition;
