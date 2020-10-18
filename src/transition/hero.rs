@@ -33,6 +33,8 @@ pub struct HeroData {
     current_frame: usize,
     num_frames: usize,
     vertical_speed: usize,
+    immunity_countdown: usize,
+    immunity_duration: usize,
 }
 
 impl HeroData {
@@ -55,6 +57,8 @@ impl HeroData {
             current_frame: 0,
             num_frames: 1,
             vertical_speed: 0,
+            immunity_countdown: 0,
+            immunity_duration: 16,
         }
     }
 
@@ -76,6 +80,8 @@ impl HeroData {
         self.current_frame = 0;
         self.num_frames = 1;
         self.vertical_speed = 0;
+        self.immunity_countdown = 0;
+        self.immunity_duration = 16;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -91,6 +97,8 @@ impl HeroData {
         self.current_frame = 0;
         self.num_frames = 1;
         self.vertical_speed = 0;
+        self.immunity_countdown = 0;
+        self.immunity_duration = 16;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -637,6 +645,66 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.vertical_speed
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_immunity_countdown(
+        ptr: *mut FnHeroData,
+        immunity_countdown: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.immunity_countdown = immunity_countdown;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_start_immunity_countdown(
+        ptr: *mut FnHeroData,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.immunity_countdown = d.immunity_duration;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_immunity_countdown_subtract(
+        ptr: *mut FnHeroData,
+        amount: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        if amount > d.immunity_countdown {
+            d.immunity_countdown = 0;
+        } else {
+            d.immunity_countdown -= amount;
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_immunity_countdown(
+        ptr: *const FnHeroData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.immunity_countdown
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_immunity_countdown_is_max(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.immunity_countdown == d.immunity_duration
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_is_immune(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.immunity_countdown > 0
     }
 
     #[no_mangle]

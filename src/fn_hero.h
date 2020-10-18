@@ -59,16 +59,6 @@ struct fn_hero_t {
   FnHeroData * data;
 
   /**
-   * A contdown how long the hero is immune when he was hurt.
-   */
-  Uint8 immunitycountdown;
-
-  /**
-   * The duration how long our hero is immune after being hurt.
-   */
-  Uint8 immunityduration;
-
-  /**
    * True as long as any actors are hurting the hero.
    */
   bool gets_hurt;

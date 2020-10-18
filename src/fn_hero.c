@@ -66,8 +66,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_data_reset(hero->data);
 
-  hero->immunitycountdown = 0;
-  hero->immunityduration = 16;
   hero->gets_hurt = false;
 
   hero->is_moving_horizontally = 0;
@@ -111,7 +109,7 @@ void fn_hero_blit(
   if (fn_hero_data_get_hidden(hero->data)) {
     return;
   }
-  if (hero->immunitycountdown % 2 != 0) {
+  if (fn_hero_data_get_immunity_countdown(hero->data) % 2 != 0) {
     return;
   }
 
@@ -121,7 +119,7 @@ void fn_hero_blit(
   dstrect.x -= FN_HALFTILE_WIDTH;
 
   tilenr = fn_hero_data_get_base_tile_number(hero->data);
-  if (hero->immunitycountdown > hero->immunityduration - 1) {
+  if (fn_hero_data_immunity_countdown_is_max(hero->data)) {
     if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
       tilenr = HERO_SKELETON_LEFT;
     } else {
@@ -191,11 +189,9 @@ int fn_hero_act(
   FnHeroPosition * position = fn_hero_data_get_position(hero->data);
   FnGeometry hero_geometry = fn_hero_position_get_geometry(position);
 
-  if (hero->immunitycountdown > 0) {
-    hero->immunitycountdown--;
-  }
-  if (hero->immunitycountdown == 0 && hero->gets_hurt) {
-    hero->immunitycountdown = hero->immunityduration;
+  fn_hero_data_immunity_countdown_subtract(hero->data, 1);
+  if (!fn_hero_data_get_is_immune(hero->data) && hero->gets_hurt) {
+    fn_hero_data_start_immunity_countdown(hero->data);
     fn_hero_health_decrease(health, 1);
   }
 
