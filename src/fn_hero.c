@@ -66,7 +66,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_data_reset(hero->data);
 
-  hero->tilenr = HERO_STANDING_RIGHT;
   hero->verticalspeed = 0;
 
   hero->animationframe = 0;
@@ -90,8 +89,6 @@ void fn_hero_enterlevel(
   fn_hero_set_y(hero, y);
   fn_hero_data_reset_for_level(hero->data);
   hero->verticalspeed = 0;
-
-  hero->tilenr = HERO_STANDING_RIGHT;
 
   hero->animationframe = 0;
   hero->num_animationframes = 1;
@@ -132,7 +129,7 @@ void fn_hero_blit(
   FnGeometry dstrect = fn_hero_position_get_geometry(hero_position);
   dstrect.x -= FN_HALFTILE_WIDTH;
 
-  tilenr = hero->tilenr;
+  tilenr = fn_hero_data_get_base_tile_number(hero->data);
   if (hero->immunitycountdown > hero->immunityduration - 1) {
     if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
       tilenr = HERO_SKELETON_LEFT;
@@ -380,15 +377,15 @@ void fn_hero_update_animation(
       /* hero is standing */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
         if (fn_hero_data_get_is_shooting(hero->data)) {
-          hero->tilenr = HERO_WALKING_LEFT + 12;
+          fn_hero_data_set_base_tile_number(hero->data, HERO_WALKING_LEFT + 12);
         } else {
-          hero->tilenr = HERO_STANDING_LEFT;
+          fn_hero_data_set_base_tile_number(hero->data, HERO_STANDING_LEFT);
         }
       } else {
         if (fn_hero_data_get_is_shooting(hero->data)) {
-          hero->tilenr = HERO_WALKING_RIGHT + 12;
+          fn_hero_data_set_base_tile_number(hero->data, HERO_WALKING_RIGHT + 12);
         } else {
-          hero->tilenr = HERO_STANDING_RIGHT;
+          fn_hero_data_set_base_tile_number(hero->data, HERO_STANDING_RIGHT);
         }
       }
       hero->num_animationframes = HERO_NUM_ANIM_STANDING;
@@ -397,9 +394,11 @@ void fn_hero_update_animation(
 
       /* hero is walking */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
-        hero->tilenr = HERO_WALKING_LEFT + 4 * hero->animationframe;
+        fn_hero_data_set_base_tile_number(
+                hero->data, HERO_WALKING_LEFT + 4 * hero->animationframe);
       } else {
-        hero->tilenr = HERO_WALKING_RIGHT + 4 * hero->animationframe;
+        fn_hero_data_set_base_tile_number(
+                hero->data, HERO_WALKING_RIGHT + 4 * hero->animationframe);
       }
       hero->num_animationframes = HERO_NUM_ANIM_WALKING;
     }
@@ -411,9 +410,9 @@ void fn_hero_update_animation(
 
       /* hero is jumping */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
-        hero->tilenr = HERO_JUMPING_LEFT;
+        fn_hero_data_set_base_tile_number(hero->data, HERO_JUMPING_LEFT);
       } else {
-        hero->tilenr = HERO_JUMPING_RIGHT;
+        fn_hero_data_set_base_tile_number(hero->data, HERO_JUMPING_RIGHT);
       }
       hero->num_animationframes = HERO_NUM_ANIM_JUMPING;
 
@@ -421,9 +420,9 @@ void fn_hero_update_animation(
 
       /* hero is falling */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
-        hero->tilenr = HERO_FALLING_LEFT;
+        fn_hero_data_set_base_tile_number(hero->data, HERO_FALLING_LEFT);
       } else {
-        hero->tilenr = HERO_FALLING_RIGHT;
+        fn_hero_data_set_base_tile_number(hero->data, HERO_FALLING_RIGHT);
       }
       hero->num_animationframes = HERO_NUM_ANIM_FALLING;
 

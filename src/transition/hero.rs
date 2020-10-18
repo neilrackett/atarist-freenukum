@@ -1,7 +1,10 @@
 use super::geometry::Geometry;
 use super::level::solids::LevelSolids;
 use super::{HorizontalDirection, UserEvent};
-use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
+use crate::{
+    HERO_STANDING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT,
+    TILE_WIDTH,
+};
 use std::convert::TryFrom;
 
 #[repr(C)]
@@ -26,6 +29,7 @@ pub struct HeroData {
     is_in_the_air: bool,
     is_shooting: bool,
     counter: usize,
+    base_tile_number: usize,
 }
 
 impl HeroData {
@@ -44,6 +48,7 @@ impl HeroData {
             is_in_the_air: false,
             is_shooting: false,
             counter: 0,
+            base_tile_number: HERO_STANDING_RIGHT,
         }
     }
 
@@ -61,6 +66,7 @@ impl HeroData {
         self.is_in_the_air = false;
         self.is_shooting = false;
         self.counter = 0;
+        self.base_tile_number = HERO_STANDING_RIGHT;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -72,6 +78,7 @@ impl HeroData {
         self.is_in_the_air = false;
         self.is_shooting = false;
         self.counter = 0;
+        self.base_tile_number = HERO_STANDING_RIGHT;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -553,6 +560,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.counter
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_base_tile_number(
+        ptr: *mut FnHeroData,
+        base_tile_number: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.base_tile_number = base_tile_number;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_base_tile_number(
+        ptr: *const FnHeroData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.base_tile_number
     }
 
     #[no_mangle]

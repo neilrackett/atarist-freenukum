@@ -55,11 +55,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * The tile number that currently represents the hero.
-   */
-  int tilenr;
-
-  /**
    * The current representation of the hero within the tile cache.
    */
   Uint8 animationframe;
