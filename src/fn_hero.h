@@ -99,24 +99,6 @@ void fn_hero_delete(fn_hero_t * hero);
 /* --------------------------------------------------------------- */
 
 /**
- * Fire a shot.
- *
- * @param  hero  The hero.
- */
-void fn_hero_fire_start(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Stop firing a shot.
- *
- * @param  hero  The hero.
- */
-void fn_hero_fire_stop(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the current position of the hero.
  *
  * @param  hero  The hero.

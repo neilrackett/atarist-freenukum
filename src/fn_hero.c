@@ -222,20 +222,6 @@ int fn_hero_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_fire_start(fn_hero_t * hero)
-{
-  fn_hero_data_set_is_shooting(hero->data, true);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_fire_stop(fn_hero_t * hero)
-{
-  fn_hero_data_set_is_shooting(hero->data, false);
-}
-
-/* --------------------------------------------------------------- */
-
 FnGeometry fn_hero_get_position(fn_hero_t * hero)
 {
   FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);

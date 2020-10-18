@@ -488,7 +488,7 @@ int fn_game_start_in_level(
               fn_hero_data_update_animation(hero->data);
               break;
             case SDLK_LALT:
-              fn_hero_fire_start(hero);
+              fn_hero_data_set_is_shooting(hero->data, true);
               fn_level_fire_shot(lv, actor_queue);
               fn_hero_data_update_animation(hero->data);
               break;
@@ -525,7 +525,7 @@ int fn_game_start_in_level(
               }
               break;
             case SDLK_LALT:
-              fn_hero_fire_stop(hero);
+              fn_hero_data_set_is_shooting(hero->data, false);
               fn_hero_data_update_animation(hero->data);
               break;
             default:
@@ -536,7 +536,7 @@ int fn_game_start_in_level(
         case SDL_MOUSEBUTTONDOWN:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
-              fn_hero_fire_start(hero);
+              fn_hero_data_set_is_shooting(hero->data, true);
               fn_level_fire_shot(lv, actor_queue);
               fn_hero_data_update_animation(hero->data);
               break;
@@ -557,7 +557,7 @@ int fn_game_start_in_level(
         case SDL_MOUSEBUTTONUP:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
-              fn_hero_fire_stop(hero);
+              fn_hero_data_set_is_shooting(hero->data, false);
               fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_RIGHT:
