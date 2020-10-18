@@ -32,6 +32,7 @@
 
 #include "fn_shot.h"
 #include "fn_object.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -171,7 +172,7 @@ Uint8 fn_shot_hits_solid(
 
 void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset, FnLevelActorQueue * actor_queue)
 {
-  fn_hero_t * hero = fn_level_get_hero(level);
+  FnHeroData * hero = fn_level_get_hero(level);
   if (shot->countdown == 2) {
     shot->position.x += offset;
     fn_list_t * iter = NULL;
@@ -182,7 +183,7 @@ void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset, FnLevelAc
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
-          fn_level_actor_shot(actor, level->data, hero->data, actor_queue)) {
+          fn_level_actor_shot(actor, level->data, hero, actor_queue)) {
         shot->countdown = 1;
       }
     }

@@ -32,8 +32,8 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_level.h"
-#include "fn_hero.h"
 #include "fn_object.h"
+#include "fn_shot.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -98,7 +98,7 @@ fn_level_t * fn_level_load(FnFile* file,
       fn_level_solids_set(solids, x, y, (tilenr >= 0x1800));
     }
 
-    fn_hero_t * hero = fn_environment_get_hero(env);
+    FnHeroData * hero = fn_environment_get_hero(env);
 
     uint16_t tx = x * FN_TILE_WIDTH;
     uint16_t ty = y * FN_TILE_HEIGHT;
@@ -492,7 +492,7 @@ fn_level_t * fn_level_load(FnFile* file,
             ActorType_RedBallJumping, tx, ty);
         break;
       case 0x3032: /* we found our hero! */
-        fn_hero_data_enter_level(hero->data,
+        fn_hero_data_enter_level(hero,
             x * FN_TILE_WIDTH, (y - 1) * FN_TILE_HEIGHT);
         if (x > 0) {
           fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
@@ -910,7 +910,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     }
   }
 
-  fn_hero_t * hero = fn_environment_get_hero(env);
+  FnHeroData * hero = fn_environment_get_hero(env);
   Uint8 draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(env);
   const FnTileCache * tilecache = fn_environment_get_tilecache(env);
@@ -933,7 +933,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
         if (!fn_level_actor_in_foreground(actor)) {
           fn_level_actor_blit(
                   actor,
-                  hero->data,
+                  hero,
                   tilecache,
                   lv->surface,
                   draw_collision_bounds);
@@ -945,7 +945,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   }
 
   /* blit the hero */
-  fn_hero_data_blit(hero->data,
+  fn_hero_data_blit(hero,
       lv->surface,
       tilecache,
       &(lv->data->solids),
@@ -961,7 +961,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       if (fn_level_actor_in_foreground(actor)) {
         fn_level_actor_blit(
                 actor,
-                hero->data,
+                hero,
                 tilecache,
                 lv->surface,
                 draw_collision_bounds);
@@ -1027,7 +1027,7 @@ int fn_level_keep_on_playing(fn_level_t * lv) {
 
 /* --------------------------------------------------------------- */
 
-fn_hero_t * fn_level_get_hero(fn_level_t * lv) {
+FnHeroData * fn_level_get_hero(fn_level_t * lv) {
   return fn_environment_get_hero(lv->environment);
 }
 
@@ -1042,7 +1042,7 @@ int fn_level_act(
   int res = 0;
   int cleanup = 0;
 
-  fn_hero_t * hero = fn_environment_get_hero(lv->environment);
+  FnHeroData * hero = fn_environment_get_hero(lv->environment);
 
   lv->animated_frames ++;
   lv->animated_frames %= 1;
@@ -1085,7 +1085,7 @@ int fn_level_act(
               fn_level_actor_receive_message(
                       actor,
                       message.message,
-                      hero->data,
+                      hero,
                       lv->data);
           }
       }
@@ -1100,7 +1100,7 @@ int fn_level_act(
     if  (fn_level_actor_acts_while_invisible(actor) ||
             fn_level_actor_is_visible(actor)) {
       sum++;
-      fn_level_actor_act(actor, lv->data, hero->data, actor_queue);
+      fn_level_actor_act(actor, lv->data, hero, actor_queue);
       if (!fn_level_actor_is_alive(actor)) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1123,15 +1123,15 @@ int fn_level_act(
     lv->actors = fn_list_remove_all(lv->actors, NULL);
   }
 
-  fn_hero_data_set_gets_hurt(hero->data, actors_hurting_hero > 0);
+  fn_hero_data_set_gets_hurt(hero, actors_hurting_hero > 0);
 
   if (lv->animated_frames == 0) {
     /* do some action, not just animation */
-    fn_hero_data_act(hero->data, &(lv->data->solids));
+    fn_hero_data_act(hero, &(lv->data->solids));
   }
 
-  fn_hero_data_next_frame(hero->data);
-  fn_hero_data_update_animation(hero->data);
+  fn_hero_data_next_frame(hero);
+  fn_hero_data_update_animation(hero);
 
   return 1;
 }
@@ -1141,9 +1141,9 @@ int fn_level_act(
 void fn_level_hero_interact_stop(fn_level_t * lv)
 {
   if (lv->interactor != NULL) {
-    fn_hero_t * hero = fn_level_get_hero(lv);
+    FnHeroData * hero = fn_level_get_hero(lv);
     fn_level_actor_hero_interact_end(
-            lv->interactor, lv->data, hero->data);
+            lv->interactor, lv->data, hero);
   }
   lv->interactor = NULL;
 }
@@ -1160,10 +1160,10 @@ void fn_level_hero_interact_start(
       iter != NULL;
       iter = fn_list_next(iter)) {
     FnLevelActor * actor = (FnLevelActor *)iter->data;
-    fn_hero_t * hero = fn_level_get_hero(lv);
+    FnHeroData * hero = fn_level_get_hero(lv);
 
-    if (fn_level_actor_hero_can_interact(actor, hero->data)) {
-      FnHeroPosition * position = fn_hero_data_get_position(hero->data);
+    if (fn_level_actor_hero_can_interact(actor, hero)) {
+      FnHeroPosition * position = fn_hero_data_get_position(hero);
 
       FnGeometry heropos = fn_hero_position_get_geometry(position);
 
@@ -1175,7 +1175,7 @@ void fn_level_hero_interact_start(
         fn_level_actor_hero_interact_start(
                 actor,
                 lv->data,
-                hero->data,
+                hero,
                 info_message_queue,
                 actor_message_queue);
         return;
@@ -1226,13 +1226,13 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 
 void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
 {
-  fn_hero_t * hero = fn_level_get_hero(lv);
-  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
+  FnHeroData * hero = fn_level_get_hero(lv);
+  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
+  FnHeroPosition * position = fn_hero_data_get_position(hero);
 
   if (lv->num_shots < fn_hero_firepower_num_shots(firepower)) {
     FnGeometry geometry = fn_hero_position_get_geometry(position);
-    HorizontalDirection direction = fn_hero_data_get_direction(hero->data);
+    HorizontalDirection direction = fn_hero_data_get_direction(hero);
 
     fn_level_add_shot(lv, direction, geometry.x, geometry.y, actor_queue);
     lv->num_shots++;

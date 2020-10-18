@@ -130,7 +130,7 @@ fn_environment_t * fn_environment_create()
   env->tilecache = NULL;
   env->episode = 1;
   env->num_episodes = 0;
-  env->hero = fn_hero_create();
+  env->hero = fn_hero_data_create();
 
   /* create all the path variables */
   char * homepath = getenv("HOME");
@@ -223,7 +223,7 @@ void fn_environment_delete(fn_environment_t * env)
     SDL_FreeSurface(env->screen); env->screen = NULL;
   }
   if (env->hero != NULL) {
-    fn_hero_delete(env->hero); env->hero = NULL;
+    fn_hero_data_free(env->hero); env->hero = NULL;
   }
 
   free(env);
@@ -458,7 +458,7 @@ const FnTexture * fn_environment_get_tile(fn_environment_t * env,
 
 const Uint8 fn_environment_get_health(fn_environment_t * env)
 {
-  FnHeroHealth * health = fn_hero_data_get_health(env->hero->data);
+  FnHeroHealth * health = fn_hero_data_get_health(env->hero);
   return fn_hero_health_get(health);
 }
 
@@ -466,7 +466,7 @@ const Uint8 fn_environment_get_health(fn_environment_t * env)
 
 Uint64 fn_environment_get_score(fn_environment_t * env)
 {
-  FnHeroScore * score = fn_hero_data_get_score(env->hero->data);
+  FnHeroScore * score = fn_hero_data_get_score(env->hero);
   return fn_hero_score_get(score);
 }
 
@@ -508,7 +508,7 @@ void fn_environment_store_settings(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-fn_hero_t * fn_environment_get_hero(fn_environment_t * env)
+FnHeroData * fn_environment_get_hero(fn_environment_t * env)
 {
   return env->hero;
 }

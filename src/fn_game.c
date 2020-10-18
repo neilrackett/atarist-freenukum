@@ -35,7 +35,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_environment.h"
-#include "fn_hero.h"
 #include "fn_game.h"
 #include "fn_picture_splash.h"
 #include "fn_level.h"
@@ -101,10 +100,10 @@ void fn_game_start(
       79,
       144);
 
-  fn_hero_t * hero = fn_environment_get_hero(env);
-  fn_hero_data_reset(hero->data);
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
-  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
+  FnHeroData * hero = fn_environment_get_hero(env);
+  fn_hero_data_reset(hero);
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero);
+  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
@@ -191,7 +190,7 @@ int fn_game_start_in_level(
   int res = 0;
   int doupdate = 1;
 
-  fn_hero_t * hero = fn_environment_get_hero(env);
+  FnHeroData * hero = fn_environment_get_hero(env);
 
   SDL_Surface * level = fn_environment_create_surface(
       env,
@@ -286,7 +285,7 @@ int fn_game_start_in_level(
   dstrect.w = (FN_LEVELWINDOW_WIDTH + 2) * FN_TILE_WIDTH;
   dstrect.h = (FN_LEVELWINDOW_HEIGHT + 2) * FN_TILE_HEIGHT;
 
-  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
+  FnHeroPosition * hero_position = fn_hero_data_get_position(hero);
   FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
   srcrect.x = (hero_geometry.x + FN_TILE_WIDTH) - dstrect.w / 2;
@@ -366,9 +365,9 @@ int fn_game_start_in_level(
             tilecache,
             texture_creation_params);
 
-    FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
-    FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
-    FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
+    FnHeroInventory * inventory = fn_hero_data_get_inventory(hero);
+    FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
+    FnHeroPosition * hero_position = fn_hero_data_get_position(hero);
     FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
     res = SDL_WaitEvent(&event);
@@ -454,13 +453,13 @@ int fn_game_start_in_level(
               } else {
                 directions |= FNK_LEFT_ENABLED;
                 if (directions & FNK_RIGHT_ENABLED) {
-                  fn_hero_data_set_motion(hero->data, Motion_NotMoving);
+                  fn_hero_data_set_motion(hero, Motion_NotMoving);
                 } else {
-                  fn_hero_data_set_direction(hero->data,
+                  fn_hero_data_set_direction(hero,
                       HorizontalDirection_Left);
-                  fn_hero_data_set_motion(hero->data, Motion_Walking);
+                  fn_hero_data_set_motion(hero, Motion_Walking);
                 }
-                fn_hero_data_update_animation(hero->data);
+                fn_hero_data_update_animation(hero);
               }
               doupdate = 1;
               break;
@@ -473,24 +472,24 @@ int fn_game_start_in_level(
               } else {
                 directions |= FNK_RIGHT_ENABLED;
                 if (directions & FNK_LEFT_ENABLED) {
-                  fn_hero_data_set_motion(hero->data, Motion_NotMoving);
+                  fn_hero_data_set_motion(hero, Motion_NotMoving);
                 } else {
-                  fn_hero_data_set_direction(hero->data,
+                  fn_hero_data_set_direction(hero,
                       HorizontalDirection_Right);
-                  fn_hero_data_set_motion(hero->data, Motion_Walking);
+                  fn_hero_data_set_motion(hero, Motion_Walking);
                 }
-                fn_hero_data_update_animation(hero->data);
+                fn_hero_data_update_animation(hero);
               }
               doupdate = 1;
               break;
             case SDLK_LCTRL:
-              fn_hero_data_jump(hero->data);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_jump(hero);
+              fn_hero_data_update_animation(hero);
               break;
             case SDLK_LALT:
-              fn_hero_data_set_is_shooting(hero->data, true);
+              fn_hero_data_set_is_shooting(hero, true);
               fn_level_fire_shot(lv, actor_queue);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_update_animation(hero);
               break;
             default:
               /* do nothing on other key input (yet) */
@@ -506,27 +505,27 @@ int fn_game_start_in_level(
             case SDLK_LEFT:
               directions &= ~FNK_LEFT_ENABLED;
               if (directions & FNK_RIGHT_ENABLED) {
-                fn_hero_data_set_direction(hero->data,
+                fn_hero_data_set_direction(hero,
                     HorizontalDirection_Right);
-                fn_hero_data_set_motion(hero->data, Motion_Walking);
+                fn_hero_data_set_motion(hero, Motion_Walking);
               } else {
-                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
+                fn_hero_data_set_motion(hero, Motion_NotMoving);
               }
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_update_animation(hero);
               break;
             case SDLK_RIGHT:
               directions &= ~FNK_RIGHT_ENABLED;
               if (directions & FNK_LEFT_ENABLED) {
-                  fn_hero_data_set_direction(hero->data,
+                  fn_hero_data_set_direction(hero,
                       HorizontalDirection_Left);
-                  fn_hero_data_set_motion(hero->data, Motion_Walking);
+                  fn_hero_data_set_motion(hero, Motion_Walking);
               } else {
-                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
+                fn_hero_data_set_motion(hero, Motion_NotMoving);
               }
               break;
             case SDLK_LALT:
-              fn_hero_data_set_is_shooting(hero->data, false);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_set_is_shooting(hero, false);
+              fn_hero_data_update_animation(hero);
               break;
             default:
               /* do nothing on other keys. */
@@ -536,13 +535,13 @@ int fn_game_start_in_level(
         case SDL_MOUSEBUTTONDOWN:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
-              fn_hero_data_set_is_shooting(hero->data, true);
+              fn_hero_data_set_is_shooting(hero, true);
               fn_level_fire_shot(lv, actor_queue);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_update_animation(hero);
               break;
             case SDL_BUTTON_RIGHT:
-              fn_hero_data_jump(hero->data);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_jump(hero);
+              fn_hero_data_update_animation(hero);
               break;
             case SDL_BUTTON_MIDDLE:
               fn_level_hero_interact_start(
@@ -557,8 +556,8 @@ int fn_game_start_in_level(
         case SDL_MOUSEBUTTONUP:
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
-              fn_hero_data_set_is_shooting(hero->data, false);
-              fn_hero_data_update_animation(hero->data);
+              fn_hero_data_set_is_shooting(hero, false);
+              fn_hero_data_update_animation(hero);
               break;
             case SDL_BUTTON_RIGHT:
               break;

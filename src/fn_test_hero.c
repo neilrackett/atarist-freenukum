@@ -31,7 +31,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_hero.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
 #include "fn_environment.h"
@@ -60,7 +59,7 @@ int main(int argc, char ** argv)
 {
   fn_environment_t * env = fn_environment_create();
   fn_environment_load_tilecache(env);
-  fn_hero_t * hero;
+  FnHeroData * hero;
 
   int res;
   SDL_Event event;
@@ -76,10 +75,10 @@ int main(int argc, char ** argv)
   bool draw_collision_bounds = fn_environment_get_draw_collision_bounds(env);
 
   /* here comes the hero!!!!! */
-  hero = fn_hero_create();
+  hero = fn_hero_data_create();
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_hero_data_blit(
-          hero->data, screen, tilecache, NULL, draw_collision_bounds);
+          hero, screen, tilecache, NULL, draw_collision_bounds);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
   timer = SDL_AddTimer(250, animate, NULL);
@@ -94,10 +93,10 @@ int main(int argc, char ** argv)
         case SDL_USEREVENT:
           if (event.user.code == EVENT_CODE_TIMER) {
             SDL_FillRect(screen, NULL, 0);
-            fn_hero_data_update_animation(hero->data);
-            fn_hero_data_next_frame(hero->data);
+            fn_hero_data_update_animation(hero);
+            fn_hero_data_next_frame(hero);
             fn_hero_data_blit(
-                    hero->data,
+                    hero,
                     screen,
                     tilecache,
                     NULL,
@@ -116,26 +115,26 @@ int main(int argc, char ** argv)
             case SDLK_LEFT:
               if (event.key.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_RIGHT) {
-                  fn_hero_data_set_direction(hero->data,
+                  fn_hero_data_set_direction(hero,
                       HorizontalDirection_Right);
                 } else {
-                  fn_hero_data_set_direction(hero->data,
+                  fn_hero_data_set_direction(hero,
                       HorizontalDirection_Left);
                 }
-                fn_hero_data_set_motion(hero->data, Motion_Walking);
+                fn_hero_data_set_motion(hero, Motion_Walking);
               } else if (event.key.type == SDL_KEYUP) {
-                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
+                fn_hero_data_set_motion(hero, Motion_NotMoving);
               }
               break;
             case SDLK_LCTRL:
             case SDLK_RCTRL:
               if (event.key.type == SDL_KEYDOWN) {
-                fn_hero_data_jump(hero->data);
+                fn_hero_data_jump(hero);
               }
               break;
             case SDLK_LALT:
             case SDLK_RALT:
-              fn_hero_data_land(hero->data);
+              fn_hero_data_land(hero);
               break;
             default:
               /* do nothing, ignoring other keys. */

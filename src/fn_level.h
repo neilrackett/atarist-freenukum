@@ -40,7 +40,6 @@ typedef struct fn_level_t fn_level_t;
  * at the beginning of this file because fn_level_t is
  * not yet defined there.
  */
-#include "fn_hero.h"
 #include "fn_shot.h"
 #include "fn_list.h"
 #include "fn_environment.h"
@@ -207,7 +206,7 @@ int fn_level_keep_on_playing(fn_level_t * lv);
  *
  * @return The hero.
  */
-fn_hero_t * fn_level_get_hero(fn_level_t * lv);
+FnHeroData * fn_level_get_hero(fn_level_t * lv);
 
 /* --------------------------------------------------------------- */
 
