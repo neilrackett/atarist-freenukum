@@ -1,6 +1,6 @@
 use super::geometry::Geometry;
 use super::level::solids::LevelSolids;
-use super::UserEvent;
+use super::{HorizontalDirection, UserEvent};
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
 
@@ -13,6 +13,7 @@ pub struct HeroData {
     pub inventory: Inventory,
     pub fetched_letter_state: FetchedLetterState,
     pub hidden: bool,
+    pub direction: HorizontalDirection,
 }
 
 impl HeroData {
@@ -25,6 +26,7 @@ impl HeroData {
             inventory: Inventory::new(),
             fetched_letter_state: FetchedLetterState::new(),
             hidden: false,
+            direction: HorizontalDirection::Right,
         }
     }
 
@@ -36,6 +38,11 @@ impl HeroData {
         self.inventory.reset();
         self.fetched_letter_state.reset();
         self.hidden = false;
+        self.direction = HorizontalDirection::Right;
+    }
+
+    pub fn reset_for_level(&mut self) {
+        self.direction = HorizontalDirection::Right;
     }
 }
 
@@ -388,6 +395,7 @@ impl TryFrom<char> for FetchedLetter {
 pub mod ffi {
     use super::super::geometry::ffi::FnGeometry;
     use super::super::level::solids::ffi::FnLevelSolids;
+    use super::super::HorizontalDirection;
     use libc::c_char;
 
     pub type FnHeroData = super::HeroData;
@@ -585,6 +593,32 @@ pub mod ffi {
         assert!(!data.is_null());
         let data: &mut FnHeroData = unsafe { &mut (*data) };
         data.reset();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_reset_for_level(data: *mut FnHeroData) {
+        assert!(!data.is_null());
+        let data: &mut FnHeroData = unsafe { &mut (*data) };
+        data.reset_for_level();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_direction(
+        data: *const FnHeroData,
+    ) -> HorizontalDirection {
+        assert!(!data.is_null());
+        let data: &FnHeroData = unsafe { &(*data) };
+        data.direction
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_direction(
+        data: *mut FnHeroData,
+        direction: HorizontalDirection,
+    ) {
+        assert!(!data.is_null());
+        let data: &mut FnHeroData = unsafe { &mut (*data) };
+        data.direction = direction;
     }
 
     #[no_mangle]

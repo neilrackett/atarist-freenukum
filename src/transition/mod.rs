@@ -19,7 +19,7 @@ pub mod tile;
 pub mod tilecache;
 
 #[repr(C)]
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
 pub enum HorizontalDirection {
     Center,
     Left,

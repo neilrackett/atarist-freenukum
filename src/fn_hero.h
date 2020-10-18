@@ -61,11 +61,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * The direction to which the hero moves.
-   */
-  FnHorizontalDirection direction;
-
-  /**
    * The motion state (none or walking).
    */
   Uint8 motion;

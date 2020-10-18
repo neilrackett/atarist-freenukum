@@ -496,6 +496,8 @@ FnHeroData *fn_hero_data_create(void);
 
 void fn_hero_data_free(FnHeroData *ptr);
 
+HorizontalDirection fn_hero_data_get_direction(const FnHeroData *data);
+
 FnHeroFetchedLetterState *fn_hero_data_get_fetched_letter_state(FnHeroData *ptr);
 
 FnHeroFirepower *fn_hero_data_get_firepower(FnHeroData *ptr);
@@ -511,6 +513,11 @@ FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
 void fn_hero_data_reset(FnHeroData *data);
+
+void fn_hero_data_reset_for_level(FnHeroData *data);
+
+void fn_hero_data_set_direction(FnHeroData *data,
+                                HorizontalDirection direction);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
 
