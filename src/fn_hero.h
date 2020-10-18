@@ -54,15 +54,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * The current representation of the hero within the tile cache.
-   */
-  Uint8 animationframe;
-  /**
-   * The number of frames inside the current animation.
-   */
-  Uint8 num_animationframes;
-
-  /**
    * The hero data.
    */
   FnHeroData * data;
@@ -133,11 +124,6 @@ void fn_hero_blit(
  */
 int fn_hero_act(fn_hero_t * hero,
     FnLevelSolids * solids);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_next_animationframe(
-    fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 

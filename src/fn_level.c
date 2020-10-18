@@ -1130,7 +1130,7 @@ int fn_level_act(
     fn_hero_act(hero, &(lv->data->solids));
   }
 
-  fn_hero_next_animationframe(hero);
+  fn_hero_data_next_frame(hero->data);
   fn_hero_update_animation(hero);
 
   return 1;

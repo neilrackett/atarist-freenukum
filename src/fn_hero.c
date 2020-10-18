@@ -68,9 +68,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   hero->verticalspeed = 0;
 
-  hero->animationframe = 0;
-  hero->num_animationframes = 1;
-
   hero->immunitycountdown = 0;
   hero->immunityduration = 16;
   hero->gets_hurt = false;
@@ -89,9 +86,6 @@ void fn_hero_enterlevel(
   fn_hero_set_y(hero, y);
   fn_hero_data_reset_for_level(hero->data);
   hero->verticalspeed = 0;
-
-  hero->animationframe = 0;
-  hero->num_animationframes = 1;
 
   FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
   fn_hero_inventory_unset(inventory, InventoryItem_KeyRed);
@@ -352,20 +346,6 @@ int fn_hero_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_next_animationframe(
-    fn_hero_t * hero)
-{
-  hero->animationframe++;
-  hero->animationframe %= hero->num_animationframes;
-  /*
-  if (hero->counter > 0) {
-    hero->counter--;
-  }
-  */
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_update_animation(
     fn_hero_t * hero)
 {
@@ -388,19 +368,21 @@ void fn_hero_update_animation(
           fn_hero_data_set_base_tile_number(hero->data, HERO_STANDING_RIGHT);
         }
       }
-      hero->num_animationframes = HERO_NUM_ANIM_STANDING;
+      fn_hero_data_set_num_frames(hero->data, HERO_NUM_ANIM_STANDING);
 
     } else {
 
       /* hero is walking */
+      fn_hero_data_set_num_frames(hero->data, HERO_NUM_ANIM_WALKING);
+      size_t current_frame =
+          fn_hero_data_get_current_frame(hero->data);
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
         fn_hero_data_set_base_tile_number(
-                hero->data, HERO_WALKING_LEFT + 4 * hero->animationframe);
+                hero->data, HERO_WALKING_LEFT + 4 * current_frame);
       } else {
         fn_hero_data_set_base_tile_number(
-                hero->data, HERO_WALKING_RIGHT + 4 * hero->animationframe);
+                hero->data, HERO_WALKING_RIGHT + 4 * current_frame);
       }
-      hero->num_animationframes = HERO_NUM_ANIM_WALKING;
     }
 
   } else {
@@ -409,22 +391,22 @@ void fn_hero_update_animation(
     if (fn_hero_data_get_counter(hero->data) > 0) {
 
       /* hero is jumping */
+      fn_hero_data_set_num_frames(hero->data, HERO_NUM_ANIM_JUMPING);
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
         fn_hero_data_set_base_tile_number(hero->data, HERO_JUMPING_LEFT);
       } else {
         fn_hero_data_set_base_tile_number(hero->data, HERO_JUMPING_RIGHT);
       }
-      hero->num_animationframes = HERO_NUM_ANIM_JUMPING;
 
     } else {
 
       /* hero is falling */
+      fn_hero_data_set_num_frames(hero->data, HERO_NUM_ANIM_FALLING);
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
         fn_hero_data_set_base_tile_number(hero->data, HERO_FALLING_LEFT);
       } else {
         fn_hero_data_set_base_tile_number(hero->data, HERO_FALLING_RIGHT);
       }
-      hero->num_animationframes = HERO_NUM_ANIM_FALLING;
 
     }
   }

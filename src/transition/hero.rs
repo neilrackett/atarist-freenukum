@@ -30,6 +30,8 @@ pub struct HeroData {
     is_shooting: bool,
     counter: usize,
     base_tile_number: usize,
+    current_frame: usize,
+    num_frames: usize,
 }
 
 impl HeroData {
@@ -49,6 +51,8 @@ impl HeroData {
             is_shooting: false,
             counter: 0,
             base_tile_number: HERO_STANDING_RIGHT,
+            current_frame: 0,
+            num_frames: 1,
         }
     }
 
@@ -67,6 +71,8 @@ impl HeroData {
         self.is_shooting = false;
         self.counter = 0;
         self.base_tile_number = HERO_STANDING_RIGHT;
+        self.current_frame = 0;
+        self.num_frames = 1;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -79,6 +85,8 @@ impl HeroData {
         self.is_shooting = false;
         self.counter = 0;
         self.base_tile_number = HERO_STANDING_RIGHT;
+        self.current_frame = 0;
+        self.num_frames = 1;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -98,6 +106,16 @@ impl HeroData {
 
     pub fn get_just_turned_around(&self) -> bool {
         self.just_turned_around
+    }
+
+    pub fn next_frame(&mut self) {
+        self.current_frame += 1;
+        self.current_frame %= self.num_frames;
+    }
+
+    pub fn set_num_frames(&mut self, num_frames: usize) {
+        self.num_frames = num_frames;
+        self.current_frame %= self.num_frames;
     }
 }
 
@@ -484,6 +502,32 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
         &mut d.position
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_next_frame(ptr: *mut FnHeroData) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.next_frame();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_num_frames(
+        ptr: *mut FnHeroData,
+        num_frames: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.set_num_frames(num_frames);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_current_frame(
+        ptr: *const FnHeroData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.current_frame
     }
 
     #[no_mangle]

@@ -509,6 +509,8 @@ uintptr_t fn_hero_data_get_base_tile_number(const FnHeroData *ptr);
 
 uintptr_t fn_hero_data_get_counter(const FnHeroData *ptr);
 
+uintptr_t fn_hero_data_get_current_frame(const FnHeroData *ptr);
+
 HorizontalDirection fn_hero_data_get_direction(const FnHeroData *data);
 
 FnHeroFetchedLetterState *fn_hero_data_get_fetched_letter_state(FnHeroData *ptr);
@@ -533,6 +535,8 @@ FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
+void fn_hero_data_next_frame(FnHeroData *ptr);
+
 void fn_hero_data_reset(FnHeroData *data);
 
 void fn_hero_data_reset_for_level(FnHeroData *data);
@@ -554,6 +558,8 @@ void fn_hero_data_set_is_in_the_air(FnHeroData *ptr, bool is_in_the_air);
 void fn_hero_data_set_is_shooting(FnHeroData *ptr, bool is_shooting);
 
 void fn_hero_data_set_motion(FnHeroData *ptr, FnHeroMotion motion);
+
+void fn_hero_data_set_num_frames(FnHeroData *ptr, uintptr_t num_frames);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);

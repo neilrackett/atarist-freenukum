@@ -34,6 +34,7 @@
 #include "fn_hero.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
+#include "fn_environment.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -93,7 +94,7 @@ int main(int argc, char ** argv)
           if (event.user.code == EVENT_CODE_TIMER) {
             SDL_FillRect(screen, NULL, 0);
             fn_hero_update_animation(hero);
-            fn_hero_next_animationframe(hero);
+            fn_hero_data_next_frame(hero->data);
             fn_hero_blit(hero, screen, tilecache, NULL, draw_collision_bounds);
             SDL_UpdateRect(screen, 0, 0, 0, 0);
           }
