@@ -517,6 +517,8 @@ FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
 
 bool fn_hero_data_get_is_in_the_air(const FnHeroData *ptr);
 
+bool fn_hero_data_get_is_shooting(const FnHeroData *ptr);
+
 bool fn_hero_data_get_just_turned_around(const FnHeroData *ptr);
 
 FnHeroMotion fn_hero_data_get_motion(const FnHeroData *ptr);
@@ -537,6 +539,8 @@ void fn_hero_data_set_direction(FnHeroData *data,
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
 
 void fn_hero_data_set_is_in_the_air(FnHeroData *ptr, bool is_in_the_air);
+
+void fn_hero_data_set_is_shooting(FnHeroData *ptr, bool is_shooting);
 
 void fn_hero_data_set_motion(FnHeroData *ptr, FnHeroMotion motion);
 

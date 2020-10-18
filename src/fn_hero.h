@@ -45,9 +45,6 @@ typedef struct fn_hero_t fn_hero_t;
 
 /* --------------------------------------------------------------- */
 
-#define FN_HERO_FLYING_FALSE       0
-#define FN_HERO_FLYING_TRUE        1
-
 #define FN_HERO_SHOOTING_FALSE     0
 #define FN_HERO_SHOOTING_TRUE      1
 
@@ -57,11 +54,6 @@ typedef struct fn_hero_t fn_hero_t;
  * Our hero.
  */
 struct fn_hero_t {
-  /**
-   * Is the hero currently shooting?
-   */
-  Uint8 shooting;
-
   /**
    * The counter for actions that take longer than one animation frame.
    */
@@ -216,12 +208,6 @@ Uint8 fn_hero_is_moving_horizontally(
 void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
     bool is_in_the_air);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_shooting(
-    fn_hero_t * hero,
-    Uint8 shooting);
 
 /* --------------------------------------------------------------- */
 

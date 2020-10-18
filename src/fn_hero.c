@@ -66,7 +66,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_data_reset(hero->data);
 
-  hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->counter = 0;
   hero->tilenr = HERO_STANDING_RIGHT;
   hero->verticalspeed = 0;
@@ -91,7 +90,6 @@ void fn_hero_enterlevel(
   fn_hero_set_x(hero, x);
   fn_hero_set_y(hero, y);
   fn_hero_data_reset_for_level(hero->data);
-  hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->verticalspeed = 0;
 
   hero->counter = 0;
@@ -383,13 +381,13 @@ void fn_hero_update_animation(
 
       /* hero is standing */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
-        if (hero->shooting == FN_HERO_SHOOTING_TRUE) {
+        if (fn_hero_data_get_is_shooting(hero->data)) {
           hero->tilenr = HERO_WALKING_LEFT + 12;
         } else {
           hero->tilenr = HERO_STANDING_LEFT;
         }
       } else {
-        if (hero->shooting == FN_HERO_SHOOTING_TRUE) {
+        if (fn_hero_data_get_is_shooting(hero->data)) {
           hero->tilenr = HERO_WALKING_RIGHT + 12;
         } else {
           hero->tilenr = HERO_STANDING_RIGHT;
@@ -463,15 +461,6 @@ void fn_hero_set_is_in_the_air(
     }
   }
   fn_hero_data_set_is_in_the_air(hero->data, is_in_the_air);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_shooting(
-    fn_hero_t * hero,
-    Uint8 shooting)
-{
-  hero->shooting = shooting;
 }
 
 /* --------------------------------------------------------------- */
@@ -570,14 +559,14 @@ int fn_hero_would_collide(
 
 void fn_hero_fire_start(fn_hero_t * hero)
 {
-  fn_hero_set_shooting(hero, FN_HERO_SHOOTING_TRUE);
+  fn_hero_data_set_is_shooting(hero->data, true);
 }
 
 /* --------------------------------------------------------------- */
 
 void fn_hero_fire_stop(fn_hero_t * hero)
 {
-  fn_hero_set_shooting(hero, FN_HERO_SHOOTING_FALSE);
+  fn_hero_data_set_is_shooting(hero->data, false);
 }
 
 /* --------------------------------------------------------------- */
