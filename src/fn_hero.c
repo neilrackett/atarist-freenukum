@@ -66,7 +66,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_data_reset(hero->data);
 
-  hero->motion = FN_HERO_MOTION_NONE;
   hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->counter = 0;
@@ -93,7 +92,6 @@ void fn_hero_enterlevel(
   fn_hero_set_x(hero, x);
   fn_hero_set_y(hero, y);
   fn_hero_data_reset_for_level(hero->data);
-  hero->motion = FN_HERO_MOTION_NONE;
   hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->verticalspeed = 0;
@@ -223,7 +221,7 @@ int fn_hero_act(
     return fn_hero_health_get(health);
   }
 
-  if (hero->motion == FN_HERO_MOTION_WALKING) {
+  if (fn_hero_data_get_motion(hero->data) == Motion_Walking) {
     /* our hero is moving */
     if (fn_hero_data_get_just_turned_around(hero->data)) {
       fn_hero_data_reset_just_turned_around(hero->data);
@@ -383,7 +381,7 @@ void fn_hero_update_animation(
   if (hero->flying == FN_HERO_FLYING_FALSE) {
 
     /* hero is standing or walking on ground */
-    if (hero->motion == FN_HERO_MOTION_NONE) {
+    if (fn_hero_data_get_motion(hero->data) == Motion_NotMoving) {
 
       /* hero is standing */
       if (fn_hero_data_get_direction(hero->data) == HorizontalDirection_Left) {
@@ -438,15 +436,6 @@ void fn_hero_update_animation(
     }
   }
 
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_motion(
-    fn_hero_t * hero,
-    Uint8 motion)
-{
-  hero->motion = motion;
 }
 
 /* --------------------------------------------------------------- */

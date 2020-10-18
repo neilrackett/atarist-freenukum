@@ -115,9 +115,9 @@ int main(int argc, char ** argv)
                   fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Left);
                 }
-                fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
+                fn_hero_data_set_motion(hero->data, Motion_Walking);
               } else if (event.key.type == SDL_KEYUP) {
-                fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
+                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
               }
               break;
             case SDLK_LCTRL:

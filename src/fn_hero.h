@@ -45,9 +45,6 @@ typedef struct fn_hero_t fn_hero_t;
 
 /* --------------------------------------------------------------- */
 
-#define FN_HERO_MOTION_NONE        0
-#define FN_HERO_MOTION_WALKING     1
-
 #define FN_HERO_FLYING_FALSE       0
 #define FN_HERO_FLYING_TRUE        1
 
@@ -60,11 +57,6 @@ typedef struct fn_hero_t fn_hero_t;
  * Our hero.
  */
 struct fn_hero_t {
-  /**
-   * The motion state (none or walking).
-   */
-  Uint8 motion;
-
   /**
    * Is the hero going up (flying) or resting (falling/standing)?
    */
@@ -218,12 +210,6 @@ void fn_hero_enterlevel(
     fn_hero_t * hero,
     Uint32 x,
     Uint32 y);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_motion(
-    fn_hero_t * hero,
-    Uint8 motion);
 
 /* --------------------------------------------------------------- */
 

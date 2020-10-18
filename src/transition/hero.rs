@@ -4,6 +4,13 @@ use super::{HorizontalDirection, UserEvent};
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use std::convert::TryFrom;
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub enum Motion {
+    NotMoving,
+    Walking,
+}
+
 #[derive(Debug)]
 pub struct HeroData {
     pub position: Position,
@@ -15,6 +22,7 @@ pub struct HeroData {
     pub hidden: bool,
     direction: HorizontalDirection,
     just_turned_around: bool,
+    motion: Motion,
 }
 
 impl HeroData {
@@ -29,6 +37,7 @@ impl HeroData {
             hidden: false,
             direction: HorizontalDirection::Right,
             just_turned_around: false,
+            motion: Motion::NotMoving,
         }
     }
 
@@ -42,6 +51,7 @@ impl HeroData {
         self.hidden = false;
         self.direction = HorizontalDirection::Right;
         self.just_turned_around = false;
+        self.motion = Motion::NotMoving;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -49,6 +59,7 @@ impl HeroData {
         self.fetched_letter_state.reset();
         self.hidden = false;
         self.just_turned_around = false;
+        self.motion = Motion::NotMoving;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -431,6 +442,7 @@ pub mod ffi {
     pub type FnHeroInventoryItem = super::InventoryItem;
     pub type FnHeroInventory = super::Inventory;
     pub type FnHeroFetchedLetterState = super::FetchedLetterState;
+    pub type FnHeroMotion = super::Motion;
 
     #[no_mangle]
     pub extern "C" fn fn_hero_data_create() -> *mut FnHeroData {
@@ -472,6 +484,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.hidden
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_motion(
+        ptr: *mut FnHeroData,
+        motion: FnHeroMotion,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.motion = motion;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_motion(
+        ptr: *const FnHeroData,
+    ) -> FnHeroMotion {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.motion
     }
 
     #[no_mangle]

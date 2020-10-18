@@ -454,11 +454,11 @@ int fn_game_start_in_level(
               } else {
                 directions |= FNK_LEFT_ENABLED;
                 if (directions & FNK_RIGHT_ENABLED) {
-                  fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
+                  fn_hero_data_set_motion(hero->data, Motion_NotMoving);
                 } else {
                   fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Left);
-                  fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
+                  fn_hero_data_set_motion(hero->data, Motion_Walking);
                 }
                 fn_hero_update_animation(hero);
               }
@@ -473,11 +473,11 @@ int fn_game_start_in_level(
               } else {
                 directions |= FNK_RIGHT_ENABLED;
                 if (directions & FNK_LEFT_ENABLED) {
-                  fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
+                  fn_hero_data_set_motion(hero->data, Motion_NotMoving);
                 } else {
                   fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Right);
-                  fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
+                  fn_hero_data_set_motion(hero->data, Motion_Walking);
                 }
                 fn_hero_update_animation(hero);
               }
@@ -508,9 +508,9 @@ int fn_game_start_in_level(
               if (directions & FNK_RIGHT_ENABLED) {
                 fn_hero_data_set_direction(hero->data,
                     HorizontalDirection_Right);
-                fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
+                fn_hero_data_set_motion(hero->data, Motion_Walking);
               } else {
-                fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
+                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
               }
               fn_hero_update_animation(hero);
               break;
@@ -519,9 +519,9 @@ int fn_game_start_in_level(
               if (directions & FNK_LEFT_ENABLED) {
                   fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Left);
-                  fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
+                  fn_hero_data_set_motion(hero->data, Motion_Walking);
               } else {
-                fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
+                fn_hero_data_set_motion(hero->data, Motion_NotMoving);
               }
               break;
             case SDLK_LALT:

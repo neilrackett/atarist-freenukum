@@ -264,6 +264,11 @@ typedef enum {
 } MainMenuEntry;
 
 typedef enum {
+    Motion_NotMoving,
+    Motion_Walking,
+} Motion;
+
+typedef enum {
     UserEvent_Timer,
     UserEvent_HeroMoved,
     UserEvent_HeroScored,
@@ -349,6 +354,8 @@ typedef HeroData FnHeroData;
 typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
+
+typedef Motion FnHeroMotion;
 
 typedef Position FnHeroPosition;
 
@@ -510,6 +517,8 @@ FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
 
 bool fn_hero_data_get_just_turned_around(const FnHeroData *ptr);
 
+FnHeroMotion fn_hero_data_get_motion(const FnHeroData *ptr);
+
 FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
@@ -524,6 +533,8 @@ void fn_hero_data_set_direction(FnHeroData *data,
                                 HorizontalDirection direction);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
+
+void fn_hero_data_set_motion(FnHeroData *ptr, FnHeroMotion motion);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);
