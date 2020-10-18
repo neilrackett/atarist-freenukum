@@ -38,13 +38,12 @@
 
 /* --------------------------------------------------------------- */
 
-fn_hero_t * fn_hero_create(fn_environment_t * env)
+fn_hero_t * fn_hero_create()
 {
   fn_hero_t * hero = malloc(sizeof(fn_hero_t));
 
   hero->data = fn_hero_data_create();
 
-  assert(env != NULL);
   fn_hero_reset(hero);
 
   return hero;

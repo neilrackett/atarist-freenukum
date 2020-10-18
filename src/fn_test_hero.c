@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
   bool draw_collision_bounds = fn_environment_get_draw_collision_bounds(env);
 
   /* here comes the hero!!!!! */
-  hero = fn_hero_create(env);
+  hero = fn_hero_create();
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_hero_blit(hero, screen, tilecache, NULL, draw_collision_bounds);
   SDL_UpdateRect(screen, 0, 0, 0, 0);

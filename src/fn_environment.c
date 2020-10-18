@@ -130,7 +130,7 @@ fn_environment_t * fn_environment_create()
   env->tilecache = NULL;
   env->episode = 1;
   env->num_episodes = 0;
-  env->hero = fn_hero_create(env);
+  env->hero = fn_hero_create();
 
   /* create all the path variables */
   char * homepath = getenv("HOME");
