@@ -945,7 +945,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   }
 
   /* blit the hero */
-  fn_hero_blit(hero,
+  fn_hero_data_blit(hero->data,
       lv->surface,
       tilecache,
       &(lv->data->solids),

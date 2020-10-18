@@ -66,23 +66,6 @@ typedef void (*fn_hero_changed_f)(fn_hero_t *);
 /* --------------------------------------------------------------- */
 
 /**
- * Blit the hero.
- *
- * @param  hero        The hero.
- * @param  target      The target surface.
- * @param  level       The level to which the hero is blit.
- *                     Can be NULL in order to blit without a level.
- */
-void fn_hero_blit(
-    fn_hero_t * hero,
-    SDL_Surface * target,
-    const FnTileCache * tilecache,
-    FnLevelSolids * solids,
-    bool draw_collision_bounds);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Let the hero act execute his next timed action.
  *
  * @param  hero  The hero that has to act.

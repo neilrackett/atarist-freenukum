@@ -1,11 +1,14 @@
 use super::geometry::Geometry;
 use super::level::solids::LevelSolids;
+use super::tilecache::TileCache;
 use super::{HorizontalDirection, UserEvent};
 use crate::{
+    HALFTILE_WIDTH, HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT,
     HERO_STANDING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT,
     TILE_WIDTH,
 };
 use std::convert::TryFrom;
+use transdl::video::Surface;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -132,6 +135,79 @@ impl HeroData {
     pub fn set_num_frames(&mut self, num_frames: usize) {
         self.num_frames = num_frames;
         self.current_frame %= self.num_frames;
+    }
+
+    pub fn blit(
+        &self,
+        target: &mut Surface,
+        tilecache: &TileCache,
+        solids: &LevelSolids,
+        draw_collision_bounds: bool,
+    ) {
+        if self.hidden {
+            return;
+        }
+        if self.immunity_countdown % 2 > 0 {
+            return;
+        }
+
+        let mut destrect = self.position.geometry;
+        destrect.x -= HALFTILE_WIDTH as i16;
+        let base_tile_number =
+            if self.immunity_countdown == self.immunity_duration {
+                match self.direction {
+                    HorizontalDirection::Left => HERO_SKELETON_LEFT,
+                    HorizontalDirection::Right => HERO_SKELETON_RIGHT,
+                    HorizontalDirection::Center => unreachable!(),
+                }
+            } else {
+                self.base_tile_number
+            };
+
+        tilecache
+            .get_tile(base_tile_number)
+            .unwrap()
+            .blit_to_sdl_surface(None, target, Some(destrect));
+        destrect.x += destrect.w as i16;
+        tilecache
+            .get_tile(base_tile_number + 1)
+            .unwrap()
+            .blit_to_sdl_surface(None, target, Some(destrect));
+        destrect.x -= destrect.w as i16;
+        destrect.y += destrect.h as i16 / 2;
+        tilecache
+            .get_tile(base_tile_number + 2)
+            .unwrap()
+            .blit_to_sdl_surface(None, target, Some(destrect));
+        destrect.x += destrect.w as i16;
+        tilecache
+            .get_tile(base_tile_number + 3)
+            .unwrap()
+            .blit_to_sdl_surface(None, target, Some(destrect));
+
+        if draw_collision_bounds {
+            let color = crate::collision_bounds_color(&target.format());
+            let g = self.position.geometry;
+            g.draw_outline(target, color);
+
+            for i in (g.x as usize / TILE_WIDTH) - 1
+                ..(g.x as usize / TILE_WIDTH) + 2
+            {
+                for j in (g.y as usize / TILE_HEIGHT) - 1
+                    ..(g.y as usize / TILE_HEIGHT) + 3
+                {
+                    if solids.get(i, j) {
+                        let obstacle = Geometry {
+                            x: (i * TILE_WIDTH) as i16,
+                            y: (j * TILE_HEIGHT) as i16,
+                            w: TILE_WIDTH as u16,
+                            h: TILE_HEIGHT as u16,
+                        };
+                        obstacle.draw_outline(target, color);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -484,8 +560,11 @@ impl TryFrom<char> for FetchedLetter {
 pub mod ffi {
     use super::super::geometry::ffi::FnGeometry;
     use super::super::level::solids::ffi::FnLevelSolids;
+    use super::super::tilecache::ffi::FnTileCache;
     use super::super::HorizontalDirection;
     use libc::c_char;
+    use transdl::ll::SDL_Surface;
+    use transdl::video::Surface;
 
     pub type FnHeroData = super::HeroData;
     pub type FnHeroPosition = super::Position;
@@ -509,6 +588,29 @@ pub mod ffi {
                 Box::from_raw(ptr);
             }
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_blit(
+        ptr: *const FnHeroData,
+        target: *mut SDL_Surface,
+        tilecache: *const FnTileCache,
+        solids: *const FnLevelSolids,
+        draw_collision_bounds: bool,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+
+        assert!(!target.is_null());
+        let mut target = Surface { raw: target };
+
+        assert!(!tilecache.is_null());
+        let tilecache = unsafe { &(*tilecache) };
+
+        assert!(!solids.is_null());
+        let solids = unsafe { &(*solids) };
+
+        d.blit(&mut target, tilecache, solids, draw_collision_bounds);
     }
 
     #[no_mangle]

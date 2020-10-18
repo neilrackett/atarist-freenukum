@@ -78,7 +78,8 @@ int main(int argc, char ** argv)
   /* here comes the hero!!!!! */
   hero = fn_hero_create();
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  fn_hero_blit(hero, screen, tilecache, NULL, draw_collision_bounds);
+  fn_hero_data_blit(
+          hero->data, screen, tilecache, NULL, draw_collision_bounds);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 
   timer = SDL_AddTimer(250, animate, NULL);
@@ -95,7 +96,12 @@ int main(int argc, char ** argv)
             SDL_FillRect(screen, NULL, 0);
             fn_hero_update_animation(hero);
             fn_hero_data_next_frame(hero->data);
-            fn_hero_blit(hero, screen, tilecache, NULL, draw_collision_bounds);
+            fn_hero_data_blit(
+                    hero->data,
+                    screen,
+                    tilecache,
+                    NULL,
+                    draw_collision_bounds);
             SDL_UpdateRect(screen, 0, 0, 0, 0);
           }
           break;

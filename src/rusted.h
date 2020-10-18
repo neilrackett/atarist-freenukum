@@ -351,6 +351,12 @@ typedef Geometry FnGeometry;
 
 typedef HeroData FnHeroData;
 
+typedef struct {
+    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelSolids;
+
+typedef LevelSolids FnLevelSolids;
+
 typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
@@ -362,12 +368,6 @@ typedef Position FnHeroPosition;
 typedef Score FnHeroScore;
 
 typedef InventoryItem FnHeroInventoryItem;
-
-typedef struct {
-    bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
-} LevelSolids;
-
-typedef LevelSolids FnLevelSolids;
 
 typedef HorizontalDirection FnHorizontalDirection;
 
@@ -498,6 +498,12 @@ bool fn_geometry_overlaps(FnGeometry r1, FnGeometry r2);
 bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
+
+void fn_hero_data_blit(const FnHeroData *ptr,
+                       SDL_Surface *target,
+                       const FnTileCache *tilecache,
+                       const FnLevelSolids *solids,
+                       bool draw_collision_bounds);
 
 uintptr_t fn_hero_data_counter_subtract(FnHeroData *ptr, uintptr_t count);
 
