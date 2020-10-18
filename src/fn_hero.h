@@ -221,12 +221,6 @@ void fn_hero_enterlevel(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_direction(
-    fn_hero_t * hero,
-    FnHorizontalDirection direction);
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_set_motion(
     fn_hero_t * hero,
     Uint8 motion);

@@ -518,13 +518,12 @@ void fn_hero_data_reset(FnHeroData *data);
 
 void fn_hero_data_reset_for_level(FnHeroData *data);
 
+void fn_hero_data_reset_just_turned_around(FnHeroData *ptr);
+
 void fn_hero_data_set_direction(FnHeroData *data,
                                 HorizontalDirection direction);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
-
-void fn_hero_data_set_just_turned_around(FnHeroData *ptr,
-                                         bool just_turned_around);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);

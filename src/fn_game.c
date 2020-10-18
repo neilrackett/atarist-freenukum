@@ -456,7 +456,7 @@ int fn_game_start_in_level(
                 if (directions & FNK_RIGHT_ENABLED) {
                   fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
                 } else {
-                  fn_hero_set_direction(hero,
+                  fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Left);
                   fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
                 }
@@ -475,7 +475,7 @@ int fn_game_start_in_level(
                 if (directions & FNK_LEFT_ENABLED) {
                   fn_hero_set_motion(hero, FN_HERO_MOTION_NONE);
                 } else {
-                  fn_hero_set_direction(hero,
+                  fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Right);
                   fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
                 }
@@ -506,7 +506,7 @@ int fn_game_start_in_level(
             case SDLK_LEFT:
               directions &= ~FNK_LEFT_ENABLED;
               if (directions & FNK_RIGHT_ENABLED) {
-                fn_hero_set_direction(hero,
+                fn_hero_data_set_direction(hero->data,
                     HorizontalDirection_Right);
                 fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
               } else {
@@ -517,7 +517,7 @@ int fn_game_start_in_level(
             case SDLK_RIGHT:
               directions &= ~FNK_RIGHT_ENABLED;
               if (directions & FNK_LEFT_ENABLED) {
-                  fn_hero_set_direction(hero,
+                  fn_hero_data_set_direction(hero->data,
                       HorizontalDirection_Left);
                   fn_hero_set_motion(hero, FN_HERO_MOTION_WALKING);
               } else {

@@ -226,7 +226,7 @@ int fn_hero_act(
   if (hero->motion == FN_HERO_MOTION_WALKING) {
     /* our hero is moving */
     if (fn_hero_data_get_just_turned_around(hero->data)) {
-      fn_hero_data_set_just_turned_around(hero->data, false);
+      fn_hero_data_reset_just_turned_around(hero->data);
     } else {
       switch(fn_hero_data_get_direction(hero->data)) {
         case HorizontalDirection_Left:
@@ -438,18 +438,6 @@ void fn_hero_update_animation(
     }
   }
 
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_direction(
-    fn_hero_t * hero,
-    FnHorizontalDirection direction)
-{
-  if (fn_hero_data_get_direction(hero->data) != direction) {
-    fn_hero_data_set_just_turned_around(hero->data, true);
-    fn_hero_data_set_direction(hero->data, direction);
-  }
 }
 
 /* --------------------------------------------------------------- */

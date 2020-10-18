@@ -13,8 +13,8 @@ pub struct HeroData {
     pub inventory: Inventory,
     pub fetched_letter_state: FetchedLetterState,
     pub hidden: bool,
-    pub direction: HorizontalDirection,
-    pub just_turned_around: bool,
+    direction: HorizontalDirection,
+    just_turned_around: bool,
 }
 
 impl HeroData {
@@ -49,6 +49,25 @@ impl HeroData {
         self.fetched_letter_state.reset();
         self.hidden = false;
         self.just_turned_around = false;
+    }
+
+    pub fn set_direction(&mut self, direction: HorizontalDirection) {
+        if self.direction != direction {
+            self.just_turned_around = true;
+            self.direction = direction;
+        }
+    }
+
+    pub fn get_direction(&self) -> HorizontalDirection {
+        self.direction
+    }
+
+    pub fn reset_just_tured_around(&mut self) {
+        self.just_turned_around = false;
+    }
+
+    pub fn get_just_turned_around(&self) -> bool {
+        self.just_turned_around
     }
 }
 
@@ -456,13 +475,12 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_data_set_just_turned_around(
+    pub extern "C" fn fn_hero_data_reset_just_turned_around(
         ptr: *mut FnHeroData,
-        just_turned_around: bool,
     ) {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
-        d.just_turned_around = just_turned_around;
+        d.reset_just_tured_around();
     }
 
     #[no_mangle]
@@ -643,7 +661,7 @@ pub mod ffi {
     ) {
         assert!(!data.is_null());
         let data: &mut FnHeroData = unsafe { &mut (*data) };
-        data.direction = direction;
+        data.set_direction(direction);
     }
 
     #[no_mangle]
