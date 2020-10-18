@@ -127,7 +127,8 @@ void fn_hero_blit(
     fn_hero_t * hero,
     SDL_Surface * target,
     const FnTileCache * tilecache,
-    FnLevelSolids * solids)
+    FnLevelSolids * solids,
+    bool draw_collision_bounds)
 {
   int tilenr;
   const FnTexture * tile;
@@ -138,8 +139,6 @@ void fn_hero_blit(
   if (hero->immunitycountdown % 2 != 0) {
     return;
   }
-
-  fn_environment_t * env = hero->env;
 
   FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
 
@@ -172,7 +171,7 @@ void fn_hero_blit(
   fn_texture_blit_to_sdl_surface(tile, NULL, target, &dstrect);
 
   Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
-  if (fn_environment_get_draw_collision_bounds(env)) {
+  if (draw_collision_bounds) {
     FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
     FnGeometry geometry = fn_hero_position_get_geometry(hero_position);
     fn_geometry_draw_outline(target, geometry, collision_color);

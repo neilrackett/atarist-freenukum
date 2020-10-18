@@ -159,7 +159,8 @@ void fn_hero_blit(
     fn_hero_t * hero,
     SDL_Surface * target,
     const FnTileCache * tilecache,
-    FnLevelSolids * solids);
+    FnLevelSolids * solids,
+    bool draw_collision_bounds);
 
 /* --------------------------------------------------------------- */
 

@@ -948,7 +948,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   fn_hero_blit(hero,
       lv->surface,
       tilecache,
-      &(lv->data->solids));
+      &(lv->data->solids),
+      draw_collision_bounds);
 
   /* blit the actors in the foreground */
   for (iter = fn_list_first(lv->actors);
