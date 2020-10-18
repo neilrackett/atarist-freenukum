@@ -517,6 +517,8 @@ FnHeroFetchedLetterState *fn_hero_data_get_fetched_letter_state(FnHeroData *ptr)
 
 FnHeroFirepower *fn_hero_data_get_firepower(FnHeroData *ptr);
 
+bool fn_hero_data_get_gets_hurt(const FnHeroData *ptr);
+
 FnHeroHealth *fn_hero_data_get_health(FnHeroData *ptr);
 
 bool fn_hero_data_get_hidden(const FnHeroData *ptr);
@@ -564,6 +566,8 @@ void fn_hero_data_set_counter(FnHeroData *ptr, uintptr_t counter);
 
 void fn_hero_data_set_direction(FnHeroData *data,
                                 HorizontalDirection direction);
+
+void fn_hero_data_set_gets_hurt(FnHeroData *ptr, bool gets_hurt);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
 

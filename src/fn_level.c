@@ -1123,7 +1123,7 @@ int fn_level_act(
     lv->actors = fn_list_remove_all(lv->actors, NULL);
   }
 
-  hero->gets_hurt = actors_hurting_hero > 0;
+  fn_hero_data_set_gets_hurt(hero->data, actors_hurting_hero > 0);
 
   if (lv->animated_frames == 0) {
     /* do some action, not just animation */

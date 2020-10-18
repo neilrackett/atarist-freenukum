@@ -65,10 +65,6 @@ void fn_hero_reset(fn_hero_t * hero)
   fn_hero_set_y(hero, 0);
 
   fn_hero_data_reset(hero->data);
-
-  hero->gets_hurt = false;
-
-  hero->is_moving_horizontally = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -190,7 +186,10 @@ int fn_hero_act(
   FnGeometry hero_geometry = fn_hero_position_get_geometry(position);
 
   fn_hero_data_immunity_countdown_subtract(hero->data, 1);
-  if (!fn_hero_data_get_is_immune(hero->data) && hero->gets_hurt) {
+  if (
+          !fn_hero_data_get_is_immune(hero->data) &&
+          fn_hero_data_get_gets_hurt(hero->data))
+  {
     fn_hero_data_start_immunity_countdown(hero->data);
     fn_hero_health_decrease(health, 1);
   }
@@ -217,9 +216,6 @@ int fn_hero_act(
                     fn_hero_position_move_to(
                             position, new_position.x, new_position.y);
                     heromoved = 1;
-                    hero->is_moving_horizontally = 1;
-                } else {
-                    hero->is_moving_horizontally = 0;
                 }
             }
             break;
@@ -235,9 +231,6 @@ int fn_hero_act(
                     fn_hero_position_move_to(
                             position, new_position.x, new_position.y);
                     heromoved = 1;
-                    hero->is_moving_horizontally = 1;
-                } else {
-                    hero->is_moving_horizontally = 0;
                 }
             }
             break;
@@ -406,14 +399,6 @@ void fn_hero_update_animation(
     }
   }
 
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_is_moving_horizontally(
-    fn_hero_t * hero)
-{
-  return hero->is_moving_horizontally;
 }
 
 /* --------------------------------------------------------------- */

@@ -57,16 +57,6 @@ struct fn_hero_t {
    * The hero data.
    */
   FnHeroData * data;
-
-  /**
-   * True as long as any actors are hurting the hero.
-   */
-  bool gets_hurt;
-
-  /**
-   * Indicates if the hero is currently moving horizontally.
-   */
-  Uint8 is_moving_horizontally;
 };
 
 /* --------------------------------------------------------------- */
@@ -154,11 +144,6 @@ void fn_hero_enterlevel(
     fn_hero_t * hero,
     Uint32 x,
     Uint32 y);
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_hero_is_moving_horizontally(
-    fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 

@@ -35,6 +35,7 @@ pub struct HeroData {
     vertical_speed: usize,
     immunity_countdown: usize,
     immunity_duration: usize,
+    gets_hurt: bool,
 }
 
 impl HeroData {
@@ -59,6 +60,7 @@ impl HeroData {
             vertical_speed: 0,
             immunity_countdown: 0,
             immunity_duration: 16,
+            gets_hurt: false,
         }
     }
 
@@ -82,6 +84,7 @@ impl HeroData {
         self.vertical_speed = 0;
         self.immunity_countdown = 0;
         self.immunity_duration = 16;
+        self.gets_hurt = false;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -99,6 +102,7 @@ impl HeroData {
         self.vertical_speed = 0;
         self.immunity_countdown = 0;
         self.immunity_duration = 16;
+        self.gets_hurt = false;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -559,6 +563,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.hidden
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_gets_hurt(
+        ptr: *mut FnHeroData,
+        gets_hurt: bool,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.gets_hurt = gets_hurt;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_gets_hurt(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.gets_hurt
     }
 
     #[no_mangle]
