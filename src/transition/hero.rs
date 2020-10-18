@@ -279,6 +279,29 @@ impl HeroData {
             }
         };
     }
+
+    fn jump(&mut self) {
+        if !self.is_in_the_air {
+            self.counter = if self.inventory.is_set(InventoryItem::Boot) {
+                7
+            } else {
+                6
+            };
+            self.vertical_speed = 2;
+            self.is_in_the_air = true;
+        }
+    }
+
+    fn land(&mut self) {
+        self.vertical_speed = 0;
+        self.is_in_the_air = false;
+        self.counter = 0;
+    }
+
+    fn fall(&mut self) {
+        self.is_in_the_air = true;
+        self.counter = 0;
+    }
 }
 
 #[derive(Debug)]
@@ -717,10 +740,13 @@ pub mod ffi {
         assert!(!tilecache.is_null());
         let tilecache = unsafe { &(*tilecache) };
 
-        assert!(!solids.is_null());
-        let solids = unsafe { &(*solids) };
-
-        d.blit(&mut target, tilecache, solids, draw_collision_bounds);
+        if solids.is_null() {
+            let solids = FnLevelSolids::new();
+            d.blit(&mut target, tilecache, &solids, draw_collision_bounds);
+        } else {
+            let solids = unsafe { &(*solids) };
+            d.blit(&mut target, tilecache, solids, draw_collision_bounds);
+        }
     }
 
     #[no_mangle]
@@ -823,13 +849,24 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_data_set_is_in_the_air(
-        ptr: *mut FnHeroData,
-        is_in_the_air: bool,
-    ) {
+    pub extern "C" fn fn_hero_data_land(ptr: *mut FnHeroData) {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
-        d.is_in_the_air = is_in_the_air;
+        d.land();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_jump(ptr: *mut FnHeroData) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.jump();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_fall(ptr: *mut FnHeroData) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.fall();
     }
 
     #[no_mangle]

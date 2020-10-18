@@ -98,17 +98,6 @@ void fn_hero_delete(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_is_in_the_air(
-    fn_hero_t * hero,
-    bool is_in_the_air);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_jump(
-    fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
 /**
  * Set the x position of the hero (in pixels).
  *

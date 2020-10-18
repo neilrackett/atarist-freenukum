@@ -515,6 +515,8 @@ FnHeroData *fn_hero_data_create(void);
 
 void fn_hero_data_enter_level(FnHeroData *data, int16_t x, int16_t y);
 
+void fn_hero_data_fall(FnHeroData *ptr);
+
 void fn_hero_data_free(FnHeroData *ptr);
 
 uintptr_t fn_hero_data_get_base_tile_number(const FnHeroData *ptr);
@@ -556,6 +558,10 @@ uintptr_t fn_hero_data_get_vertical_speed(const FnHeroData *ptr);
 void fn_hero_data_increase_vertical_speed(FnHeroData *ptr,
                                           uintptr_t increment);
 
+void fn_hero_data_jump(FnHeroData *ptr);
+
+void fn_hero_data_land(FnHeroData *ptr);
+
 void fn_hero_data_next_frame(FnHeroData *ptr);
 
 void fn_hero_data_reset(FnHeroData *data);
@@ -573,8 +579,6 @@ void fn_hero_data_set_direction(FnHeroData *data,
 void fn_hero_data_set_gets_hurt(FnHeroData *ptr, bool gets_hurt);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
-
-void fn_hero_data_set_is_in_the_air(FnHeroData *ptr, bool is_in_the_air);
 
 void fn_hero_data_set_is_shooting(FnHeroData *ptr, bool is_shooting);
 

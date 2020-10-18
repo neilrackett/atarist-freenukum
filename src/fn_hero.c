@@ -193,12 +193,12 @@ int fn_hero_act(
       SDL_PushEvent(&event);
     }
     /* we are standing on solid ground */
-    fn_hero_set_is_in_the_air(hero, false);
+    fn_hero_data_land(hero->data);
     fn_hero_data_set_counter(hero->data, 0);
   } else {
     /* we fall down */
     if (fn_hero_data_get_counter(hero->data) == 0) {
-      fn_hero_set_is_in_the_air(hero, true);
+      fn_hero_data_fall(hero->data);
       fn_hero_data_set_counter(hero->data, 0);
     }
   }
@@ -213,35 +213,6 @@ int fn_hero_act(
   }
 
   return fn_hero_health_get(health);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_is_in_the_air(
-    fn_hero_t * hero,
-    bool is_in_the_air)
-{
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
-  if (is_in_the_air) {
-    if (fn_hero_data_get_is_in_the_air(hero->data) != is_in_the_air) {
-      if (fn_hero_inventory_is_set(inventory, InventoryItem_Boot)) {
-        fn_hero_data_set_counter(hero->data, 7);
-      } else {
-        fn_hero_data_set_counter(hero->data, 6);
-      }
-      fn_hero_data_set_vertical_speed(hero->data, 2);
-    }
-  }
-  fn_hero_data_set_is_in_the_air(hero->data, is_in_the_air);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_jump(
-    fn_hero_t * hero)
-{
-  fn_hero_data_set_counter(hero->data, 6);
-  fn_hero_set_is_in_the_air(hero, true);
 }
 
 /* --------------------------------------------------------------- */

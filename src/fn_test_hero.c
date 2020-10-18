@@ -130,12 +130,12 @@ int main(int argc, char ** argv)
             case SDLK_LCTRL:
             case SDLK_RCTRL:
               if (event.key.type == SDL_KEYDOWN) {
-                fn_hero_jump(hero);
+                fn_hero_data_jump(hero->data);
               }
               break;
             case SDLK_LALT:
             case SDLK_RALT:
-              fn_hero_set_is_in_the_air(hero, false);
+              fn_hero_data_land(hero->data);
               break;
             default:
               /* do nothing, ignoring other keys. */

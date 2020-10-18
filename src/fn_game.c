@@ -484,7 +484,7 @@ int fn_game_start_in_level(
               doupdate = 1;
               break;
             case SDLK_LCTRL:
-              fn_hero_set_is_in_the_air(hero, true);
+              fn_hero_data_jump(hero->data);
               fn_hero_data_update_animation(hero->data);
               break;
             case SDLK_LALT:
@@ -541,7 +541,7 @@ int fn_game_start_in_level(
               fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_RIGHT:
-              fn_hero_set_is_in_the_air(hero, true);
+              fn_hero_data_jump(hero->data);
               fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_MIDDLE:
