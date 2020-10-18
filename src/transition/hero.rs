@@ -14,6 +14,7 @@ pub struct HeroData {
     pub fetched_letter_state: FetchedLetterState,
     pub hidden: bool,
     pub direction: HorizontalDirection,
+    pub just_turned_around: bool,
 }
 
 impl HeroData {
@@ -27,6 +28,7 @@ impl HeroData {
             fetched_letter_state: FetchedLetterState::new(),
             hidden: false,
             direction: HorizontalDirection::Right,
+            just_turned_around: false,
         }
     }
 
@@ -39,10 +41,14 @@ impl HeroData {
         self.fetched_letter_state.reset();
         self.hidden = false;
         self.direction = HorizontalDirection::Right;
+        self.just_turned_around = false;
     }
 
     pub fn reset_for_level(&mut self) {
         self.direction = HorizontalDirection::Right;
+        self.fetched_letter_state.reset();
+        self.hidden = false;
+        self.just_turned_around = false;
     }
 }
 
@@ -447,6 +453,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.hidden
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_just_turned_around(
+        ptr: *mut FnHeroData,
+        just_turned_around: bool,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.just_turned_around = just_turned_around;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_just_turned_around(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.just_turned_around
     }
 
     #[no_mangle]

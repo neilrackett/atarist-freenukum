@@ -121,11 +121,6 @@ struct fn_hero_t {
   bool gets_hurt;
 
   /**
-   * Indicates if the hero just turned around.
-   */
-  Uint8 turned_around;
-
-  /**
    * Indicates if the hero is currently moving horizontally.
    */
   Uint8 is_moving_horizontally;

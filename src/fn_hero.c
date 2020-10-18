@@ -80,8 +80,6 @@ void fn_hero_reset(fn_hero_t * hero)
   hero->immunityduration = 16;
   hero->gets_hurt = false;
 
-  hero->turned_around = 0;
-
   hero->is_moving_horizontally = 0;
 }
 
@@ -227,8 +225,8 @@ int fn_hero_act(
 
   if (hero->motion == FN_HERO_MOTION_WALKING) {
     /* our hero is moving */
-    if (hero->turned_around) {
-      hero->turned_around = 0;
+    if (fn_hero_data_get_just_turned_around(hero->data)) {
+      fn_hero_data_set_just_turned_around(hero->data, false);
     } else {
       switch(fn_hero_data_get_direction(hero->data)) {
         case HorizontalDirection_Left:
@@ -449,7 +447,7 @@ void fn_hero_set_direction(
     FnHorizontalDirection direction)
 {
   if (fn_hero_data_get_direction(hero->data) != direction) {
-    hero->turned_around = 1;
+    fn_hero_data_set_just_turned_around(hero->data, true);
     fn_hero_data_set_direction(hero->data, direction);
   }
 }
