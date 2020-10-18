@@ -535,6 +535,11 @@ FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
+uintptr_t fn_hero_data_get_vertical_speed(const FnHeroData *ptr);
+
+void fn_hero_data_increase_vertical_speed(FnHeroData *ptr,
+                                          uintptr_t increment);
+
 void fn_hero_data_next_frame(FnHeroData *ptr);
 
 void fn_hero_data_reset(FnHeroData *data);
@@ -560,6 +565,9 @@ void fn_hero_data_set_is_shooting(FnHeroData *ptr, bool is_shooting);
 void fn_hero_data_set_motion(FnHeroData *ptr, FnHeroMotion motion);
 
 void fn_hero_data_set_num_frames(FnHeroData *ptr, uintptr_t num_frames);
+
+void fn_hero_data_set_vertical_speed(FnHeroData *ptr,
+                                     uintptr_t vertical_speed);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);

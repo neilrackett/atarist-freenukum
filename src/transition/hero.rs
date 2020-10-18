@@ -32,6 +32,7 @@ pub struct HeroData {
     base_tile_number: usize,
     current_frame: usize,
     num_frames: usize,
+    vertical_speed: usize,
 }
 
 impl HeroData {
@@ -53,6 +54,7 @@ impl HeroData {
             base_tile_number: HERO_STANDING_RIGHT,
             current_frame: 0,
             num_frames: 1,
+            vertical_speed: 0,
         }
     }
 
@@ -73,6 +75,7 @@ impl HeroData {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
+        self.vertical_speed = 0;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -87,6 +90,7 @@ impl HeroData {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
+        self.vertical_speed = 0;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -604,6 +608,35 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.counter
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_vertical_speed(
+        ptr: *mut FnHeroData,
+        vertical_speed: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.vertical_speed = vertical_speed;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_increase_vertical_speed(
+        ptr: *mut FnHeroData,
+        increment: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.vertical_speed = std::cmp::min(d.vertical_speed + increment, 6);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_vertical_speed(
+        ptr: *const FnHeroData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.vertical_speed
     }
 
     #[no_mangle]

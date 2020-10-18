@@ -59,12 +59,6 @@ struct fn_hero_t {
   FnHeroData * data;
 
   /**
-   * The speed with which our hero falls or jumps.
-   * Either 0, 1 or 2.
-   */
-  Uint8 verticalspeed;
-
-  /**
    * A contdown how long the hero is immune when he was hurt.
    */
   Uint8 immunitycountdown;
