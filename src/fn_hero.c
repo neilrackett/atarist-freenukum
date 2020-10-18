@@ -148,11 +148,13 @@ int fn_hero_act(
       }
       int i = 0;
       for (i = 0; i < fn_hero_data_get_vertical_speed(hero->data); i++) {
+        FnGeometry geometry = fn_hero_position_get_geometry(position);
         if (!fn_hero_data_would_collide(hero->data, solids,
-              fn_hero_get_x(hero),
-              fn_hero_get_y(hero) - FN_HALFTILE_HEIGHT
+              geometry.x,
+              geometry.y - FN_HALFTILE_HEIGHT
               )) {
-          fn_hero_set_y(hero, fn_hero_get_y(hero) - FN_HALFTILE_HEIGHT);
+          fn_hero_position_move_y_to(
+                  position, geometry.y - FN_HALFTILE_HEIGHT);
           heromoved = 1;
         } else {
           /* we bumped against the ceiling */
@@ -169,20 +171,23 @@ int fn_hero_act(
               i < fn_hero_data_get_vertical_speed(hero->data) / 2;
               i++)
       {
+        FnGeometry geometry = fn_hero_position_get_geometry(position);
         if (!fn_hero_data_would_collide(hero->data, solids,
-              fn_hero_get_x(hero),
-              fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
+              geometry.x,
+              geometry.y + FN_HALFTILE_HEIGHT
               )) {
-          fn_hero_set_y(hero, fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT);
+          fn_hero_position_move_y_to(
+                  position, geometry.y + FN_HALFTILE_HEIGHT);
           heromoved = 1;
         }
       }
     }
   }
 
+  FnGeometry geometry = fn_hero_position_get_geometry(position);
   if (fn_hero_data_would_collide(hero->data, solids,
-        fn_hero_get_x(hero),
-        fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
+        geometry.x,
+        geometry.y + FN_HALFTILE_HEIGHT
         )) {
     if (fn_hero_data_get_is_in_the_air(hero->data)) {
       SDL_Event event;
@@ -213,60 +218,6 @@ int fn_hero_act(
   }
 
   return fn_hero_health_get(health);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_x(
-    fn_hero_t * hero, Uint32 x)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  fn_hero_position_move_x_to(position, x);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint32 fn_hero_get_x(
-    fn_hero_t * hero)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  return fn_hero_position_get_geometry(position).x;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_y(
-    fn_hero_t * hero, Uint32 y)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  fn_hero_position_move_y_to(position, y);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint32 fn_hero_get_y(
-    fn_hero_t * hero)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  return fn_hero_position_get_geometry(position).y;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_hero_get_w(
-    fn_hero_t * hero)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  return fn_hero_position_get_geometry(position).w;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_hero_get_h(
-    fn_hero_t * hero)
-{
-  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
-  return fn_hero_position_get_geometry(position).h;
 }
 
 /* --------------------------------------------------------------- */
