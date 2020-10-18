@@ -91,7 +91,7 @@ int fn_hero_act(
             {
                 FnGeometry new_position = hero_geometry;
                 new_position.x -= FN_HALFTILE_WIDTH;
-                if (!fn_hero_would_collide(hero, solids,
+                if (!fn_hero_data_would_collide(hero->data, solids,
                             new_position.x,
                             new_position.y
                             ))
@@ -106,7 +106,7 @@ int fn_hero_act(
             {
                 FnGeometry new_position = hero_geometry;
                 new_position.x += FN_HALFTILE_WIDTH;
-                if (!fn_hero_would_collide(hero, solids,
+                if (!fn_hero_data_would_collide(hero->data, solids,
                             new_position.x,
                             new_position.y
                             ))
@@ -148,7 +148,7 @@ int fn_hero_act(
       }
       int i = 0;
       for (i = 0; i < fn_hero_data_get_vertical_speed(hero->data); i++) {
-        if (!fn_hero_would_collide(hero, solids,
+        if (!fn_hero_data_would_collide(hero->data, solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) - FN_HALFTILE_HEIGHT
               )) {
@@ -169,7 +169,7 @@ int fn_hero_act(
               i < fn_hero_data_get_vertical_speed(hero->data) / 2;
               i++)
       {
-        if (!fn_hero_would_collide(hero, solids,
+        if (!fn_hero_data_would_collide(hero->data, solids,
               fn_hero_get_x(hero),
               fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
               )) {
@@ -180,7 +180,7 @@ int fn_hero_act(
     }
   }
 
-  if (fn_hero_would_collide(hero, solids,
+  if (fn_hero_data_would_collide(hero->data, solids,
         fn_hero_get_x(hero),
         fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
         )) {
@@ -365,26 +365,6 @@ Uint16 fn_hero_get_h(
 {
   FnHeroPosition * position = fn_hero_data_get_position(hero->data);
   return fn_hero_position_get_geometry(position).h;
-}
-
-/* --------------------------------------------------------------- */
-
-int fn_hero_would_collide(
-        fn_hero_t * hero,
-        FnLevelSolids * solids,
-        Uint32 x,
-        Uint32 y)
-{
-  if (solids == NULL) {
-    return 1;
-  }
-
-  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
-  FnGeometry hero_rect = fn_hero_position_get_geometry(hero_position);
-  hero_rect.x = x;
-  hero_rect.y = y;
-
-  return fn_level_solids_collides(solids, hero_rect);
 }
 
 /* --------------------------------------------------------------- */

@@ -214,6 +214,18 @@ impl HeroData {
         self.position.geometry.y = y;
         self.reset_for_level();
     }
+
+    pub fn would_collide(
+        &self,
+        solids: &LevelSolids,
+        x: i16,
+        y: i16,
+    ) -> bool {
+        let mut destination = self.position.geometry;
+        destination.x = x;
+        destination.y = y;
+        solids.collides(destination)
+    }
 }
 
 #[derive(Debug)]
@@ -656,6 +668,25 @@ pub mod ffi {
         let solids = unsafe { &(*solids) };
 
         d.blit(&mut target, tilecache, solids, draw_collision_bounds);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_would_collide(
+        ptr: *const FnHeroData,
+        solids: *const FnLevelSolids,
+        x: i16,
+        y: i16,
+    ) -> bool {
+        if solids.is_null() {
+            return true;
+        }
+
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+
+        let solids = unsafe { &(*solids) };
+
+        d.would_collide(solids, x, y)
     }
 
     #[no_mangle]

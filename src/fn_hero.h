@@ -185,24 +185,6 @@ Uint16 fn_hero_get_h(
 /* --------------------------------------------------------------- */
 
 /**
- * Calculate if our hero would  collide with a solid tile in the level.
- *
- * @param  hero        The hero.
- * @param  level       The level.
- * @param  x           The x coordinate.
- * @param  y           The y coordinate.
- *
- * @return 1 if hero collides, 0 if not.
- */
-int fn_hero_would_collide(
-        fn_hero_t * hero,
-        FnLevelSolids * solids,
-        Uint32 x,
-        Uint32 y);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Fire a shot.
  *
  * @param  hero  The hero.

@@ -585,6 +585,11 @@ void fn_hero_data_set_num_frames(FnHeroData *ptr, uintptr_t num_frames);
 void fn_hero_data_set_vertical_speed(FnHeroData *ptr,
                                      uintptr_t vertical_speed);
 
+bool fn_hero_data_would_collide(const FnHeroData *ptr,
+                                const FnLevelSolids *solids,
+                                int16_t x,
+                                int16_t y);
+
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);
 
