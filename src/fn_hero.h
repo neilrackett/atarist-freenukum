@@ -39,7 +39,6 @@ typedef struct fn_hero_t fn_hero_t;
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
 #include "fn_list.h"
 #include "rusted.h"
 
@@ -149,8 +148,6 @@ void fn_hero_update_animation(
 
 /**
  * Create a hero.
- *
- * @param  env  The environment for the hero.
  *
  * @return The newly created hero.
  */
