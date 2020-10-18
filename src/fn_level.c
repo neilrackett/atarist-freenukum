@@ -1131,7 +1131,7 @@ int fn_level_act(
   }
 
   fn_hero_data_next_frame(hero->data);
-  fn_hero_update_animation(hero);
+  fn_hero_data_update_animation(hero->data);
 
   return 1;
 }

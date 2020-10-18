@@ -3,15 +3,18 @@ use super::level::solids::LevelSolids;
 use super::tilecache::TileCache;
 use super::{HorizontalDirection, UserEvent};
 use crate::{
-    HALFTILE_WIDTH, HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT,
-    HERO_STANDING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT,
-    TILE_WIDTH,
+    HALFTILE_WIDTH, HERO_FALLING_LEFT, HERO_FALLING_RIGHT,
+    HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT, HERO_NUM_FALLING,
+    HERO_NUM_JUMPING, HERO_NUM_STANDING, HERO_NUM_WALKING,
+    HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT, HERO_STANDING_LEFT,
+    HERO_STANDING_RIGHT, HERO_WALKING_LEFT, HERO_WALKING_RIGHT,
+    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::convert::TryFrom;
 use transdl::video::Surface;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Motion {
     NotMoving,
     Walking,
@@ -225,6 +228,56 @@ impl HeroData {
         destination.x = x;
         destination.y = y;
         solids.collides(destination)
+    }
+
+    pub fn update_animation(&mut self) {
+        self.base_tile_number = if self.is_in_the_air {
+            // hero is jumping or falling
+            if self.counter > 0 {
+                // hero is jumping
+                self.num_frames = HERO_NUM_JUMPING;
+                if self.direction == HorizontalDirection::Left {
+                    HERO_JUMPING_LEFT
+                } else {
+                    HERO_JUMPING_RIGHT
+                }
+            } else {
+                // hero is falling
+                self.num_frames = HERO_NUM_FALLING;
+                if self.direction == HorizontalDirection::Left {
+                    HERO_FALLING_LEFT
+                } else {
+                    HERO_FALLING_RIGHT
+                }
+            }
+        } else {
+            // hero is standing or walking on ground
+            if self.motion == Motion::NotMoving {
+                // hero is standing
+                self.num_frames = HERO_NUM_STANDING;
+                if self.direction == HorizontalDirection::Left {
+                    if self.is_shooting {
+                        HERO_WALKING_LEFT + 12
+                    } else {
+                        HERO_STANDING_LEFT
+                    }
+                } else {
+                    if self.is_shooting {
+                        HERO_WALKING_RIGHT + 12
+                    } else {
+                        HERO_STANDING_RIGHT
+                    }
+                }
+            } else {
+                // hero is walking
+                self.num_frames = HERO_NUM_WALKING;
+                if self.direction == HorizontalDirection::Left {
+                    HERO_WALKING_LEFT + 4 * self.current_frame
+                } else {
+                    HERO_WALKING_RIGHT + 4 * self.current_frame
+                }
+            }
+        };
     }
 }
 
@@ -668,6 +721,13 @@ pub mod ffi {
         let solids = unsafe { &(*solids) };
 
         d.blit(&mut target, tilecache, solids, draw_collision_bounds);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_update_animation(ptr: *mut FnHeroData) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.update_animation();
     }
 
     #[no_mangle]

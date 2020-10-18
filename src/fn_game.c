@@ -460,7 +460,7 @@ int fn_game_start_in_level(
                       HorizontalDirection_Left);
                   fn_hero_data_set_motion(hero->data, Motion_Walking);
                 }
-                fn_hero_update_animation(hero);
+                fn_hero_data_update_animation(hero->data);
               }
               doupdate = 1;
               break;
@@ -479,18 +479,18 @@ int fn_game_start_in_level(
                       HorizontalDirection_Right);
                   fn_hero_data_set_motion(hero->data, Motion_Walking);
                 }
-                fn_hero_update_animation(hero);
+                fn_hero_data_update_animation(hero->data);
               }
               doupdate = 1;
               break;
             case SDLK_LCTRL:
               fn_hero_set_is_in_the_air(hero, true);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             case SDLK_LALT:
               fn_hero_fire_start(hero);
               fn_level_fire_shot(lv, actor_queue);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             default:
               /* do nothing on other key input (yet) */
@@ -512,7 +512,7 @@ int fn_game_start_in_level(
               } else {
                 fn_hero_data_set_motion(hero->data, Motion_NotMoving);
               }
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             case SDLK_RIGHT:
               directions &= ~FNK_RIGHT_ENABLED;
@@ -526,7 +526,7 @@ int fn_game_start_in_level(
               break;
             case SDLK_LALT:
               fn_hero_fire_stop(hero);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             default:
               /* do nothing on other keys. */
@@ -538,11 +538,11 @@ int fn_game_start_in_level(
             case SDL_BUTTON_LEFT:
               fn_hero_fire_start(hero);
               fn_level_fire_shot(lv, actor_queue);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_RIGHT:
               fn_hero_set_is_in_the_air(hero, true);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_MIDDLE:
               fn_level_hero_interact_start(
@@ -558,7 +558,7 @@ int fn_game_start_in_level(
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
               fn_hero_fire_stop(hero);
-              fn_hero_update_animation(hero);
+              fn_hero_data_update_animation(hero->data);
               break;
             case SDL_BUTTON_RIGHT:
               break;

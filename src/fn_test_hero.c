@@ -94,7 +94,7 @@ int main(int argc, char ** argv)
         case SDL_USEREVENT:
           if (event.user.code == EVENT_CODE_TIMER) {
             SDL_FillRect(screen, NULL, 0);
-            fn_hero_update_animation(hero);
+            fn_hero_data_update_animation(hero->data);
             fn_hero_data_next_frame(hero->data);
             fn_hero_data_blit(
                     hero->data,

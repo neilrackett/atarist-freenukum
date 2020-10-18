@@ -175,16 +175,16 @@ const OBJECT_SPIKES_DOWN: usize = OBJECT_START + 149;
 
 const HERO_START: usize = OBJECT_START + 150;
 
-const HERO_NUM_ANIM_WALKING: usize = 4;
+const HERO_NUM_WALKING: usize = 4;
 const HERO_WALKING_LEFT: usize = HERO_START + 0;
 const HERO_WALKING_RIGHT: usize = HERO_START + 0x10;
-const HERO_NUM_ANIM_JUMPING: usize = 1;
+const HERO_NUM_JUMPING: usize = 1;
 const HERO_JUMPING_LEFT: usize = HERO_START + 0x20;
 const HERO_JUMPING_RIGHT: usize = HERO_START + 0x24;
-const HERO_NUM_ANIM_FALLING: usize = 1;
+const HERO_NUM_FALLING: usize = 1;
 const HERO_FALLING_LEFT: usize = HERO_START + 0x28;
 const HERO_FALLING_RIGHT: usize = HERO_START + 0x2C;
-const HERO_NUM_ANIM_STANDING: usize = 1;
+const HERO_NUM_STANDING: usize = 1;
 const HERO_STANDING_LEFT: usize = HERO_START + 0x30;
 const HERO_STANDING_RIGHT: usize = HERO_START + 0x34;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
