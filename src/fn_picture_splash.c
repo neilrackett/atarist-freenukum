@@ -45,11 +45,13 @@
 /* --------------------------------------------------------------- */
 
 int fn_picture_splash_show(
+    const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename)
 {
   return fn_picture_splash_show_with_message(
+      tilecache,
       texture_creation_params,
       env,
       filename,
@@ -60,6 +62,7 @@ int fn_picture_splash_show(
 /* --------------------------------------------------------------- */
 
 int fn_picture_splash_show_with_message(
+    const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename,
@@ -91,15 +94,11 @@ int fn_picture_splash_show_with_message(
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);
 
-
-  if (fn_environment_tilecache_loaded(env) && msg != NULL) {
+  if (msg != NULL) {
     FnTexture * msgbox;
     FnGeometry dstrect;
 
-    msgbox = fn_messagebox(
-            msg,
-            fn_environment_get_tilecache(env),
-            texture_creation_params);
+    msgbox = fn_messagebox(msg, tilecache, texture_creation_params);
 
     dstrect.x = x;
     dstrect.y = y;

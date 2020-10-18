@@ -46,11 +46,12 @@ int main(int argc, char ** argv)
   fn_error_set_handler(fn_error_print_commandline);
 
   screen = fn_environment_get_screen_sdl(env);
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   FnTextureCreationParams texture_creation_params =
       fn_environment_build_texture_creation_params(env);
 
-  fn_picture_splash_show(texture_creation_params, env, "DN.DN1");
+  fn_picture_splash_show(tilecache, texture_creation_params, env, "DN.DN1");
 
   SDL_FreeSurface(screen);
   

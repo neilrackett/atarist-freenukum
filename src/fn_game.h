@@ -46,6 +46,7 @@
  * @param  env        The environent.
  */
 void fn_game_start(
+    const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     fn_environment_t * env);
 
