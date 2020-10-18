@@ -221,11 +221,3 @@ int fn_hero_act(
 }
 
 /* --------------------------------------------------------------- */
-
-FnGeometry fn_hero_get_position(fn_hero_t * hero)
-{
-  FnHeroPosition * hero_position = fn_hero_data_get_position(hero->data);
-  return fn_hero_position_get_geometry(hero_position);
-}
-
-/* --------------------------------------------------------------- */

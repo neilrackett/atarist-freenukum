@@ -1163,8 +1163,9 @@ void fn_level_hero_interact_start(
     fn_hero_t * hero = fn_level_get_hero(lv);
 
     if (fn_level_actor_hero_can_interact(actor, hero->data)) {
+      FnHeroPosition * position = fn_hero_data_get_position(hero->data);
 
-      FnGeometry heropos = fn_hero_get_position(hero);
+      FnGeometry heropos = fn_hero_position_get_geometry(position);
 
       if (fn_geometry_touches(heropos, fn_level_actor_get_position(actor)))
       {
@@ -1227,12 +1228,13 @@ void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
 {
   fn_hero_t * hero = fn_level_get_hero(lv);
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
+  FnHeroPosition * position = fn_hero_data_get_position(hero->data);
 
   if (lv->num_shots < fn_hero_firepower_num_shots(firepower)) {
-    FnGeometry position = fn_hero_get_position(hero);
+    FnGeometry geometry = fn_hero_position_get_geometry(position);
     HorizontalDirection direction = fn_hero_data_get_direction(hero->data);
 
-    fn_level_add_shot(lv, direction, position.x, position.y, actor_queue);
+    fn_level_add_shot(lv, direction, geometry.x, geometry.y, actor_queue);
     lv->num_shots++;
   }
 }

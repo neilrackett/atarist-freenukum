@@ -98,15 +98,4 @@ void fn_hero_delete(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
-/**
- * Get the current position of the hero.
- *
- * @param  hero  The hero.
- *
- * @return The current position.
- */
-FnGeometry fn_hero_get_position(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
 #endif /* FN_HERO_H */

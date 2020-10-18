@@ -581,7 +581,8 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroMoved:
               {
-                FnGeometry heropos = fn_hero_get_position(hero);
+                FnGeometry heropos =
+                    fn_hero_position_get_geometry(hero_position);
                 srcrect.x = heropos.x + heropos.w / 2 -
                    FN_LEVELWINDOW_WIDTH * FN_TILE_WIDTH / 2;
                 if (srcrect.x < 0) {
