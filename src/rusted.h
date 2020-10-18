@@ -499,9 +499,13 @@ bool fn_geometry_overlaps_vertically(FnGeometry r1, FnGeometry r2);
 
 bool fn_geometry_touches(FnGeometry r1, FnGeometry r2);
 
+uintptr_t fn_hero_data_counter_subtract(FnHeroData *ptr, uintptr_t count);
+
 FnHeroData *fn_hero_data_create(void);
 
 void fn_hero_data_free(FnHeroData *ptr);
+
+uintptr_t fn_hero_data_get_counter(const FnHeroData *ptr);
 
 HorizontalDirection fn_hero_data_get_direction(const FnHeroData *data);
 
@@ -532,6 +536,8 @@ void fn_hero_data_reset(FnHeroData *data);
 void fn_hero_data_reset_for_level(FnHeroData *data);
 
 void fn_hero_data_reset_just_turned_around(FnHeroData *ptr);
+
+void fn_hero_data_set_counter(FnHeroData *ptr, uintptr_t counter);
 
 void fn_hero_data_set_direction(FnHeroData *data,
                                 HorizontalDirection direction);

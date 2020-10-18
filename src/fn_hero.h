@@ -55,11 +55,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * The counter for actions that take longer than one animation frame.
-   */
-  Uint8 counter;
-
-  /**
    * The tile number that currently represents the hero.
    */
   int tilenr;
@@ -208,12 +203,6 @@ Uint8 fn_hero_is_moving_horizontally(
 void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
     bool is_in_the_air);
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_set_counter(
-    fn_hero_t * hero,
-    Uint8 counter);
 
 /* --------------------------------------------------------------- */
 

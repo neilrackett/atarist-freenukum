@@ -25,6 +25,7 @@ pub struct HeroData {
     motion: Motion,
     is_in_the_air: bool,
     is_shooting: bool,
+    counter: usize,
 }
 
 impl HeroData {
@@ -42,6 +43,7 @@ impl HeroData {
             motion: Motion::NotMoving,
             is_in_the_air: false,
             is_shooting: false,
+            counter: 0,
         }
     }
 
@@ -58,6 +60,7 @@ impl HeroData {
         self.motion = Motion::NotMoving;
         self.is_in_the_air = false;
         self.is_shooting = false;
+        self.counter = 0;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -68,6 +71,7 @@ impl HeroData {
         self.motion = Motion::NotMoving;
         self.is_in_the_air = false;
         self.is_shooting = false;
+        self.counter = 0;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -530,6 +534,36 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.is_shooting
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_counter(
+        ptr: *mut FnHeroData,
+        counter: usize,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.counter = counter;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_counter(
+        ptr: *const FnHeroData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.counter
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_counter_subtract(
+        ptr: *mut FnHeroData,
+        count: usize,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.counter -= count;
+        d.counter
     }
 
     #[no_mangle]
