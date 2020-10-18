@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
               break;
             case SDLK_LALT:
             case SDLK_RALT:
-              fn_hero_set_flying(hero, FN_HERO_FLYING_FALSE);
+              fn_hero_set_is_in_the_air(hero, false);
               break;
             default:
               /* do nothing, ignoring other keys. */

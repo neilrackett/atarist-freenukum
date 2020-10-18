@@ -66,7 +66,6 @@ void fn_hero_reset(fn_hero_t * hero)
 
   fn_hero_data_reset(hero->data);
 
-  hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->counter = 0;
   hero->tilenr = HERO_STANDING_RIGHT;
@@ -92,7 +91,6 @@ void fn_hero_enterlevel(
   fn_hero_set_x(hero, x);
   fn_hero_set_y(hero, y);
   fn_hero_data_reset_for_level(hero->data);
-  hero->flying = FN_HERO_FLYING_FALSE;
   hero->shooting = FN_HERO_SHOOTING_FALSE;
   hero->verticalspeed = 0;
 
@@ -270,7 +268,7 @@ int fn_hero_act(
     }
   }
 
-  if (hero->flying == FN_HERO_FLYING_FALSE) {
+  if (!fn_hero_data_get_is_in_the_air(hero->data)) {
     /* our hero is standing or walking */
     hero->verticalspeed = 0;
   } else {
@@ -328,7 +326,7 @@ int fn_hero_act(
         fn_hero_get_x(hero),
         fn_hero_get_y(hero) + FN_HALFTILE_HEIGHT
         )) {
-    if (hero->flying == FN_HERO_FLYING_TRUE) {
+    if (fn_hero_data_get_is_in_the_air(hero->data)) {
       SDL_Event event;
       event.type = SDL_USEREVENT;
       event.user.code = UserEvent_HeroLanded;
@@ -337,12 +335,12 @@ int fn_hero_act(
       SDL_PushEvent(&event);
     }
     /* we are standing on solid ground */
-    fn_hero_set_flying(hero, FN_HERO_FLYING_FALSE);
+    fn_hero_set_is_in_the_air(hero, false);
     hero->counter = 0;
   } else {
     /* we fall down */
     if (hero->counter == 0) {
-      fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
+      fn_hero_set_is_in_the_air(hero, true);
       hero->counter = 0;
     }
   }
@@ -378,7 +376,7 @@ void fn_hero_next_animationframe(
 void fn_hero_update_animation(
     fn_hero_t * hero)
 {
-  if (hero->flying == FN_HERO_FLYING_FALSE) {
+  if (!fn_hero_data_get_is_in_the_air(hero->data)) {
 
     /* hero is standing or walking on ground */
     if (fn_hero_data_get_motion(hero->data) == Motion_NotMoving) {
@@ -448,13 +446,13 @@ Uint8 fn_hero_is_moving_horizontally(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_flying(
+void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
-    Uint8 flying)
+    bool is_in_the_air)
 {
   FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
-  if (flying == FN_HERO_FLYING_TRUE) {
-    if (hero->flying != flying) {
+  if (is_in_the_air) {
+    if (fn_hero_data_get_is_in_the_air(hero->data) != is_in_the_air) {
       if (fn_hero_inventory_is_set(inventory, InventoryItem_Boot)) {
         hero->counter = 7;
         hero->verticalspeed = 2;
@@ -464,7 +462,7 @@ void fn_hero_set_flying(
       }
     }
   }
-  hero->flying = flying;
+  fn_hero_data_set_is_in_the_air(hero->data, is_in_the_air);
 }
 
 /* --------------------------------------------------------------- */
@@ -491,7 +489,7 @@ void fn_hero_jump(
     fn_hero_t * hero)
 {
   fn_hero_set_counter(hero, 6);
-  fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
+  fn_hero_set_is_in_the_air(hero, true);
 }
 
 /* --------------------------------------------------------------- */

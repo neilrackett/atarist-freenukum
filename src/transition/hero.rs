@@ -23,6 +23,7 @@ pub struct HeroData {
     direction: HorizontalDirection,
     just_turned_around: bool,
     motion: Motion,
+    is_in_the_air: bool,
 }
 
 impl HeroData {
@@ -38,6 +39,7 @@ impl HeroData {
             direction: HorizontalDirection::Right,
             just_turned_around: false,
             motion: Motion::NotMoving,
+            is_in_the_air: false,
         }
     }
 
@@ -52,6 +54,7 @@ impl HeroData {
         self.direction = HorizontalDirection::Right;
         self.just_turned_around = false;
         self.motion = Motion::NotMoving;
+        self.is_in_the_air = false;
     }
 
     pub fn reset_for_level(&mut self) {
@@ -60,6 +63,7 @@ impl HeroData {
         self.hidden = false;
         self.just_turned_around = false;
         self.motion = Motion::NotMoving;
+        self.is_in_the_air = false;
     }
 
     pub fn set_direction(&mut self, direction: HorizontalDirection) {
@@ -484,6 +488,25 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &FnHeroData = unsafe { &(*ptr) };
         d.hidden
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_set_is_in_the_air(
+        ptr: *mut FnHeroData,
+        is_in_the_air: bool,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        d.is_in_the_air = is_in_the_air;
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_is_in_the_air(
+        ptr: *const FnHeroData,
+    ) -> bool {
+        assert!(!ptr.is_null());
+        let d: &FnHeroData = unsafe { &(*ptr) };
+        d.is_in_the_air
     }
 
     #[no_mangle]

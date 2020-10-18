@@ -58,11 +58,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * Is the hero going up (flying) or resting (falling/standing)?
-   */
-  Uint8 flying;
-
-  /**
    * Is the hero currently shooting?
    */
   Uint8 shooting;
@@ -218,9 +213,9 @@ Uint8 fn_hero_is_moving_horizontally(
 
 /* --------------------------------------------------------------- */
 
-void fn_hero_set_flying(
+void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
-    Uint8 flying);
+    bool is_in_the_air);
 
 /* --------------------------------------------------------------- */
 
