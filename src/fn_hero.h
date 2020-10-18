@@ -61,10 +61,6 @@ struct fn_hero_t {
 
 /* --------------------------------------------------------------- */
 
-typedef void (*fn_hero_changed_f)(fn_hero_t *);
-
-/* --------------------------------------------------------------- */
-
 /**
  * Let the hero act execute his next timed action.
  *
