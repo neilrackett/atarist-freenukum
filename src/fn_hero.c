@@ -45,7 +45,6 @@ fn_hero_t * fn_hero_create(fn_environment_t * env)
   hero->data = fn_hero_data_create();
 
   assert(env != NULL);
-  hero->env = env;
   fn_hero_reset(hero);
 
   return hero;

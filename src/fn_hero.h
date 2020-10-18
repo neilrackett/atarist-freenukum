@@ -61,11 +61,6 @@ typedef struct fn_hero_t fn_hero_t;
  */
 struct fn_hero_t {
   /**
-   * The environment of the game.
-   */
-  fn_environment_t * env;
-
-  /**
    * The direction to which the hero moves.
    */
   FnHorizontalDirection direction;
@@ -200,7 +195,7 @@ void fn_hero_update_animation(
  *
  * @return The newly created hero.
  */
-fn_hero_t * fn_hero_create(fn_environment_t * env);
+fn_hero_t * fn_hero_create();
 
 /* --------------------------------------------------------------- */
 
