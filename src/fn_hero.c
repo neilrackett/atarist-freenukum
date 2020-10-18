@@ -65,14 +65,15 @@ int fn_hero_act(
 
   FnHeroHealth * health = fn_hero_data_get_health(hero->data);
   FnHeroPosition * position = fn_hero_data_get_position(hero->data);
+  FnHeroImmunity * immunity = fn_hero_data_get_immunity(hero->data);
   FnGeometry hero_geometry = fn_hero_position_get_geometry(position);
 
-  fn_hero_data_immunity_countdown_subtract(hero->data, 1);
+  fn_hero_immunity_count_down(immunity);
   if (
-          !fn_hero_data_get_is_immune(hero->data) &&
+          !fn_hero_immunity_hero_is_protected(immunity) &&
           fn_hero_data_get_gets_hurt(hero->data))
   {
-    fn_hero_data_start_immunity_countdown(hero->data);
+    fn_hero_immunity_enable(immunity);
     fn_hero_health_decrease(health, 1);
   }
 

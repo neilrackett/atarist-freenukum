@@ -302,6 +302,8 @@ typedef struct Health Health;
 
 typedef struct HeroData HeroData;
 
+typedef struct Immunity Immunity;
+
 typedef struct InfoMessageQueue InfoMessageQueue;
 
 typedef struct InputField InputField;
@@ -360,6 +362,8 @@ typedef LevelSolids FnLevelSolids;
 typedef FetchedLetterState FnHeroFetchedLetterState;
 
 typedef Health FnHeroHealth;
+
+typedef Immunity FnHeroImmunity;
 
 typedef Motion FnHeroMotion;
 
@@ -531,11 +535,9 @@ FnHeroHealth *fn_hero_data_get_health(FnHeroData *ptr);
 
 bool fn_hero_data_get_hidden(const FnHeroData *ptr);
 
-uintptr_t fn_hero_data_get_immunity_countdown(const FnHeroData *ptr);
+FnHeroImmunity *fn_hero_data_get_immunity(FnHeroData *ptr);
 
 FnHeroInventory *fn_hero_data_get_inventory(FnHeroData *ptr);
-
-bool fn_hero_data_get_is_immune(const FnHeroData *ptr);
 
 bool fn_hero_data_get_is_in_the_air(const FnHeroData *ptr);
 
@@ -550,11 +552,6 @@ FnHeroPosition *fn_hero_data_get_position(FnHeroData *ptr);
 FnHeroScore *fn_hero_data_get_score(FnHeroData *ptr);
 
 uintptr_t fn_hero_data_get_vertical_speed(const FnHeroData *ptr);
-
-bool fn_hero_data_immunity_countdown_is_max(const FnHeroData *ptr);
-
-void fn_hero_data_immunity_countdown_subtract(FnHeroData *ptr,
-                                              uintptr_t amount);
 
 void fn_hero_data_increase_vertical_speed(FnHeroData *ptr,
                                           uintptr_t increment);
@@ -577,9 +574,6 @@ void fn_hero_data_set_gets_hurt(FnHeroData *ptr, bool gets_hurt);
 
 void fn_hero_data_set_hidden(FnHeroData *ptr, bool hidden);
 
-void fn_hero_data_set_immunity_countdown(FnHeroData *ptr,
-                                         uintptr_t immunity_countdown);
-
 void fn_hero_data_set_is_in_the_air(FnHeroData *ptr, bool is_in_the_air);
 
 void fn_hero_data_set_is_shooting(FnHeroData *ptr, bool is_shooting);
@@ -590,8 +584,6 @@ void fn_hero_data_set_num_frames(FnHeroData *ptr, uintptr_t num_frames);
 
 void fn_hero_data_set_vertical_speed(FnHeroData *ptr,
                                      uintptr_t vertical_speed);
-
-void fn_hero_data_start_immunity_countdown(FnHeroData *ptr);
 
 void fn_hero_fetched_letter_state_picked(FnHeroFetchedLetterState *ptr,
                                          char letter);
@@ -613,6 +605,12 @@ uint8_t fn_hero_health_get(const FnHeroHealth *health);
 void fn_hero_health_increase(FnHeroHealth *health, uint8_t amount);
 
 void fn_hero_health_kill(FnHeroHealth *health);
+
+void fn_hero_immunity_count_down(FnHeroImmunity *immunity);
+
+void fn_hero_immunity_enable(FnHeroImmunity *immunity);
+
+bool fn_hero_immunity_hero_is_protected(const FnHeroImmunity *immunity);
 
 void fn_hero_inventory_clear(FnHeroInventory *inventory);
 

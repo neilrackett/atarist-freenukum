@@ -25,6 +25,7 @@ pub struct HeroData {
     pub firepower: Firepower,
     pub inventory: Inventory,
     pub fetched_letter_state: FetchedLetterState,
+    pub immunity: Immunity,
     pub hidden: bool,
     direction: HorizontalDirection,
     just_turned_around: bool,
@@ -36,8 +37,6 @@ pub struct HeroData {
     current_frame: usize,
     num_frames: usize,
     vertical_speed: usize,
-    immunity_countdown: usize,
-    immunity_duration: usize,
     gets_hurt: bool,
 }
 
@@ -50,6 +49,7 @@ impl HeroData {
             firepower: Firepower::new(),
             inventory: Inventory::new(),
             fetched_letter_state: FetchedLetterState::new(),
+            immunity: Immunity::new(),
             hidden: false,
             direction: HorizontalDirection::Right,
             just_turned_around: false,
@@ -61,8 +61,6 @@ impl HeroData {
             current_frame: 0,
             num_frames: 1,
             vertical_speed: 0,
-            immunity_countdown: 0,
-            immunity_duration: 16,
             gets_hurt: false,
         }
     }
@@ -74,6 +72,7 @@ impl HeroData {
         self.firepower.reset();
         self.inventory.reset();
         self.fetched_letter_state.reset();
+        self.immunity.reset();
         self.hidden = false;
         self.direction = HorizontalDirection::Right;
         self.just_turned_around = false;
@@ -85,8 +84,6 @@ impl HeroData {
         self.current_frame = 0;
         self.num_frames = 1;
         self.vertical_speed = 0;
-        self.immunity_countdown = 0;
-        self.immunity_duration = 16;
         self.gets_hurt = false;
     }
 
@@ -97,6 +94,7 @@ impl HeroData {
         self.inventory.unset(InventoryItem::KeyBlue);
         self.inventory.unset(InventoryItem::KeyPink);
         self.fetched_letter_state.reset();
+        self.immunity.reset();
         self.hidden = false;
         self.just_turned_around = false;
         self.motion = Motion::NotMoving;
@@ -107,8 +105,6 @@ impl HeroData {
         self.current_frame = 0;
         self.num_frames = 1;
         self.vertical_speed = 0;
-        self.immunity_countdown = 0;
-        self.immunity_duration = 16;
         self.gets_hurt = false;
     }
 
@@ -151,22 +147,21 @@ impl HeroData {
         if self.hidden {
             return;
         }
-        if self.immunity_countdown % 2 > 0 {
+        if self.immunity.hero_invisible() {
             return;
         }
 
         let mut destrect = self.position.geometry;
         destrect.x -= HALFTILE_WIDTH as i16;
-        let base_tile_number =
-            if self.immunity_countdown == self.immunity_duration {
-                match self.direction {
-                    HorizontalDirection::Left => HERO_SKELETON_LEFT,
-                    HorizontalDirection::Right => HERO_SKELETON_RIGHT,
-                    HorizontalDirection::Center => unreachable!(),
-                }
-            } else {
-                self.base_tile_number
-            };
+        let base_tile_number = if self.immunity.hero_skeleton() {
+            match self.direction {
+                HorizontalDirection::Left => HERO_SKELETON_LEFT,
+                HorizontalDirection::Right => HERO_SKELETON_RIGHT,
+                HorizontalDirection::Center => unreachable!(),
+            }
+        } else {
+            self.base_tile_number
+        };
 
         tilecache
             .get_tile(base_tile_number)
@@ -340,6 +335,45 @@ impl Position {
 
     fn emit_update(&self) {
         transdl::event::push_user_event(UserEvent::HeroMoved as i32);
+    }
+}
+
+#[derive(Debug)]
+pub struct Immunity {
+    countdown: usize,
+}
+
+impl Immunity {
+    const DURATION: usize = 16;
+
+    fn new() -> Self {
+        Immunity { countdown: 0 }
+    }
+
+    fn reset(&mut self) {
+        self.countdown = 0;
+    }
+
+    fn enable(&mut self) {
+        self.countdown = Self::DURATION;
+    }
+
+    fn hero_invisible(&self) -> bool {
+        self.countdown % 2 > 0
+    }
+
+    fn hero_skeleton(&self) -> bool {
+        self.countdown == Self::DURATION
+    }
+
+    fn hero_is_protected(&self) -> bool {
+        self.countdown > 0
+    }
+
+    fn count_down(&mut self) {
+        if self.countdown > 0 {
+            self.countdown -= 1;
+        }
     }
 }
 
@@ -579,6 +613,7 @@ pub mod ffi {
     pub type FnHeroData = super::HeroData;
     pub type FnHeroPosition = super::Position;
     pub type FnHeroScore = super::Score;
+    pub type FnHeroImmunity = super::Immunity;
     pub type FnHeroHealth = super::Health;
     pub type FnHeroFirepower = super::Firepower;
     pub type FnHeroInventoryItem = super::InventoryItem;
@@ -783,66 +818,6 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_hero_data_set_immunity_countdown(
-        ptr: *mut FnHeroData,
-        immunity_countdown: usize,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
-        d.immunity_countdown = immunity_countdown;
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_data_start_immunity_countdown(
-        ptr: *mut FnHeroData,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
-        d.immunity_countdown = d.immunity_duration;
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_data_immunity_countdown_subtract(
-        ptr: *mut FnHeroData,
-        amount: usize,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
-        if amount > d.immunity_countdown {
-            d.immunity_countdown = 0;
-        } else {
-            d.immunity_countdown -= amount;
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_data_get_immunity_countdown(
-        ptr: *const FnHeroData,
-    ) -> usize {
-        assert!(!ptr.is_null());
-        let d: &FnHeroData = unsafe { &(*ptr) };
-        d.immunity_countdown
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_data_immunity_countdown_is_max(
-        ptr: *const FnHeroData,
-    ) -> bool {
-        assert!(!ptr.is_null());
-        let d: &FnHeroData = unsafe { &(*ptr) };
-        d.immunity_countdown == d.immunity_duration
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_hero_data_get_is_immune(
-        ptr: *const FnHeroData,
-    ) -> bool {
-        assert!(!ptr.is_null());
-        let d: &FnHeroData = unsafe { &(*ptr) };
-        d.immunity_countdown > 0
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_hero_data_set_base_tile_number(
         ptr: *mut FnHeroData,
         base_tile_number: usize,
@@ -916,6 +891,15 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnHeroData = unsafe { &mut (*ptr) };
         &mut d.score
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_data_get_immunity(
+        ptr: *mut FnHeroData,
+    ) -> *mut FnHeroImmunity {
+        assert!(!ptr.is_null());
+        let d: &mut FnHeroData = unsafe { &mut (*ptr) };
+        &mut d.immunity
     }
 
     #[no_mangle]
@@ -1036,6 +1020,33 @@ pub mod ffi {
         assert!(!position.is_null());
         let position: &FnHeroPosition = unsafe { &(*position) };
         position.geometry
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_immunity_count_down(
+        immunity: *mut FnHeroImmunity,
+    ) {
+        assert!(!immunity.is_null());
+        let immunity: &mut FnHeroImmunity = unsafe { &mut (*immunity) };
+        immunity.count_down();
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_immunity_hero_is_protected(
+        immunity: *const FnHeroImmunity,
+    ) -> bool {
+        assert!(!immunity.is_null());
+        let immunity: &FnHeroImmunity = unsafe { &(*immunity) };
+        immunity.hero_is_protected()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_hero_immunity_enable(
+        immunity: *mut FnHeroImmunity,
+    ) {
+        assert!(!immunity.is_null());
+        let immunity: &mut FnHeroImmunity = unsafe { &mut (*immunity) };
+        immunity.enable()
     }
 
     #[no_mangle]
