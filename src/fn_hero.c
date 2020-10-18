@@ -44,8 +44,6 @@ fn_hero_t * fn_hero_create()
 
   hero->data = fn_hero_data_create();
 
-  fn_hero_reset(hero);
-
   return hero;
 }
 
@@ -55,16 +53,6 @@ void fn_hero_delete(fn_hero_t * hero)
 {
   fn_hero_data_free(hero->data); hero->data = NULL;
   free(hero); hero = NULL;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_hero_reset(fn_hero_t * hero)
-{
-  fn_hero_set_x(hero, 0);
-  fn_hero_set_y(hero, 0);
-
-  fn_hero_data_reset(hero->data);
 }
 
 /* --------------------------------------------------------------- */

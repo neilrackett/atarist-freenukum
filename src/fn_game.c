@@ -102,7 +102,7 @@ void fn_game_start(
       144);
 
   fn_hero_t * hero = fn_environment_get_hero(env);
-  fn_hero_reset(hero);
+  fn_hero_data_reset(hero->data);
   FnHeroInventory * inventory = fn_hero_data_get_inventory(hero->data);
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero->data);
 

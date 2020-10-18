@@ -107,15 +107,6 @@ void fn_hero_delete(fn_hero_t * hero);
 
 /* --------------------------------------------------------------- */
 
-/**
- * Reset all values of a hero to default.
- *
- * @param  hero  The hero to reset.
- */
-void fn_hero_reset(fn_hero_t * hero);
-
-/* --------------------------------------------------------------- */
-
 void fn_hero_set_is_in_the_air(
     fn_hero_t * hero,
     bool is_in_the_air);
