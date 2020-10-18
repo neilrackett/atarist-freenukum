@@ -47,7 +47,10 @@ int main(int argc, char ** argv)
 
   screen = fn_environment_get_screen_sdl(env);
 
-  fn_picture_splash_show(env, "DN.DN1");
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
+
+  fn_picture_splash_show(texture_creation_params, env, "DN.DN1");
 
   SDL_FreeSurface(screen);
   

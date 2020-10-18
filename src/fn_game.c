@@ -59,6 +59,7 @@ Uint32 fn_game_timer_triggered(
 /* --------------------------------------------------------------- */
 
 void fn_game_start(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env)
 {
   /* Initialize Random Number Generator. */
@@ -80,6 +81,7 @@ void fn_game_start(
   snprintf(
       filename, 30, "BADGUY.DN%d", fn_environment_get_episode(env));
   fn_picture_splash_show_with_message(
+      texture_creation_params,
       env,
       filename,
       msg1,
@@ -89,6 +91,7 @@ void fn_game_start(
   snprintf(
       filename, 30, "DUKE.DN%d", fn_environment_get_episode(env));
   fn_picture_splash_show_with_message(
+      texture_creation_params,
       env,
       filename,
       msg2,

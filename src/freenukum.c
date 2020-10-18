@@ -85,8 +85,12 @@ int main(int argc, char ** argv)
   /* load the tilecache */
   res = fn_environment_load_tilecache(env);
 
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
+
   /* show the splash screen */
   res = fn_picture_splash_show(
+      texture_creation_params,
       env,
       backgroundfile);
   if (!res) {
@@ -96,30 +100,30 @@ int main(int argc, char ** argv)
 
   SDL_Surface * screen = env->screen;
   const FnTileCache * tilecache = fn_environment_get_tilecache(env);
-  FnTextureCreationParams params =
-      fn_environment_build_texture_creation_params(env);
 
   /* show the main menu */
   while (choice != MainMenuEntry_Quit) {
-    choice = fn_mainmenu(screen, tilecache, params);
+    choice = fn_mainmenu(screen, tilecache, texture_creation_params);
     switch(choice) {
       case MainMenuEntry_Start:
         fn_game_start(
+            texture_creation_params,
             env);
         res = fn_picture_splash_show(
+            texture_creation_params,
             env,
             backgroundfile);
         break;
       case MainMenuEntry_Restore:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Restore not implemented yet.\n");
         break;
       case MainMenuEntry_Instructions:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Instructions not implemented yet.\n");
         break;
       case MainMenuEntry_OrderingInfo:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Orderinginfo not implemented yet.\n");
         break;
       case MainMenuEntry_FullScreenToggle:
@@ -136,39 +140,39 @@ int main(int argc, char ** argv)
           }
           snprintf(backgroundfile,
               7, "DN.DN%d", episode);
-          res = fn_picture_splash_show(env, backgroundfile);
+          res = fn_picture_splash_show(texture_creation_params, env, backgroundfile);
           if (res == 0) {
-            fn_infobox_show(screen, tilecache, params,
+            fn_infobox_show(screen, tilecache, texture_creation_params,
                 "You don't have this episode installed.\n"
                 "We stay in episode 1\n");
             episode = 1;
             snprintf(backgroundfile,
                 7, "DN.DN%d", episode);
-            res = fn_picture_splash_show(env,
-                backgroundfile);
+            res = fn_picture_splash_show(
+                    texture_creation_params, env, backgroundfile);
           } else {
             fn_environment_set_episode(env, episode);
           }
         }
         break;
       case MainMenuEntry_HighScores:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Highscores not implemented yet.\n");
         break;
       case MainMenuEntry_Previews:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Previews not implemented yet.\n");
         break;
       case MainMenuEntry_ViewUserDemo:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Userdemo not implemented yet.\n");
         break;
       case MainMenuEntry_TitleScreen:
-        res = fn_picture_splash_show(env,
+        res = fn_picture_splash_show(texture_creation_params, env,
             backgroundfile);
         break;
       case MainMenuEntry_Credits:
-        fn_infobox_show(screen, tilecache, params,
+        fn_infobox_show(screen, tilecache, texture_creation_params,
             "Credits not implemented yet.\n");
         break;
       default:

@@ -45,10 +45,12 @@
 /* --------------------------------------------------------------- */
 
 int fn_picture_splash_show(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename)
 {
   return fn_picture_splash_show_with_message(
+      texture_creation_params,
       env,
       filename,
       NULL,
@@ -58,6 +60,7 @@ int fn_picture_splash_show(
 /* --------------------------------------------------------------- */
 
 int fn_picture_splash_show_with_message(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename,
     char * msg,
@@ -83,8 +86,7 @@ int fn_picture_splash_show_with_message(
   }
   free(path);
 
-  FnTextureCreationParams params = fn_environment_build_texture_creation_params(env);
-  picture = fn_picture_load(file, params);
+  picture = fn_picture_load(file, texture_creation_params);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);
@@ -97,7 +99,7 @@ int fn_picture_splash_show_with_message(
     msgbox = fn_messagebox(
             msg,
             fn_environment_get_tilecache(env),
-            fn_environment_build_texture_creation_params(env));
+            texture_creation_params);
 
     dstrect.x = x;
     dstrect.y = y;

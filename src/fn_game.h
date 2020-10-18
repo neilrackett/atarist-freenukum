@@ -46,6 +46,7 @@
  * @param  env        The environent.
  */
 void fn_game_start(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

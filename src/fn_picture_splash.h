@@ -52,6 +52,7 @@
  *         read. In that case, it also calls the fn_error_printf function).
  */
 int fn_picture_splash_show(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename);
 
@@ -75,6 +76,7 @@ int fn_picture_splash_show(
  *         read. In that case, it also calls the fn_error_printf function).
  */
 int fn_picture_splash_show_with_message(
+    FnTextureCreationParams texture_creation_params,
     fn_environment_t * env,
     char * filename,
     char * message,
