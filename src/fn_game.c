@@ -111,12 +111,12 @@ void fn_game_start(
   fn_borders_blit(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_tilecache(env));
+          tilecache);
 
   fn_borders_blit_life(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_tilecache(env),
+          tilecache,
           fn_environment_get_health(env));
 
   fn_borders_blit_score(
@@ -154,7 +154,7 @@ void fn_game_start(
     while (success && level < 13) {
       if (interlevel) {
         /* interlevel */
-        success = fn_game_start_in_level(2,
+        success = fn_game_start_in_level(2, tilecache,
             env);
         level++;
         if (level == 2) {
@@ -163,7 +163,7 @@ void fn_game_start(
         interlevel = 0;
       } else {
         /* real level */
-        success = fn_game_start_in_level(level,
+        success = fn_game_start_in_level(level, tilecache,
             env);
         interlevel = 1;
       }
@@ -179,6 +179,7 @@ void fn_game_start(
 
 int fn_game_start_in_level(
     int levelnumber,
+    const FnTileCache * tilecache,
     fn_environment_t * env)
 {
   int returnvalue = 0;
@@ -270,8 +271,6 @@ int fn_game_start_in_level(
     perror("Can't open file");
     goto cleanup;
   }
-
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   lv = fn_level_load(file, hero, tilecache, env);
   if (lv == NULL)
