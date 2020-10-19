@@ -50,7 +50,6 @@ fn_shot_t * fn_shot_create(
   shot->direction = direction;
   shot->counter = 0;
   shot->countdown = 2;
-  shot->draw_collision_bounds = 0;
 
   return shot;
 }
@@ -94,7 +93,11 @@ Uint8 fn_shot_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_shot_blit(fn_shot_t * shot, SDL_Surface * target, const FnTileCache * tilecache)
+void fn_shot_blit(
+        fn_shot_t * shot,
+        SDL_Surface * target,
+        const FnTileCache * tilecache,
+        bool draw_collision_bounds)
 {
   if (shot->is_alive) {
     FnGeometry destrect;
@@ -107,7 +110,7 @@ void fn_shot_blit(fn_shot_t * shot, SDL_Surface * target, const FnTileCache * ti
     destrect.h = shot->position.h;
     fn_texture_blit_to_sdl_surface(tile, NULL, target, &destrect);
 
-    if (shot->draw_collision_bounds) {
+    if (draw_collision_bounds) {
         Uint32 collision_color = FN_COLLISION_DEBUG_COLOR(target->format);
         fn_geometry_draw_outline(target, shot->position, collision_color);
     }
@@ -155,14 +158,6 @@ Uint8 fn_shot_touches_actor(fn_shot_t * shot, FnLevelActor * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
   return fn_geometry_touches(actorpos, shot->position);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_shot_set_draw_collision_bounds(
-    fn_shot_t * shot, Uint8 enable)
-{
-  shot->draw_collision_bounds = enable;
 }
 
 /* --------------------------------------------------------------- */

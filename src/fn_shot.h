@@ -72,11 +72,6 @@ struct fn_shot_t {
    * The down until the shot is to be removed.
    */
   Uint8 countdown;
-
-  /**
-   * Flag indicating if collision bounds are drawn.
-   */
-  Uint8 draw_collision_bounds;
 };
 
 /* --------------------------------------------------------------- */
@@ -125,7 +120,11 @@ Uint8 fn_shot_act(
  *
  * @param  shot       The shot to delete.
  */
-void fn_shot_blit(fn_shot_t * shot, SDL_Surface * target, const FnTileCache * tilecache);
+void fn_shot_blit(
+        fn_shot_t * shot,
+        SDL_Surface * target,
+        const FnTileCache * tilecache,
+        bool draw_collision_bounds);
 
 /* --------------------------------------------------------------- */
 
@@ -184,17 +183,6 @@ Uint16 fn_shot_get_h(fn_shot_t * shot);
  * @return 1 if they touch, otherwise 0.
  */
 Uint8 fn_shot_touches_actor(fn_shot_t * shot, FnLevelActor * actor);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Enable or disable the drawing of collision bounds for a shot.
- *
- * @param  shot    The shot.
- * @param  enable  If 0, disable drawing, else enable.
- */
-void fn_shot_set_draw_collision_bounds(
-    fn_shot_t * shot, Uint8 enable);
 
 /* --------------------------------------------------------------- */
 

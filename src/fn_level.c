@@ -968,7 +968,11 @@ void fn_level_blit_to_surface(
       Uint16 x = fn_shot_get_x(shot) / FN_TILE_WIDTH;
       Uint16 y = fn_shot_get_y(shot) / FN_TILE_HEIGHT;
       if (x > x_start && y > y_start && x < x_end && y < y_end) {
-        fn_shot_blit(shot, lv->surface, tilecache);
+        fn_shot_blit(
+                shot,
+                lv->surface,
+                tilecache,
+                draw_collision_bounds);
       } else {
         fn_shot_gets_out_of_sight(shot);
       }
@@ -1159,8 +1163,7 @@ fn_shot_t * fn_level_add_shot(
     FnHorizontalDirection direction,
     Uint16 x,
     Uint16 y,
-    FnLevelActorQueue * actor_queue,
-    bool draw_collision_bounds)
+    FnLevelActorQueue * actor_queue)
 {
   fn_shot_t * shot = fn_shot_create(x, y, direction);
 
@@ -1176,8 +1179,6 @@ fn_shot_t * fn_level_add_shot(
           addition * FN_HALFTILE_WIDTH,
           actor_queue);
 
-  fn_shot_set_draw_collision_bounds(shot,
-      draw_collision_bounds);
   return shot;
 }
 
@@ -1186,8 +1187,7 @@ fn_shot_t * fn_level_add_shot(
 void fn_level_fire_shot(
         fn_level_t * lv,
         FnHeroData * hero,
-        FnLevelActorQueue * actor_queue,
-        bool draw_collision_bounds)
+        FnLevelActorQueue * actor_queue)
 {
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
   FnHeroPosition * position = fn_hero_data_get_position(hero);
@@ -1202,8 +1202,7 @@ void fn_level_fire_shot(
             direction,
             geometry.x,
             geometry.y,
-            actor_queue,
-            draw_collision_bounds);
+            actor_queue);
     lv->num_shots++;
   }
 }
