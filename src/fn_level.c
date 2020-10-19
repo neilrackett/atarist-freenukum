@@ -31,6 +31,7 @@
 
 /* --------------------------------------------------------------- */
 
+#include "fn.h"
 #include "fn_level.h"
 #include "fn_object.h"
 #include "fn_shot.h"
@@ -42,8 +43,7 @@ fn_level_t * fn_level_load(
         FnFile* file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
-        FnTextureCreationParams texture_creation_params,
-        fn_environment_t * env)
+        FnTextureCreationParams texture_creation_params)
 {
   size_t i = 0;
   fn_level_t * lv = malloc(sizeof(fn_level_t));
@@ -53,8 +53,6 @@ fn_level_t * fn_level_load(
   Uint8 lowertile;
 
   lv->data = fn_level_data_create();
-
-  lv->environment = env;
 
   lv->animated_frames = 0;
 
@@ -1191,7 +1189,12 @@ fn_shot_t * fn_level_add_shot(
 
   lv->shots = fn_list_append(lv->shots, shot);
 
-  fn_shot_push(shot, hero, lv, addition * FN_HALFTILE_WIDTH, actor_queue);
+  fn_shot_push(
+          shot,
+          hero,
+          lv,
+          addition * FN_HALFTILE_WIDTH,
+          actor_queue);
 
   fn_shot_set_draw_collision_bounds(shot,
       draw_collision_bounds);

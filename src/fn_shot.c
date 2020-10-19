@@ -30,6 +30,7 @@
 
 /* --------------------------------------------------------------- */
 
+#include "fn.h"
 #include "fn_shot.h"
 #include "fn_object.h"
 #include "rusted.h"

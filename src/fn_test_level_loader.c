@@ -34,6 +34,7 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
+#include "fn_environment.h"
 #include "fn_level.h"
 
 /* --------------------------------------------------------------- */
@@ -135,7 +136,7 @@ int main(int argc, char ** argv)
         fn_environment_build_texture_creation_params(env);
 
     lv = fn_level_load(
-            file, hero, tilecache, texture_creation_params,env);
+            file, hero, tilecache, texture_creation_params);
     if (lv == NULL)
     {
         fn_file_free(file);

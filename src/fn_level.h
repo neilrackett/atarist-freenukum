@@ -42,7 +42,6 @@ typedef struct fn_level_t fn_level_t;
  */
 #include "fn_shot.h"
 #include "fn_list.h"
-#include "fn_environment.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -70,11 +69,6 @@ struct fn_level_t {
    * The surface for blitting the level.
    */
   SDL_Surface * surface;
-
-  /**
-   * The environment in which the level runs.
-   */
-  fn_environment_t * environment;
 
   /**
    * The actors inside the level.
@@ -118,8 +112,7 @@ fn_level_t * fn_level_load(
         FnFile * file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
-        FnTextureCreationParams texture_creation_params,
-        fn_environment_t * env);
+        FnTextureCreationParams texture_creation_params);
 
 /* --------------------------------------------------------------- */
 

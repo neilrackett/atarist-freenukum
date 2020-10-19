@@ -286,7 +286,7 @@ int fn_game_start_in_level(
   }
 
   lv = fn_level_load(
-          file, hero, tilecache, texture_creation_params, env);
+          file, hero, tilecache, texture_creation_params);
   if (lv == NULL)
   {
     fn_file_free(file);
