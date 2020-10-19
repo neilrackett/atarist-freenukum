@@ -62,7 +62,6 @@ fn_level_t * fn_level_load(
   lv->num_shots = 0;
 
   lv->actors = NULL;
-  lv->bots = NULL;
   lv->shots = NULL;
   lv->interactor = NULL;
 
@@ -247,8 +246,8 @@ fn_level_t * fn_level_load(
         if (x > 0) {
           fn_level_tiles_copy_from_to(tiles, x-1, y, x, y);
         }
-        lv->bots = fn_list_append(lv->bots, fn_bot_create(
-              BotType_FootBot, x*2, y*2));
+        fn_level_actor_queue_push_back(actor_queue,
+            ActorType_FootBot, tx, ty);
         break;
       case 0x300d: /* tankbot */
         if (x > 0) {
@@ -795,13 +794,6 @@ void fn_level_free(fn_level_t * lv)
 {
   fn_list_t * iter = NULL;
 
-  for (iter = fn_list_first(lv->bots);
-      iter != fn_list_last(lv->bots);
-      iter = fn_list_next(iter)) {
-    fn_bot_free((FnBot *)iter->data);
-  }
-  fn_list_free(lv->bots);
-
   for (iter = fn_list_first(lv->shots);
       iter != fn_list_last(lv->shots);
       iter = fn_list_next(iter)) {
@@ -968,18 +960,6 @@ void fn_level_blit_to_surface(
                 lv->surface,
                 draw_collision_bounds);
       }
-    }
-  }
-
-  /* blit the bots */
-  for (iter = fn_list_first(lv->bots);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    const FnBot * bot = (FnBot *)iter->data;
-    int x = fn_bot_get_x(bot) / 2;
-    int y = fn_bot_get_y(bot) / 2;
-    if (x > x_start && y > y_start && x < x_end && y < y_end) {
-      fn_bot_blit(bot, lv->surface, tilecache);
     }
   }
 

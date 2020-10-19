@@ -1,6 +1,5 @@
 pub mod backdrop;
 pub mod borders;
-pub mod bot;
 pub mod file;
 pub mod geometry;
 pub mod hero;

@@ -92,12 +92,6 @@ struct fn_level_t {
   Uint8 num_shots;
 
   /**
-   * The bots
-   * @TODO remove this (replaced by actors).
-   */
-  fn_list_t * bots;
-
-  /**
    * The number of animated frames since last action.
    */
   size_t animated_frames;
