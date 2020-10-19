@@ -223,6 +223,7 @@ FnHeroData * fn_level_get_hero(fn_level_t * lv);
  */
 int fn_level_act(
         fn_level_t * lv,
+        FnHeroData * hero,
         FnLevelActorQueue * actor_queue,
         FnLevelActorMessageQueue * actor_message_queue);
 
@@ -274,7 +275,10 @@ FnLevelActor * fn_level_add_actor(fn_level_t * lv,
  * 
  * @param  lv  The level.
  */
-void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue);
+void fn_level_fire_shot(
+        fn_level_t * lv,
+        FnHeroData * hero,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 

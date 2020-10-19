@@ -112,7 +112,11 @@ void fn_shot_free(fn_shot_t * shot);
  *
  * @return 0 if shot is obsolete, 1 if it is still alive.
  */
-Uint8 fn_shot_act(fn_shot_t * shot, fn_level_t * level, FnLevelActorQueue * actor_queue);
+Uint8 fn_shot_act(
+        fn_shot_t * shot,
+        FnHeroData * hero,
+        fn_level_t * level,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 
@@ -214,7 +218,12 @@ Uint8 fn_shot_hits_solid(
  * @param  shot    The shot.
  * @param  offset  The offset to which the shot gets pushed.
  */
-void fn_shot_push(fn_shot_t * shot, fn_level_t * level, Sint16 offset, FnLevelActorQueue * actor_queue);
+void fn_shot_push(
+        fn_shot_t * shot,
+        FnHeroData * hero,
+        fn_level_t * level,
+        Sint16 offset,
+        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 

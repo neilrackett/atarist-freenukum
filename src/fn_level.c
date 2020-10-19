@@ -1036,14 +1036,13 @@ FnHeroData * fn_level_get_hero(fn_level_t * lv) {
 
 int fn_level_act(
         fn_level_t * lv,
+        FnHeroData * hero,
         FnLevelActorQueue * actor_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
   fn_list_t * iter = NULL;
   int res = 0;
   int cleanup = 0;
-
-  FnHeroData * hero = fn_environment_get_hero(lv->environment);
 
   lv->animated_frames ++;
   lv->animated_frames %= 1;
@@ -1054,7 +1053,7 @@ int fn_level_act(
     fn_shot_t * shot = (fn_shot_t *)iter->data;
 
     if (shot != NULL) {
-      res = fn_shot_act(shot, lv, actor_queue);
+      res = fn_shot_act(shot, hero, lv, actor_queue);
       if (res == 0) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1200,7 +1199,9 @@ FnLevelActor * fn_level_add_actor(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-fn_shot_t * fn_level_add_shot(fn_level_t * lv,
+fn_shot_t * fn_level_add_shot(
+    fn_level_t * lv,
+    FnHeroData * hero,
     FnHorizontalDirection direction,
     Uint16 x,
     Uint16 y,
@@ -1213,7 +1214,7 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 
   lv->shots = fn_list_append(lv->shots, shot);
 
-  fn_shot_push(shot, lv, addition * FN_HALFTILE_WIDTH, actor_queue);
+  fn_shot_push(shot, hero, lv, addition * FN_HALFTILE_WIDTH, actor_queue);
 
   Uint8 draw_collision_bounds =
     fn_environment_get_draw_collision_bounds(lv->environment);
@@ -1225,9 +1226,11 @@ fn_shot_t * fn_level_add_shot(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
+void fn_level_fire_shot(
+        fn_level_t * lv,
+        FnHeroData * hero,
+        FnLevelActorQueue * actor_queue)
 {
-  FnHeroData * hero = fn_level_get_hero(lv);
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
   FnHeroPosition * position = fn_hero_data_get_position(hero);
 
@@ -1235,7 +1238,7 @@ void fn_level_fire_shot(fn_level_t * lv, FnLevelActorQueue * actor_queue)
     FnGeometry geometry = fn_hero_position_get_geometry(position);
     HorizontalDirection direction = fn_hero_data_get_direction(hero);
 
-    fn_level_add_shot(lv, direction, geometry.x, geometry.y, actor_queue);
+    fn_level_add_shot(lv, hero, direction, geometry.x, geometry.y, actor_queue);
     lv->num_shots++;
   }
 }
