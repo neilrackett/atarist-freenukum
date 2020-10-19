@@ -244,7 +244,8 @@ FnLevelActor * fn_level_add_actor(fn_level_t * lv,
 void fn_level_fire_shot(
         fn_level_t * lv,
         FnHeroData * hero,
-        FnLevelActorQueue * actor_queue);
+        FnLevelActorQueue * actor_queue,
+        bool draw_collision_bounds);
 
 /* --------------------------------------------------------------- */
 

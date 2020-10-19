@@ -1181,7 +1181,8 @@ fn_shot_t * fn_level_add_shot(
     FnHorizontalDirection direction,
     Uint16 x,
     Uint16 y,
-    FnLevelActorQueue * actor_queue)
+    FnLevelActorQueue * actor_queue,
+    bool draw_collision_bounds)
 {
   fn_shot_t * shot = fn_shot_create(x, y, direction);
 
@@ -1191,9 +1192,6 @@ fn_shot_t * fn_level_add_shot(
   lv->shots = fn_list_append(lv->shots, shot);
 
   fn_shot_push(shot, hero, lv, addition * FN_HALFTILE_WIDTH, actor_queue);
-
-  Uint8 draw_collision_bounds =
-    fn_environment_get_draw_collision_bounds(lv->environment);
 
   fn_shot_set_draw_collision_bounds(shot,
       draw_collision_bounds);
@@ -1205,7 +1203,8 @@ fn_shot_t * fn_level_add_shot(
 void fn_level_fire_shot(
         fn_level_t * lv,
         FnHeroData * hero,
-        FnLevelActorQueue * actor_queue)
+        FnLevelActorQueue * actor_queue,
+        bool draw_collision_bounds)
 {
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
   FnHeroPosition * position = fn_hero_data_get_position(hero);
@@ -1214,7 +1213,14 @@ void fn_level_fire_shot(
     FnGeometry geometry = fn_hero_position_get_geometry(position);
     HorizontalDirection direction = fn_hero_data_get_direction(hero);
 
-    fn_level_add_shot(lv, hero, direction, geometry.x, geometry.y, actor_queue);
+    fn_level_add_shot(
+            lv,
+            hero,
+            direction,
+            geometry.x,
+            geometry.y,
+            actor_queue,
+            draw_collision_bounds);
     lv->num_shots++;
   }
 }
