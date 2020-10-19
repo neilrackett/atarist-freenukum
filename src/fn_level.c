@@ -38,8 +38,10 @@
 
 /* --------------------------------------------------------------- */
 
-fn_level_t * fn_level_load(FnFile* file,
-    fn_environment_t * env)
+fn_level_t * fn_level_load(
+        FnFile* file,
+        FnHeroData * hero,
+        fn_environment_t * env)
 {
   size_t i = 0;
   fn_level_t * lv = malloc(sizeof(fn_level_t));
@@ -97,8 +99,6 @@ fn_level_t * fn_level_load(FnFile* file,
       fn_level_tiles_set(tiles, x, y, tilenr / 0x20);
       fn_level_solids_set(solids, x, y, (tilenr >= 0x1800));
     }
-
-    FnHeroData * hero = fn_environment_get_hero(env);
 
     uint16_t tx = x * FN_TILE_WIDTH;
     uint16_t ty = y * FN_TILE_HEIGHT;

@@ -120,8 +120,10 @@ struct fn_level_t {
  *          the level, NULL is returned. Examine errno in order
  *          to find out what error occured.
  */
-fn_level_t * fn_level_load(FnFile * file,
-    fn_environment_t * env);
+fn_level_t * fn_level_load(
+        FnFile * file,
+        FnHeroData * hero,
+        fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
