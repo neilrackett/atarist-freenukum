@@ -875,6 +875,7 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
 
 void fn_level_blit_to_surface(
         fn_level_t * lv,
+        const FnTileCache * tilecache,
         FnHeroData * hero,
         SDL_Surface * target,
         FnGeometry * targetrect,
@@ -930,7 +931,6 @@ void fn_level_blit_to_surface(
 
   Uint8 draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(env);
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   /* blit the actors in the background */
   for (iter = fn_list_first(lv->actors);

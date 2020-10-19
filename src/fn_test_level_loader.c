@@ -165,6 +165,7 @@ int main(int argc, char ** argv)
 
     fn_level_blit_to_surface(
             lv,
+            tilecache,
             hero,
             level,
             &r,

@@ -345,6 +345,7 @@ int fn_game_start_in_level(
       SDL_Rect srect = fn_geometry_as_sdl_rect(&srcrect);
       fn_level_blit_to_surface(
           lv,
+          tilecache,
           hero,
           level,
           &srcrect,

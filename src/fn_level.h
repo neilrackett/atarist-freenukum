@@ -156,6 +156,7 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
  */
 void fn_level_blit_to_surface(
         fn_level_t * lv,
+        const FnTileCache * tilecache,
         FnHeroData * hero,
         SDL_Surface * target,
         FnGeometry * targetrect,
