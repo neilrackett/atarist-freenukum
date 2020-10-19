@@ -1349,13 +1349,3 @@ Uint8 fn_level_rect_fall_down(
   }
   return i;
 }
-
-/* --------------------------------------------------------------- */
-
-fn_environment_t * fn_level_get_environment(fn_level_t * level)
-{
-  return level->environment;
-}
-
-/* --------------------------------------------------------------- */
-

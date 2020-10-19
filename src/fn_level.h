@@ -325,15 +325,4 @@ Uint8 fn_level_rect_fall_down(
 
 /* --------------------------------------------------------------- */
 
-/**
- * Get the environment of the level.
- *
- * @param  level    The level.
- *
- * @return The environment.
- */
-fn_environment_t * fn_level_get_environment(fn_level_t * level);
-
-/* --------------------------------------------------------------- */
-
 #endif /* FN_LEVEL_H */
