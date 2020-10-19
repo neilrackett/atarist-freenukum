@@ -127,8 +127,9 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
     FnHeroData * hero = fn_environment_get_hero(env);
+    const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
-    lv = fn_level_load(file, hero, env);
+    lv = fn_level_load(file, hero, tilecache, env);
     if (lv == NULL)
     {
         fn_file_free(file);

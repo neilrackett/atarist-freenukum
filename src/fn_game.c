@@ -271,7 +271,9 @@ int fn_game_start_in_level(
     goto cleanup;
   }
 
-  lv = fn_level_load(file, hero, env);
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
+
+  lv = fn_level_load(file, hero, tilecache, env);
   if (lv == NULL)
   {
     fn_file_free(file);

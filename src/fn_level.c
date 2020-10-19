@@ -41,6 +41,7 @@
 fn_level_t * fn_level_load(
         FnFile* file,
         FnHeroData * hero,
+        const FnTileCache * tilecache,
         fn_environment_t * env)
 {
   size_t i = 0;
@@ -779,7 +780,7 @@ fn_level_t * fn_level_load(
       if (tilenr > 1 && tilenr < (48 * 8)) {
         r.x = x * FN_TILE_WIDTH;
         r.y = y * FN_TILE_HEIGHT;
-        tile = fn_environment_get_tile(env, tilenr);
+        tile = fn_tilecache_get_tile(tilecache, tilenr);
         fn_texture_blit_to_sdl_surface(tile, NULL, lv->surface_fixed, &r);
       }
     }

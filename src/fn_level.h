@@ -123,6 +123,7 @@ struct fn_level_t {
 fn_level_t * fn_level_load(
         FnFile * file,
         FnHeroData * hero,
+        const FnTileCache * tilecache,
         fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
