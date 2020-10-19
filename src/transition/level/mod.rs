@@ -7,6 +7,7 @@ pub struct LevelData {
     pub solids: solids::LevelSolids,
     pub do_play: bool,
     pub level_passed: bool,
+    pub actors: actor::ActorsList,
 }
 
 impl LevelData {
@@ -16,6 +17,7 @@ impl LevelData {
             solids: solids::LevelSolids::new(),
             do_play: true,
             level_passed: false,
+            actors: Vec::new(),
         }
     }
 }
@@ -23,6 +25,7 @@ impl LevelData {
 pub mod ffi {
     pub type FnLevelData = super::LevelData;
 
+    use super::actor::ffi::FnLevelActorsList;
     use super::solids::ffi::FnLevelSolids;
     use super::tiles::ffi::FnLevelTiles;
 
@@ -56,6 +59,15 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnLevelData = unsafe { &mut (*ptr) };
         &mut d.solids
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_get_actors_list(
+        ptr: *mut FnLevelData,
+    ) -> *mut FnLevelActorsList {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+        &mut d.actors
     }
 
     #[no_mangle]

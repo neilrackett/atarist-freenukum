@@ -304,6 +304,8 @@ typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
 
+typedef struct Vec_Actor Vec_Actor;
+
 typedef Texture FnTexture;
 
 typedef File FnFile;
@@ -385,6 +387,10 @@ typedef struct {
 typedef ActorQueueItem FnLevelActorQueueItem;
 
 typedef ActorMessageType FnLevelActorMessageType;
+
+typedef Vec_Actor ActorsList;
+
+typedef ActorsList FnLevelActorsList;
 
 typedef struct {
     uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
@@ -752,9 +758,30 @@ bool fn_level_actor_shot(FnLevelActor *actor,
 
 FnLevelActorType fn_level_actor_type(const FnLevelActor *actor);
 
+void fn_level_actors_list_add_actor(FnLevelActorsList *ptr,
+                                    FnLevelData *level_data,
+                                    FnLevelActorType actor_type,
+                                    int16_t x,
+                                    int16_t y);
+
+uintptr_t fn_level_actors_list_count(const FnLevelActorsList *ptr);
+
+FnLevelActor *fn_level_actors_list_get(FnLevelActorsList *ptr,
+                                       uintptr_t index);
+
+void fn_level_actors_list_remove_dead(FnLevelActorsList *ptr);
+
+void fn_level_actors_list_send_message(FnLevelActorsList *ptr,
+                                       FnLevelActorType receivers,
+                                       FnLevelActorMessageType message,
+                                       FnHeroData *hero_data,
+                                       FnLevelData *level_data);
+
 FnLevelData *fn_level_data_create(void);
 
 void fn_level_data_free(FnLevelData *ptr);
+
+FnLevelActorsList *fn_level_data_get_actors_list(FnLevelData *ptr);
 
 bool fn_level_data_get_do_play(const FnLevelData *ptr);
 

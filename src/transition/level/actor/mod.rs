@@ -43,6 +43,8 @@ use super::super::infobox::InfoMessageQueue;
 use super::super::level::LevelData;
 use super::super::tilecache::TileCache;
 
+pub type ActorsList = Vec<Actor>;
+
 #[repr(C)]
 #[derive(Debug)]
 pub struct Actor {
@@ -646,7 +648,7 @@ impl ActorQueue {
 }
 
 #[repr(C)]
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum ActorMessageType {
     OpenDoor,
     Teleport,
@@ -764,14 +766,15 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
 }
 
 pub mod ffi {
-    type FnLevelActor = super::Actor;
+    pub type FnLevelActor = super::Actor;
     type FnLevelActorData = super::ActorData;
-    type FnLevelActorType = super::ActorType;
+    pub type FnLevelActorType = super::ActorType;
     type FnLevelActorQueue = super::ActorQueue;
     type FnLevelActorQueueItem = super::ActorQueueItem;
     type FnLevelActorMessage = super::ActorMessage;
-    type FnLevelActorMessageType = super::ActorMessageType;
+    pub type FnLevelActorMessageType = super::ActorMessageType;
     type FnLevelActorMessageQueue = super::ActorMessageQueue;
+    pub type FnLevelActorsList = super::ActorsList;
 
     use super::super::super::geometry::ffi::FnGeometry;
     use super::super::super::hero::ffi::FnHeroData;
@@ -1156,5 +1159,87 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let queue = unsafe { &mut (*ptr) };
         queue.messages.remove(0)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actors_list_count(
+        ptr: *const FnLevelActorsList,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &FnLevelActorsList = unsafe { &(*ptr) };
+        d.len()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actors_list_get(
+        ptr: *mut FnLevelActorsList,
+        index: usize,
+    ) -> *mut FnLevelActor {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
+        match d.get_mut(index) {
+            Some(actor) => actor as *mut FnLevelActor,
+            None => std::ptr::null_mut(),
+        }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actors_list_remove_dead(
+        ptr: *mut FnLevelActorsList,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
+        d.retain(|a| a.general.is_alive);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actors_list_add_actor(
+        ptr: *mut FnLevelActorsList,
+        level_data: *mut FnLevelData,
+        actor_type: FnLevelActorType,
+        x: i16,
+        y: i16,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
+
+        assert!(!level_data.is_null());
+        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
+
+        let mut general = super::ActorData::new(actor_type);
+        general.position.x = x;
+        general.position.y = y;
+        let specific =
+            actor_type.create_actor_interface(&mut general, level_data);
+        d.push(super::Actor { general, specific });
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_actors_list_send_message(
+        ptr: *mut FnLevelActorsList,
+        receivers: FnLevelActorType,
+        message: FnLevelActorMessageType,
+        hero_data: *mut FnHeroData,
+        level_data: *mut FnLevelData,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
+
+        assert!(!hero_data.is_null());
+        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
+
+        assert!(!level_data.is_null());
+        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
+
+        for actor in
+            d.iter_mut().filter(|a| a.general.actor_type == receivers)
+        {
+            actor.specific.receive_message(
+                &mut actor.general,
+                message,
+                hero_data,
+                level_data,
+            );
+        }
     }
 }

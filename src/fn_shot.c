@@ -184,11 +184,9 @@ void fn_shot_push(
 {
   if (shot->countdown == 2) {
     shot->position.x += offset;
-    fn_list_t * iter = NULL;
-    for (iter = fn_list_first(level->actors);
-        iter != NULL && shot->countdown != 1;
-        iter = fn_list_next(iter)) {
-      FnLevelActor * actor = (FnLevelActor *)iter->data;
+    FnLevelActorsList * actors = fn_level_data_get_actors_list(level_data);
+    for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
+      FnLevelActor * actor = fn_level_actors_list_get(actors, i);
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&

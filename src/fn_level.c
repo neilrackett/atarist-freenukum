@@ -58,7 +58,6 @@ fn_level_t * fn_level_load(
 
   lv->num_shots = 0;
 
-  lv->actors = NULL;
   lv->shots = NULL;
   lv->interactor = NULL;
 
@@ -818,16 +817,6 @@ void fn_level_free(fn_level_t * lv)
   }
   fn_list_free(lv->shots);
 
-  for (iter = fn_list_first(lv->actors);
-      iter != fn_list_last(lv->actors);
-      iter = fn_list_next(iter)) {
-    if (iter->data != NULL) {
-      fn_level_actor_free((FnLevelActor *)iter->data);
-      iter->data = NULL;
-    }
-  }
-  fn_list_free(lv->actors);
-
   SDL_FreeSurface(lv->surface);
   SDL_FreeSurface(lv->surface_fixed);
 
@@ -901,31 +890,28 @@ void fn_level_blit_to_surface(
   }
 
   /* blit the actors in the background */
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnLevelActor * actor = (FnLevelActor *)iter->data;
+  FnLevelActorsList * actors = fn_level_data_get_actors_list(lv->data);
+  for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
+    FnLevelActor * actor = fn_level_actors_list_get(actors, i);
 
-    if (actor != NULL) {
-      FnGeometry position = fn_level_actor_get_position(actor);
-      Uint16 xl = position.x / FN_TILE_WIDTH;
-      Uint16 yt = position.y / FN_TILE_HEIGHT;
-      Uint16 xr = xl + position.w / FN_TILE_WIDTH;
-      Uint16 yb = yt + position.h / FN_TILE_HEIGHT;
+    FnGeometry position = fn_level_actor_get_position(actor);
+    Uint16 xl = position.x / FN_TILE_WIDTH;
+    Uint16 yt = position.y / FN_TILE_HEIGHT;
+    Uint16 xr = xl + position.w / FN_TILE_WIDTH;
+    Uint16 yb = yt + position.h / FN_TILE_HEIGHT;
 
-      if (xr > x_start && yb > y_start && xl < x_end && yt < y_end) {
-        fn_level_actor_set_visible(actor, 1);
-        if (!fn_level_actor_in_foreground(actor)) {
-          fn_level_actor_blit(
-                  actor,
-                  hero,
-                  tilecache,
-                  lv->surface,
-                  draw_collision_bounds);
-        }
-      } else {
-        fn_level_actor_set_visible(actor, 0);
+    if (xr > x_start && yb > y_start && xl < x_end && yt < y_end) {
+      fn_level_actor_set_visible(actor, 1);
+      if (!fn_level_actor_in_foreground(actor)) {
+        fn_level_actor_blit(
+                actor,
+                hero,
+                tilecache,
+                lv->surface,
+                draw_collision_bounds);
       }
+    } else {
+      fn_level_actor_set_visible(actor, 0);
     }
   }
 
@@ -937,12 +923,10 @@ void fn_level_blit_to_surface(
       draw_collision_bounds);
 
   /* blit the actors in the foreground */
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnLevelActor * actor = (FnLevelActor *)iter->data;
+  for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
+    FnLevelActor * actor = fn_level_actors_list_get(actors, i);
 
-    if (actor != NULL && fn_level_actor_is_visible(actor)) {
+    if (fn_level_actor_is_visible(actor)) {
       if (fn_level_actor_in_foreground(actor)) {
         fn_level_actor_blit(
                 actor,
@@ -1028,43 +1012,32 @@ int fn_level_act(
   int sum = 0;
   size_t actors_hurting_hero = 0;
 
+  FnLevelActorsList * actors =
+      fn_level_data_get_actors_list(lv->data);
   while (fn_level_actor_message_queue_has_items(actor_message_queue)) {
       FnLevelActorMessage message =
           fn_level_actor_message_queue_pop_front(actor_message_queue);
-      for (iter = fn_list_first(lv->actors);
-              iter != NULL;
-              iter = fn_list_next(iter))
-      {
-          FnLevelActor * actor = (FnLevelActor *)iter->data;
-          if (fn_level_actor_type(actor) == message.receivers) {
-              fn_level_actor_receive_message(
-                      actor,
-                      message.message,
-                      hero,
-                      lv->data);
-          }
-      }
+      fn_level_actors_list_send_message(
+              actors,
+              message.receivers,
+              message.message,
+              hero,
+              lv->data);
   }
 
+  for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
+      FnLevelActor * actor = fn_level_actors_list_get(actors, i);
 
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnLevelActor * actor = (FnLevelActor *)iter->data;
-
-    if  (fn_level_actor_acts_while_invisible(actor) ||
-            fn_level_actor_is_visible(actor)) {
-      sum++;
-      fn_level_actor_act(actor, lv->data, hero, actor_queue);
-      if (!fn_level_actor_is_alive(actor)) {
-        /* set the cleanup flag and free the memory */
-        cleanup = 1;
-        iter->data = NULL;
-        fn_level_actor_free(actor); actor = NULL;
-      } else if (fn_level_actor_hurts_hero(actor)) {
-          actors_hurting_hero++;
+      if  (fn_level_actor_acts_while_invisible(actor) ||
+              fn_level_actor_is_visible(actor)) {
+          sum++;
+          fn_level_actor_act(actor, lv->data, hero, actor_queue);
+          if (fn_level_actor_is_alive(actor) &&
+                  fn_level_actor_hurts_hero(actor))
+          {
+              actors_hurting_hero++;
+          }
       }
-    }
   }
 
   while (fn_level_actor_queue_has_items(actor_queue)) {
@@ -1072,11 +1045,7 @@ int fn_level_act(
       fn_level_add_actor(lv, item.actor_type, item.x, item.y);
   }
 
-  if (cleanup) {
-    /* clean up the actors that are finished */
-    cleanup = 0;
-    lv->actors = fn_list_remove_all(lv->actors, NULL);
-  }
+  fn_level_actors_list_remove_dead(actors);
 
   fn_hero_data_set_gets_hurt(hero, actors_hurting_hero > 0);
 
@@ -1110,11 +1079,9 @@ void fn_level_hero_interact_start(
         FnInfoMessageQueue * info_message_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
-  fn_list_t * iter = NULL;
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnLevelActor * actor = (FnLevelActor *)iter->data;
+  FnLevelActorsList * actors = fn_level_data_get_actors_list(lv->data);
+  for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
+    FnLevelActor * actor = fn_level_actors_list_get(actors, i);
 
     if (fn_level_actor_hero_can_interact(actor, hero)) {
       FnHeroPosition * position = fn_hero_data_get_position(hero);
@@ -1140,15 +1107,14 @@ void fn_level_hero_interact_start(
 
 /* --------------------------------------------------------------- */
 
-FnLevelActor * fn_level_add_actor(fn_level_t * lv,
+void fn_level_add_actor(fn_level_t * lv,
     FnLevelActorType type,
     Uint16 x,
     Uint16 y)
 {
-  FnLevelActor * actor = fn_level_actor_create(type, lv->data, x, y);
-  lv->actors = fn_list_append(lv->actors, actor);
-
-  return actor;
+  FnLevelActorsList * actors = fn_level_data_get_actors_list(lv->data);
+  fn_level_actors_list_add_actor(
+          actors, lv->data, type, x, y);
 }
 
 /* --------------------------------------------------------------- */
@@ -1202,24 +1168,6 @@ void fn_level_fire_shot(
             actor_queue);
     lv->num_shots++;
   }
-}
-
-/* --------------------------------------------------------------- */
-
-fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
-    FnLevelActorType type)
-{
-  fn_list_t * ret = NULL;
-  fn_list_t * iter = NULL;
-  for (iter = fn_list_first(lv->actors);
-      iter != fn_list_last(lv->actors);
-      iter = fn_list_next(iter)) {
-    FnLevelActor * actor = iter->data;
-    if (fn_level_actor_type(actor) == type) {
-      ret = fn_list_append(ret, actor);
-    }
-  }
-  return ret;
 }
 
 /* --------------------------------------------------------------- */

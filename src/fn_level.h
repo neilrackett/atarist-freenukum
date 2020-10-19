@@ -71,11 +71,6 @@ struct fn_level_t {
   SDL_Surface * surface;
 
   /**
-   * The actors inside the level.
-   */
-  fn_list_t * actors;
-
-  /**
    * The shots inside the level.
    */
   fn_list_t * shots;
@@ -219,7 +214,7 @@ void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero);
  *
  * @return  The newly created actor.
  */
-FnLevelActor * fn_level_add_actor(fn_level_t * lv,
+void fn_level_add_actor(fn_level_t * lv,
     FnLevelActorType type,
     Uint16 x,
     Uint16 y);
@@ -238,20 +233,6 @@ void fn_level_fire_shot(
         fn_level_t * lv,
         FnHeroData * hero,
         FnLevelActorQueue * actor_queue);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get a list containing all items in the level of a type.
- *
- * @param  lv    The level.
- * @param  type  The type of which to get the items.
- *
- * @return The list. The user who called this function has to
- *         call fn_list_free on it in order to free the memory.
- */
-fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
-    FnLevelActorType type);
 
 /* --------------------------------------------------------------- */
 
