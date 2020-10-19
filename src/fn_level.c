@@ -849,26 +849,6 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_level_is_solid(const fn_level_t * lv, int x, int y)
-{
-  if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
-    return 1;
-  }
-  return fn_level_solids_get(&(lv->data->solids), x, y);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
-{
-  if (x < 0 || y < 0 || x > FN_LEVEL_WIDTH || y > FN_LEVEL_HEIGHT) {
-    return;
-  }
-  fn_level_solids_set(&(lv->data->solids), x, y, solid);
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_level_blit_to_surface(
         fn_level_t * lv,
         const FnTileCache * tilecache,
