@@ -159,12 +159,14 @@ Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
  * @param  backdrop1  The first backdrop type.
  * @param  backdrop2  The second backdrop type.
  */
-void fn_level_blit_to_surface(fn_level_t * lv,
-    SDL_Surface * target,
-    FnGeometry * targetrect,
-    FnGeometry * sourcerect,
-    FnTexture * backdrop1,
-    FnTexture * backdrop2);
+void fn_level_blit_to_surface(
+        fn_level_t * lv,
+        FnHeroData * hero,
+        SDL_Surface * target,
+        FnGeometry * targetrect,
+        FnGeometry * sourcerect,
+        FnTexture * backdrop1,
+        FnTexture * backdrop2);
 
 /* --------------------------------------------------------------- */
 

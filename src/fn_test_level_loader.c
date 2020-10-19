@@ -150,12 +150,14 @@ int main(int argc, char ** argv)
     r.w = FN_TILE_WIDTH * FN_LEVEL_WIDTH;
     r.h = FN_TILE_HEIGHT * FN_LEVEL_HEIGHT;
 
-    fn_level_blit_to_surface(lv,
-        level,
-        &r,
-        &r,
-        NULL,
-        NULL);
+    fn_level_blit_to_surface(
+            lv,
+            hero,
+            level,
+            &r,
+            &r,
+            NULL,
+            NULL);
 
     SDL_BlitSurface(level, NULL, screen, NULL);
 
