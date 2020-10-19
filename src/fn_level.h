@@ -166,17 +166,6 @@ void fn_level_blit_to_surface(
 /* --------------------------------------------------------------- */
 
 /**
- * Get the tilecache for the level.
- *
- * @param  lv  The level.
- *
- * @return The tilecache.
- */
-const FnTileCache * fn_level_get_tilecache(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Indicate if we are still playing this level.
  * 
  * @param  lv    The level we want to play.

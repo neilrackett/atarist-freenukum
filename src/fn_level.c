@@ -988,14 +988,6 @@ void fn_level_blit_to_surface(
 
 /* --------------------------------------------------------------- */
 
-/* TODO this is deprecated! remove it. */
-const FnTileCache * fn_level_get_tilecache(fn_level_t * lv)
-{
-  return fn_environment_get_tilecache(lv->environment);
-}
-
-/* --------------------------------------------------------------- */
-
 int fn_level_keep_on_playing(fn_level_t * lv) {
   return lv->data->do_play;
 }

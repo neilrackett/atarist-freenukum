@@ -359,7 +359,6 @@ int fn_game_start_in_level(
       doupdate = 0;
     }
 
-    const FnTileCache * tilecache = fn_level_get_tilecache(lv);
     FnTextureCreationParams texture_creation_params =
         fn_environment_build_texture_creation_params(env);
     fn_info_message_queue_process(
