@@ -131,7 +131,11 @@ int main(int argc, char ** argv)
     bool draw_collision_bounds =
         fn_environment_get_draw_collision_bounds(env);
 
-    lv = fn_level_load(file, hero, tilecache, env);
+    FnTextureCreationParams texture_creation_params =
+        fn_environment_build_texture_creation_params(env);
+
+    lv = fn_level_load(
+            file, hero, tilecache, texture_creation_params,env);
     if (lv == NULL)
     {
         fn_file_free(file);
@@ -141,8 +145,6 @@ int main(int argc, char ** argv)
 
     fn_file_free(file);
 
-    FnTextureCreationParams texture_creation_params =
-        fn_environment_build_texture_creation_params(env);
     level = SDL_CreateRGBSurface(
         texture_creation_params.flags,
         FN_TILE_WIDTH * FN_LEVEL_WIDTH,

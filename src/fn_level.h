@@ -118,6 +118,7 @@ fn_level_t * fn_level_load(
         FnFile * file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
+        FnTextureCreationParams texture_creation_params,
         fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

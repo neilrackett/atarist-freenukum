@@ -264,7 +264,7 @@ int fn_game_start_in_level(
   } else {
     fn_tileheader_load(file);
     backdrop = fn_backdrop_load(
-            file, fn_environment_build_texture_creation_params(env));
+            file, texture_creation_params);
     if (backdrop == NULL) {
       printf("could not load backdrop");
     }
@@ -285,7 +285,8 @@ int fn_game_start_in_level(
     goto cleanup;
   }
 
-  lv = fn_level_load(file, hero, tilecache, env);
+  lv = fn_level_load(
+          file, hero, tilecache, texture_creation_params, env);
   if (lv == NULL)
   {
     fn_file_free(file);

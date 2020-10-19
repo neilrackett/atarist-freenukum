@@ -42,6 +42,7 @@ fn_level_t * fn_level_load(
         FnFile* file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
+        FnTextureCreationParams texture_creation_params,
         fn_environment_t * env)
 {
   size_t i = 0;
@@ -66,9 +67,6 @@ fn_level_t * fn_level_load(
   lv->interactor = NULL;
 
   lv->data->do_play = 1;
-
-  FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
 
   lv->surface_fixed = SDL_CreateRGBSurface(
       texture_creation_params.flags,
