@@ -193,10 +193,21 @@ int fn_game_start_in_level(
 
   FnHeroData * hero = fn_environment_get_hero(env);
 
-  SDL_Surface * level = fn_environment_create_surface(
-      env,
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
+  SDL_Surface * level = SDL_CreateRGBSurface(
+      texture_creation_params.flags,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
+      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
+      texture_creation_params.bits_per_pixel,
+      0,
+      0,
+      0,
+      0);
+  SDL_SetColorKey(
+          level,
+          SDL_SRCCOLORKEY,
+          texture_creation_params.transparent);
 
   FnTexture * backdrop = NULL;;
   SDL_TimerID tick = 0;

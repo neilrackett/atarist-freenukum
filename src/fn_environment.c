@@ -401,28 +401,6 @@ Uint32 fn_environment_get_transparent(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-SDL_Surface * fn_environment_create_surface(
-    fn_environment_t * env,
-    int width,
-    int height)
-{
-  SDL_Surface * surface = SDL_CreateRGBSurface(
-      env->screen->flags,
-      width,
-      height,
-      env->screen->format->BitsPerPixel,
-      0,
-      0,
-      0,
-      0);
-
-  SDL_SetColorKey(surface, SDL_SRCCOLORKEY, env->transparent);
-
-  return surface;
-}
-
-/* --------------------------------------------------------------- */
-
 SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env)
 {
   return env->screen;

@@ -67,15 +67,38 @@ fn_level_t * fn_level_load(
 
   lv->data->do_play = 1;
 
-  lv->surface_fixed = fn_environment_create_surface(
-      env,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
 
-  lv->surface = fn_environment_create_surface(
-      env,
+  lv->surface_fixed = SDL_CreateRGBSurface(
+      texture_creation_params.flags,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
+      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
+      texture_creation_params.bits_per_pixel,
+      0,
+      0,
+      0,
+      0);
+
+  SDL_SetColorKey(
+          lv->surface_fixed,
+          SDL_SRCCOLORKEY,
+          texture_creation_params.transparent);
+
+  lv->surface = SDL_CreateRGBSurface(
+      texture_creation_params.flags,
+      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
+      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
+      texture_creation_params.bits_per_pixel,
+      0,
+      0,
+      0,
+      0);
+
+  SDL_SetColorKey(
+          lv->surface,
+          SDL_SRCCOLORKEY,
+          texture_creation_params.transparent);
 
   FnLevelTiles * tiles = &(lv->data->tiles);
   FnLevelSolids * solids = &(lv->data->solids);

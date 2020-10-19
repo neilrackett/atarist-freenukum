@@ -139,9 +139,21 @@ int main(int argc, char ** argv)
 
     fn_file_free(file);
 
-    level = fn_environment_create_surface(env,
+    FnTextureCreationParams texture_creation_params =
+        fn_environment_build_texture_creation_params(env);
+    level = SDL_CreateRGBSurface(
+        texture_creation_params.flags,
         FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-        FN_TILE_HEIGHT * FN_LEVEL_WIDTH);
+        FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
+        texture_creation_params.bits_per_pixel,
+        0,
+        0,
+        0,
+        0);
+    SDL_SetColorKey(
+            level,
+            SDL_SRCCOLORKEY,
+            texture_creation_params.transparent);
 
     SDL_WM_SetCaption("FreeNukum Level Tester", "");
 

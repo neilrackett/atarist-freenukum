@@ -172,23 +172,6 @@ Uint32 fn_environment_get_transparent(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Create a new SDL Surface with the environment's settings.
- * The user is responsible for freeing that surface on his own by
- * calling SDL_Free on it.
- *
- * @param  env     The environment.
- * @param  width   The width of the surface in original-game pixels.
- * @param  height  The height of the surface in orginal-game pixels.
- *
- * @return The newly created surface.
- */
-SDL_Surface * fn_environment_create_surface(fn_environment_t * env,
-    int width,
-    int height);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the screen to which the environment displays the game.
  *
  * @param  env    The environment.
