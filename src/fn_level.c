@@ -988,13 +988,6 @@ void fn_level_blit_to_surface(
 
 /* --------------------------------------------------------------- */
 
-SDL_Surface * fn_level_get_surface(fn_level_t * lv)
-{
-  return lv->surface;
-}
-
-/* --------------------------------------------------------------- */
-
 /* TODO this is deprecated! remove it. */
 const FnTileCache * fn_level_get_tilecache(fn_level_t * lv)
 {

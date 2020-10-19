@@ -166,17 +166,6 @@ void fn_level_blit_to_surface(
 /* --------------------------------------------------------------- */
 
 /**
- * Get the SDL surface to which the level is blitted.
- *
- * @param  lv   The level.
- *
- * @return The surface to which the level is blitted.
- */
-SDL_Surface * fn_level_get_surface(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the tilecache for the level.
  *
  * @param  lv  The level.
