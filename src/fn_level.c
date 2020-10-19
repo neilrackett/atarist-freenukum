@@ -877,6 +877,7 @@ void fn_level_blit_to_surface(
         fn_level_t * lv,
         const FnTileCache * tilecache,
         FnHeroData * hero,
+        bool draw_collision_bounds,
         SDL_Surface * target,
         FnGeometry * targetrect,
         FnGeometry * sourcerect,
@@ -888,8 +889,6 @@ void fn_level_blit_to_surface(
   int y_start = 0;
   int y_end = FN_LEVEL_HEIGHT;
   fn_list_t * iter = NULL;
-
-  fn_environment_t * env = fn_level_get_environment(lv);
 
   /* load the background tiles */
   /*
@@ -928,9 +927,6 @@ void fn_level_blit_to_surface(
       y_start = y_end - FN_LEVELWINDOW_HEIGHT * 2;
     }
   }
-
-  Uint8 draw_collision_bounds =
-      fn_environment_get_draw_collision_bounds(env);
 
   /* blit the actors in the background */
   for (iter = fn_list_first(lv->actors);

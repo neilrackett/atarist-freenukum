@@ -158,6 +158,7 @@ void fn_level_blit_to_surface(
         fn_level_t * lv,
         const FnTileCache * tilecache,
         FnHeroData * hero,
+        bool draw_collision_bounds,
         SDL_Surface * target,
         FnGeometry * targetrect,
         FnGeometry * sourcerect,

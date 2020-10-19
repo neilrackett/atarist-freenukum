@@ -128,6 +128,8 @@ int main(int argc, char ** argv)
     screen = fn_environment_get_screen_sdl(env);
     FnHeroData * hero = fn_environment_get_hero(env);
     const FnTileCache * tilecache = fn_environment_get_tilecache(env);
+    bool draw_collision_bounds =
+        fn_environment_get_draw_collision_bounds(env);
 
     lv = fn_level_load(file, hero, tilecache, env);
     if (lv == NULL)
@@ -167,6 +169,7 @@ int main(int argc, char ** argv)
             lv,
             tilecache,
             hero,
+            draw_collision_bounds,
             level,
             &r,
             &r,

@@ -192,6 +192,8 @@ int fn_game_start_in_level(
   int doupdate = 1;
 
   FnHeroData * hero = fn_environment_get_hero(env);
+  bool draw_collision_bounds =
+      fn_environment_get_draw_collision_bounds(env);
 
   FnTextureCreationParams texture_creation_params =
       fn_environment_build_texture_creation_params(env);
@@ -347,6 +349,7 @@ int fn_game_start_in_level(
           lv,
           tilecache,
           hero,
+          draw_collision_bounds,
           level,
           &srcrect,
           &srcrect,
