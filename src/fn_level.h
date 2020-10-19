@@ -204,17 +204,6 @@ int fn_level_keep_on_playing(fn_level_t * lv);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the hero of the level.
- *
- * @param  lv    The level from which to get the hero.
- *
- * @return The hero.
- */
-FnHeroData * fn_level_get_hero(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Call this function make the game act one step further.
  *
  * @param  lv  The level which should step.
@@ -236,6 +225,7 @@ int fn_level_act(
  */
 void fn_level_hero_interact_start(
         fn_level_t * lv,
+        FnHeroData * hero,
         FnInfoMessageQueue * info_message_queue,
         FnLevelActorMessageQueue * actor_message_queue);
 
@@ -246,7 +236,7 @@ void fn_level_hero_interact_start(
  *
  * @param  lv  The level whose hero should interact.
  */
-void fn_level_hero_interact_stop(fn_level_t * lv);
+void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero);
 
 /* --------------------------------------------------------------- */
 

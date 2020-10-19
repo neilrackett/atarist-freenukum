@@ -1028,12 +1028,6 @@ int fn_level_keep_on_playing(fn_level_t * lv) {
 
 /* --------------------------------------------------------------- */
 
-FnHeroData * fn_level_get_hero(fn_level_t * lv) {
-  return fn_environment_get_hero(lv->environment);
-}
-
-/* --------------------------------------------------------------- */
-
 int fn_level_act(
         fn_level_t * lv,
         FnHeroData * hero,
@@ -1138,10 +1132,9 @@ int fn_level_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_hero_interact_stop(fn_level_t * lv)
+void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero)
 {
   if (lv->interactor != NULL) {
-    FnHeroData * hero = fn_level_get_hero(lv);
     fn_level_actor_hero_interact_end(
             lv->interactor, lv->data, hero);
   }
@@ -1152,6 +1145,7 @@ void fn_level_hero_interact_stop(fn_level_t * lv)
 
 void fn_level_hero_interact_start(
         fn_level_t * lv,
+        FnHeroData * hero,
         FnInfoMessageQueue * info_message_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
@@ -1160,7 +1154,6 @@ void fn_level_hero_interact_start(
       iter != NULL;
       iter = fn_list_next(iter)) {
     FnLevelActor * actor = (FnLevelActor *)iter->data;
-    FnHeroData * hero = fn_level_get_hero(lv);
 
     if (fn_level_actor_hero_can_interact(actor, hero)) {
       FnHeroPosition * position = fn_hero_data_get_position(hero);
@@ -1169,7 +1162,7 @@ void fn_level_hero_interact_start(
 
       if (fn_geometry_touches(heropos, fn_level_actor_get_position(actor)))
       {
-        fn_level_hero_interact_stop(lv);
+        fn_level_hero_interact_stop(lv, hero);
 
         lv->interactor = actor;
         fn_level_actor_hero_interact_start(

@@ -443,7 +443,7 @@ int fn_game_start_in_level(
                 }
               } else {
                 fn_level_hero_interact_start(
-                        lv, info_message_queue, actor_message_queue);
+                        lv, hero, info_message_queue, actor_message_queue);
               }
               doupdate = 1;
               break;
@@ -501,7 +501,7 @@ int fn_game_start_in_level(
         case SDL_KEYUP:
           switch(event.key.keysym.sym) {
             case SDLK_UP:
-              fn_level_hero_interact_stop(lv);
+              fn_level_hero_interact_stop(lv, hero);
               doupdate = 1;
               break;
             case SDLK_LEFT:
@@ -547,7 +547,7 @@ int fn_game_start_in_level(
               break;
             case SDL_BUTTON_MIDDLE:
               fn_level_hero_interact_start(
-                      lv, info_message_queue, actor_message_queue);
+                      lv, hero, info_message_queue, actor_message_queue);
               doupdate = 1;
               break;
             default:
@@ -564,7 +564,7 @@ int fn_game_start_in_level(
             case SDL_BUTTON_RIGHT:
               break;
             case SDL_BUTTON_MIDDLE:
-              fn_level_hero_interact_stop(lv);
+              fn_level_hero_interact_stop(lv, hero);
               doupdate = 1;
               break;
             default:
