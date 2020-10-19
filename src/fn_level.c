@@ -56,15 +56,11 @@ fn_level_t * fn_level_load(
 
   lv->animated_frames = 0;
 
-  lv->data->level_passed = 0;
-
   lv->num_shots = 0;
 
   lv->actors = NULL;
   lv->shots = NULL;
   lv->interactor = NULL;
-
-  lv->data->do_play = 1;
 
   lv->surface_fixed = SDL_CreateRGBSurface(
       texture_creation_params.flags,
@@ -96,8 +92,8 @@ fn_level_t * fn_level_load(
           SDL_SRCCOLORKEY,
           texture_creation_params.transparent);
 
-  FnLevelTiles * tiles = &(lv->data->tiles);
-  FnLevelSolids * solids = &(lv->data->solids);
+  FnLevelTiles * tiles = fn_level_data_get_tiles(lv->data);
+  FnLevelSolids * solids = fn_level_data_get_solids(lv->data);
   FnLevelActorQueue * actor_queue = fn_level_actor_queue_create();
 
   while (i != FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH)
@@ -937,7 +933,7 @@ void fn_level_blit_to_surface(
   fn_hero_data_blit(hero,
       lv->surface,
       tilecache,
-      &(lv->data->solids),
+      fn_level_data_get_solids(lv->data),
       draw_collision_bounds);
 
   /* blit the actors in the foreground */
@@ -988,7 +984,7 @@ void fn_level_blit_to_surface(
 /* --------------------------------------------------------------- */
 
 int fn_level_keep_on_playing(fn_level_t * lv) {
-  return lv->data->do_play;
+  return fn_level_data_get_do_play(lv->data);
 }
 
 /* --------------------------------------------------------------- */
@@ -1086,7 +1082,7 @@ int fn_level_act(
 
   if (lv->animated_frames == 0) {
     /* do some action, not just animation */
-    fn_hero_data_act(hero, &(lv->data->solids));
+    fn_hero_data_act(hero, fn_level_data_get_solids(lv->data));
   }
 
   fn_hero_data_next_frame(hero);

@@ -292,6 +292,8 @@ typedef struct InputField InputField;
 
 typedef struct Inventory Inventory;
 
+typedef struct LevelData LevelData;
+
 typedef struct Menu Menu;
 
 typedef struct Position Position;
@@ -359,19 +361,6 @@ typedef InputField FnInputField;
 
 typedef Actor FnLevelActor;
 
-typedef struct {
-    uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
-} LevelTiles;
-
-typedef LevelTiles FnLevelTiles;
-
-typedef struct {
-    FnLevelTiles tiles;
-    FnLevelSolids solids;
-    bool do_play;
-    bool level_passed;
-} LevelData;
-
 typedef LevelData FnLevelData;
 
 typedef ActorQueue FnLevelActorQueue;
@@ -396,6 +385,12 @@ typedef struct {
 typedef ActorQueueItem FnLevelActorQueueItem;
 
 typedef ActorMessageType FnLevelActorMessageType;
+
+typedef struct {
+    uint16_t tiles[LEVEL_HEIGHT][LEVEL_WIDTH];
+} LevelTiles;
+
+typedef LevelTiles FnLevelTiles;
 
 typedef MainMenuEntry FnMainMenuEntry;
 
@@ -760,6 +755,18 @@ FnLevelActorType fn_level_actor_type(const FnLevelActor *actor);
 FnLevelData *fn_level_data_create(void);
 
 void fn_level_data_free(FnLevelData *ptr);
+
+bool fn_level_data_get_do_play(const FnLevelData *ptr);
+
+bool fn_level_data_get_level_passed(const FnLevelData *ptr);
+
+FnLevelSolids *fn_level_data_get_solids(FnLevelData *ptr);
+
+FnLevelTiles *fn_level_data_get_tiles(FnLevelData *ptr);
+
+void fn_level_data_set_do_play(FnLevelData *ptr, bool do_play);
+
+void fn_level_data_set_level_passed(FnLevelData *ptr, bool level_passed);
 
 bool fn_level_solids_collides(const FnLevelSolids *ptr, FnGeometry rect);
 

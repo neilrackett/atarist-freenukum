@@ -198,7 +198,7 @@ void fn_shot_push(
     }
   }
   if (shot->countdown == 2) {
-    if (fn_shot_hits_solid(shot, &(level_data->solids))) {
+    if (fn_shot_hits_solid(shot, fn_level_data_get_solids(level_data))) {
       shot->countdown = 1;
 
       fn_level_actor_queue_push_back(

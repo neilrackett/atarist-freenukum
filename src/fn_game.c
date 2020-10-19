@@ -437,8 +437,8 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case SDLK_0:
-              lv->data->level_passed = true;
-              lv->data->do_play = false;
+              fn_level_data_set_level_passed(lv->data, true);
+              fn_level_data_set_do_play(lv->data, false);
               break;
             case SDLK_f:
               fn_environment_toggle_fullscreen(env);
@@ -690,7 +690,7 @@ cleanup:
     fn_texture_free(backdrop);
   }
   if (lv != NULL) {
-    returnvalue = lv->data->level_passed;
+    returnvalue = fn_level_data_get_level_passed(lv->data);
     fn_level_free(lv);
   }
   SDL_RemoveTimer(tick);

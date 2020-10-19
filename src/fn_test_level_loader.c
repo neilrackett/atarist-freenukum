@@ -250,7 +250,10 @@ int main(int argc, char ** argv)
                       tile_y = global_y / FN_TILE_HEIGHT;
 
                       tilenr = fn_level_get_raw(lv, tile_x, tile_y);
-                      is_solid = fn_level_solids_get(&(lv->data->solids), tile_x, tile_y);
+                      FnLevelSolids * solids =
+                          fn_level_data_get_solids(lv->data);
+                      is_solid = fn_level_solids_get(
+                              solids, tile_x, tile_y);
                       printf("Tile number x=%d y=%d: 0x%04x; Solid: %s\n",
                           tile_x, tile_y, tilenr, (is_solid? "yes" : "no"));
                     }
