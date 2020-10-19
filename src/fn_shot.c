@@ -67,6 +67,7 @@ Uint8 fn_shot_act(
         fn_shot_t * shot,
         FnHeroData * hero,
         fn_level_t * level,
+        FnLevelData * level_data,
         FnLevelActorQueue * actor_queue)
 {
   shot->counter++;
@@ -78,15 +79,18 @@ Uint8 fn_shot_act(
   }
 
   if (shot->countdown == 2) {
+    int distance = 0;
     if (shot->direction == HorizontalDirection_Right) {
-      /* push twice so that every position gets covered. */
-      fn_shot_push(shot, hero, level, FN_HALFTILE_WIDTH, actor_queue);
-      fn_shot_push(shot, hero, level, FN_HALFTILE_WIDTH, actor_queue);
+        distance = FN_HALFTILE_WIDTH;
     } else {
-      /* push twice so that every position gets covered. */
-      fn_shot_push(shot, hero, level, -FN_HALFTILE_WIDTH, actor_queue);
-      fn_shot_push(shot, hero, level, -FN_HALFTILE_WIDTH, actor_queue);
+        distance = -FN_HALFTILE_WIDTH;
     }
+
+    /* we push twice so that also the intermediate position gets
+     * covered, not just the end position. */
+
+    fn_shot_push(shot, hero, level, level_data, distance, actor_queue);
+    fn_shot_push(shot, hero, level, level_data, distance, actor_queue);
   }
   return shot->is_alive;
 }
@@ -174,6 +178,7 @@ void fn_shot_push(
         fn_shot_t * shot,
         FnHeroData * hero,
         fn_level_t * level,
+        FnLevelData * level_data,
         Sint16 offset,
         FnLevelActorQueue * actor_queue)
 {
@@ -187,16 +192,17 @@ void fn_shot_push(
 
       if (fn_level_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
-          fn_level_actor_shot(actor, level->data, hero, actor_queue)) {
+          fn_level_actor_shot(actor, level_data, hero, actor_queue)) {
         shot->countdown = 1;
       }
     }
   }
   if (shot->countdown == 2) {
-    if (fn_shot_hits_solid(shot, &(level->data->solids))) {
+    if (fn_shot_hits_solid(shot, &(level_data->solids))) {
       shot->countdown = 1;
 
-      fn_level_add_actor(level,
+      fn_level_actor_queue_push_back(
+          actor_queue,
           ActorType_Explosion,
           shot->position.x + shot->position.w / 2 - FN_HALFTILE_WIDTH,
           shot->position.y);

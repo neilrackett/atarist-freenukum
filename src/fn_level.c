@@ -1012,7 +1012,7 @@ int fn_level_act(
     fn_shot_t * shot = (fn_shot_t *)iter->data;
 
     if (shot != NULL) {
-      res = fn_shot_act(shot, hero, lv, actor_queue);
+      res = fn_shot_act(shot, hero, lv, lv->data, actor_queue);
       if (res == 0) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
@@ -1176,6 +1176,7 @@ fn_shot_t * fn_level_add_shot(
           shot,
           hero,
           lv,
+          lv->data,
           addition * FN_HALFTILE_WIDTH,
           actor_queue);
 
