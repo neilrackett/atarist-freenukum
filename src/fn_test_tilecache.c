@@ -56,9 +56,10 @@ int sumuntil(Uint8 * ar, size_t s)
 
 /* --------------------------------------------------------------- */
 
-void blithex(SDL_Surface * target,
+void blithex(
+    SDL_Surface * target,
     FnGeometry * r,
-    fn_environment_t * env,
+    const FnTileCache * tilecache,
     int x)
 {
   int tilenr;
@@ -72,7 +73,7 @@ void blithex(SDL_Surface * target,
     else
       tilenr = dst[i] - 'a' + FONT_ASCII_LOWERCASE;
     fn_texture_blit_to_sdl_surface(
-        fn_environment_get_tile(env, tilenr),
+        fn_tilecache_get_tile(tilecache, tilenr),
         NULL,
         target,
         r);
@@ -94,6 +95,7 @@ int main(int argc, char ** argv)
   fn_environment_t * env;
   env = fn_environment_create();
   fn_environment_load_tilecache(env);
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   fn_error_set_handler(fn_error_print_commandline);
 
@@ -156,19 +158,13 @@ int main(int argc, char ** argv)
   for (i = 0; i != 26; i++) {
     r.x = 0;
     r.y = (i+1) * FN_TILE_HEIGHT;
-    blithex(screen,
-        &r,
-        env,
-        i);
+    blithex(screen, &r, tilecache, i);
   }
 
   for (i = 0; i != 50; i++) {
     r.x = (i+1) * FN_TILE_WIDTH;
     r.y = 0;
-    blithex(screen,
-        &r,
-        env,
-        i);
+    blithex(screen, &r, tilecache, i);
   }
 
   for (j = 0; j != 26; j++)
@@ -178,7 +174,7 @@ int main(int argc, char ** argv)
       r.x = (i+1) * FN_TILE_WIDTH;
       r.y = (j+1) * FN_TILE_HEIGHT;
       const FnTexture * tile =
-        fn_environment_get_tile(env, sumuntil(size, j)+i);
+        fn_tilecache_get_tile(tilecache, sumuntil(size, j)+i);
       fn_texture_blit_to_sdl_surface(
           tile, NULL,
           screen, &r);
