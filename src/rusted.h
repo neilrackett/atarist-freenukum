@@ -21,6 +21,8 @@
 
 #define INVENTORY_WIDTH (HEALTH_COUNT / 2)
 
+#define LEVELWINDOW_WIDTH 13
+
 /**
  * The height of the level in full tiles
  */
@@ -300,13 +302,13 @@ typedef struct Position Position;
 
 typedef struct Score Score;
 
-typedef struct Shot Shot;
-
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
 
 typedef struct Vec_Actor Vec_Actor;
+
+typedef struct Vec_Shot Vec_Shot;
 
 typedef Texture FnTexture;
 
@@ -412,7 +414,9 @@ typedef struct {
 
 typedef Settings FnSettings;
 
-typedef Shot FnShot;
+typedef Vec_Shot ShotList;
+
+typedef ShotList FnShotList;
 
 typedef struct {
     uint8_t tiles;
@@ -855,29 +859,29 @@ FnSettings fn_settings_load_or_create(void);
 
 void fn_settings_save(FnSettings settings);
 
-bool fn_shot_act(FnShot *ptr,
-                 FnHeroData *hero_data,
-                 FnLevelData *level_data,
-                 FnLevelActorQueue *actor_queue);
+void fn_shot_list_act(FnShotList *l,
+                      FnHeroData *hero_data,
+                      FnLevelData *level_data,
+                      FnLevelActorQueue *actor_queue);
 
-void fn_shot_blit(const FnShot *ptr,
-                  SDL_Surface *target,
-                  const FnTileCache *tilecache,
-                  bool draw_collision_bounds);
+void fn_shot_list_add(FnShotList *l,
+                      FnHeroData *hero_data,
+                      FnLevelData *level_data,
+                      FnLevelActorQueue *actor_queue,
+                      int16_t x,
+                      int16_t y,
+                      HorizontalDirection direction);
 
-FnShot *fn_shot_create(int16_t x, int16_t y, HorizontalDirection direction);
+void fn_shot_list_blit(const FnShotList *ptr,
+                       SDL_Surface *target,
+                       const FnTileCache *tilecache,
+                       bool draw_collision_bounds);
 
-void fn_shot_free(FnShot *ptr);
+uintptr_t fn_shot_list_count(const FnShotList *l);
 
-FnGeometry fn_shot_get_position(const FnShot *shot);
+FnShotList *fn_shot_list_create(void);
 
-void fn_shot_push(FnShot *ptr,
-                  FnHeroData *hero_data,
-                  FnLevelData *level_data,
-                  int16_t offset,
-                  FnLevelActorQueue *actor_queue);
-
-void fn_shot_set_is_alive(FnShot *ptr, bool is_alive);
+void fn_shot_list_free(FnShotList *ptr);
 
 void fn_text_print(FnTexture *target,
                    FnGeometry geometry,

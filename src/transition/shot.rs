@@ -4,7 +4,12 @@ use super::level::actor::{ActorQueue, ActorType};
 use super::level::LevelData;
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
-use crate::{HALFTILE_WIDTH, OBJECT_SHOT, TILE_HEIGHT, TILE_WIDTH};
+use crate::{
+    HALFTILE_WIDTH, LEVELWINDOW_WIDTH, OBJECT_SHOT, TILE_HEIGHT,
+    TILE_WIDTH,
+};
+
+pub type ShotList = Vec<Shot>;
 
 pub struct Shot {
     position: Geometry,
@@ -47,6 +52,12 @@ impl Shot {
             self.countdown -= 1;
         }
 
+        let x_start = hero_data.position.geometry.x
+            - TILE_WIDTH as i16 * LEVELWINDOW_WIDTH as i16 / 2;
+        let x_end = hero_data.position.geometry.x
+            + hero_data.position.geometry.w as i16
+            + TILE_WIDTH as i16 * LEVELWINDOW_WIDTH as i16 / 2;
+
         if self.countdown == 2 {
             let distance = match self.direction {
                 HorizontalDirection::Left => -(HALFTILE_WIDTH as i16),
@@ -59,6 +70,12 @@ impl Shot {
             // end position.
             self.push(hero_data, level_data, distance, actor_queue);
             self.push(hero_data, level_data, distance, actor_queue);
+
+            let x = self.position.x;
+
+            if x < x_start || x > x_end {
+                self.countdown = 1;
+            }
         }
         self.is_alive
     }
@@ -131,27 +148,24 @@ impl Shot {
 
 pub mod ffi {
     pub type FnShot = super::Shot;
+    pub type FnShotList = super::ShotList;
 
-    use super::super::geometry::ffi::FnGeometry;
     use super::super::hero::ffi::FnHeroData;
     use super::super::level::actor::ffi::FnLevelActorQueue;
     use super::super::level::ffi::FnLevelData;
     use super::super::tilecache::ffi::FnTileCache;
     use super::HorizontalDirection;
+    use crate::HALFTILE_WIDTH;
     use transdl::ll::SDL_Surface;
     use transdl::video::Surface;
 
     #[no_mangle]
-    pub extern "C" fn fn_shot_create(
-        x: i16,
-        y: i16,
-        direction: HorizontalDirection,
-    ) -> *mut FnShot {
-        Box::into_raw(Box::new(FnShot::new(x, y, direction)))
+    pub extern "C" fn fn_shot_list_create() -> *mut FnShotList {
+        Box::into_raw(Box::new(FnShotList::new()))
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_shot_free(ptr: *mut FnShot) {
+    pub extern "C" fn fn_shot_list_free(ptr: *mut FnShotList) {
         if !ptr.is_null() {
             unsafe {
                 Box::from_raw(ptr);
@@ -160,23 +174,86 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_shot_get_position(
-        shot: *const FnShot,
-    ) -> FnGeometry {
-        assert!(!shot.is_null());
-        let shot: &FnShot = unsafe { &(*shot) };
-        shot.position
+    pub extern "C" fn fn_shot_list_count(l: *const FnShotList) -> usize {
+        assert!(!l.is_null());
+        let l: &FnShotList = unsafe { &(*l) };
+        l.len()
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_shot_blit(
-        ptr: *const FnShot,
+    pub extern "C" fn fn_shot_list_add(
+        l: *mut FnShotList,
+        hero_data: *mut FnHeroData,
+        level_data: *mut FnLevelData,
+        actor_queue: *mut FnLevelActorQueue,
+        x: i16,
+        y: i16,
+        direction: HorizontalDirection,
+    ) {
+        assert!(!l.is_null());
+        let l: &mut FnShotList = unsafe { &mut (*l) };
+
+        assert!(!hero_data.is_null());
+        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
+
+        assert!(!level_data.is_null());
+        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
+
+        assert!(!actor_queue.is_null());
+        let actor_queue: &mut FnLevelActorQueue =
+            unsafe { &mut (*actor_queue) };
+
+        let mut shot = FnShot::new(x, y, direction);
+
+        let distance = match shot.direction {
+            HorizontalDirection::Left => -(HALFTILE_WIDTH as i16),
+            HorizontalDirection::Right => HALFTILE_WIDTH as i16,
+            _ => unreachable!(),
+        };
+
+        // we only push half of the distance, but do it twice, so that
+        // also the intermediate position gets covered, not just the
+        // end position.
+        shot.push(hero_data, level_data, distance, actor_queue);
+
+        l.push(shot);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_shot_list_act(
+        l: *mut FnShotList,
+        hero_data: *mut FnHeroData,
+        level_data: *mut FnLevelData,
+        actor_queue: *mut FnLevelActorQueue,
+    ) {
+        assert!(!l.is_null());
+        let l: &mut FnShotList = unsafe { &mut (*l) };
+
+        assert!(!hero_data.is_null());
+        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
+
+        assert!(!level_data.is_null());
+        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
+
+        assert!(!actor_queue.is_null());
+        let actor_queue: &mut FnLevelActorQueue =
+            unsafe { &mut (*actor_queue) };
+
+        for shot in l.iter_mut() {
+            shot.act(hero_data, level_data, actor_queue);
+        }
+        l.retain(|s| s.is_alive);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_shot_list_blit(
+        ptr: *const FnShotList,
         target: *mut SDL_Surface,
         tilecache: *const FnTileCache,
         draw_collision_bounds: bool,
     ) {
         assert!(!ptr.is_null());
-        let d: &FnShot = unsafe { &(*ptr) };
+        let d: &FnShotList = unsafe { &(*ptr) };
 
         assert!(!target.is_null());
         let mut target = Surface { raw: target };
@@ -184,64 +261,8 @@ pub mod ffi {
         assert!(!tilecache.is_null());
         let tilecache = unsafe { &(*tilecache) };
 
-        d.blit(&mut target, tilecache, draw_collision_bounds);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_shot_push(
-        ptr: *mut FnShot,
-        hero_data: *mut FnHeroData,
-        level_data: *mut FnLevelData,
-        offset: i16,
-        actor_queue: *mut FnLevelActorQueue,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnShot = unsafe { &mut (*ptr) };
-
-        assert!(!hero_data.is_null());
-        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
-
-        assert!(!level_data.is_null());
-        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
-
-        assert!(!actor_queue.is_null());
-        let actor_queue: &mut FnLevelActorQueue =
-            unsafe { &mut (*actor_queue) };
-
-        d.push(hero_data, level_data, offset, actor_queue);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_shot_act(
-        ptr: *mut FnShot,
-        hero_data: *mut FnHeroData,
-        level_data: *mut FnLevelData,
-        actor_queue: *mut FnLevelActorQueue,
-    ) -> bool {
-        assert!(!ptr.is_null());
-        let d: &mut FnShot = unsafe { &mut (*ptr) };
-
-        assert!(!hero_data.is_null());
-        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
-
-        assert!(!level_data.is_null());
-        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
-
-        assert!(!actor_queue.is_null());
-        let actor_queue: &mut FnLevelActorQueue =
-            unsafe { &mut (*actor_queue) };
-
-        d.act(hero_data, level_data, actor_queue)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_shot_set_is_alive(
-        ptr: *mut FnShot,
-        is_alive: bool,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnShot = unsafe { &mut (*ptr) };
-
-        d.set_is_alive(is_alive);
+        for shot in d.iter() {
+            shot.blit(&mut target, tilecache, draw_collision_bounds);
+        }
     }
 }

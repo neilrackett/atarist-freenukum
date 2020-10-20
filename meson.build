@@ -54,7 +54,6 @@ c_src = [
     'src/fn_error_cmdline.c',
     'src/fn_game.c',
     'src/fn_level.c',
-    'src/fn_list.c',
     'src/fn_picture_splash.c',
     'src/freenukum.c'
 ]
@@ -79,14 +78,6 @@ configure_file(
     configuration: conf
 )
 
-test_list = executable(
-    'test_list',
-    [
-        'src/fn_test_list.c',
-        'src/fn_list.c',
-    ]
-)
-
 test_tile = executable(
     'test_tile',
     [
@@ -96,7 +87,6 @@ test_tile = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -122,7 +112,6 @@ test_borders = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -148,7 +137,6 @@ test_drop = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -183,7 +171,6 @@ test_hero = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -209,7 +196,6 @@ test_infobox = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -235,7 +221,6 @@ test_inputbox = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -261,7 +246,6 @@ test_level_loader = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -287,7 +271,6 @@ test_menu = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -313,7 +296,6 @@ test_msgbox = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -339,7 +321,6 @@ test_picture = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,
@@ -365,7 +346,6 @@ test_picture_splash = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
         'src/fn_picture_splash.c',
     ],
     dependencies: [
@@ -392,7 +372,6 @@ test_tilecache = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_list.c',
     ],
     dependencies: [
         curl_lib,

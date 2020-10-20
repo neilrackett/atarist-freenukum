@@ -31,6 +31,7 @@ pub const BACKDROP_HEIGHT: usize = 10;
 pub const MAX_LIFE: usize = 8;
 pub const MAX_FIREPOWER: usize = 4;
 pub const SCORE_DIGITS: usize = 8;
+pub const LEVELWINDOW_WIDTH: usize = 13;
 
 /// The height of the level in full tiles
 pub const LEVEL_HEIGHT: usize = 90;

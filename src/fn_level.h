@@ -40,7 +40,6 @@ typedef struct fn_level_t fn_level_t;
  * at the beginning of this file because fn_level_t is
  * not yet defined there.
  */
-#include "fn_list.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -72,12 +71,7 @@ struct fn_level_t {
   /**
    * The shots inside the level.
    */
-  fn_list_t * shots;
-
-  /**
-   * The number of shots currently in level.
-   */
-  Uint8 num_shots;
+  FnShotList * shots;
 
   /**
    * The number of animated frames since last action.

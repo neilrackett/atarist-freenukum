@@ -56,9 +56,7 @@ fn_level_t * fn_level_load(
 
   lv->animated_frames = 0;
 
-  lv->num_shots = 0;
-
-  lv->shots = NULL;
+  lv->shots = fn_shot_list_create();
   lv->interactor = NULL;
 
   lv->surface_fixed = SDL_CreateRGBSurface(
@@ -806,16 +804,7 @@ fn_level_t * fn_level_load(
 
 void fn_level_free(fn_level_t * lv)
 {
-  fn_list_t * iter = NULL;
-
-  for (iter = fn_list_first(lv->shots);
-      iter != fn_list_last(lv->shots);
-      iter = fn_list_next(iter)) {
-    if (iter->data != NULL) {
-      fn_shot_free((FnShot *)iter->data);
-    }
-  }
-  fn_list_free(lv->shots);
+  fn_shot_list_free(lv->shots);
 
   SDL_FreeSurface(lv->surface);
   SDL_FreeSurface(lv->surface_fixed);
@@ -849,7 +838,6 @@ void fn_level_blit_to_surface(
   int x_end = FN_LEVEL_WIDTH;
   int y_start = 0;
   int y_end = FN_LEVEL_HEIGHT;
-  fn_list_t * iter = NULL;
 
   /* load the background tiles */
   /*
@@ -939,26 +927,7 @@ void fn_level_blit_to_surface(
   }
 
   /* blit the shots */
-  for (iter = fn_list_first(lv->shots);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnShot * shot = (FnShot *)iter->data;
-
-    if (shot != NULL) {
-      FnGeometry position = fn_shot_get_position(shot);
-      Uint16 x = position.x / FN_TILE_WIDTH;
-      Uint16 y = position.y / FN_TILE_HEIGHT;
-      if (x > x_start && y > y_start && x < x_end && y < y_end) {
-        fn_shot_blit(
-                shot,
-                lv->surface,
-                tilecache,
-                draw_collision_bounds);
-      } else {
-        fn_shot_set_is_alive(shot, false);
-      }
-    }
-  }
+  fn_shot_list_blit(lv->shots, lv->surface, tilecache, draw_collision_bounds);
 
   SDL_Rect trect = fn_geometry_as_sdl_rect(targetrect);
 
@@ -980,31 +949,10 @@ int fn_level_act(
         FnLevelActorQueue * actor_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
-  fn_list_t * iter = NULL;
-  int cleanup = 0;
-
   lv->animated_frames ++;
   lv->animated_frames %= 1;
 
-  for (iter = fn_list_first(lv->shots);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    FnShot * shot = (FnShot *)iter->data;
-
-      if (!fn_shot_act(shot, hero, lv->data, actor_queue)) {
-        /* set the cleanup flag and free the memory */
-        cleanup = 1;
-        iter->data = 0;
-        fn_shot_free(shot); shot = NULL;
-        lv->num_shots--;
-      }
-  }
-
-  if (cleanup) {
-    /* clean up the shots that are finished */
-    cleanup = 0;
-    lv->shots = fn_list_remove_all(lv->shots, NULL);
-  }
+  fn_shot_list_act(lv->shots, hero, lv->data, actor_queue);
 
   int sum = 0;
   size_t actors_hurting_hero = 0;
@@ -1116,7 +1064,7 @@ void fn_level_add_actor(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-FnShot * fn_level_add_shot(
+void fn_level_add_shot(
     fn_level_t * lv,
     FnHeroData * hero,
     FnHorizontalDirection direction,
@@ -1124,21 +1072,7 @@ FnShot * fn_level_add_shot(
     Uint16 y,
     FnLevelActorQueue * actor_queue)
 {
-  FnShot * shot = fn_shot_create(x, y, direction);
-
-  int addition = (direction == HorizontalDirection_Right ?
-      1 : -1);
-
-  lv->shots = fn_list_append(lv->shots, shot);
-
-  fn_shot_push(
-          shot,
-          hero,
-          lv->data,
-          addition * FN_HALFTILE_WIDTH,
-          actor_queue);
-
-  return shot;
+  fn_shot_list_add(lv->shots, hero, lv->data, actor_queue, x, y, direction);
 }
 
 /* --------------------------------------------------------------- */
@@ -1151,7 +1085,7 @@ void fn_level_fire_shot(
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
   FnHeroPosition * position = fn_hero_data_get_position(hero);
 
-  if (lv->num_shots < fn_hero_firepower_num_shots(firepower)) {
+  if (fn_shot_list_count(lv->shots) < fn_hero_firepower_num_shots(firepower)) {
     FnGeometry geometry = fn_hero_position_get_geometry(position);
     HorizontalDirection direction = fn_hero_data_get_direction(hero);
 
@@ -1162,7 +1096,6 @@ void fn_level_fire_shot(
             geometry.x,
             geometry.y,
             actor_queue);
-    lv->num_shots++;
   }
 }
 
