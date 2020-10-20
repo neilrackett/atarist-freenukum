@@ -12,6 +12,7 @@ pub mod menu;
 pub mod messagebox;
 pub mod picture;
 pub mod settings;
+pub mod shot;
 pub mod text;
 pub mod texture;
 pub mod tile;

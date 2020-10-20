@@ -40,7 +40,6 @@ typedef struct fn_level_t fn_level_t;
  * at the beginning of this file because fn_level_t is
  * not yet defined there.
  */
-#include "fn_shot.h"
 #include "fn_list.h"
 #include "rusted.h"
 

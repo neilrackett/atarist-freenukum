@@ -40,6 +40,8 @@ mod wallcrawler;
 use super::super::geometry::Geometry;
 use super::super::hero::HeroData;
 use super::super::infobox::InfoMessageQueue;
+use super::super::level::solids::LevelSolids;
+use super::super::level::tiles::LevelTiles;
 use super::super::level::LevelData;
 use super::super::tilecache::TileCache;
 
@@ -108,6 +110,34 @@ impl Actor {
         } else {
             self.specific.hero_can_interact()
         }
+    }
+
+    pub fn can_get_shot(&self) -> bool {
+        self.specific.can_get_shot(&self.general)
+    }
+
+    pub fn shot(
+        &mut self,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
+        actor_queue: &mut ActorQueue,
+        hero_data: &mut HeroData,
+    ) {
+        self.specific.shot(
+            &mut self.general,
+            solids,
+            tiles,
+            actor_queue,
+            hero_data,
+        );
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.general.is_alive
+    }
+
+    pub fn position(&self) -> Geometry {
+        self.general.position
     }
 }
 
@@ -749,7 +779,8 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn shot(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_queue: &mut ActorQueue,
         _hero_data: &mut HeroData,
     ) {
@@ -769,7 +800,7 @@ pub mod ffi {
     pub type FnLevelActor = super::Actor;
     type FnLevelActorData = super::ActorData;
     pub type FnLevelActorType = super::ActorType;
-    type FnLevelActorQueue = super::ActorQueue;
+    pub type FnLevelActorQueue = super::ActorQueue;
     type FnLevelActorQueueItem = super::ActorQueueItem;
     type FnLevelActorMessage = super::ActorMessage;
     pub type FnLevelActorMessageType = super::ActorMessageType;
@@ -986,38 +1017,6 @@ pub mod ffi {
             level_data,
             hero_data,
         )
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_shot(
-        actor: *mut FnLevelActor,
-        level_data: *mut FnLevelData,
-        hero_data: *mut FnHeroData,
-        actor_queue: *mut FnLevelActorQueue,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!level_data.is_null());
-        let level_data = unsafe { &mut (*level_data) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        assert!(!actor_queue.is_null());
-        let actor_queue = unsafe { &mut (*actor_queue) };
-
-        if actor.specific.can_get_shot(&actor.general) {
-            actor.specific.shot(
-                &mut actor.general,
-                level_data,
-                actor_queue,
-                hero_data,
-            );
-            true
-        } else {
-            false
-        }
     }
 
     #[no_mangle]

@@ -1,4 +1,6 @@
 use super::super::super::hero::HeroData;
+use super::super::super::level::solids::LevelSolids;
+use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
@@ -43,7 +45,8 @@ impl ActorInterface for Specific {
     fn shot(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_queue: &mut ActorQueue,
         hero_data: &mut HeroData,
     ) {
@@ -54,7 +57,7 @@ impl ActorInterface for Specific {
             general.position.y as u16,
         );
         general.is_alive = false;
-        level_data.solids.set(
+        solids.set(
             general.position.x as usize / TILE_WIDTH,
             general.position.y as usize / TILE_HEIGHT,
             false,

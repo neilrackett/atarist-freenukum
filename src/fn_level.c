@@ -28,13 +28,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <SDL/SDL.h>
 
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
 #include "fn_level.h"
 #include "fn_object.h"
-#include "fn_shot.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -812,7 +812,7 @@ void fn_level_free(fn_level_t * lv)
       iter != fn_list_last(lv->shots);
       iter = fn_list_next(iter)) {
     if (iter->data != NULL) {
-      fn_shot_free((fn_shot_t *)iter->data);
+      fn_shot_free((FnShot *)iter->data);
     }
   }
   fn_list_free(lv->shots);
@@ -942,7 +942,7 @@ void fn_level_blit_to_surface(
   for (iter = fn_list_first(lv->shots);
       iter != NULL;
       iter = fn_list_next(iter)) {
-    fn_shot_t * shot = (fn_shot_t *)iter->data;
+    FnShot * shot = (FnShot *)iter->data;
 
     if (shot != NULL) {
       FnGeometry position = fn_shot_get_position(shot);
@@ -955,7 +955,7 @@ void fn_level_blit_to_surface(
                 tilecache,
                 draw_collision_bounds);
       } else {
-        fn_shot_gets_out_of_sight(shot);
+        fn_shot_set_is_alive(shot, false);
       }
     }
   }
@@ -981,7 +981,6 @@ int fn_level_act(
         FnLevelActorMessageQueue * actor_message_queue)
 {
   fn_list_t * iter = NULL;
-  int res = 0;
   int cleanup = 0;
 
   lv->animated_frames ++;
@@ -990,18 +989,15 @@ int fn_level_act(
   for (iter = fn_list_first(lv->shots);
       iter != NULL;
       iter = fn_list_next(iter)) {
-    fn_shot_t * shot = (fn_shot_t *)iter->data;
+    FnShot * shot = (FnShot *)iter->data;
 
-    if (shot != NULL) {
-      res = fn_shot_act(shot, hero, lv->data, actor_queue);
-      if (res == 0) {
+      if (!fn_shot_act(shot, hero, lv->data, actor_queue)) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = 0;
         fn_shot_free(shot); shot = NULL;
         lv->num_shots--;
       }
-    }
   }
 
   if (cleanup) {
@@ -1120,7 +1116,7 @@ void fn_level_add_actor(fn_level_t * lv,
 
 /* --------------------------------------------------------------- */
 
-fn_shot_t * fn_level_add_shot(
+FnShot * fn_level_add_shot(
     fn_level_t * lv,
     FnHeroData * hero,
     FnHorizontalDirection direction,
@@ -1128,7 +1124,7 @@ fn_shot_t * fn_level_add_shot(
     Uint16 y,
     FnLevelActorQueue * actor_queue)
 {
-  fn_shot_t * shot = fn_shot_create(x, y, direction);
+  FnShot * shot = fn_shot_create(x, y, direction);
 
   int addition = (direction == HorizontalDirection_Right ?
       1 : -1);

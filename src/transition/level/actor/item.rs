@@ -1,5 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::hero::{FetchedLetter, InventoryItem};
+use super::super::super::level::solids::LevelSolids;
+use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
@@ -355,7 +357,8 @@ impl ActorInterface for Specific {
     fn shot(
         &mut self,
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _level_solids: &mut LevelSolids,
+        _level_tiles: &mut LevelTiles,
         actor_queue: &mut ActorQueue,
         _hero_data: &mut HeroData,
     ) {

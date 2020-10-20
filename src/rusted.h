@@ -300,6 +300,8 @@ typedef struct Position Position;
 
 typedef struct Score Score;
 
+typedef struct Shot Shot;
+
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
@@ -409,6 +411,8 @@ typedef struct {
 } Settings;
 
 typedef Settings FnSettings;
+
+typedef Shot FnShot;
 
 typedef struct {
     uint8_t tiles;
@@ -751,11 +755,6 @@ void fn_level_actor_receive_message(FnLevelActor *actor,
 
 void fn_level_actor_set_visible(FnLevelActor *actor, bool visible);
 
-bool fn_level_actor_shot(FnLevelActor *actor,
-                         FnLevelData *level_data,
-                         FnHeroData *hero_data,
-                         FnLevelActorQueue *actor_queue);
-
 FnLevelActorType fn_level_actor_type(const FnLevelActor *actor);
 
 void fn_level_actors_list_add_actor(FnLevelActorsList *ptr,
@@ -855,6 +854,30 @@ FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 FnSettings fn_settings_load_or_create(void);
 
 void fn_settings_save(FnSettings settings);
+
+bool fn_shot_act(FnShot *ptr,
+                 FnHeroData *hero_data,
+                 FnLevelData *level_data,
+                 FnLevelActorQueue *actor_queue);
+
+void fn_shot_blit(const FnShot *ptr,
+                  SDL_Surface *target,
+                  const FnTileCache *tilecache,
+                  bool draw_collision_bounds);
+
+FnShot *fn_shot_create(int16_t x, int16_t y, HorizontalDirection direction);
+
+void fn_shot_free(FnShot *ptr);
+
+FnGeometry fn_shot_get_position(const FnShot *shot);
+
+void fn_shot_push(FnShot *ptr,
+                  FnHeroData *hero_data,
+                  FnLevelData *level_data,
+                  int16_t offset,
+                  FnLevelActorQueue *actor_queue);
+
+void fn_shot_set_is_alive(FnShot *ptr, bool is_alive);
 
 void fn_text_print(FnTexture *target,
                    FnGeometry geometry,

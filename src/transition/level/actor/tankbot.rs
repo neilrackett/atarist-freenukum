@@ -1,4 +1,6 @@
 use super::super::super::hero::HeroData;
+use super::super::super::level::solids::LevelSolids;
+use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
@@ -199,7 +201,8 @@ impl ActorInterface for Specific {
     fn shot(
         &mut self,
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_queue: &mut ActorQueue,
         _hero_data: &mut HeroData,
     ) {
