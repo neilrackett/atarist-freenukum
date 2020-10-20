@@ -423,17 +423,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-const FnTexture * fn_environment_get_tile(fn_environment_t * env,
-    size_t pos)
-{
-  if (env->tilecache == NULL) {
-    return NULL;
-  }
-  return fn_tilecache_get_tile(env->tilecache, pos);
-}
-
-/* --------------------------------------------------------------- */
-
 const Uint8 fn_environment_get_health(fn_environment_t * env)
 {
   FnHeroHealth * health = fn_hero_data_get_health(env->hero);

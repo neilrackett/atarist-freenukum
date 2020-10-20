@@ -205,20 +205,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 /* --------------------------------------------------------------- */
 
 /**
- * Get a tile from the environment's tilecache.
- *
- * @param  env  The environment.
- * @param  pos  The number of the tile.
- *
- * @return  The tile. If no tile exists at pos, or no tilecache is
- *          loaded, NULL is returned.
- */
-const FnTexture * fn_environment_get_tile(fn_environment_t * env,
-    size_t pos);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the health of the hero in the environment.
  *
  * @param  env  The environment.
