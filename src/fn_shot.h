@@ -110,7 +110,6 @@ void fn_shot_free(fn_shot_t * shot);
 Uint8 fn_shot_act(
         fn_shot_t * shot,
         FnHeroData * hero,
-        fn_level_t * level,
         FnLevelData * level_data,
         FnLevelActorQueue * actor_queue);
 
@@ -174,7 +173,6 @@ Uint8 fn_shot_hits_solid(
 void fn_shot_push(
         fn_shot_t * shot,
         FnHeroData * hero,
-        fn_level_t * level,
         FnLevelData * level_data,
         Sint16 offset,
         FnLevelActorQueue * actor_queue);

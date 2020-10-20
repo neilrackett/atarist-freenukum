@@ -66,7 +66,6 @@ void fn_shot_free(fn_shot_t * shot)
 Uint8 fn_shot_act(
         fn_shot_t * shot,
         FnHeroData * hero,
-        fn_level_t * level,
         FnLevelData * level_data,
         FnLevelActorQueue * actor_queue)
 {
@@ -89,8 +88,8 @@ Uint8 fn_shot_act(
     /* we push twice so that also the intermediate position gets
      * covered, not just the end position. */
 
-    fn_shot_push(shot, hero, level, level_data, distance, actor_queue);
-    fn_shot_push(shot, hero, level, level_data, distance, actor_queue);
+    fn_shot_push(shot, hero, level_data, distance, actor_queue);
+    fn_shot_push(shot, hero, level_data, distance, actor_queue);
   }
   return shot->is_alive;
 }
@@ -149,7 +148,6 @@ Uint8 fn_shot_hits_solid(
 void fn_shot_push(
         fn_shot_t * shot,
         FnHeroData * hero,
-        fn_level_t * level,
         FnLevelData * level_data,
         Sint16 offset,
         FnLevelActorQueue * actor_queue)
