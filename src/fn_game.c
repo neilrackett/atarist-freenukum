@@ -122,19 +122,19 @@ void fn_game_start(
   fn_borders_blit_score(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_tilecache(env),
+          tilecache,
           fn_environment_get_score(env));
 
   fn_borders_blit_firepower(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_tilecache(env),
+          tilecache,
           firepower);
 
   fn_borders_blit_inventory(
           env->screen,
           fn_environment_build_texture_creation_params(env),
-          fn_environment_get_tilecache(env),
+          tilecache,
           inventory);
 
   SDL_UpdateRect(screen, 0, 0, 0, 0);
@@ -147,7 +147,7 @@ void fn_game_start(
 
     fn_infobox_show(
         env->screen,
-        fn_environment_get_tilecache(env),
+        tilecache,
         fn_environment_build_texture_creation_params(env),
         "Get ready FreeNukum,\nyou are going in.\n");
 
@@ -624,7 +624,7 @@ int fn_game_start_in_level(
               fn_borders_blit_score(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
-                  fn_environment_get_tilecache(env),
+                  tilecache,
                   fn_environment_get_score(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
@@ -633,7 +633,7 @@ int fn_game_start_in_level(
               fn_borders_blit_firepower(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
-                  fn_environment_get_tilecache(env),
+                  tilecache,
                   firepower);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
@@ -642,7 +642,7 @@ int fn_game_start_in_level(
               fn_borders_blit_inventory(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
-                  fn_environment_get_tilecache(env),
+                  tilecache,
                   inventory);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
@@ -651,7 +651,7 @@ int fn_game_start_in_level(
               fn_borders_blit_life(
                       env->screen,
                       fn_environment_build_texture_creation_params(env),
-                      fn_environment_get_tilecache(env),
+                      tilecache,
                       fn_environment_get_health(env));
               /* TODO separately update this area. */
               updateWholeScreen = 1;

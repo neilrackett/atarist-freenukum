@@ -48,6 +48,7 @@ int main(int argc, char ** argv)
 
     fn_environment_t * env = fn_environment_create();
     fn_environment_load_tilecache(env);
+    const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
     char * msg =
         " FREENUKUM MAIN MENU\n"
@@ -78,7 +79,7 @@ int main(int argc, char ** argv)
 
     msgbox = fn_messagebox(
             msg,
-            fn_environment_get_tilecache(env),
+            tilecache,
             fn_environment_build_texture_creation_params(env));
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, NULL);

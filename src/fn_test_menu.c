@@ -39,6 +39,7 @@ int main(int argc, char ** argv) {
   SDL_Surface * screen;
   fn_environment_t * env = fn_environment_create();
   fn_environment_load_tilecache(env);
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   screen = fn_environment_get_screen_sdl(env);
 
@@ -49,7 +50,7 @@ int main(int argc, char ** argv) {
   char choice = fn_menu_get_choice(
       menu,
       screen,
-      fn_environment_get_tilecache(env),
+      tilecache,
       fn_environment_build_texture_creation_params(env));
   printf("Choice: %c\n", choice);
   fn_menu_free(menu);

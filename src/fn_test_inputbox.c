@@ -40,6 +40,7 @@ int main(int argc, char ** argv) {
 
   fn_environment_t * env = fn_environment_create();
   fn_environment_load_tilecache(env);
+  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
   
   screen = fn_environment_get_screen_sdl(env);
 
@@ -47,7 +48,7 @@ int main(int argc, char ** argv) {
   FnInputBoxAnswer entered =
     fn_inputbox_show(
         screen,
-        fn_environment_get_tilecache(env),
+        tilecache,
         fn_environment_build_texture_creation_params(env),
         "Please enter your name:",
         answer,
