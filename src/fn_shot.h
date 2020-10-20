@@ -140,42 +140,6 @@ void fn_shot_gets_out_of_sight(fn_shot_t * shot);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the x position of a shot (in pixels).
- *
- * @param  shot  The shot.
- */
-Uint16 fn_shot_get_x(fn_shot_t * shot);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the y position of a shot (in pixels).
- *
- * @param  shot  The shot.
- */
-Uint16 fn_shot_get_y(fn_shot_t * shot);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the width of a shot (in pixels).
- *
- * @param  shot  The shot.
- */
-Uint16 fn_shot_get_w(fn_shot_t * shot);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the height of a shot (in pixels).
- *
- * @param  shot  The shot.
- */
-Uint16 fn_shot_get_h(fn_shot_t * shot);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Check if a shot touches an actor.
  *
  * @param  shot   The shot.

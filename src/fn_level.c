@@ -945,8 +945,9 @@ void fn_level_blit_to_surface(
     fn_shot_t * shot = (fn_shot_t *)iter->data;
 
     if (shot != NULL) {
-      Uint16 x = fn_shot_get_x(shot) / FN_TILE_WIDTH;
-      Uint16 y = fn_shot_get_y(shot) / FN_TILE_HEIGHT;
+      FnGeometry position = fn_shot_get_position(shot);
+      Uint16 x = position.x / FN_TILE_WIDTH;
+      Uint16 y = position.y / FN_TILE_HEIGHT;
       if (x > x_start && y > y_start && x < x_end && y < y_end) {
         fn_shot_blit(
                 shot,

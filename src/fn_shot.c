@@ -130,34 +130,6 @@ void fn_shot_gets_out_of_sight(fn_shot_t * shot)
 
 /* --------------------------------------------------------------- */
 
-Uint16 fn_shot_get_x(fn_shot_t * shot)
-{
-  return shot->position.x;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_shot_get_y(fn_shot_t * shot)
-{
-  return shot->position.y;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_shot_get_w(fn_shot_t * shot)
-{
-  return FN_TILE_WIDTH;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_shot_get_h(fn_shot_t * shot)
-{
-  return FN_TILE_HEIGHT;
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_shot_touches_actor(fn_shot_t * shot, FnLevelActor * actor)
 {
   FnGeometry actorpos = fn_level_actor_get_position(actor);
