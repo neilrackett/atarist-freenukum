@@ -48,7 +48,6 @@ cargo_build = custom_target(
 )
 
 c_src = [
-    'src/fn_data.c',
     'src/fn_environment.c',
     'src/fn_error.c',
     'src/fn_error_cmdline.c',
@@ -82,7 +81,6 @@ test_tile = executable(
     'test_tile',
     [
         'src/fn_test_tile.c',
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -107,7 +105,6 @@ test_borders = executable(
     'test_borders',
     [
         'src/fn_test_borders.c',
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -132,7 +129,6 @@ test_drop = executable(
     [
         'src/fn_test_drop.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -166,7 +162,6 @@ test_hero = executable(
     [
         'src/fn_test_hero.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -191,7 +186,6 @@ test_infobox = executable(
     [
         'src/fn_test_infobox.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -216,7 +210,6 @@ test_inputbox = executable(
     [
         'src/fn_test_inputbox.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -241,7 +234,6 @@ test_level_loader = executable(
     [
         'src/fn_test_level_loader.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -266,7 +258,6 @@ test_menu = executable(
     [
         'src/fn_test_menu.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -291,7 +282,6 @@ test_msgbox = executable(
     [
         'src/fn_test_msgbox.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -316,7 +306,6 @@ test_picture = executable(
     [
         'src/fn_test_picture.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -341,7 +330,6 @@ test_picture_splash = executable(
     [
         'src/fn_test_picture_splash.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
@@ -367,7 +355,6 @@ test_tilecache = executable(
     [
         'src/fn_test_tilecache.c',
 
-        'src/fn_data.c',
         'src/fn_environment.c',
         'src/fn_error.c',
         'src/fn_error_cmdline.c',

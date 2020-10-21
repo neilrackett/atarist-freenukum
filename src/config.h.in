@@ -1,5 +1,1 @@
 #define VERSION "@version@"
-
-#define HAVE_SDL_SDL_TTF_H 1
-#define HAVE_LIBCURL 1
-#define HAVE_LIBZIP 1

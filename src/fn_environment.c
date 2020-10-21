@@ -33,16 +33,12 @@
 #include <errno.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-#ifdef HAVE_SDL_SDL_TTF_H
 #include <SDL/SDL_ttf.h>
-#endif /* HAVE_SDL_SDL_TTF_H */
 
 /* --------------------------------------------------------------- */
 
 #include "fn_environment.h"
 #include "fn_error.h"
-#include "fn_data.h"
 
 /* --------------------------------------------------------------- */
 
@@ -111,12 +107,6 @@ TTF_Font * fn_environment_loadfont(const int fontsize)
 
 /* --------------------------------------------------------------- */
 
-char const * const subpath_config = "/.freenukum";
-char const * const subpath_data = "/data";
-char const * const subpath_configfile = "/config";
-
-/* --------------------------------------------------------------- */
-
 fn_environment_t * fn_environment_create()
 {
   /* create the environment */
@@ -125,60 +115,11 @@ fn_environment_t * fn_environment_create()
   /* fill with default values */
   env->videoflags = FN_SURFACE_FLAGS;
   env->transparent = 0;
-  env->datapath = NULL;
   env->screen = NULL;
   env->tilecache = NULL;
   env->episode = 1;
   env->num_episodes = 0;
   env->hero = fn_hero_data_create();
-
-  /* create all the path variables */
-  char * homepath = getenv("HOME");
-
-  if (homepath == NULL) {
-    homepath = ".";
-  }
-
-  size_t configpath_size =
-    strlen(subpath_config) +
-    strlen(homepath) +
-    2;
-  char * configpath = malloc(configpath_size);
-  snprintf(configpath, configpath_size, "%s%s",
-      homepath, subpath_config);
-
-  size_t datapath_size =
-    strlen(configpath) +
-    strlen(subpath_data) +
-    2;
-  env->datapath = malloc(datapath_size);
-  snprintf(env->datapath, datapath_size, "%s%s",
-      configpath, subpath_data);
-
-  /* check if the paths exist and create them if necessary */
-  DIR * configdir = opendir(configpath);
-  if (configdir == NULL) {
-    int res = mkdir(configpath, S_IRUSR | S_IWUSR | S_IXUSR
-        | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (res) {
-      fn_error_printf(1024, "Could not create the directory %s: %s",
-          configpath, strerror(errno));
-      return env;
-    }
-  }
-  closedir(configdir);
-  free(configpath); configpath = NULL;
-
-  DIR * datadir = opendir(env->datapath);
-  if (datadir == NULL) {
-    int res = mkdir(env->datapath, S_IRUSR | S_IWUSR | S_IXUSR
-        | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (res) {
-      fn_error_printf(1024, "Could not create the directory %s: %s",
-          env->datapath, strerror(errno));
-      return env;
-    }
-  }
 
   env->settings = fn_settings_load_or_create();
 
@@ -213,9 +154,6 @@ fn_environment_t * fn_environment_create()
 
 void fn_environment_delete(fn_environment_t * env)
 {
-  if (env->datapath != NULL) {
-    free(env->datapath); env->datapath = NULL;
-  }
   if (env->tilecache != NULL) {
     fn_tilecache_free(env->tilecache); env->tilecache = NULL;
   }
@@ -233,43 +171,15 @@ void fn_environment_delete(fn_environment_t * env)
 
 Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 {
-  env->num_episodes = 0;
+  env->num_episodes = fn_data_count_installed_episodes();
 
-  int res = 0;
-
-  while (res != -1) {
-    res = fn_data_check(env->datapath, env->num_episodes + 1);
-    if (res == -1 && env->num_episodes == 0) {
+  if (env->num_episodes == 0) {
       /* we found no episodes */
-      int succeeded = 0;
-      int can_download = fn_data_download_possible();
-      char downloadinfo[1024] = "";
-      if (can_download) {
-        snprintf(downloadinfo, 1024,
-            "\n"
-            "I can try to download the files automatically.\n"
-            "\n"
-            "Press ENTER for automatic download\n"
-            "Press ESCAPE to abort.");
-      } else {
-        snprintf(downloadinfo, 1024,
-            "\n"
-            "Press any key to close this window.");
-      }
-      char message_cmdline[1024];
-      char message_screen[2049];
-      snprintf(message_cmdline, 1024,
+      char * message =
           "Could not load data level and graphics files.\n"
-          "You can download the shareware episode for free from\n"
-          "http://www.3drealms.com/duke1/\n"
-          "Copy the data files to\n"
-          "%s\n", env->datapath);
-      snprintf(message_screen, 2049,
-          "%s\n"
-          "%s\n",
-          message_cmdline,
-          downloadinfo);
-      printf("%s\n", message_cmdline);
+          "Please use the accompanied freenukum-data-tool\n"
+          "for installing the game data files.\n";
+      printf(message);
 #ifdef HAVE_SDL_SDL_TTF_H
       TTF_Font * font = NULL;
       int fontsize = 10;
@@ -277,13 +187,14 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
         font = fn_environment_loadfont(fontsize);
       }
       if (font) {
-        fn_data_display_text(env->screen, 0, 0, font, message_screen);
+        fn_data_display_text(env->screen, 0, 0, font, message);
         SDL_UpdateRect(
             env->screen, 0, 0, env->screen->w, env->screen->h);
 
         SDL_Event event;
 
         char input = 0;
+        int res = 0;
         while (input == 0) {
           res = SDL_WaitEvent(&event);
           if (res == 1) {
@@ -309,57 +220,10 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
             }
           }
         }
-#ifdef HAVE_AUTOMATIC_DOWNLOAD
-        if (can_download && input == 'd') {
-          succeeded =
-            fn_data_download(screen, font, fontsize, datapath);
-
-          if (!succeeded) {
-            input = 0;
-            Uint32 black = SDL_MapRGB(screen->format, 0, 0, 0);
-            SDL_FillRect(screen, NULL, black);
-            fn_data_display_text(screen, 0, 0, font,
-                "Download failed. Press ESCAPE to quit.");
-            SDL_UpdateRect(screen, 0, 0, screen->w, screen->h);
-            
-            while (input == 0) {
-              res = SDL_WaitEvent(&event);
-              if (res == 1) {
-                switch(event.type) {
-                  case SDL_QUIT:
-                    input = 'q';
-                    break;
-                  case SDL_KEYDOWN:
-                    switch(event.key.keysym.sym) {
-                      case SDLK_ESCAPE:
-                        input = 'q';
-                        break;
-                      default:
-                        /* do nothing */
-                        break;
-                    }
-                  default:
-                    /* do nothing on other events */
-                    break;
-                }
-              }
-            }
-          }
-
-          res = 0;
-        }
-#endif /* HAVE_AUTOMATIC_DOWNLOAD */
         TTF_CloseFont(font);
         font = NULL;
       }
 #endif
-      if (!succeeded) {
-        return 0;
-      }
-    } else if (res != -1) {
-      /* we found the currently requested episode */
-      env->num_episodes++;
-    }
   }
 
   return env->num_episodes;
@@ -370,7 +234,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 Uint8 fn_environment_load_tilecache(fn_environment_t * env)
 {
   env->tilecache = fn_tilecache_load(
-          env->datapath,
           fn_environment_build_texture_creation_params(env));
   return env->tilecache != NULL;
 }
@@ -443,13 +306,6 @@ Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env)
 {
   return env->settings.draw_collision_bounds;
-}
-
-/* --------------------------------------------------------------- */
-
-char * fn_environment_get_datapath(fn_environment_t * env)
-{
-  return env->datapath;
 }
 
 /* --------------------------------------------------------------- */

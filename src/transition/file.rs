@@ -2,6 +2,7 @@ pub struct File(std::fs::File);
 
 impl File {
     pub fn open(name: &str) -> std::io::Result<Self> {
+        println!("Opening file {:?}", name);
         Ok(File(std::fs::File::open(name)?))
     }
 

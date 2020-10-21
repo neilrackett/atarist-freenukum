@@ -74,7 +74,10 @@ impl ActorCreateInterface for Specific {
             ActorType::AccessCard => (OBJECT_ACCESS_CARD, 1),
             ActorType::Glove => (OBJECT_GLOVE, 1),
             ActorType::Clamps => (OBJECT_CLAMP, 1),
-            _ => unreachable!(),
+            _ => unreachable!(
+                "Attempted to load actor type {:?} as item",
+                general.actor_type
+            ),
         };
 
         Specific {

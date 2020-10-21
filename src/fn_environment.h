@@ -33,6 +33,7 @@
 
 #include <unistd.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 
 /* --------------------------------------------------------------- */
 
@@ -60,11 +61,6 @@ struct fn_environment_t {
    * The transparent color.
    */
   Uint32 transparent;
-
-  /**
-   * The path where the data can be found.
-   */
-  char * datapath;
 
   /**
    * The game settings.
@@ -231,10 +227,6 @@ Uint64 fn_environment_get_score(fn_environment_t * env);
  */
 Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-char * fn_environment_get_datapath(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

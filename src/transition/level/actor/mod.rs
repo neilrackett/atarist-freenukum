@@ -481,7 +481,7 @@ impl ActorType {
             }
             ActorType::LetterE => item::Specific::create_boxed(g, l),
             ActorType::AccessCardSlot => {
-                item::Specific::create_boxed(g, l)
+                accesscard_slot::Specific::create_boxed(g, l)
             }
             ActorType::GloveSlot => {
                 glove_slot::Specific::create_boxed(g, l)

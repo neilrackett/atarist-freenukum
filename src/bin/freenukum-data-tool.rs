@@ -75,13 +75,14 @@ fn read_file_entry<R: Read>(
         Err(e) => Err(e)?,
     }
 
-    let filename = std::str::from_utf8(
+    let mut filename = std::str::from_utf8(
         filename
             .split(|c| *c == 0)
             .nth(0)
             .context("Couldn't extract filename")?,
     )?
     .to_string();
+    filename.make_ascii_lowercase();
 
     reader.skip(120)?;
 

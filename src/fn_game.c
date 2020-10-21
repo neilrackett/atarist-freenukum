@@ -79,7 +79,7 @@ void fn_game_start(
   char filename[30];
 
   snprintf(
-      filename, 30, "BADGUY.DN%d", fn_environment_get_episode(env));
+      filename, 30, "badguy.dn%d", fn_environment_get_episode(env));
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
@@ -90,7 +90,7 @@ void fn_game_start(
       144);
 
   snprintf(
-      filename, 30, "DUKE.DN%d", fn_environment_get_episode(env));
+      filename, 30, "duke.dn%d", fn_environment_get_episode(env));
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
@@ -248,14 +248,13 @@ int fn_game_start_in_level(
       break;
   }
 
-  char backdropfile[1024];
+  char backdropfile[100];
   snprintf(backdropfile,
-      1024,
-      "%s/DROP%d.DN%d",
-      fn_environment_get_datapath(env),
+      100,
+      "drop%d.dn%d",
       backdropnumber,
       fn_environment_get_episode(env));
-  file = fn_file_open(backdropfile);
+  file = fn_data_open_file(backdropfile);
 
   if (file == NULL)
   {
@@ -271,12 +270,11 @@ int fn_game_start_in_level(
     fn_file_free(file);
   }
 
-  char levelfile[1024];
-  snprintf(levelfile, 1024, "%s/WORLDAL%X.DN%d",
-      fn_environment_get_datapath(env),
+  char levelfile[100];
+  snprintf(levelfile, 100, "worldal%x.dn%d",
       levelnumber,
       fn_environment_get_episode(env));
-  file = fn_file_open(levelfile);
+  file = fn_data_open_file(levelfile);
 
   if (file == NULL)
   {

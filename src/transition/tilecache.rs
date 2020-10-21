@@ -31,32 +31,32 @@ impl TileCache {
             }
         }
         let files = vec![
-            p(true, "BACK0.DN1", 48),
-            p(false, "BACK1.DN1", 48),
-            p(false, "BACK2.DN1", 48),
-            p(false, "BACK3.DN1", 48),
-            p(true, "SOLID0.DN1", 48),
-            p(false, "SOLID1.DN1", 48),
-            p(false, "SOLID2.DN1", 48),
-            p(false, "SOLID3.DN1", 48),
-            p(true, "ANIM0.DN1", 48),
-            p(true, "ANIM1.DN1", 48),
-            p(true, "ANIM2.DN1", 48),
-            p(true, "ANIM3.DN1", 48),
-            p(true, "ANIM4.DN1", 48),
-            p(true, "ANIM5.DN1", 48),
-            p(true, "OBJECT0.DN1", 50),
-            p(true, "OBJECT1.DN1", 50),
-            p(true, "OBJECT2.DN1", 50),
-            p(true, "MAN0.DN1", 48),
-            p(true, "MAN1.DN1", 48),
-            p(true, "MAN2.DN1", 48),
-            p(true, "MAN3.DN1", 48),
-            p(true, "MAN4.DN1", 48),
-            p(true, "FONT1.DN1", 50),
-            p(true, "FONT2.DN1", 50),
-            p(true, "BORDER.DN1", 48),
-            p(true, "NUMBERS.DN1", 44),
+            p(true, "back0.dn1", 48),
+            p(false, "back1.dn1", 48),
+            p(false, "back2.dn1", 48),
+            p(false, "back3.dn1", 48),
+            p(true, "solid0.dn1", 48),
+            p(false, "solid1.dn1", 48),
+            p(false, "solid2.dn1", 48),
+            p(false, "solid3.dn1", 48),
+            p(true, "anim0.dn1", 48),
+            p(true, "anim1.dn1", 48),
+            p(true, "anim2.dn1", 48),
+            p(true, "anim3.dn1", 48),
+            p(true, "anim4.dn1", 48),
+            p(true, "anim5.dn1", 48),
+            p(true, "object0.dn1", 50),
+            p(true, "object1.dn1", 50),
+            p(true, "object2.dn1", 50),
+            p(true, "man0.dn1", 48),
+            p(true, "man1.dn1", 48),
+            p(true, "man2.dn1", 48),
+            p(true, "man3.dn1", 48),
+            p(true, "man4.dn1", 48),
+            p(true, "font1.dn1", 50),
+            p(true, "font2.dn1", 50),
+            p(true, "border.dn1", 48),
+            p(true, "numbers.dn1", 44),
         ];
 
         let mut tiles = Vec::new();
@@ -111,27 +111,13 @@ impl TileCache {
 pub mod ffi {
     pub type FnTileCache = super::TileCache;
     use super::super::texture::ffi::{FnTexture, FnTextureCreationParams};
-    use libc::c_char;
-    use std::ffi::CStr;
-    use std::path::Path;
 
     #[no_mangle]
     pub extern "C" fn fn_tilecache_load(
-        path: *const c_char,
         params: FnTextureCreationParams,
     ) -> *mut FnTileCache {
-        assert!(!path.is_null());
-        let path = {
-            match unsafe { CStr::from_ptr(path) }.to_str() {
-                Ok(filename) => filename,
-                Err(e) => {
-                    eprintln!("Couldn't read file name: {:?}.", e);
-                    return std::ptr::null_mut();
-                }
-            }
-        };
-
-        match FnTileCache::load_from_path(Path::new(path), params) {
+        let path = super::super::data::path();
+        match FnTileCache::load_from_path(&path, params) {
             Ok(tc) => Box::into_raw(Box::new(tc)),
             Err(e) => {
                 eprintln!("Error: {:?}", e);

@@ -456,6 +456,16 @@ void fn_borders_blit_score(SDL_Surface *screen,
                            const FnTileCache *tilecache,
                            uintptr_t score);
 
+uintptr_t fn_data_count_installed_episodes(void);
+
+void fn_data_display_text(SDL_Surface *target,
+                          int16_t x,
+                          int16_t y,
+                          TTF_Font *font,
+                          const char *message);
+
+FnFile *fn_data_open_file(const char *filename);
+
 void fn_file_free(FnFile *ptr);
 
 FnFile *fn_file_open(const char *path);
@@ -930,8 +940,7 @@ void fn_tilecache_free(FnTileCache *ptr);
 const FnTexture *fn_tilecache_get_tile(const FnTileCache *ptr,
                                        uintptr_t index);
 
-FnTileCache *fn_tilecache_load(const char *path,
-                               FnTextureCreationParams params);
+FnTileCache *fn_tilecache_load(FnTextureCreationParams params);
 
 FnTileHeader fn_tileheader_load(FnFile *file);
 

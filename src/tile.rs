@@ -48,7 +48,7 @@ impl Category {
 
     pub fn filename(&self) -> PathBuf {
         let mut s = self.basename();
-        s.push_str(".DN1");
+        s.push_str(".dn1");
         PathBuf::from(s)
     }
 

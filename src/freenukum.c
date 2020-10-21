@@ -28,16 +28,9 @@
 
 #include "config.h"
 
-#ifdef HAVE_SDL_SDL_TTF_H
-#ifdef HAVE_LIBCURL
-#ifdef HAVE_LIBZIP
-#define HAVE_AUTOMATIC_DOWNLOAD 1
-#endif /* HAVE_LIBZIP */
-#endif /* HAVE_LIBCURL */
-#endif /* HAVE_SDL_SDL_TTF_H */
-
 /* --------------------------------------------------------------- */
 
+#include <SDL/SDL_ttf.h>
 #include <SDL/SDL.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -53,7 +46,6 @@
 #include "fn_error.h"
 #include "fn_picture_splash.h"
 #include "fn_game.h"
-#include "fn_data.h"
 #include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
@@ -67,7 +59,7 @@ int main(int argc, char ** argv)
   int choice = 0; /* choice of the main menu */
 
   /* TODO move this into fn_environment. */
-  char backgroundfile[10] = "DN.DN1";
+  char backgroundfile[10] = "dn.dn1";
 /* --------------------------------------------------------------- */
 
   fn_error_set_handler(fn_error_print_commandline);
@@ -142,7 +134,7 @@ int main(int argc, char ** argv)
             episode = 1;
           }
           snprintf(backgroundfile,
-              7, "DN.DN%d", episode);
+              7, "dn.dn%d", episode);
           res = fn_picture_splash_show(
                   tilecache, texture_creation_params, env, backgroundfile);
           if (res == 0) {
@@ -151,7 +143,7 @@ int main(int argc, char ** argv)
                 "We stay in episode 1\n");
             episode = 1;
             snprintf(backgroundfile,
-                7, "DN.DN%d", episode);
+                7, "dn.dn%d", episode);
             res = fn_picture_splash_show(
                     tilecache, texture_creation_params, env, backgroundfile);
           } else {

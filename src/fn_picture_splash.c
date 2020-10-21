@@ -70,24 +70,12 @@ int fn_picture_splash_show_with_message(
     Uint8 x,
     Uint8 y)
 {
-  char * path;
   FnFile * file;
   int res;
   SDL_Event event;
   FnTexture * picture;
 
-  char * datapath = fn_environment_get_datapath(env);
-  path = malloc(strlen(datapath) + strlen(filename) + 1);
-  sprintf(path, "%s/%s", datapath, filename);
-  file = fn_file_open(path);
-
-  if (file == NULL) {
-    fn_error_printf(1024, "Could not open file %s for reading: %s",
-        path,strerror(errno));
-    free(path);
-    return 0;
-  }
-  free(path);
+  file = fn_data_open_file(filename);
 
   picture = fn_picture_load(file, texture_creation_params);
 

@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
     SDL_Surface * level;
     SDL_Event event;
     char * homedir;
-    char levelfile[1024];
+    char levelfile[100];
     fn_environment_t * env = fn_environment_create();
     fn_environment_load_tilecache(env);
     fn_environment_check_for_episodes(env);
@@ -87,7 +87,7 @@ int main(int argc, char ** argv)
       if (strlen(argv[1]) == 1) {
         levelnumber = argv[1][0];
         if ((levelnumber >= '1' && levelnumber <= '9') ||
-            (levelnumber >= 'A' && levelnumber <= 'C'))
+            (levelnumber >= 'a' && levelnumber <= 'c'))
         {
           argok = 1;
         }
@@ -101,7 +101,7 @@ int main(int argc, char ** argv)
         fprintf(stderr,
                 "LEVELNUMBER is the number of the level.\n"
                 "          This is usually a number between 1 and 9\n"
-                "          or one of A, B, C.\n\n");
+                "          or one of a, b, c.\n\n");
 
         return -1;
     }
@@ -113,12 +113,11 @@ int main(int argc, char ** argv)
       exit(1);
     }
 
-    snprintf(levelfile, 1024, "%s/.freenukum/data/WORLDAL%c.DN1",
-        homedir, levelnumber);
+    snprintf(levelfile, 100, "worldal%x.dn1", levelnumber);
 
     printf("Use the arrow keys to navigate through the level\n");
 
-    file = fn_file_open(levelfile);
+    file = fn_data_open_file(levelfile);
 
     if (file == NULL)
     {

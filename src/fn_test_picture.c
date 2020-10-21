@@ -27,6 +27,7 @@
  *******************************************************************/
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
