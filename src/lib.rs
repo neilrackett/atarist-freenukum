@@ -198,11 +198,16 @@ pub mod transition;
 pub use transition::geometry::Geometry;
 pub use transition::texture::Texture;
 
+fn directories() -> directories::ProjectDirs {
+    directories::ProjectDirs::from("", "", "freenukum").unwrap()
+}
+
 fn config_dir() -> std::path::PathBuf {
-    directories::ProjectDirs::from("", "", "freenukum")
-        .unwrap()
-        .config_dir()
-        .to_path_buf()
+    directories().config_dir().to_path_buf()
+}
+
+pub fn data_dir() -> std::path::PathBuf {
+    directories().data_dir().to_path_buf()
 }
 
 fn collision_bounds_color(format: &transdl::video::PixelFormat) -> u32 {

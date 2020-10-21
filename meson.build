@@ -43,7 +43,7 @@ cargo_build = custom_target(
         cargo_manifest,
     ],
     output: [
-        'libfreenukum_rs.so',
+        'libfreenukum.so',
     ]
 )
 
@@ -95,7 +95,7 @@ test_tile = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -120,7 +120,7 @@ test_borders = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -145,7 +145,7 @@ test_drop = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -179,7 +179,7 @@ test_hero = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -204,7 +204,7 @@ test_infobox = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -229,7 +229,7 @@ test_inputbox = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -254,7 +254,7 @@ test_level_loader = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -279,7 +279,7 @@ test_menu = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -304,7 +304,7 @@ test_msgbox = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -329,7 +329,7 @@ test_picture = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -355,7 +355,7 @@ test_picture_splash = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -380,7 +380,7 @@ test_tilecache = executable(
         zip_lib,
     ],
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,
@@ -398,7 +398,7 @@ executable(
     ],
     include_directories: include_directories('.'),
     objects: [
-        'build/libfreenukum_rs.so',
+        'build/libfreenukum.so',
     ],
     link_depends: [
         cargo_build,

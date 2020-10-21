@@ -1,5 +1,5 @@
 [package]
-name = "freenukum-rs"
+name = "freenukum"
 version = "0.3.0"
 authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"
@@ -8,10 +8,9 @@ edition = "2018"
 crate-type = ["rlib", "cdylib"]
 
 [dependencies]
-anyhow = "1.0.32"
+anyhow = "1.0.33"
 bitvec = "0.17"
 directories = "3.0.1"
-dirs = "2"
 libc = "0.2.77"
 sdl2 = "0.33"
 serde = "1"
@@ -19,6 +18,9 @@ serde_derive = "1"
 toml = "0.5.6"
 transdl = { path = "transdl" }
 rand = "0.7.3"
+explode = "0.1.2"
+structopt = "0.3.20"
+zip = "0.5.8"
 
 [build-dependencies]
 cbindgen = "0.14.4"
