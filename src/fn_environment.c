@@ -78,7 +78,6 @@ char * fonts[] = {
 
 /* --------------------------------------------------------------- */
 
-#ifdef HAVE_SDL_SDL_TTF_H
 TTF_Font * fn_environment_loadfont(const int fontsize)
 {
   TTF_Font * font = NULL;
@@ -103,7 +102,6 @@ TTF_Font * fn_environment_loadfont(const int fontsize)
   printf("Could not find any font.");
   return font;
 }
-#endif /* HAVE_SDL_SDL_TTF_H */
 
 /* --------------------------------------------------------------- */
 
@@ -180,7 +178,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
           "Please use the accompanied freenukum-data-tool\n"
           "for installing the game data files.\n";
       printf(message);
-#ifdef HAVE_SDL_SDL_TTF_H
       TTF_Font * font = NULL;
       int fontsize = 10;
       if (TTF_Init() != -1) {
@@ -223,7 +220,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
         TTF_CloseFont(font);
         font = NULL;
       }
-#endif
   }
 
   return env->num_episodes;
