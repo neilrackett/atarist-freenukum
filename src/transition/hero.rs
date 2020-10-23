@@ -193,16 +193,17 @@ impl HeroData {
             let g = self.position.geometry;
             g.draw_outline(target, color);
 
-            for i in (g.x as usize / TILE_WIDTH) - 1
-                ..(g.x as usize / TILE_WIDTH) + 2
+            for i in (g.x / TILE_WIDTH as i16) - 1
+                ..(g.x / TILE_WIDTH as i16) + 2
             {
-                for j in (g.y as usize / TILE_HEIGHT) - 1
-                    ..(g.y as usize / TILE_HEIGHT) + 3
+                for j in (g.y / TILE_HEIGHT as i16) - 1
+                    ..(g.y / TILE_HEIGHT as i16) + 3
                 {
-                    if solids.get(i, j) {
+                    if i > 0 && j > 0 && solids.get(i as usize, j as usize)
+                    {
                         let obstacle = Geometry {
-                            x: (i * TILE_WIDTH) as i16,
-                            y: (j * TILE_HEIGHT) as i16,
+                            x: (i as i16 * TILE_WIDTH as i16),
+                            y: (j as i16 * TILE_HEIGHT as i16),
                             w: TILE_WIDTH as u16,
                             h: TILE_HEIGHT as u16,
                         };
