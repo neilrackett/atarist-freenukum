@@ -59,6 +59,7 @@ Uint32 fn_game_timer_triggered(
 
 void fn_game_start(
     const FnTileCache * tilecache,
+    FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
     fn_environment_t * env)
 {
@@ -100,10 +101,10 @@ void fn_game_start(
       79,
       144);
 
-  FnHeroData * hero = fn_environment_get_hero(env);
-  fn_hero_data_reset(hero);
-  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero);
-  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
+  fn_hero_data_reset(hero_data);
+  FnHeroInventory * inventory = fn_hero_data_get_inventory(hero_data);
+  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero_data);
+  FnHeroScore * score = fn_hero_data_get_score(hero_data);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
@@ -123,7 +124,7 @@ void fn_game_start(
           env->screen,
           fn_environment_build_texture_creation_params(env),
           tilecache,
-          fn_environment_get_score(env));
+          fn_hero_score_get(score));
 
   fn_borders_blit_firepower(
           env->screen,
@@ -383,6 +384,7 @@ int fn_game_start_in_level(
 
     FnHeroInventory * inventory = fn_hero_data_get_inventory(hero);
     FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
+    FnHeroScore * score = fn_hero_data_get_score(hero);
     FnHeroPosition * hero_position = fn_hero_data_get_position(hero);
     FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
@@ -623,7 +625,7 @@ int fn_game_start_in_level(
                   env->screen,
                   fn_environment_build_texture_creation_params(env),
                   tilecache,
-                  fn_environment_get_score(env));
+                  fn_hero_score_get(score));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

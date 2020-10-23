@@ -46,6 +46,7 @@
  */
 void fn_game_start(
     const FnTileCache * tilecache,
+    FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
     fn_environment_t * env);
 

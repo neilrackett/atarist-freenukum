@@ -74,6 +74,8 @@ int main(int argc, char ** argv)
     exit(retval);
   }
 
+  FnHeroData * hero_data = fn_environment_get_hero(env);
+
   /* load the tilecache */
   res = fn_environment_load_tilecache(env);
 
@@ -101,6 +103,7 @@ int main(int argc, char ** argv)
       case MainMenuEntry_Start:
         fn_game_start(
             tilecache,
+            hero_data,
             texture_creation_params,
             env);
         res = fn_picture_splash_show(

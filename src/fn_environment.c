@@ -290,14 +290,6 @@ const Uint8 fn_environment_get_health(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint64 fn_environment_get_score(fn_environment_t * env)
-{
-  FnHeroScore * score = fn_hero_data_get_score(env->hero);
-  return fn_hero_score_get(score);
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env)
 {

@@ -212,17 +212,6 @@ const Uint8 fn_environment_get_health(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the score of the player in the environment.
- *
- * @param  env  The environment.
- *
- * @return The score.
- */
-Uint64 fn_environment_get_score(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the information if collision bounds should be draws.
  */
 Uint8 fn_environment_get_draw_collision_bounds(
