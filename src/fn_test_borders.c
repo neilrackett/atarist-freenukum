@@ -48,8 +48,11 @@ int main(int argc, char ** argv)
 
   fn_environment_t * env = fn_environment_create();
   fn_environment_check_for_episodes(env);
-  fn_environment_load_tilecache(env);
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
+
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
+  const FnTileCache * tilecache =
+      fn_tilecache_load(texture_creation_params);
 
   fn_borders_blit(
           env->screen,

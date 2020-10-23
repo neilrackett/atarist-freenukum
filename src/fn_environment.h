@@ -73,11 +73,6 @@ struct fn_environment_t {
   SDL_Surface * screen;
 
   /**
-   * The tilecache.
-   */
-  FnTileCache * tilecache;
-
-  /**
    * The episode number.
    */
   Uint8 episode;
@@ -122,17 +117,6 @@ void fn_environment_delete(fn_environment_t * env);
  * @return The number of available episodes.
  */
 Uint8 fn_environment_check_for_episodes(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Load the tilecache into an environment.
- *
- * @param  env  The environment.
- *
- * @return  1 on success, 0 on failure.
- */
-Uint8 fn_environment_load_tilecache(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
@@ -216,14 +200,6 @@ const Uint8 fn_environment_get_health(fn_environment_t * env);
  */
 Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-const FnTileCache * fn_environment_get_tilecache(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_environment_tilecache_loaded(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

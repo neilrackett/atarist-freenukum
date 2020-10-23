@@ -58,7 +58,6 @@ Uint32 animate(Uint32 interval, void * param) {
 int main(int argc, char ** argv)
 {
   fn_environment_t * env = fn_environment_create();
-  fn_environment_load_tilecache(env);
   FnHeroData * hero;
 
   int res;
@@ -71,8 +70,12 @@ int main(int argc, char ** argv)
 
   fn_error_set_handler(fn_error_print_commandline);
 
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
-  bool draw_collision_bounds = fn_environment_get_draw_collision_bounds(env);
+  FnTextureCreationParams texture_creation_params =
+      fn_environment_build_texture_creation_params(env);
+  const FnTileCache * tilecache =
+      fn_tilecache_load(texture_creation_params);
+  bool draw_collision_bounds =
+      fn_environment_get_draw_collision_bounds(env);
 
   /* here comes the hero!!!!! */
   hero = fn_hero_data_create();

@@ -41,7 +41,6 @@ int main(int argc, char ** argv)
 {
     FnFile * file = NULL;
     fn_environment_t * env = fn_environment_create();
-    fn_environment_load_tilecache(env);
     SDL_Event event;
     int res = 0;
     int quit = 0;

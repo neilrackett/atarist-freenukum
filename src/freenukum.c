@@ -76,14 +76,13 @@ int main(int argc, char ** argv)
 
   FnHeroData * hero_data = fn_environment_get_hero(env);
 
-  /* load the tilecache */
-  res = fn_environment_load_tilecache(env);
-
   SDL_Surface * screen = env->screen;
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
 
   FnTextureCreationParams texture_creation_params =
       fn_environment_build_texture_creation_params(env);
+  const FnTileCache * tilecache =
+      fn_tilecache_load(texture_creation_params);
+
 
   /* show the splash screen */
   res = fn_picture_splash_show(

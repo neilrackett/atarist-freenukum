@@ -48,7 +48,6 @@ int main(int argc, char ** argv)
     int quit = 0;
     SDL_Event event;
     fn_environment_t * env = fn_environment_create();
-    fn_environment_load_tilecache(env);
 
     if (argc != 2)
     {

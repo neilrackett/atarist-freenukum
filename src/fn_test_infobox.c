@@ -37,19 +37,29 @@
 
 int main(int argc, char ** argv) {
   fn_environment_t * env = fn_environment_create();
-  fn_environment_load_tilecache(env);
 
   SDL_Surface * screen = env->screen;
-  const FnTileCache * tilecache = fn_environment_get_tilecache(env);
-  FnTextureCreationParams params =
+
+  FnTextureCreationParams texture_creation_params =
       fn_environment_build_texture_creation_params(env);
+  const FnTileCache * tilecache =
+      fn_tilecache_load(texture_creation_params);
 
   fn_infobox_show(
-      screen, tilecache, params, "This is...\n");
+      screen,
+      tilecache,
+      texture_creation_params,
+      "This is...\n");
   fn_infobox_show(
-      screen, tilecache, params, "...the great\nInfobox test case.\n");
+      screen,
+      tilecache,
+      texture_creation_params,
+      "...the great\nInfobox test case.\n");
   fn_infobox_show(
-      screen, tilecache, params, "now\nwith\neven\nmore\nlines.\n");
+      screen,
+      tilecache,
+      texture_creation_params,
+      "now\nwith\neven\nmore\nlines.\n");
   
   return 0;
 }

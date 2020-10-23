@@ -114,7 +114,6 @@ fn_environment_t * fn_environment_create()
   env->videoflags = FN_SURFACE_FLAGS;
   env->transparent = 0;
   env->screen = NULL;
-  env->tilecache = NULL;
   env->episode = 1;
   env->num_episodes = 0;
   env->hero = fn_hero_data_create();
@@ -152,9 +151,6 @@ fn_environment_t * fn_environment_create()
 
 void fn_environment_delete(fn_environment_t * env)
 {
-  if (env->tilecache != NULL) {
-    fn_tilecache_free(env->tilecache); env->tilecache = NULL;
-  }
   if (env->screen != NULL) {
     SDL_FreeSurface(env->screen); env->screen = NULL;
   }
@@ -227,15 +223,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_load_tilecache(fn_environment_t * env)
-{
-  env->tilecache = fn_tilecache_load(
-          fn_environment_build_texture_creation_params(env));
-  return env->tilecache != NULL;
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_environment_get_fullscreen(fn_environment_t * env)
 {
   return env->settings.fullscreen;
@@ -294,20 +281,6 @@ Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env)
 {
   return env->settings.draw_collision_bounds;
-}
-
-/* --------------------------------------------------------------- */
-
-const FnTileCache * fn_environment_get_tilecache(fn_environment_t * env)
-{
-  return env->tilecache;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_environment_tilecache_loaded(fn_environment_t * env)
-{
-  return (env->tilecache != NULL);
 }
 
 /* --------------------------------------------------------------- */

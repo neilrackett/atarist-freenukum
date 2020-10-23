@@ -77,19 +77,29 @@ int main(int argc, char ** argv)
     char * homedir;
     char levelfile[100];
     fn_environment_t * env = fn_environment_create();
-    fn_environment_load_tilecache(env);
+
+    FnTextureCreationParams texture_creation_params =
+        fn_environment_build_texture_creation_params(env);
+    const FnTileCache * tilecache =
+        fn_tilecache_load(texture_creation_params);
+
     fn_environment_check_for_episodes(env);
 
     int argok = 0;
-    char levelnumber;
+    int levelnumber = 0;
 
     if (argc == 2) {
       if (strlen(argv[1]) == 1) {
-        levelnumber = argv[1][0];
-        if ((levelnumber >= '1' && levelnumber <= '9') ||
-            (levelnumber >= 'a' && levelnumber <= 'c'))
-        {
-          argok = 1;
+        char c = argv[1][0];
+        argok = 1;
+        if (c >= '1' && c <= '9') {
+            levelnumber = c - '0';
+        } else if (c >= 'a' && c <= 'c') {
+            levelnumber = c - 'a' + 10;
+        } else if (c >= 'A' && c <= 'C') {
+            levelnumber = c - 'A' + 10;
+        } else {
+          argok = 0;
         }
       }
     }
@@ -127,12 +137,8 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
     FnHeroData * hero = fn_environment_get_hero(env);
-    const FnTileCache * tilecache = fn_environment_get_tilecache(env);
     bool draw_collision_bounds =
         fn_environment_get_draw_collision_bounds(env);
-
-    FnTextureCreationParams texture_creation_params =
-        fn_environment_build_texture_creation_params(env);
 
     lv = fn_level_load(
             file, hero, tilecache, texture_creation_params);
