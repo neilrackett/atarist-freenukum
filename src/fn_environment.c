@@ -254,14 +254,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-const Uint8 fn_environment_get_health(fn_environment_t * env)
-{
-  FnHeroHealth * health = fn_hero_data_get_health(env->hero);
-  return fn_hero_health_get(health);
-}
-
-/* --------------------------------------------------------------- */
-
 Uint8 fn_environment_get_draw_collision_bounds(
     fn_environment_t * env)
 {

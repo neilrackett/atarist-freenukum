@@ -105,6 +105,7 @@ void fn_game_start(
   FnHeroInventory * inventory = fn_hero_data_get_inventory(hero_data);
   FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero_data);
   FnHeroScore * score = fn_hero_data_get_score(hero_data);
+  FnHeroHealth * health = fn_hero_data_get_health(hero_data);
 
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
@@ -121,7 +122,7 @@ void fn_game_start(
           env->screen,
           surface_creation_params,
           tilecache,
-          fn_environment_get_health(env));
+          fn_hero_health_get(health));
 
   fn_borders_blit_score(
           env->screen,
@@ -388,6 +389,7 @@ int fn_game_start_in_level(
     FnHeroInventory * inventory = fn_hero_data_get_inventory(hero);
     FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
     FnHeroScore * score = fn_hero_data_get_score(hero);
+    FnHeroHealth * health = fn_hero_data_get_health(hero);
     FnHeroPosition * hero_position = fn_hero_data_get_position(hero);
     FnGeometry hero_geometry = fn_hero_position_get_geometry(hero_position);
 
@@ -655,7 +657,7 @@ int fn_game_start_in_level(
                       env->screen,
                       texture_creation_params,
                       tilecache,
-                      fn_environment_get_health(env));
+                      fn_hero_health_get(health));
               /* TODO separately update this area. */
               updateWholeScreen = 1;
               break;

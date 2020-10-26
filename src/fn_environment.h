@@ -164,17 +164,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 /* --------------------------------------------------------------- */
 
 /**
- * Get the health of the hero in the environment.
- *
- * @param  env  The environment.
- *
- * @return The health.
- */
-const Uint8 fn_environment_get_health(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the information if collision bounds should be draws.
  */
 Uint8 fn_environment_get_draw_collision_bounds(
