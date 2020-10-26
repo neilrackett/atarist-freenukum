@@ -11,8 +11,28 @@ pub struct Texture {
 #[derive(Clone, Copy, Debug)]
 pub struct TextureCreationParams {
     pub flags: u32,
-    pub bits_per_pixel: i32,
+    pub bits_per_pixel: u8,
     pub transparent: u32,
+}
+
+impl TextureCreationParams {
+    pub fn create_surface(&self, w: u16, h: u16) -> Surface {
+        let mut surface = Surface::create_rgb(
+            self.flags,
+            w,
+            h,
+            self.bits_per_pixel as i32,
+            0,
+            0,
+            0,
+            0,
+        );
+        surface.set_color_key(
+            transdl::ll::SDL_SRCCOLORKEY,
+            super::sdl_surface_transparent(&surface),
+        );
+        surface
+    }
 }
 
 impl Texture {
@@ -21,27 +41,11 @@ impl Texture {
         h: u16,
         params: TextureCreationParams,
     ) -> Texture {
-        Self::create(
-            params.flags,
+        Texture {
             w,
             h,
-            params.bits_per_pixel,
-            params.transparent,
-        )
-    }
-
-    pub fn create(
-        flags: u32,
-        w: u16,
-        h: u16,
-        bits_per_pixel: i32,
-        transparent: u32,
-    ) -> Texture {
-        let mut surface =
-            Surface::create_rgb(flags, w, h, bits_per_pixel, 0, 0, 0, 0);
-        surface.set_color_key(transdl::ll::SDL_SRCCOLORKEY, transparent);
-
-        Texture { w, h, surface }
+            surface: params.create_surface(w, h),
+        }
     }
 
     pub fn set_data(&mut self, data: &[u8], transparent: u32) {

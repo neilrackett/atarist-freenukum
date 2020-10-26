@@ -13,6 +13,12 @@ pub struct PixelFormat {
     pub raw: *mut ll::SDL_PixelFormat,
 }
 
+impl PixelFormat {
+    pub fn bits_per_pixel(&self) -> u8 {
+        unsafe { (*self.raw).BitsPerPixel }
+    }
+}
+
 impl Surface {
     pub fn create_rgb(
         flags: u32,
@@ -49,6 +55,10 @@ impl Surface {
     pub fn format(&self) -> PixelFormat {
         let raw = unsafe { *self.raw }.format;
         PixelFormat { raw }
+    }
+
+    pub fn flags(&self) -> u32 {
+        unsafe { *self.raw }.flags
     }
 
     pub fn fill_rect(&mut self, dstrect: Rect, color: u32) {

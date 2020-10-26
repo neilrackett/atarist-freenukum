@@ -62,6 +62,16 @@ pub fn sdl_surface_transparent(surface: &transdl::video::Surface) -> u32 {
     transdl::video::map_rgb(&surface.format(), 100, 1, 1)
 }
 
+pub fn sdl_surface_creation_params(
+    surface: &transdl::video::Surface,
+) -> texture::TextureCreationParams {
+    texture::TextureCreationParams {
+        flags: surface.flags(),
+        bits_per_pixel: surface.format().bits_per_pixel(),
+        transparent: sdl_surface_transparent(surface),
+    }
+}
+
 pub mod ffi {
     pub type FnHorizontalDirection = super::HorizontalDirection;
     pub type FnVerticalDirection = super::VerticalDirection;
@@ -104,5 +114,14 @@ pub mod ffi {
         assert!(!surface.is_null());
         let surface = transdl::video::Surface { raw: surface };
         super::sdl_surface_transparent(&surface)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_sdl_surface_creation_params(
+        surface: *mut transdl::ll::SDL_Surface,
+    ) -> super::texture::ffi::FnTextureCreationParams {
+        assert!(!surface.is_null());
+        let surface = transdl::video::Surface { raw: surface };
+        super::sdl_surface_creation_params(&surface)
     }
 }

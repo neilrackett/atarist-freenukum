@@ -23,16 +23,9 @@ fn show(
     };
 
     // backup the background
-    let mut background_backup = Surface::create_rgb(
-        texture_creation_params.flags,
-        destrect.w,
-        destrect.h,
-        texture_creation_params.bits_per_pixel,
-        0,
-        0,
-        0,
-        0,
-    );
+    let mut background_backup =
+        texture_creation_params.create_surface(destrect.w, destrect.h);
+
     screen.blit(
         Some(destrect.as_sdl_rect()),
         &mut background_backup,

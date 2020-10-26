@@ -316,7 +316,7 @@ typedef File FnFile;
 
 typedef struct {
     uint32_t flags;
-    int32_t bits_per_pixel;
+    uint8_t bits_per_pixel;
     uint32_t transparent;
 } TextureCreationParams;
 
@@ -864,6 +864,8 @@ void fn_messagebox_get_text_information(const char *text,
                                         uint16_t *rows);
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
+
+FnTextureCreationParams fn_sdl_surface_creation_params(SDL_Surface *surface);
 
 uint32_t fn_sdl_surface_flags(bool fullscreen);
 
