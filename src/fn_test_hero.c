@@ -57,7 +57,9 @@ Uint32 animate(Uint32 interval, void * param) {
 
 int main(int argc, char ** argv)
 {
-  fn_environment_t * env = fn_environment_create();
+  FnSettings settings = fn_settings_load_or_create();
+
+  fn_environment_t * env = fn_environment_create(settings.fullscreen);
   FnHeroData * hero;
 
   int res;
@@ -74,7 +76,7 @@ int main(int argc, char ** argv)
       fn_sdl_surface_creation_params(env->screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
-  bool draw_collision_bounds = env->settings.draw_collision_bounds;
+  bool draw_collision_bounds = settings.draw_collision_bounds;
 
   /* here comes the hero!!!!! */
   hero = fn_hero_data_create();

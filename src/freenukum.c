@@ -64,7 +64,8 @@ int main(int argc, char ** argv)
 
   fn_error_set_handler(fn_error_print_commandline);
 
-  fn_environment_t * env = fn_environment_create();
+  FnSettings settings = fn_settings_load_or_create();
+  fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
 /* --------------------------------------------------------------- */
 
@@ -105,6 +106,7 @@ int main(int argc, char ** argv)
             hero_data,
             texture_creation_params,
             screen,
+            &settings,
             env);
         res = fn_picture_splash_show(
             tilecache,
@@ -128,8 +130,8 @@ int main(int argc, char ** argv)
         {
         int res = SDL_WM_ToggleFullScreen(env->screen);
         if (res) {
-            fn_settings_toggle_fullscreen(&env->settings);
-            fn_settings_save(env->settings);
+            fn_settings_toggle_fullscreen(&settings);
+            fn_settings_save(settings);
         }
         }
         break;

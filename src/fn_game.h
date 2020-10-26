@@ -49,6 +49,7 @@ void fn_game_start(
     FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
+    FnSettings * settings,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
@@ -68,6 +69,7 @@ int fn_game_start_in_level(
     FnHeroData * hero,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
+    FnSettings * settings,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

@@ -65,11 +65,11 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    bool fullscreen = false;
+    FnSettings settings = fn_settings_load_or_create();
     screen = fn_sdl_create_screen(
             FN_DROP_WIDTH * FN_TILE_WIDTH,
             FN_DROP_HEIGHT * FN_TILE_HEIGHT,
-            fullscreen);
+            settings.fullscreen);
 
     if (screen == NULL)
     {

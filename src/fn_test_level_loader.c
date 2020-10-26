@@ -76,7 +76,9 @@ int main(int argc, char ** argv)
     SDL_Event event;
     char * homedir;
     char levelfile[100];
-    fn_environment_t * env = fn_environment_create();
+
+    FnSettings settings = fn_settings_load_or_create();
+    fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
     FnTextureCreationParams texture_creation_params =
         fn_sdl_surface_creation_params(env->screen);
@@ -137,7 +139,7 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
     FnHeroData * hero = fn_hero_data_create();
-    bool draw_collision_bounds = env->settings.draw_collision_bounds;
+    bool draw_collision_bounds = settings.draw_collision_bounds;
 
     lv = fn_level_load(
             file, hero, tilecache, texture_creation_params);

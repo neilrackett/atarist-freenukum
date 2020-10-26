@@ -105,7 +105,7 @@ TTF_Font * fn_environment_loadfont(const int fontsize)
 
 /* --------------------------------------------------------------- */
 
-fn_environment_t * fn_environment_create()
+fn_environment_t * fn_environment_create(bool fullscreen)
 {
   /* create the environment */
   fn_environment_t * env = malloc(sizeof(fn_environment_t));
@@ -115,15 +115,13 @@ fn_environment_t * fn_environment_create()
   env->episode = 1;
   env->num_episodes = 0;
 
-  env->settings = fn_settings_load_or_create();
-
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
     fn_error_printf(1024, "Can't initialize SDL: %s", SDL_GetError());
     return env;
   }
 
   env->screen = fn_sdl_create_screen(
-          FN_WINDOW_WIDTH, FN_WINDOW_HEIGHT, env->settings.fullscreen);
+          FN_WINDOW_WIDTH, FN_WINDOW_HEIGHT, fullscreen);
   if (env->screen == NULL) {
     fn_error_printf(1024, "Can't set video mode: %s", SDL_GetError());
     return env;

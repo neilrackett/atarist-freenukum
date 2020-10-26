@@ -91,14 +91,14 @@ int main(int argc, char ** argv)
   int res;
   int quit = 0;
   SDL_Event event;
-  fn_environment_t * env;
-  env = fn_environment_create();
 
-  bool fullscreen = false;
+  FnSettings settings = fn_settings_load_or_create();
+  fn_environment_t * env = fn_environment_create(settings.fullscreen);
+
   SDL_Surface * screen = fn_sdl_create_screen(
       FN_TILE_WIDTH * (50+1),
       FN_TILE_HEIGHT * (26+1),
-      fullscreen);
+      settings.fullscreen);
 
   if (screen == NULL)
   {

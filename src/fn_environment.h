@@ -53,11 +53,6 @@ struct fn_environment_t {
   Uint8 initialized;
 
   /**
-   * The game settings.
-   */
-  FnSettings settings;
-
-  /**
    * SDL screen
    */
   SDL_Surface * screen;
@@ -81,7 +76,7 @@ struct fn_environment_t {
  * @return  The completely setup environment. If something goes
  *          wrong, NULL is returned.
  */
-fn_environment_t * fn_environment_create();
+fn_environment_t * fn_environment_create(bool fullscreen);
 
 /* --------------------------------------------------------------- */
 

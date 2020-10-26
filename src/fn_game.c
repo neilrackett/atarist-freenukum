@@ -62,6 +62,7 @@ void fn_game_start(
     FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
+    FnSettings * settings,
     fn_environment_t * env)
 {
   /* Initialize Random Number Generator. */
@@ -158,7 +159,13 @@ void fn_game_start(
       if (interlevel) {
         /* interlevel */
         success = fn_game_start_in_level(
-                2, tilecache, hero_data, texture_creation_params, target, env);
+                2,
+                tilecache,
+                hero_data,
+                texture_creation_params,
+                target,
+                settings,
+                env);
         level++;
         if (level == 2) {
           level++;
@@ -167,7 +174,13 @@ void fn_game_start(
       } else {
         /* real level */
         success = fn_game_start_in_level(
-                level, tilecache, hero_data, texture_creation_params, target, env);
+                level,
+                tilecache,
+                hero_data,
+                texture_creation_params,
+                target,
+                settings,
+                env);
         interlevel = 1;
       }
     }
@@ -186,6 +199,7 @@ int fn_game_start_in_level(
     FnHeroData * hero,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
+    FnSettings * settings,
     fn_environment_t * env)
 {
   int returnvalue = 0;
@@ -196,8 +210,6 @@ int fn_game_start_in_level(
   SDL_Event event;
   int res = 0;
   int doupdate = 1;
-
-  bool draw_collision_bounds = env->settings.draw_collision_bounds;
 
   SDL_Surface * level = SDL_CreateRGBSurface(
       texture_creation_params.flags,
@@ -346,7 +358,7 @@ int fn_game_start_in_level(
           lv,
           tilecache,
           hero,
-          draw_collision_bounds,
+          settings->draw_collision_bounds,
           level,
           &srcrect,
           &srcrect,
@@ -440,8 +452,8 @@ int fn_game_start_in_level(
               {
                   int res = SDL_WM_ToggleFullScreen(env->screen);
                   if (res) {
-                      fn_settings_toggle_fullscreen(&env->settings);
-                      fn_settings_save(env->settings);
+                      fn_settings_toggle_fullscreen(settings);
+                      fn_settings_save(*settings);
                   }
               }
               break;

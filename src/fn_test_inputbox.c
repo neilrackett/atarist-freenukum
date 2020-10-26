@@ -39,7 +39,8 @@
 int main(int argc, char ** argv) {
   SDL_Surface * screen;
 
-  fn_environment_t * env = fn_environment_create();
+  FnSettings settings = fn_settings_load_or_create();
+  fn_environment_t * env = fn_environment_create(settings.fullscreen);
   FnTextureCreationParams texture_creation_params =
       fn_sdl_surface_creation_params(env->screen);
   const FnTileCache * tilecache =

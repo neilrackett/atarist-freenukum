@@ -46,7 +46,8 @@ int main(int argc, char ** argv)
     char * homedir;
     char tilespath[1024];
 
-    fn_environment_t * env = fn_environment_create();
+    FnSettings settings = fn_settings_load_or_create();
+    fn_environment_t * env = fn_environment_create(settings.fullscreen);
     screen = fn_environment_get_screen_sdl(env);
     FnTextureCreationParams texture_creation_params =
         fn_sdl_surface_creation_params(screen);

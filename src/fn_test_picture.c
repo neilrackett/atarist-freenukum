@@ -47,7 +47,9 @@ int main(int argc, char ** argv)
     int res;
     int quit = 0;
     SDL_Event event;
-    fn_environment_t * env = fn_environment_create();
+
+    FnSettings settings = fn_settings_load_or_create();
+    fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
     if (argc != 2)
     {

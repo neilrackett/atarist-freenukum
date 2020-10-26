@@ -88,7 +88,7 @@ pub mod ffi {
 
     #[no_mangle]
     pub extern "C" fn fn_settings_load_or_create() -> FnSettings {
-        FnSettings::load_or_create()
+        dbg!(FnSettings::load_or_create())
     }
 
     #[no_mangle]
