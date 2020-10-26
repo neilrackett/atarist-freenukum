@@ -53,11 +53,6 @@ struct fn_environment_t {
   Uint8 initialized;
 
   /**
-   * The video flags.
-   */
-  Uint32 videoflags;
-
-  /**
    * The transparent color.
    */
   Uint32 transparent;

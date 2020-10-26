@@ -47,6 +47,17 @@ pub enum UserEvent {
     HeroLanded,
 }
 
+pub fn sdl_surface_flags(fullscreen: bool) -> u32 {
+    let init = if fullscreen {
+        transdl::ll::SDL_FULLSCREEN
+    } else {
+        0u32
+    };
+    init | transdl::ll::SDL_HWSURFACE
+        | transdl::ll::SDL_HWACCEL
+        | transdl::ll::SDL_ANYFORMAT
+}
+
 pub mod ffi {
     pub type FnHorizontalDirection = super::HorizontalDirection;
     pub type FnVerticalDirection = super::VerticalDirection;
@@ -75,5 +86,10 @@ pub mod ffi {
     #[no_mangle]
     pub extern "C" fn fn_user_event_print(e: FnUserEvent) {
         println!("{:?}", e);
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_sdl_surface_flags(fullscreen: bool) -> u32 {
+        super::sdl_surface_flags(fullscreen)
     }
 }

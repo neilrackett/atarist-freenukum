@@ -111,7 +111,6 @@ fn_environment_t * fn_environment_create()
   fn_environment_t * env = malloc(sizeof(fn_environment_t));
 
   /* fill with default values */
-  env->videoflags = FN_SURFACE_FLAGS;
   env->transparent = 0;
   env->screen = NULL;
   env->episode = 1;
@@ -119,10 +118,6 @@ fn_environment_t * fn_environment_create()
   env->hero = fn_hero_data_create();
 
   env->settings = fn_settings_load_or_create();
-
-  if (env->settings.fullscreen) {
-    env->videoflags |= SDL_FULLSCREEN;
-  }
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
     fn_error_printf(1024, "Can't initialize SDL: %s", SDL_GetError());
@@ -133,7 +128,7 @@ fn_environment_t * fn_environment_create()
       FN_WINDOW_WIDTH,
       FN_WINDOW_HEIGHT,
       FN_COLOR_DEPTH,
-      env->videoflags);
+      fn_sdl_surface_flags(env->settings.fullscreen));
   if (env->screen == NULL) {
     fn_error_printf(1024, "Can't set video mode: %s", SDL_GetError());
     return env;

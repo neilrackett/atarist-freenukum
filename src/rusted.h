@@ -865,6 +865,8 @@ void fn_messagebox_get_text_information(const char *text,
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
+uint32_t fn_sdl_surface_flags(bool fullscreen);
+
 FnSettings fn_settings_load_or_create(void);
 
 void fn_settings_save(FnSettings settings);
