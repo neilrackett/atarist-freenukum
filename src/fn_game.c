@@ -438,7 +438,12 @@ int fn_game_start_in_level(
               fn_level_data_set_do_play(lv->data, false);
               break;
             case SDLK_f:
-              fn_environment_toggle_fullscreen(env);
+              {
+                  int res = SDL_WM_ToggleFullScreen(env->screen);
+                  if (res) {
+                      fn_settings_toggle_fullscreen(&env->settings);
+                  }
+              }
               break;
             case SDLK_DOWN:
               if (event.key.keysym.mod & KMOD_SHIFT) {

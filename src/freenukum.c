@@ -126,7 +126,11 @@ int main(int argc, char ** argv)
         break;
       case MainMenuEntry_FullScreenToggle:
         {
-          fn_environment_toggle_fullscreen(env);
+        int res = SDL_WM_ToggleFullScreen(env->screen);
+        if (res) {
+            fn_settings_toggle_fullscreen(&env->settings);
+            fn_settings_save(env->settings);
+        }
         }
         break;
       case MainMenuEntry_EpisodeChange:

@@ -215,16 +215,6 @@ Uint8 fn_environment_get_fullscreen(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-void fn_environment_toggle_fullscreen(fn_environment_t * env)
-{
-  int res = SDL_WM_ToggleFullScreen(env->screen);
-  if (res) {
-    env->settings.fullscreen = (env->settings.fullscreen + 1) % 2;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
 SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env)
 {
   return env->screen;

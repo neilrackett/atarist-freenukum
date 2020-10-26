@@ -877,6 +877,8 @@ FnSettings fn_settings_load_or_create(void);
 
 void fn_settings_save(FnSettings settings);
 
+bool fn_settings_toggle_fullscreen(FnSettings *settings);
+
 void fn_shot_list_act(FnShotList *l,
                       FnHeroData *hero_data,
                       FnLevelData *level_data,

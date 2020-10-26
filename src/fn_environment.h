@@ -117,15 +117,6 @@ Uint8 fn_environment_get_fullscreen(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Toggle fullscreen in an environment.
- *
- * @param  env  The environment.
- */
-void fn_environment_toggle_fullscreen(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the screen to which the environment displays the game.
  *
  * @param  env    The environment.
