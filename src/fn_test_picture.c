@@ -64,7 +64,8 @@ int main(int argc, char ** argv)
     FnTexture * picture;
 
     screen = fn_environment_get_screen_sdl(env);
-    FnTextureCreationParams params = fn_environment_build_texture_creation_params(env);
+    FnTextureCreationParams params =
+        fn_sdl_surface_creation_params(screen);
 
     picture = fn_picture_load(file, params);
 

@@ -59,7 +59,6 @@ int main(int argc, char ** argv)
 
     file = fn_file_open(argv[1]);
 
-    SDL_Surface * screen;
     FnTexture * tile;
 
     if (SDL_Init(SDL_INIT_VIDEO) == -1)
@@ -70,7 +69,7 @@ int main(int argc, char ** argv)
 
     FnTileHeader h = fn_tileheader_load(file);
  
-    screen = fn_environment_get_screen_sdl(env);
+    SDL_Surface * screen = fn_environment_get_screen_sdl(env);
 
     FnGeometry r;
     r.x = 0;
@@ -82,7 +81,7 @@ int main(int argc, char ** argv)
     {
         tile = fn_tile_load(
             file,
-            fn_environment_build_texture_creation_params(env),
+            fn_sdl_surface_creation_params(screen),
             h,
             0);
         fn_texture_blit_to_sdl_surface(tile, NULL, screen, &r);

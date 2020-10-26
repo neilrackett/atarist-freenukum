@@ -36,24 +36,20 @@
 /* --------------------------------------------------------------- */
 
 int main(int argc, char ** argv) {
-  SDL_Surface * screen;
   fn_environment_t * env = fn_environment_create();
+  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 
-  screen = fn_environment_get_screen_sdl(env);
 
   FnMenu * menu = fn_menu_create("Testmenu\nTest\nTest");
   fn_menu_append_entry(menu, 's', "S)tart game");
   fn_menu_append_entry(menu, 'h', "H)ello");
   fn_menu_append_entry(menu, 'd', "D)emo game");
   char choice = fn_menu_get_choice(
-      menu,
-      screen,
-      tilecache,
-      fn_environment_build_texture_creation_params(env));
+      menu, screen, tilecache, texture_creation_params);
   printf("Choice: %c\n", choice);
   fn_menu_free(menu);
   SDL_FreeSurface(screen);

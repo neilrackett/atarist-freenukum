@@ -50,14 +50,11 @@ int main(int argc, char ** argv)
   fn_environment_check_for_episodes(env);
 
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(env->screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 
-  fn_borders_blit(
-          env->screen,
-          fn_environment_build_texture_creation_params(env),
-          tilecache);
+  fn_borders_blit(env->screen, texture_creation_params, tilecache);
   SDL_UpdateRect(env->screen, 0, 0, 0, 0);
 
   while (1)

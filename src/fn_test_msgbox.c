@@ -47,8 +47,9 @@ int main(int argc, char ** argv)
     char tilespath[1024];
 
     fn_environment_t * env = fn_environment_create();
+    screen = fn_environment_get_screen_sdl(env);
     FnTextureCreationParams texture_creation_params =
-        fn_environment_build_texture_creation_params(env);
+        fn_sdl_surface_creation_params(screen);
     const FnTileCache * tilecache =
         fn_tilecache_load(texture_creation_params);
 
@@ -77,12 +78,7 @@ int main(int argc, char ** argv)
 
     snprintf(tilespath, 1024, "%s%s", homedir, "/.freenukum/data/");
 
-    screen = fn_environment_get_screen_sdl(env);
-
-    msgbox = fn_messagebox(
-            msg,
-            tilecache,
-            fn_environment_build_texture_creation_params(env));
+    msgbox = fn_messagebox(msg, tilecache, texture_creation_params);
 
     fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, NULL);
     fn_texture_free(msgbox);

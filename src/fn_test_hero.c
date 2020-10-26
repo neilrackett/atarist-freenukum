@@ -71,7 +71,7 @@ int main(int argc, char ** argv)
   fn_error_set_handler(fn_error_print_commandline);
 
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(env->screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
   bool draw_collision_bounds =

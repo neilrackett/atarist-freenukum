@@ -109,32 +109,35 @@ void fn_game_start(
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   SDL_FillRect(screen, NULL, 0);
 
+  FnTextureCreationParams surface_creation_params =
+      fn_sdl_surface_creation_params(env->screen);
+
   fn_borders_blit(
           env->screen,
-          fn_environment_build_texture_creation_params(env),
+          surface_creation_params,
           tilecache);
 
   fn_borders_blit_life(
           env->screen,
-          fn_environment_build_texture_creation_params(env),
+          surface_creation_params,
           tilecache,
           fn_environment_get_health(env));
 
   fn_borders_blit_score(
           env->screen,
-          fn_environment_build_texture_creation_params(env),
+          surface_creation_params,
           tilecache,
           fn_hero_score_get(score));
 
   fn_borders_blit_firepower(
           env->screen,
-          fn_environment_build_texture_creation_params(env),
+          surface_creation_params,
           tilecache,
           firepower);
 
   fn_borders_blit_inventory(
           env->screen,
-          fn_environment_build_texture_creation_params(env),
+          fn_sdl_surface_creation_params(env->screen),
           tilecache,
           inventory);
 
@@ -149,7 +152,7 @@ void fn_game_start(
     fn_infobox_show(
         env->screen,
         tilecache,
-        fn_environment_build_texture_creation_params(env),
+        fn_sdl_surface_creation_params(env->screen),
         "Get ready FreeNukum,\nyou are going in.\n");
 
     while (success && level < 13) {
@@ -197,7 +200,7 @@ int fn_game_start_in_level(
       fn_environment_get_draw_collision_bounds(env);
 
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(env->screen);
   SDL_Surface * level = SDL_CreateRGBSurface(
       texture_creation_params.flags,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
@@ -375,7 +378,7 @@ int fn_game_start_in_level(
     }
 
     FnTextureCreationParams texture_creation_params =
-        fn_environment_build_texture_creation_params(env);
+        fn_sdl_surface_creation_params(screen);
     fn_info_message_queue_process(
             info_message_queue,
             screen,
@@ -623,7 +626,7 @@ int fn_game_start_in_level(
             case UserEvent_HeroScored:
               fn_borders_blit_score(
                   env->screen,
-                  fn_environment_build_texture_creation_params(env),
+                  texture_creation_params,
                   tilecache,
                   fn_hero_score_get(score));
               /* TODO separately update this area. */
@@ -632,7 +635,7 @@ int fn_game_start_in_level(
             case UserEvent_HeroFirepowerChanged:
               fn_borders_blit_firepower(
                   env->screen,
-                  fn_environment_build_texture_creation_params(env),
+                  texture_creation_params,
                   tilecache,
                   firepower);
               /* TODO separately update this area. */
@@ -641,7 +644,7 @@ int fn_game_start_in_level(
             case UserEvent_HeroInventoryChanged:
               fn_borders_blit_inventory(
                   env->screen,
-                  fn_environment_build_texture_creation_params(env),
+                  texture_creation_params,
                   tilecache,
                   inventory);
               /* TODO separately update this area. */
@@ -650,7 +653,7 @@ int fn_game_start_in_level(
             case UserEvent_HeroHealthChanged:
               fn_borders_blit_life(
                       env->screen,
-                      fn_environment_build_texture_creation_params(env),
+                      texture_creation_params,
                       tilecache,
                       fn_environment_get_health(env));
               /* TODO separately update this area. */

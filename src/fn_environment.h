@@ -190,9 +190,4 @@ FnHeroData * fn_environment_get_hero(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
-FnTextureCreationParams fn_environment_build_texture_creation_params(
-        fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
 #endif /* FN_ENVIRONMENT_H */

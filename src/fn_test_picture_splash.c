@@ -40,13 +40,12 @@
 int main(int argc, char ** argv)
 {
   fn_environment_t * env = fn_environment_create();
-  SDL_Surface * screen;
 
   fn_error_set_handler(fn_error_print_commandline);
 
-  screen = fn_environment_get_screen_sdl(env);
+  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 

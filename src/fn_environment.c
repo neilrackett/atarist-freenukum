@@ -281,17 +281,3 @@ FnHeroData * fn_environment_get_hero(fn_environment_t * env)
 {
   return env->hero;
 }
-
-/* --------------------------------------------------------------- */
-
-FnTextureCreationParams fn_environment_build_texture_creation_params(
-        fn_environment_t * env)
-{
-  FnTextureCreationParams params;
-  params.flags = env->screen->flags;
-  params.bits_per_pixel = env->screen->format->BitsPerPixel;
-  params.transparent = fn_sdl_surface_transparent(env->screen);
-  return params;
-}
-
-/* --------------------------------------------------------------- */

@@ -54,8 +54,6 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    fn_environment_t * env = fn_environment_create();
-
     file = fn_file_open(argv[1]);
 
     SDL_Surface * screen;
@@ -82,7 +80,7 @@ int main(int argc, char ** argv)
     fn_tileheader_load(file);
 
     drop = fn_backdrop_load(
-            file, fn_environment_build_texture_creation_params(env));
+            file, fn_sdl_surface_creation_params(screen));
 
     fn_texture_blit_to_sdl_surface(drop, NULL, screen, NULL);
     SDL_UpdateRect(screen, 0, 0, 0, 0);

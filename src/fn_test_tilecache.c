@@ -85,7 +85,6 @@ void blithex(
 
 int main(int argc, char ** argv)
 {
-  SDL_Surface * screen;
   size_t i = 0;
   size_t j = 0;
 
@@ -95,8 +94,20 @@ int main(int argc, char ** argv)
   fn_environment_t * env;
   env = fn_environment_create();
 
+  SDL_Surface * screen = SDL_SetVideoMode(
+      FN_TILE_WIDTH * (50+1),
+      FN_TILE_HEIGHT * (26+1),
+      FN_COLOR_DEPTH,
+      FN_SURFACE_FLAGS);
+
+  if (screen == NULL)
+  {
+    fprintf(stderr, "Can't set video mode: %s\n", SDL_GetError());
+    return -1;
+  }
+
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 
@@ -136,18 +147,6 @@ int main(int argc, char ** argv)
   if (SDL_Init(SDL_INIT_VIDEO) == -1)
   {
     fprintf(stderr, "Can't init SDL: %s\n", SDL_GetError());
-    return -1;
-  }
-
-  screen = SDL_SetVideoMode(
-      FN_TILE_WIDTH * (50+1),
-      FN_TILE_HEIGHT * (26+1),
-      FN_COLOR_DEPTH,
-      FN_SURFACE_FLAGS);
-
-  if (screen == NULL)
-  {
-    fprintf(stderr, "Can't set video mode: %s\n", SDL_GetError());
     return -1;
   }
 

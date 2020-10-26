@@ -79,7 +79,7 @@ int main(int argc, char ** argv)
   SDL_Surface * screen = env->screen;
 
   FnTextureCreationParams texture_creation_params =
-      fn_environment_build_texture_creation_params(env);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 
