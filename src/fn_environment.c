@@ -122,11 +122,8 @@ fn_environment_t * fn_environment_create()
     return env;
   }
 
-  env->screen = SDL_SetVideoMode(
-      FN_WINDOW_WIDTH,
-      FN_WINDOW_HEIGHT,
-      FN_COLOR_DEPTH,
-      fn_sdl_surface_flags(env->settings.fullscreen));
+  env->screen = fn_sdl_create_screen(
+          FN_WINDOW_WIDTH, FN_WINDOW_HEIGHT, env->settings.fullscreen);
   if (env->screen == NULL) {
     fn_error_printf(1024, "Can't set video mode: %s", SDL_GetError());
     return env;

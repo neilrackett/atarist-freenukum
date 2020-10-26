@@ -65,11 +65,11 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    screen = SDL_SetVideoMode(
+    bool fullscreen = false;
+    screen = fn_sdl_create_screen(
             FN_DROP_WIDTH * FN_TILE_WIDTH,
             FN_DROP_HEIGHT * FN_TILE_HEIGHT,
-            FN_COLOR_DEPTH,
-            FN_SURFACE_FLAGS);
+            fullscreen);
 
     if (screen == NULL)
     {

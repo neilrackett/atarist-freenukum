@@ -20,6 +20,12 @@ impl PixelFormat {
 }
 
 impl Surface {
+    pub fn set_video_mode(w: i32, h: i32, depth: i32, flags: u32) -> Self {
+        Surface {
+            raw: unsafe { ll::SDL_SetVideoMode(w, h, depth, flags) },
+        }
+    }
+
     pub fn create_rgb(
         flags: u32,
         width: u16,

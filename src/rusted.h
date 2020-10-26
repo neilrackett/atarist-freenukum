@@ -865,6 +865,8 @@ void fn_messagebox_get_text_information(const char *text,
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
+SDL_Surface *fn_sdl_create_screen(int32_t w, int32_t h, bool fullscreen);
+
 FnTextureCreationParams fn_sdl_surface_creation_params(SDL_Surface *surface);
 
 uint32_t fn_sdl_surface_flags(bool fullscreen);

@@ -72,6 +72,20 @@ pub fn sdl_surface_creation_params(
     }
 }
 
+pub fn sdl_create_screen(
+    w: i32,
+    h: i32,
+    fullscreen: bool,
+) -> transdl::video::Surface {
+    let depth = 0;
+    transdl::video::Surface::set_video_mode(
+        w,
+        h,
+        depth,
+        sdl_surface_flags(fullscreen),
+    )
+}
+
 pub mod ffi {
     pub type FnHorizontalDirection = super::HorizontalDirection;
     pub type FnVerticalDirection = super::VerticalDirection;
@@ -123,5 +137,15 @@ pub mod ffi {
         assert!(!surface.is_null());
         let surface = transdl::video::Surface { raw: surface };
         super::sdl_surface_creation_params(&surface)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_sdl_create_screen(
+        w: i32,
+        h: i32,
+        fullscreen: bool,
+    ) -> *mut transdl::ll::SDL_Surface {
+        let surface = super::sdl_create_screen(w, h, fullscreen);
+        surface.raw
     }
 }

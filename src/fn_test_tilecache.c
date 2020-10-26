@@ -94,11 +94,11 @@ int main(int argc, char ** argv)
   fn_environment_t * env;
   env = fn_environment_create();
 
-  SDL_Surface * screen = SDL_SetVideoMode(
+  bool fullscreen = false;
+  SDL_Surface * screen = fn_sdl_create_screen(
       FN_TILE_WIDTH * (50+1),
       FN_TILE_HEIGHT * (26+1),
-      FN_COLOR_DEPTH,
-      FN_SURFACE_FLAGS);
+      fullscreen);
 
   if (screen == NULL)
   {
