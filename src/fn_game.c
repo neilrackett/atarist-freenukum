@@ -197,8 +197,7 @@ int fn_game_start_in_level(
   int res = 0;
   int doupdate = 1;
 
-  bool draw_collision_bounds =
-      fn_environment_get_draw_collision_bounds(env);
+  bool draw_collision_bounds = env->settings.draw_collision_bounds;
 
   SDL_Surface * level = SDL_CreateRGBSurface(
       texture_creation_params.flags,
@@ -442,6 +441,7 @@ int fn_game_start_in_level(
                   int res = SDL_WM_ToggleFullScreen(env->screen);
                   if (res) {
                       fn_settings_toggle_fullscreen(&env->settings);
+                      fn_settings_save(env->settings);
                   }
               }
               break;

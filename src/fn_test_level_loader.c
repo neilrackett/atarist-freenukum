@@ -137,8 +137,7 @@ int main(int argc, char ** argv)
 
     screen = fn_environment_get_screen_sdl(env);
     FnHeroData * hero = fn_hero_data_create();
-    bool draw_collision_bounds =
-        fn_environment_get_draw_collision_bounds(env);
+    bool draw_collision_bounds = env->settings.draw_collision_bounds;
 
     lv = fn_level_load(
             file, hero, tilecache, texture_creation_params);

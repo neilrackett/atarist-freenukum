@@ -230,14 +230,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_get_draw_collision_bounds(
-    fn_environment_t * env)
-{
-  return env->settings.draw_collision_bounds;
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_environment_store_settings(fn_environment_t * env)
 {
   fn_settings_save(env->settings);

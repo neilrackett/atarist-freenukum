@@ -138,14 +138,6 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-/**
- * Get the information if collision bounds should be draws.
- */
-Uint8 fn_environment_get_draw_collision_bounds(
-    fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
 void fn_environment_store_settings(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

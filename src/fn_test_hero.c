@@ -74,8 +74,7 @@ int main(int argc, char ** argv)
       fn_sdl_surface_creation_params(env->screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
-  bool draw_collision_bounds =
-      fn_environment_get_draw_collision_bounds(env);
+  bool draw_collision_bounds = env->settings.draw_collision_bounds;
 
   /* here comes the hero!!!!! */
   hero = fn_hero_data_create();
