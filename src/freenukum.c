@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
     exit(retval);
   }
 
-  FnHeroData * hero_data = env->hero;
+  FnHeroData * hero_data = fn_hero_data_create();
 
   SDL_Surface * screen = env->screen;
 
@@ -183,6 +183,7 @@ int main(int argc, char ** argv)
   retval = 0;
 
   fn_environment_delete(env);
+  fn_hero_data_free(hero_data); hero_data = NULL;
 
   return retval;
 }

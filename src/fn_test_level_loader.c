@@ -136,7 +136,7 @@ int main(int argc, char ** argv)
     }
 
     screen = fn_environment_get_screen_sdl(env);
-    FnHeroData * hero = env->hero;
+    FnHeroData * hero = fn_hero_data_create();
     bool draw_collision_bounds =
         fn_environment_get_draw_collision_bounds(env);
 
@@ -274,6 +274,7 @@ int main(int argc, char ** argv)
     }
 
     fn_level_free(lv);
+    fn_hero_data_free(hero);
 
     return 0;
 }

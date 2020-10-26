@@ -71,11 +71,6 @@ struct fn_environment_t {
    * The number of episodes available.
    */
   Uint8 num_episodes;
-
-  /**
-   * The hero.
-   */
-  FnHeroData * hero;
 };
 
 /* --------------------------------------------------------------- */

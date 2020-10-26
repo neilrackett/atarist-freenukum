@@ -114,7 +114,6 @@ fn_environment_t * fn_environment_create()
   env->screen = NULL;
   env->episode = 1;
   env->num_episodes = 0;
-  env->hero = fn_hero_data_create();
 
   env->settings = fn_settings_load_or_create();
 
@@ -145,9 +144,6 @@ void fn_environment_delete(fn_environment_t * env)
 {
   if (env->screen != NULL) {
     SDL_FreeSurface(env->screen); env->screen = NULL;
-  }
-  if (env->hero != NULL) {
-    fn_hero_data_free(env->hero); env->hero = NULL;
   }
 
   free(env);
