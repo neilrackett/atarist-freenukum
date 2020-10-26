@@ -208,13 +208,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint8 fn_environment_get_fullscreen(fn_environment_t * env)
-{
-  return env->settings.fullscreen;
-}
-
-/* --------------------------------------------------------------- */
-
 SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env)
 {
   return env->screen;

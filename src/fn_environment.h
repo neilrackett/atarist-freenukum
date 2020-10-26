@@ -106,17 +106,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Get the information if the environment is in fullscreen mode.
- *
- * @param  env  The environment.
- *
- * @return  1 if the game is in fullscreen mode, 0 if windowed.
- */
-Uint8 fn_environment_get_fullscreen(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the screen to which the environment displays the game.
  *
  * @param  env    The environment.
