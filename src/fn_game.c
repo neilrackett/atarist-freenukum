@@ -159,7 +159,7 @@ void fn_game_start(
     while (success && level < 13) {
       if (interlevel) {
         /* interlevel */
-        success = fn_game_start_in_level(2, tilecache,
+        success = fn_game_start_in_level(2, tilecache, hero_data,
             env);
         level++;
         if (level == 2) {
@@ -168,7 +168,7 @@ void fn_game_start(
         interlevel = 0;
       } else {
         /* real level */
-        success = fn_game_start_in_level(level, tilecache,
+        success = fn_game_start_in_level(level, tilecache, hero_data,
             env);
         interlevel = 1;
       }
@@ -185,6 +185,7 @@ void fn_game_start(
 int fn_game_start_in_level(
     int levelnumber,
     const FnTileCache * tilecache,
+    FnHeroData * hero,
     fn_environment_t * env)
 {
   int returnvalue = 0;
@@ -196,7 +197,6 @@ int fn_game_start_in_level(
   int res = 0;
   int doupdate = 1;
 
-  FnHeroData * hero = fn_environment_get_hero(env);
   bool draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(env);
 

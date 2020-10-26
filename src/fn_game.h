@@ -64,6 +64,7 @@ void fn_game_start(
 int fn_game_start_in_level(
     int levelnumber,
     const FnTileCache * tilecache,
+    FnHeroData * hero,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

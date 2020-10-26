@@ -175,8 +175,4 @@ void fn_environment_store_settings(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 
-FnHeroData * fn_environment_get_hero(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
 #endif /* FN_ENVIRONMENT_H */

@@ -266,10 +266,3 @@ void fn_environment_store_settings(fn_environment_t * env)
 {
   fn_settings_save(env->settings);
 }
-
-/* --------------------------------------------------------------- */
-
-FnHeroData * fn_environment_get_hero(fn_environment_t * env)
-{
-  return env->hero;
-}

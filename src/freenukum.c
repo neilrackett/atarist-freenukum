@@ -74,7 +74,7 @@ int main(int argc, char ** argv)
     exit(retval);
   }
 
-  FnHeroData * hero_data = fn_environment_get_hero(env);
+  FnHeroData * hero_data = env->hero;
 
   SDL_Surface * screen = env->screen;
 
