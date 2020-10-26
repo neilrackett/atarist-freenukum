@@ -48,6 +48,7 @@ void fn_game_start(
     const FnTileCache * tilecache,
     FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
+    SDL_Surface * target,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
@@ -65,6 +66,8 @@ int fn_game_start_in_level(
     int levelnumber,
     const FnTileCache * tilecache,
     FnHeroData * hero,
+    FnTextureCreationParams texture_creation_params,
+    SDL_Surface * target,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

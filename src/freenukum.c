@@ -104,6 +104,7 @@ int main(int argc, char ** argv)
             tilecache,
             hero_data,
             texture_creation_params,
+            screen,
             env);
         res = fn_picture_splash_show(
             tilecache,

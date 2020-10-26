@@ -61,6 +61,7 @@ void fn_game_start(
     const FnTileCache * tilecache,
     FnHeroData * hero_data,
     FnTextureCreationParams texture_creation_params,
+    SDL_Surface * target,
     fn_environment_t * env)
 {
   /* Initialize Random Number Generator. */
@@ -107,42 +108,39 @@ void fn_game_start(
   FnHeroScore * score = fn_hero_data_get_score(hero_data);
   FnHeroHealth * health = fn_hero_data_get_health(hero_data);
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  SDL_FillRect(screen, NULL, 0);
+  SDL_FillRect(target, NULL, 0);
 
   FnTextureCreationParams surface_creation_params =
-      fn_sdl_surface_creation_params(env->screen);
+      fn_sdl_surface_creation_params(target);
 
   fn_borders_blit(
-          env->screen,
-          surface_creation_params,
-          tilecache);
+          target, surface_creation_params, tilecache);
 
   fn_borders_blit_life(
-          env->screen,
+          target,
           surface_creation_params,
           tilecache,
           fn_hero_health_get(health));
 
   fn_borders_blit_score(
-          env->screen,
+          target,
           surface_creation_params,
           tilecache,
           fn_hero_score_get(score));
 
   fn_borders_blit_firepower(
-          env->screen,
+          target,
           surface_creation_params,
           tilecache,
           firepower);
 
   fn_borders_blit_inventory(
-          env->screen,
-          fn_sdl_surface_creation_params(env->screen),
+          target,
+          surface_creation_params,
           tilecache,
           inventory);
 
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  SDL_UpdateRect(target, 0, 0, 0, 0);
 
   { /* start the game itself */
 
@@ -151,16 +149,16 @@ void fn_game_start(
     int success = 1;
 
     fn_infobox_show(
-        env->screen,
+        target,
         tilecache,
-        fn_sdl_surface_creation_params(env->screen),
+        surface_creation_params,
         "Get ready FreeNukum,\nyou are going in.\n");
 
     while (success && level < 13) {
       if (interlevel) {
         /* interlevel */
-        success = fn_game_start_in_level(2, tilecache, hero_data,
-            env);
+        success = fn_game_start_in_level(
+                2, tilecache, hero_data, texture_creation_params, target, env);
         level++;
         if (level == 2) {
           level++;
@@ -168,8 +166,8 @@ void fn_game_start(
         interlevel = 0;
       } else {
         /* real level */
-        success = fn_game_start_in_level(level, tilecache, hero_data,
-            env);
+        success = fn_game_start_in_level(
+                level, tilecache, hero_data, texture_creation_params, target, env);
         interlevel = 1;
       }
     }
@@ -186,6 +184,8 @@ int fn_game_start_in_level(
     int levelnumber,
     const FnTileCache * tilecache,
     FnHeroData * hero,
+    FnTextureCreationParams texture_creation_params,
+    SDL_Surface * target,
     fn_environment_t * env)
 {
   int returnvalue = 0;
@@ -200,8 +200,6 @@ int fn_game_start_in_level(
   bool draw_collision_bounds =
       fn_environment_get_draw_collision_bounds(env);
 
-  FnTextureCreationParams texture_creation_params =
-      fn_sdl_surface_creation_params(env->screen);
   SDL_Surface * level = SDL_CreateRGBSurface(
       texture_creation_params.flags,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
@@ -333,9 +331,6 @@ int fn_game_start_in_level(
 
   int updateWholeScreen = 1;
 
-  SDL_Surface * screen =
-    fn_environment_get_screen_sdl(env);
-
   FnLevelActorQueue * actor_queue = fn_level_actor_queue_create();
 
   FnInfoMessageQueue * info_message_queue =
@@ -347,7 +342,6 @@ int fn_game_start_in_level(
   while (fn_level_keep_on_playing(lv))
   {
     if (doupdate) {
-      SDL_Surface * screen = fn_environment_get_screen_sdl(env);
       SDL_Rect srect = fn_geometry_as_sdl_rect(&srcrect);
       fn_level_blit_to_surface(
           lv,
@@ -364,12 +358,12 @@ int fn_game_start_in_level(
       // parameter, it doesn't work properly. I don't care to investigate,
       // because in the end, it will all be replaced by rust code, so I
       // simply cast for now to get rid of the warning.
-      SDL_BlitSurface(level, &srect, screen, (SDL_Rect*)(&dstrect));
+      SDL_BlitSurface(level, &srect, target, (SDL_Rect*)(&dstrect));
       if (updateWholeScreen) {
-        SDL_UpdateRect(screen, 0, 0, 0, 0);
+        SDL_UpdateRect(target, 0, 0, 0, 0);
         updateWholeScreen = 0;
       } else {
-        SDL_UpdateRect(screen,
+        SDL_UpdateRect(target,
             dstrect.x,
             dstrect.y,
             dstrect.w,
@@ -378,11 +372,9 @@ int fn_game_start_in_level(
       doupdate = 0;
     }
 
-    FnTextureCreationParams texture_creation_params =
-        fn_sdl_surface_creation_params(screen);
     fn_info_message_queue_process(
             info_message_queue,
-            screen,
+            target,
             tilecache,
             texture_creation_params);
 
@@ -593,7 +585,7 @@ int fn_game_start_in_level(
               break;
           }
         case SDL_VIDEOEXPOSE:
-          SDL_UpdateRect(screen, 0, 0, 0, 0);
+          SDL_UpdateRect(target, 0, 0, 0, 0);
           break;
         case SDL_USEREVENT:
           switch(event.user.code) {
