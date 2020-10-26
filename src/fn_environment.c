@@ -227,10 +227,3 @@ void fn_environment_set_episode(fn_environment_t * env,
 {
   env->episode = episode;
 }
-
-/* --------------------------------------------------------------- */
-
-void fn_environment_store_settings(fn_environment_t * env)
-{
-  fn_settings_save(env->settings);
-}

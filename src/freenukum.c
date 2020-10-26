@@ -183,8 +183,6 @@ int main(int argc, char ** argv)
     }
   }
 
-  fn_environment_store_settings(env);
-
   retval = 0;
 
   fn_environment_delete(env);

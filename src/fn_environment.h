@@ -138,8 +138,4 @@ void fn_environment_set_episode(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-void fn_environment_store_settings(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
 #endif /* FN_ENVIRONMENT_H */
