@@ -58,6 +58,10 @@ pub fn sdl_surface_flags(fullscreen: bool) -> u32 {
         | transdl::ll::SDL_ANYFORMAT
 }
 
+pub fn sdl_surface_transparent(surface: &transdl::video::Surface) -> u32 {
+    transdl::video::map_rgb(&surface.format(), 100, 1, 1)
+}
+
 pub mod ffi {
     pub type FnHorizontalDirection = super::HorizontalDirection;
     pub type FnVerticalDirection = super::VerticalDirection;
@@ -91,5 +95,14 @@ pub mod ffi {
     #[no_mangle]
     pub extern "C" fn fn_sdl_surface_flags(fullscreen: bool) -> u32 {
         super::sdl_surface_flags(fullscreen)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_sdl_surface_transparent(
+        surface: *mut transdl::ll::SDL_Surface,
+    ) -> u32 {
+        assert!(!surface.is_null());
+        let surface = transdl::video::Surface { raw: surface };
+        super::sdl_surface_transparent(&surface)
     }
 }

@@ -867,6 +867,8 @@ FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
 uint32_t fn_sdl_surface_flags(bool fullscreen);
 
+uint32_t fn_sdl_surface_transparent(SDL_Surface *surface);
+
 FnSettings fn_settings_load_or_create(void);
 
 void fn_settings_save(FnSettings settings);

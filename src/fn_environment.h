@@ -53,11 +53,6 @@ struct fn_environment_t {
   Uint8 initialized;
 
   /**
-   * The transparent color.
-   */
-  Uint32 transparent;
-
-  /**
    * The game settings.
    */
   FnSettings settings;
@@ -132,17 +127,6 @@ Uint8 fn_environment_get_fullscreen(fn_environment_t * env);
  * @param  env  The environment.
  */
 void fn_environment_toggle_fullscreen(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the transparent color of an environment.
- *
- * @param  env  The environment.
- *
- * @return The transparent color.
- */
-Uint32 fn_environment_get_transparent(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

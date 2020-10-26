@@ -111,7 +111,6 @@ fn_environment_t * fn_environment_create()
   fn_environment_t * env = malloc(sizeof(fn_environment_t));
 
   /* fill with default values */
-  env->transparent = 0;
   env->screen = NULL;
   env->episode = 1;
   env->num_episodes = 0;
@@ -133,8 +132,6 @@ fn_environment_t * fn_environment_create()
     fn_error_printf(1024, "Can't set video mode: %s", SDL_GetError());
     return env;
   }
-
-  env->transparent = SDL_MapRGB(env->screen->format, 100, 1, 1);
 
   SDL_WM_SetCaption("Freenukum " VERSION, "Freenukum " VERSION);
 
@@ -235,13 +232,6 @@ void fn_environment_toggle_fullscreen(fn_environment_t * env)
 
 /* --------------------------------------------------------------- */
 
-Uint32 fn_environment_get_transparent(fn_environment_t * env)
-{
-  return env->transparent;
-}
-
-/* --------------------------------------------------------------- */
-
 SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env)
 {
   return env->screen;
@@ -300,7 +290,7 @@ FnTextureCreationParams fn_environment_build_texture_creation_params(
   FnTextureCreationParams params;
   params.flags = env->screen->flags;
   params.bits_per_pixel = env->screen->format->BitsPerPixel;
-  params.transparent = env->transparent;
+  params.transparent = fn_sdl_surface_transparent(env->screen);
   return params;
 }
 
