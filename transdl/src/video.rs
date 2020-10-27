@@ -4,6 +4,7 @@ pub use ll::SDL_Color as Color;
 pub use ll::SDL_Rect as Rect;
 
 #[repr(transparent)]
+#[derive(Debug)]
 pub struct Surface {
     pub raw: *mut ll::SDL_Surface,
 }

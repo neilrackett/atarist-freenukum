@@ -116,7 +116,7 @@ pub mod ffi {
     pub extern "C" fn fn_tilecache_load(
         params: FnTextureCreationParams,
     ) -> *mut FnTileCache {
-        let path = super::super::data::path();
+        let path = super::super::data::original_data_dir();
         match FnTileCache::load_from_path(&path, params) {
             Ok(tc) => Box::into_raw(Box::new(tc)),
             Err(e) => {

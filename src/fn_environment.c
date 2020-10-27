@@ -112,8 +112,7 @@ fn_environment_t * fn_environment_create(bool fullscreen)
 
   /* fill with default values */
   env->screen = NULL;
-  env->episode = 1;
-  env->num_episodes = 0;
+  env->episodes = NULL;
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
     fn_error_printf(1024, "Can't initialize SDL: %s", SDL_GetError());
@@ -137,6 +136,9 @@ fn_environment_t * fn_environment_create(bool fullscreen)
 
 void fn_environment_delete(fn_environment_t * env)
 {
+  if (env->episodes != NULL) {
+    fn_episodes_free(env->episodes); env->episodes = NULL;
+  }
   if (env->screen != NULL) {
     SDL_FreeSurface(env->screen); env->screen = NULL;
   }
@@ -148,9 +150,9 @@ void fn_environment_delete(fn_environment_t * env)
 
 Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
 {
-  env->num_episodes = fn_data_count_installed_episodes();
+  env->episodes = fn_episodes_find_installed();
 
-  if (env->num_episodes == 0) {
+  if (fn_episodes_count(env->episodes) == 0) {
       /* we found no episodes */
       char * message =
           "Could not load data level and graphics files.\n"
@@ -201,7 +203,7 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
       }
   }
 
-  return env->num_episodes;
+  return fn_episodes_count(env->episodes);
 }
 
 /* --------------------------------------------------------------- */
@@ -215,13 +217,9 @@ SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env)
 
 Uint8 fn_environment_get_episode(fn_environment_t * env)
 {
-  return env->episode;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_environment_set_episode(fn_environment_t * env,
-    Uint8 episode)
-{
-  env->episode = episode;
+  if (env->episodes != NULL) {
+      return fn_episodes_current(env->episodes) + 1;
+  } else {
+      return 0;
+  }
 }

@@ -13,9 +13,9 @@ fn show(
 ) {
     let messagebox = messagebox(text, tilecache, texture_creation_params);
     let destrect = Geometry {
-        x: (screen.width() as usize - messagebox.width() as usize) as i16
+        x: (screen.width() as isize - messagebox.width() as isize) as i16
             / 2,
-        y: (screen.height() as usize - messagebox.height() as usize)
+        y: (screen.height() as isize - messagebox.height() as isize)
             as i16
             / 2,
         w: messagebox.width(),

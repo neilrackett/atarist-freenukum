@@ -1,6 +1,7 @@
 use crate::Geometry;
 use transdl::video::{map_rgb, Rect, Surface};
 
+#[derive(Debug)]
 pub struct Texture {
     w: u16,
     h: u16,

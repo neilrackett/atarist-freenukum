@@ -276,6 +276,8 @@ typedef struct ActorMessageQueue ActorMessageQueue;
 
 typedef struct ActorQueue ActorQueue;
 
+typedef struct Episodes Episodes;
+
 typedef struct FetchedLetterState FetchedLetterState;
 
 typedef struct File File;
@@ -327,6 +329,8 @@ typedef TileCache FnTileCache;
 typedef Firepower FnHeroFirepower;
 
 typedef Inventory FnHeroInventory;
+
+typedef Episodes FnEpisodes;
 
 typedef struct {
     int16_t x;
@@ -456,8 +460,6 @@ void fn_borders_blit_score(SDL_Surface *screen,
                            const FnTileCache *tilecache,
                            uintptr_t score);
 
-uintptr_t fn_data_count_installed_episodes(void);
-
 void fn_data_display_text(SDL_Surface *target,
                           int16_t x,
                           int16_t y,
@@ -465,6 +467,16 @@ void fn_data_display_text(SDL_Surface *target,
                           const char *message);
 
 FnFile *fn_data_open_file(const char *filename);
+
+uintptr_t fn_episodes_count(const FnEpisodes *episodes);
+
+uintptr_t fn_episodes_current(const FnEpisodes *episodes);
+
+FnEpisodes *fn_episodes_find_installed(void);
+
+void fn_episodes_free(FnEpisodes *ptr);
+
+uintptr_t fn_episodes_switch(FnEpisodes *episodes);
 
 void fn_file_free(FnFile *ptr);
 

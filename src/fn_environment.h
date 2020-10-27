@@ -58,14 +58,9 @@ struct fn_environment_t {
   SDL_Surface * screen;
 
   /**
-   * The episode number.
+   * The episodes.
    */
-  Uint8 episode;
-
-  /**
-   * The number of episodes available.
-   */
-  Uint8 num_episodes;
+  FnEpisodes * episodes;
 };
 
 /* --------------------------------------------------------------- */
@@ -119,17 +114,6 @@ SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env);
  * @return  The number of the episode.
  */
 Uint8 fn_environment_get_episode(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Switch the environment to an episode.
- *
- * @param  env      The environment.
- * @param  episode  The episode number.
- */
-void fn_environment_set_episode(fn_environment_t * env,
-    Uint8 episode);
 
 /* --------------------------------------------------------------- */
 

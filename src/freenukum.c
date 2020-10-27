@@ -137,26 +137,25 @@ int main(int argc, char ** argv)
         break;
       case MainMenuEntry_EpisodeChange:
         {
-          Uint8 episode = fn_environment_get_episode(env);
-          episode++;
-          if (episode > 3) {
-            episode = 1;
-          }
+          Uint8 old = fn_episodes_current(env->episodes);
+          Uint8 new = fn_episodes_switch(env->episodes);
+          Uint8 episode = new + 1;
+
           snprintf(backgroundfile,
               7, "dn.dn%d", episode);
-          res = fn_picture_splash_show(
-                  tilecache, texture_creation_params, env, backgroundfile);
-          if (res == 0) {
+          if (old == new) {
             fn_infobox_show(screen, tilecache, texture_creation_params,
-                "You don't have this episode installed.\n"
-                "We stay in episode 1\n");
-            episode = 1;
+                "You don't have another\n"
+                "episode installed.\n"
+                "\n"
+                "We stay in this episode\n");
             snprintf(backgroundfile,
                 7, "dn.dn%d", episode);
             res = fn_picture_splash_show(
                     tilecache, texture_creation_params, env, backgroundfile);
           } else {
-            fn_environment_set_episode(env, episode);
+            res = fn_picture_splash_show(
+                    tilecache, texture_creation_params, env, backgroundfile);
           }
         }
         break;

@@ -1,7 +1,7 @@
 use crate::data_dir;
 use std::path::PathBuf;
 
-fn required_file_names() -> Vec<&'static str> {
+pub fn required_file_names() -> Vec<&'static str> {
     vec![
         "anim0", "anim1", "anim2", "anim3", "anim4", "anim5", "back0",
         "back1", "back2", "back3", "badguy", "border", "credits", "dn",
@@ -14,32 +14,7 @@ fn required_file_names() -> Vec<&'static str> {
     ]
 }
 
-fn is_episode_installed(number: usize) -> bool {
-    let data_path = path();
-    for f in required_file_names() {
-        let f = format!("{}.dn{}", f, number);
-        let file_path = data_path.join(f);
-        match std::fs::File::open(file_path) {
-            Ok(_) => {}
-            Err(_) => {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-pub fn count_installed_episodes() -> usize {
-    let mut episode_count = 0;
-    for i in 0..3 {
-        if is_episode_installed(i) {
-            episode_count = i + 1;
-        }
-    }
-    episode_count
-}
-
-pub fn path() -> PathBuf {
+pub fn original_data_dir() -> PathBuf {
     data_dir().join("data").join("original")
 }
 
@@ -52,11 +27,6 @@ pub mod ffi {
     };
 
     use super::super::file::ffi::FnFile;
-
-    #[no_mangle]
-    pub extern "C" fn fn_data_count_installed_episodes() -> usize {
-        super::count_installed_episodes()
-    }
 
     #[no_mangle]
     pub extern "C" fn fn_data_display_text(
@@ -117,7 +87,7 @@ pub mod ffi {
         let filename =
             unsafe { CStr::from_ptr(filename) }.to_str().unwrap();
 
-        let data_path = super::path();
+        let data_path = super::original_data_dir();
         Box::into_raw(Box::new(
             FnFile::open(&format!(
                 "{}/{}",
