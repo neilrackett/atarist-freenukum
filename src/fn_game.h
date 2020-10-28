@@ -32,10 +32,12 @@
 /* --------------------------------------------------------------- */
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
+#include "fn.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -50,8 +52,7 @@ void fn_game_start(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
-    size_t episode,
-    fn_environment_t * env);
+    size_t episode);
 
 /* --------------------------------------------------------------- */
 
@@ -71,8 +72,7 @@ int fn_game_start_in_level(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
-    size_t episode,
-    fn_environment_t * env);
+    size_t episode);
 
 /* --------------------------------------------------------------- */
 

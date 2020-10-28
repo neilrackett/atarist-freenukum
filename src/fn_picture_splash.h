@@ -32,10 +32,11 @@
 /* --------------------------------------------------------------- */
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -54,7 +55,7 @@
 int fn_picture_splash_show(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
-    fn_environment_t * env,
+    SDL_Surface * target,
     char * filename);
 
 /* --------------------------------------------------------------- */
@@ -79,7 +80,7 @@ int fn_picture_splash_show(
 int fn_picture_splash_show_with_message(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
-    fn_environment_t * env,
+    SDL_Surface * target,
     char * filename,
     char * message,
     Uint8 x,

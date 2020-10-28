@@ -49,17 +49,6 @@ pub enum UserEvent {
     HeroLanded,
 }
 
-pub fn sdl_surface_flags(fullscreen: bool) -> u32 {
-    let init = if fullscreen {
-        transdl::ll::SDL_FULLSCREEN
-    } else {
-        0u32
-    };
-    init | transdl::ll::SDL_HWSURFACE
-        | transdl::ll::SDL_HWACCEL
-        | transdl::ll::SDL_ANYFORMAT
-}
-
 pub fn sdl_surface_transparent(surface: &transdl::video::Surface) -> u32 {
     transdl::video::map_rgb(&surface.format(), 100, 1, 1)
 }
@@ -72,20 +61,6 @@ pub fn sdl_surface_creation_params(
         bits_per_pixel: surface.format().bits_per_pixel(),
         transparent: sdl_surface_transparent(surface),
     }
-}
-
-pub fn sdl_create_screen(
-    w: i32,
-    h: i32,
-    fullscreen: bool,
-) -> transdl::video::Surface {
-    let depth = 0;
-    transdl::video::Surface::set_video_mode(
-        w,
-        h,
-        depth,
-        sdl_surface_flags(fullscreen),
-    )
 }
 
 pub mod ffi {
@@ -119,11 +94,6 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_sdl_surface_flags(fullscreen: bool) -> u32 {
-        super::sdl_surface_flags(fullscreen)
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_sdl_surface_transparent(
         surface: *mut transdl::ll::SDL_Surface,
     ) -> u32 {
@@ -139,15 +109,5 @@ pub mod ffi {
         assert!(!surface.is_null());
         let surface = transdl::video::Surface { raw: surface };
         super::sdl_surface_creation_params(&surface)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_sdl_create_screen(
-        w: i32,
-        h: i32,
-        fullscreen: bool,
-    ) -> *mut transdl::ll::SDL_Surface {
-        let surface = super::sdl_create_screen(w, h, fullscreen);
-        surface.raw
     }
 }

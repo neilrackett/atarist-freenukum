@@ -31,26 +31,30 @@
 
 /* --------------------------------------------------------------- */
 
+#include "config.h"
+#include "fn.h"
 #include "rusted.h"
-#include "fn_environment.h"
 
 /* --------------------------------------------------------------- */
 
 int main(int argc, char ** argv) {
-  SDL_Surface * screen;
-
   FnSettings settings = fn_settings_load_or_create();
-  if (!fn_game_initialize_sdl()) {
+  SDL_Surface * screen = fn_game_initialize_and_get_window(
+          FN_WINDOW_WIDTH,
+          FN_WINDOW_HEIGHT,
+          settings.fullscreen,
+          "Freenukum " VERSION,
+          "Freenukum " VERSION
+          );
+
+  if (!screen) {
       return 1;
   }
-  fn_environment_t * env = fn_environment_create(settings.fullscreen);
   FnTextureCreationParams texture_creation_params =
-      fn_sdl_surface_creation_params(env->screen);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
   
-  screen = fn_environment_get_screen_sdl(env);
-
   char answer[30] = "";
   FnInputBoxAnswer entered =
     fn_inputbox_show(

@@ -34,7 +34,6 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
 #include "fn_game.h"
 #include "fn_picture_splash.h"
 #include "fn_level.h"
@@ -63,8 +62,7 @@ void fn_game_start(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
-    size_t episode,
-    fn_environment_t * env)
+    size_t episode)
 {
   /* Initialize Random Number Generator. */
   srand(time(NULL));
@@ -87,7 +85,7 @@ void fn_game_start(
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
-      env,
+      target,
       filename,
       msg1,
       0,
@@ -98,7 +96,7 @@ void fn_game_start(
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
-      env,
+      target,
       filename,
       msg2,
       79,
@@ -166,8 +164,7 @@ void fn_game_start(
                 texture_creation_params,
                 target,
                 settings,
-                episode,
-                env);
+                episode);
         level++;
         if (level == 2) {
           level++;
@@ -182,8 +179,7 @@ void fn_game_start(
                 texture_creation_params,
                 target,
                 settings,
-                episode,
-                env);
+                episode);
         interlevel = 1;
       }
     }
@@ -203,8 +199,7 @@ int fn_game_start_in_level(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
-    size_t episode,
-    fn_environment_t * env)
+    size_t episode)
 {
   int returnvalue = 0;
   FnFile * file = NULL;
@@ -454,7 +449,7 @@ int fn_game_start_in_level(
               break;
             case SDLK_f:
               {
-                  int res = SDL_WM_ToggleFullScreen(env->screen);
+                  int res = SDL_WM_ToggleFullScreen(target);
                   if (res) {
                       fn_settings_toggle_fullscreen(settings);
                       fn_settings_save(*settings);
@@ -640,7 +635,7 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroScored:
               fn_borders_blit_score(
-                  env->screen,
+                  target,
                   texture_creation_params,
                   tilecache,
                   fn_hero_score_get(score));
@@ -649,7 +644,7 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroFirepowerChanged:
               fn_borders_blit_firepower(
-                  env->screen,
+                  target,
                   texture_creation_params,
                   tilecache,
                   firepower);
@@ -658,7 +653,7 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroInventoryChanged:
               fn_borders_blit_inventory(
-                  env->screen,
+                  target,
                   texture_creation_params,
                   tilecache,
                   inventory);
@@ -667,7 +662,7 @@ int fn_game_start_in_level(
               break;
             case UserEvent_HeroHealthChanged:
               fn_borders_blit_life(
-                      env->screen,
+                      target,
                       texture_creation_params,
                       tilecache,
                       fn_hero_health_get(health));

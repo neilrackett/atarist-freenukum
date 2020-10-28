@@ -26,14 +26,16 @@
  *
  *******************************************************************/
 
+#include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 /* --------------------------------------------------------------- */
 
+#include "config.h"
 #include "fn.h"
-#include "fn_environment.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -56,7 +58,6 @@ int main(int argc, char ** argv)
 
     file = fn_file_open(argv[1]);
 
-    SDL_Surface * screen;
     FnTexture * drop;
 
     if (SDL_Init(SDL_INIT_VIDEO) == -1)
@@ -66,15 +67,15 @@ int main(int argc, char ** argv)
     }
 
     FnSettings settings = fn_settings_load_or_create();
-    screen = fn_sdl_create_screen(
+    SDL_Surface * screen = fn_game_initialize_and_get_window(
             FN_DROP_WIDTH * FN_TILE_WIDTH,
             FN_DROP_HEIGHT * FN_TILE_HEIGHT,
-            settings.fullscreen);
-
-    if (screen == NULL)
-    {
-        fprintf(stderr, "Can't set video mode: %s\n", SDL_GetError());
-        return -1;
+            settings.fullscreen,
+            "Freenukum " VERSION,
+            "Freenukum " VERSION
+            );
+    if (!screen) {
+        return 1;
     }
 
     fn_tileheader_load(file);

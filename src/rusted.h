@@ -486,7 +486,11 @@ void fn_file_read(FnFile *ptr, void *buffer, size_t length);
 
 FnEpisodes *fn_game_check_episodes(SDL_Surface *target);
 
-bool fn_game_initialize_sdl(void);
+SDL_Surface *fn_game_initialize_and_get_window(int32_t width,
+                                               int32_t height,
+                                               bool fullscreen,
+                                               const char *title,
+                                               const char *icon);
 
 void fn_game_show_missing_data_information(SDL_Surface *target);
 
@@ -883,11 +887,7 @@ void fn_messagebox_get_text_information(const char *text,
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
-SDL_Surface *fn_sdl_create_screen(int32_t w, int32_t h, bool fullscreen);
-
 FnTextureCreationParams fn_sdl_surface_creation_params(SDL_Surface *surface);
-
-uint32_t fn_sdl_surface_flags(bool fullscreen);
 
 uint32_t fn_sdl_surface_transparent(SDL_Surface *surface);
 

@@ -27,13 +27,14 @@
  *******************************************************************/
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 
 /* --------------------------------------------------------------- */
 
+#include "config.h"
 #include "fn.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
-#include "fn_environment.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -59,10 +60,16 @@ int main(int argc, char ** argv)
 {
   FnSettings settings = fn_settings_load_or_create();
 
-  if (!fn_game_initialize_sdl()) {
+  SDL_Surface * screen = fn_game_initialize_and_get_window(
+          FN_WINDOW_WIDTH,
+          FN_WINDOW_HEIGHT,
+          settings.fullscreen,
+          "Freenukum " VERSION,
+          "Freenukum " VERSION
+          );
+  if (!screen) {
       return 1;
   }
-  fn_environment_t * env = fn_environment_create(settings.fullscreen);
   FnHeroData * hero;
 
   int res;
@@ -76,14 +83,13 @@ int main(int argc, char ** argv)
   fn_error_set_handler(fn_error_print_commandline);
 
   FnTextureCreationParams texture_creation_params =
-      fn_sdl_surface_creation_params(env->screen);
+      fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
   bool draw_collision_bounds = settings.draw_collision_bounds;
 
   /* here comes the hero!!!!! */
   hero = fn_hero_data_create();
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   fn_hero_data_blit(
           hero, screen, tilecache, NULL, draw_collision_bounds);
   SDL_UpdateRect(screen, 0, 0, 0, 0);
@@ -157,6 +163,7 @@ int main(int argc, char ** argv)
     }
   }
 
+  SDL_FreeSurface(screen);
   SDL_RemoveTimer(timer);
 
   return 0;

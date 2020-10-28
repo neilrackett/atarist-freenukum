@@ -31,18 +31,25 @@
 
 /* --------------------------------------------------------------- */
 
-#include "fn_environment.h"
+#include "config.h"
+#include "fn.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
 int main(int argc, char ** argv) {
   FnSettings settings = fn_settings_load_or_create();
-  if (!fn_game_initialize_sdl()) {
+
+  SDL_Surface * screen = fn_game_initialize_and_get_window(
+          FN_WINDOW_WIDTH,
+          FN_WINDOW_HEIGHT,
+          settings.fullscreen,
+          "Freenukum " VERSION,
+          "Freenukum " VERSION
+          );
+  if (screen) {
       return 1;
   }
-  fn_environment_t * env = fn_environment_create(settings.fullscreen);
-
-  SDL_Surface * screen = env->screen;
 
   FnTextureCreationParams texture_creation_params =
       fn_sdl_surface_creation_params(screen);
@@ -65,6 +72,7 @@ int main(int argc, char ** argv) {
       texture_creation_params,
       "now\nwith\neven\nmore\nlines.\n");
   
+  SDL_FreeSurface(screen);
   return 0;
 }
 

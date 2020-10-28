@@ -47,13 +47,13 @@
 int fn_picture_splash_show(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
-    fn_environment_t * env,
+    SDL_Surface * target,
     char * filename)
 {
   return fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
-      env,
+      target,
       filename,
       NULL,
       0,0);
@@ -64,7 +64,7 @@ int fn_picture_splash_show(
 int fn_picture_splash_show_with_message(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
-    fn_environment_t * env,
+    SDL_Surface * target,
     char * filename,
     char * msg,
     Uint8 x,
@@ -79,8 +79,7 @@ int fn_picture_splash_show_with_message(
 
   picture = fn_picture_load(file, texture_creation_params);
 
-  SDL_Surface * screen = fn_environment_get_screen_sdl(env);
-  fn_texture_blit_to_sdl_surface(picture, NULL, screen, NULL);
+  fn_texture_blit_to_sdl_surface(picture, NULL, target, NULL);
 
   if (msg != NULL) {
     FnTexture * msgbox;
@@ -91,11 +90,11 @@ int fn_picture_splash_show_with_message(
     dstrect.x = x;
     dstrect.y = y;
 
-    fn_texture_blit_to_sdl_surface(msgbox, NULL, screen, &dstrect);
+    fn_texture_blit_to_sdl_surface(msgbox, NULL, target, &dstrect);
     fn_texture_free(msgbox);
   }
 
-  SDL_UpdateRect(screen, 0, 0, 0, 0);
+  SDL_UpdateRect(target, 0, 0, 0, 0);
   fn_texture_free(picture);
 
   while (1) {
@@ -120,7 +119,7 @@ int fn_picture_splash_show_with_message(
           }
           break;
         case SDL_VIDEOEXPOSE:
-          SDL_UpdateRect(screen, 0, 0, 0, 0);
+          SDL_UpdateRect(target, 0, 0, 0, 0);
           break;
         default:
           /* ignore unknown events */

@@ -46,7 +46,7 @@
 #include "fn_error.h"
 #include "fn_picture_splash.h"
 #include "fn_game.h"
-#include "fn_environment.h"
+#include "rusted.h"
 
 /* --------------------------------------------------------------- */
 
@@ -58,30 +58,34 @@ int main(int argc, char ** argv)
 
   int choice = 0; /* choice of the main menu */
 
-  /* TODO move this into fn_environment. */
   char backgroundfile[10] = "dn.dn1";
 /* --------------------------------------------------------------- */
 
   fn_error_set_handler(fn_error_print_commandline);
 
   FnSettings settings = fn_settings_load_or_create();
-  if (!fn_game_initialize_sdl()) {
+  
+  SDL_Surface * screen = fn_game_initialize_and_get_window(
+          FN_WINDOW_WIDTH,
+          FN_WINDOW_HEIGHT,
+          settings.fullscreen,
+          "Freenukum " VERSION,
+          "Freenukum " VERSION
+          );
+  if (!screen) {
       return 1;
   }
-  fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
 /* --------------------------------------------------------------- */
 
   /* check if all data is present */
-  FnEpisodes * episodes = fn_game_check_episodes(env->screen);
+  FnEpisodes * episodes = fn_game_check_episodes(screen);
   if (fn_episodes_count(episodes) == 0) {
       fn_episodes_free(episodes);
       exit(retval);
   }
 
   FnHeroData * hero_data = fn_hero_data_create();
-
-  SDL_Surface * screen = env->screen;
 
   FnTextureCreationParams texture_creation_params =
       fn_sdl_surface_creation_params(screen);
@@ -93,7 +97,7 @@ int main(int argc, char ** argv)
   res = fn_picture_splash_show(
       tilecache,
       texture_creation_params,
-      env,
+      screen,
       backgroundfile);
   if (!res) {
     fn_error_printf(1024, "Could not show splash screen.\n");
@@ -111,12 +115,11 @@ int main(int argc, char ** argv)
             texture_creation_params,
             screen,
             &settings,
-            fn_episodes_current(episodes) + 1,
-            env);
+            fn_episodes_current(episodes) + 1);
         res = fn_picture_splash_show(
             tilecache,
             texture_creation_params,
-            env,
+            screen,
             backgroundfile);
         break;
       case MainMenuEntry_Restore:
@@ -133,7 +136,7 @@ int main(int argc, char ** argv)
         break;
       case MainMenuEntry_FullScreenToggle:
         {
-        int res = SDL_WM_ToggleFullScreen(env->screen);
+        int res = SDL_WM_ToggleFullScreen(screen);
         if (res) {
             fn_settings_toggle_fullscreen(&settings);
             fn_settings_save(settings);
@@ -157,10 +160,10 @@ int main(int argc, char ** argv)
             snprintf(backgroundfile,
                 7, "dn.dn%d", episode);
             res = fn_picture_splash_show(
-                    tilecache, texture_creation_params, env, backgroundfile);
+                    tilecache, texture_creation_params, screen, backgroundfile);
           } else {
             res = fn_picture_splash_show(
-                    tilecache, texture_creation_params, env, backgroundfile);
+                    tilecache, texture_creation_params, screen, backgroundfile);
           }
         }
         break;
@@ -177,7 +180,7 @@ int main(int argc, char ** argv)
             "Userdemo not implemented yet.\n");
         break;
       case MainMenuEntry_TitleScreen:
-        res = fn_picture_splash_show(tilecache, texture_creation_params, env,
+        res = fn_picture_splash_show(tilecache, texture_creation_params, screen,
             backgroundfile);
         break;
       case MainMenuEntry_Credits:
@@ -191,7 +194,6 @@ int main(int argc, char ** argv)
 
   retval = 0;
 
-  fn_environment_delete(env);
   fn_hero_data_free(hero_data); hero_data = NULL;
   fn_episodes_free(episodes);
 

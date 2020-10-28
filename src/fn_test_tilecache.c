@@ -27,6 +27,7 @@
  *******************************************************************/
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_ttf.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -34,9 +35,9 @@
 
 /* --------------------------------------------------------------- */
 
+#include "config.h"
 #include "fn.h"
 #include "fn_object.h"
-#include "fn_environment.h"
 #include "fn_error.h"
 #include "fn_error_cmdline.h"
 #include "rusted.h"
@@ -93,20 +94,16 @@ int main(int argc, char ** argv)
   SDL_Event event;
 
   FnSettings settings = fn_settings_load_or_create();
-  if (!fn_game_initialize_sdl()) {
+  
+  SDL_Surface * screen = fn_game_initialize_and_get_window(
+          FN_TILE_WIDTH * (50+1),
+          FN_TILE_HEIGHT * (26+1),
+          settings.fullscreen,
+          "Freenukum " VERSION,
+          "Freenukum " VERSION
+          );
+  if (!screen) {
       return 1;
-  }
-  fn_environment_t * env = fn_environment_create(settings.fullscreen);
-
-  SDL_Surface * screen = fn_sdl_create_screen(
-      FN_TILE_WIDTH * (50+1),
-      FN_TILE_HEIGHT * (26+1),
-      settings.fullscreen);
-
-  if (screen == NULL)
-  {
-    fprintf(stderr, "Can't set video mode: %s\n", SDL_GetError());
-    return -1;
   }
 
   FnTextureCreationParams texture_creation_params =
@@ -218,7 +215,7 @@ int main(int argc, char ** argv)
     }
   }
 
-  fn_environment_delete(env);
+  SDL_FreeSurface(screen);
 
   return 0;
 }
