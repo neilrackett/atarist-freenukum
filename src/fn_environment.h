@@ -48,11 +48,6 @@ typedef struct fn_environment_t fn_environment_t;
 
 struct fn_environment_t {
   /**
-   * Was the initialization successful?
-   */
-  Uint8 initialized;
-
-  /**
    * SDL screen
    */
   SDL_Surface * screen;

@@ -37,6 +37,9 @@
 
 int main(int argc, char ** argv) {
   FnSettings settings = fn_settings_load_or_create();
+  if (!fn_game_initialize_sdl()) {
+      return 1;
+  }
   fn_environment_t * env = fn_environment_create(settings.fullscreen);
   SDL_Surface * screen = fn_environment_get_screen_sdl(env);
   FnTextureCreationParams texture_creation_params =

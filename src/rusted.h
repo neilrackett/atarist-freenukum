@@ -486,6 +486,8 @@ void fn_file_read(FnFile *ptr, void *buffer, size_t length);
 
 FnEpisodes *fn_game_check_episodes(SDL_Surface *target);
 
+bool fn_game_initialize_sdl(void);
+
 void fn_game_show_missing_data_information(SDL_Surface *target);
 
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);

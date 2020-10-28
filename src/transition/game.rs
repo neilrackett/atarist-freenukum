@@ -39,6 +39,24 @@ fn show_missing_data_information(target: &mut Surface) {
     }
 }
 
+fn initialize_sdl() -> Result<(), String> {
+    if unsafe {
+        transdl::ll::SDL_Init(
+            transdl::ll::SDL_INIT_VIDEO | transdl::ll::SDL_INIT_TIMER,
+        )
+    } < 0
+    {
+        use std::ffi::CString;
+        let s = unsafe { CString::from_raw(transdl::ll::SDL_GetError()) };
+        Err(format!(
+            "Can't initialize SDL: {}",
+            s.into_string().unwrap()
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 pub mod ffi {
     use super::super::episodes::ffi::FnEpisodes;
     use transdl::ll::SDL_Surface;
@@ -51,6 +69,17 @@ pub mod ffi {
         let mut target = transdl::video::Surface { raw: target };
 
         Box::into_raw(Box::new(super::check_episodes(&mut target)))
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_game_initialize_sdl() -> bool {
+        match super::initialize_sdl() {
+            Ok(()) => true,
+            Err(e) => {
+                eprintln!("{}", e);
+                false
+            }
+        }
     }
 
     #[no_mangle]

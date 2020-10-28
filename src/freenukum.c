@@ -65,6 +65,9 @@ int main(int argc, char ** argv)
   fn_error_set_handler(fn_error_print_commandline);
 
   FnSettings settings = fn_settings_load_or_create();
+  if (!fn_game_initialize_sdl()) {
+      return 1;
+  }
   fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
 /* --------------------------------------------------------------- */

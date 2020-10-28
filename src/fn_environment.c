@@ -113,11 +113,6 @@ fn_environment_t * fn_environment_create(bool fullscreen)
   /* fill with default values */
   env->screen = NULL;
 
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
-    fn_error_printf(1024, "Can't initialize SDL: %s", SDL_GetError());
-    return env;
-  }
-
   env->screen = fn_sdl_create_screen(
           FN_WINDOW_WIDTH, FN_WINDOW_HEIGHT, fullscreen);
   if (env->screen == NULL) {
@@ -127,7 +122,6 @@ fn_environment_t * fn_environment_create(bool fullscreen)
 
   SDL_WM_SetCaption("Freenukum " VERSION, "Freenukum " VERSION);
 
-  env->initialized = 1;
   return env;
 }
 

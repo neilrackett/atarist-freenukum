@@ -78,6 +78,9 @@ int main(int argc, char ** argv)
     char levelfile[100];
 
     FnSettings settings = fn_settings_load_or_create();
+    if (!fn_game_initialize_sdl()) {
+        return 1;
+    }
     fn_environment_t * env = fn_environment_create(settings.fullscreen);
 
     FnTextureCreationParams texture_creation_params =
