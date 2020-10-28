@@ -153,54 +153,7 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env)
   env->episodes = fn_episodes_find_installed();
 
   if (fn_episodes_count(env->episodes) == 0) {
-      /* we found no episodes */
-      char * message =
-          "Could not load data level and graphics files.\n"
-          "Please use the accompanied freenukum-data-tool\n"
-          "for installing the game data files.\n";
-      printf(message);
-      TTF_Font * font = NULL;
-      int fontsize = 10;
-      if (TTF_Init() != -1) {
-        font = fn_environment_loadfont(fontsize);
-      }
-      if (font) {
-        fn_data_display_text(env->screen, 0, 0, font, message);
-        SDL_UpdateRect(
-            env->screen, 0, 0, env->screen->w, env->screen->h);
-
-        SDL_Event event;
-
-        char input = 0;
-        int res = 0;
-        while (input == 0) {
-          res = SDL_WaitEvent(&event);
-          if (res == 1) {
-            switch(event.type) {
-              case SDL_QUIT:
-                input = 'q';
-                break;
-              case SDL_KEYDOWN:
-                switch(event.key.keysym.sym) {
-                  case SDLK_RETURN:
-                    input = 'd';
-                    break;
-                  case SDLK_ESCAPE:
-                    input = 'q';
-                    break;
-                  default:
-                    /* do nothing */
-                    break;
-                }
-              default:
-                /* do nothing on other events */
-                break;
-            }
-          }
-        }
-        TTF_CloseFont(font);
-        font = NULL;
-      }
+      fn_game_show_missing_data_information(env->screen);
   }
 
   return fn_episodes_count(env->episodes);

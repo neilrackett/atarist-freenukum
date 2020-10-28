@@ -484,6 +484,8 @@ FnFile *fn_file_open(const char *path);
 
 void fn_file_read(FnFile *ptr, void *buffer, size_t length);
 
+void fn_game_show_missing_data_information(SDL_Surface *target);
+
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 
 FnGeometry fn_geometry_create(int16_t x, int16_t y, uint16_t w, uint16_t h);

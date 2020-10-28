@@ -3,6 +3,7 @@ pub mod borders;
 pub mod data;
 pub mod episodes;
 pub mod file;
+pub mod game;
 pub mod geometry;
 pub mod hero;
 pub mod infobox;

@@ -1,5 +1,8 @@
 use crate::data_dir;
 use std::path::PathBuf;
+use transdl::ll::{SDL_Color, SDL_Rect};
+use transdl::ttf::Font;
+use transdl::video::Surface;
 
 pub fn required_file_names() -> Vec<&'static str> {
     vec![
@@ -18,13 +21,39 @@ pub fn original_data_dir() -> PathBuf {
     data_dir().join("data").join("original")
 }
 
+pub fn display_text(
+    target: &mut Surface,
+    x: i16,
+    y: i16,
+    font: &Font,
+    message: &str,
+) {
+    let mut destrect = SDL_Rect { x, y, w: 0, h: 0 };
+    let fgcolor = SDL_Color {
+        r: 255,
+        g: 255,
+        b: 255,
+        unused: 0,
+    };
+    let bgcolor = SDL_Color {
+        r: 0,
+        g: 0,
+        b: 0,
+        unused: 0,
+    };
+
+    for line in message.lines() {
+        let text = font.render_utf8_shaded(line, fgcolor, bgcolor);
+        destrect.y += text.height() as i16;
+        text.blit(None, target, Some(destrect));
+    }
+    target.update_rect(0, 0, 0, 0);
+}
+
 pub mod ffi {
     use libc::c_char;
     use std::ffi::CStr;
-    use transdl::ll::{
-        SDL_Color, SDL_FreeSurface, SDL_Rect, SDL_Surface, SDL_UpperBlit,
-        TTF_Font, TTF_RenderText_Shaded,
-    };
+    use transdl::ll::{SDL_Surface, TTF_Font};
 
     use super::super::file::ffi::FnFile;
 
@@ -40,44 +69,10 @@ pub mod ffi {
         assert!(!font.is_null());
 
         let s = unsafe { CStr::from_ptr(message) }.to_str().unwrap();
+        let mut target = transdl::video::Surface { raw: target };
+        let mut font = transdl::ttf::Font { raw: font };
 
-        let mut destrect = SDL_Rect { x, y, w: 0, h: 0 };
-        let fgcolor = SDL_Color {
-            r: 255,
-            g: 255,
-            b: 255,
-            unused: 0,
-        };
-        let bgcolor = SDL_Color {
-            r: 0,
-            g: 0,
-            b: 0,
-            unused: 0,
-        };
-
-        for line in s.lines() {
-            unsafe {
-                let line = line
-                    .as_bytes()
-                    .iter()
-                    .map(|c| *c as i8)
-                    .collect::<Vec<_>>();
-                let text = TTF_RenderText_Shaded(
-                    font,
-                    line.as_ptr() as *const i8,
-                    fgcolor,
-                    bgcolor,
-                );
-                destrect.y += (*text).h as i16;
-                SDL_UpperBlit(
-                    text,
-                    std::ptr::null_mut(),
-                    target,
-                    &mut destrect as *mut SDL_Rect,
-                );
-                SDL_FreeSurface(text);
-            }
-        }
+        super::display_text(&mut target, x, y, &mut font, s);
     }
 
     #[no_mangle]
