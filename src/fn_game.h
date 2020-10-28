@@ -50,6 +50,7 @@ void fn_game_start(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
+    size_t episode,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
@@ -70,6 +71,7 @@ int fn_game_start_in_level(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
+    size_t episode,
     fn_environment_t * env);
 
 /* --------------------------------------------------------------- */

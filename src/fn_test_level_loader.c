@@ -85,7 +85,11 @@ int main(int argc, char ** argv)
     const FnTileCache * tilecache =
         fn_tilecache_load(texture_creation_params);
 
-    fn_environment_check_for_episodes(env);
+    FnEpisodes * episodes = fn_game_check_episodes(env->screen);
+    if (fn_episodes_count(episodes) == 0) {
+        fn_episodes_free(episodes);
+        return 0;
+    }
 
     int argok = 0;
     int levelnumber = 0;
@@ -276,6 +280,7 @@ int main(int argc, char ** argv)
 
     fn_level_free(lv);
     fn_hero_data_free(hero);
+    fn_episodes_free(episodes);
 
     return 0;
 }

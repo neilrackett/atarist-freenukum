@@ -56,11 +56,6 @@ struct fn_environment_t {
    * SDL screen
    */
   SDL_Surface * screen;
-
-  /**
-   * The episodes.
-   */
-  FnEpisodes * episodes;
 };
 
 /* --------------------------------------------------------------- */
@@ -85,17 +80,6 @@ void fn_environment_delete(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
- * Check if there are any episodes available for this environment.
- *
- * @param  env  The environment.
- *
- * @return The number of available episodes.
- */
-Uint8 fn_environment_check_for_episodes(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Get the screen to which the environment displays the game.
  *
  * @param  env    The environment.
@@ -103,17 +87,6 @@ Uint8 fn_environment_check_for_episodes(fn_environment_t * env);
  * @return  The screen.
  */
 SDL_Surface * fn_environment_get_screen_sdl(fn_environment_t * env);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the number of the current episode.
- *
- * @param  env  The environment.
- *
- * @return  The number of the episode.
- */
-Uint8 fn_environment_get_episode(fn_environment_t * env);
 
 /* --------------------------------------------------------------- */
 

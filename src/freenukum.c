@@ -70,9 +70,10 @@ int main(int argc, char ** argv)
 /* --------------------------------------------------------------- */
 
   /* check if all data is present */
-  int episodes = fn_environment_check_for_episodes(env);
-  if (episodes == 0) {
-    exit(retval);
+  FnEpisodes * episodes = fn_game_check_episodes(env->screen);
+  if (fn_episodes_count(episodes) == 0) {
+      fn_episodes_free(episodes);
+      exit(retval);
   }
 
   FnHeroData * hero_data = fn_hero_data_create();
@@ -107,6 +108,7 @@ int main(int argc, char ** argv)
             texture_creation_params,
             screen,
             &settings,
+            fn_episodes_current(episodes) + 1,
             env);
         res = fn_picture_splash_show(
             tilecache,
@@ -137,8 +139,8 @@ int main(int argc, char ** argv)
         break;
       case MainMenuEntry_EpisodeChange:
         {
-          Uint8 old = fn_episodes_current(env->episodes);
-          Uint8 new = fn_episodes_switch(env->episodes);
+          Uint8 old = fn_episodes_current(episodes);
+          Uint8 new = fn_episodes_switch(episodes);
           Uint8 episode = new + 1;
 
           snprintf(backgroundfile,
@@ -188,6 +190,7 @@ int main(int argc, char ** argv)
 
   fn_environment_delete(env);
   fn_hero_data_free(hero_data); hero_data = NULL;
+  fn_episodes_free(episodes);
 
   return retval;
 }

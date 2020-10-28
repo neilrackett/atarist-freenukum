@@ -63,6 +63,7 @@ void fn_game_start(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
+    size_t episode,
     fn_environment_t * env)
 {
   /* Initialize Random Number Generator. */
@@ -82,7 +83,7 @@ void fn_game_start(
   char filename[30];
 
   snprintf(
-      filename, 30, "badguy.dn%d", fn_environment_get_episode(env));
+      filename, 30, "badguy.dn%ld", episode);
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
@@ -93,7 +94,7 @@ void fn_game_start(
       144);
 
   snprintf(
-      filename, 30, "duke.dn%d", fn_environment_get_episode(env));
+      filename, 30, "duke.dn%ld", episode);
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
@@ -165,6 +166,7 @@ void fn_game_start(
                 texture_creation_params,
                 target,
                 settings,
+                episode,
                 env);
         level++;
         if (level == 2) {
@@ -180,6 +182,7 @@ void fn_game_start(
                 texture_creation_params,
                 target,
                 settings,
+                episode,
                 env);
         interlevel = 1;
       }
@@ -200,6 +203,7 @@ int fn_game_start_in_level(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
+    size_t episode,
     fn_environment_t * env)
 {
   int returnvalue = 0;
@@ -265,9 +269,9 @@ int fn_game_start_in_level(
   char backdropfile[100];
   snprintf(backdropfile,
       100,
-      "drop%d.dn%d",
+      "drop%d.dn%ld",
       backdropnumber,
-      fn_environment_get_episode(env));
+      episode);
   file = fn_data_open_file(backdropfile);
 
   if (file == NULL)
@@ -285,9 +289,9 @@ int fn_game_start_in_level(
   }
 
   char levelfile[100];
-  snprintf(levelfile, 100, "worldal%x.dn%d",
+  snprintf(levelfile, 100, "worldal%x.dn%ld",
       levelnumber,
-      fn_environment_get_episode(env));
+      episode);
   file = fn_data_open_file(levelfile);
 
   if (file == NULL)

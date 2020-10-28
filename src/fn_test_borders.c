@@ -48,7 +48,12 @@ int main(int argc, char ** argv)
 
   FnSettings settings = fn_settings_load_or_create();
   fn_environment_t * env = fn_environment_create(settings.fullscreen);
-  fn_environment_check_for_episodes(env);
+  
+  FnEpisodes * episodes = fn_game_check_episodes(env->screen);
+  if (fn_episodes_count(episodes) == 0) {
+      fn_episodes_free(episodes);
+      return 0;
+  }
 
   FnTextureCreationParams texture_creation_params =
       fn_sdl_surface_creation_params(env->screen);
@@ -89,5 +94,6 @@ int main(int argc, char ** argv)
     }
   }
 
+  fn_episodes_free(episodes);
   return 0;
 }
