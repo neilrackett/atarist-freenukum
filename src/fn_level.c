@@ -766,11 +766,7 @@ fn_level_t * fn_level_load(
     i++;
   }
 
-  while (fn_level_actor_queue_has_items(actor_queue)) {
-      FnLevelActorQueueItem item =
-          fn_level_actor_queue_pop_front(actor_queue);
-      fn_level_add_actor(lv, item.actor_type, item.x, item.y);
-  }
+  fn_level_actor_queue_process(actor_queue, lv->data);
   fn_level_actor_queue_free(actor_queue);
 
   /*
@@ -982,10 +978,7 @@ int fn_level_act(
       }
   }
 
-  while (fn_level_actor_queue_has_items(actor_queue)) {
-      FnLevelActorQueueItem item = fn_level_actor_queue_pop_front(actor_queue);
-      fn_level_add_actor(lv, item.actor_type, item.x, item.y);
-  }
+  fn_level_actor_queue_process(actor_queue, lv->data);
 
   fn_level_actors_list_remove_dead(actors);
 
@@ -1045,18 +1038,6 @@ void fn_level_hero_interact_start(
       }
     }
   }
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_add_actor(fn_level_t * lv,
-    FnLevelActorType type,
-    Uint16 x,
-    Uint16 y)
-{
-  FnLevelActorsList * actors = fn_level_data_get_actors_list(lv->data);
-  fn_level_actors_list_add_actor(
-          actors, lv->data, type, x, y);
 }
 
 /* --------------------------------------------------------------- */

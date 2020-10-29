@@ -388,14 +388,6 @@ typedef struct {
 
 typedef ActorMessage FnLevelActorMessage;
 
-typedef struct {
-    ActorType actor_type;
-    uint16_t x;
-    uint16_t y;
-} ActorQueueItem;
-
-typedef ActorQueueItem FnLevelActorQueueItem;
-
 typedef ActorMessageType FnLevelActorMessageType;
 
 typedef Vec_Actor ActorsList;
@@ -779,9 +771,8 @@ FnLevelActorQueue *fn_level_actor_queue_create(void);
 
 void fn_level_actor_queue_free(FnLevelActorQueue *ptr);
 
-bool fn_level_actor_queue_has_items(const FnLevelActorQueue *ptr);
-
-FnLevelActorQueueItem fn_level_actor_queue_pop_front(FnLevelActorQueue *ptr);
+void fn_level_actor_queue_process(FnLevelActorQueue *queue,
+                                  FnLevelData *destination);
 
 void fn_level_actor_queue_push_back(FnLevelActorQueue *ptr,
                                     FnLevelActorType actor_type,

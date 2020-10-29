@@ -23,6 +23,17 @@ impl LevelData {
     }
 }
 
+impl actor::ActorAdder for LevelData {
+    fn add_actor(&mut self, actor_type: actor::ActorType, x: u16, y: u16) {
+        let mut general = actor::ActorData::new(actor_type);
+        general.position.x = x as i16;
+        general.position.y = y as i16;
+        let specific =
+            actor_type.create_actor_interface(&mut general, self);
+        self.actors.push(actor::Actor { general, specific });
+    }
+}
+
 pub mod ffi {
     pub type FnLevelData = super::LevelData;
 

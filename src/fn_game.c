@@ -670,7 +670,9 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case UserEvent_HeroLanded:
-              fn_level_add_actor(lv, ActorType_DustCloud,
+              fn_level_actor_queue_push_back(
+                      actor_queue,
+                      ActorType_DustCloud,
                       hero_geometry.x,
                       hero_geometry.y + FN_TILE_HEIGHT
                   );

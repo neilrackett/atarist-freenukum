@@ -181,23 +181,6 @@ void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero);
 /* --------------------------------------------------------------- */
 
 /**
- * Add an actor to the level.
- *
- * @param  lv    The level to which the actor gets added.
- * @param  type  The type of actor.
- * @param  x     The x coordinate of the top left corner.
- * @param  y     The y coordinate of the top left corner.
- *
- * @return  The newly created actor.
- */
-void fn_level_add_actor(fn_level_t * lv,
-    FnLevelActorType type,
-    Uint16 x,
-    Uint16 y);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Let the hero fire a shot.
  *
  * If there are already the maximum of shots in the level,
