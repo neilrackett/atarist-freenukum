@@ -3,8 +3,8 @@ use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
-    ActorQueue,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageQueue,
 };
 use crate::{ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -63,7 +63,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         match self.state {

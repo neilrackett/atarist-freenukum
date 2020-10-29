@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -38,7 +38,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         let hero_geometry = hero_data.position.geometry;
@@ -83,12 +83,12 @@ impl ActorInterface for Specific {
                     general.position.x as usize / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT + 1,
                 ) {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::Steam,
                         general.position.x as u16,
                         general.position.y as u16,
                     );
-                    actor_queue.push_particle_firework(
+                    actor_adder.add_particle_firework(
                         general.position.x as u16,
                         general.position.y as u16,
                         4,
@@ -130,17 +130,17 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         if self.counter > 0 {
             hero_data.score.add(500);
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Score500,
                 general.position.x as u16,
                 general.position.y as u16,
             );
-            actor_queue.push_particle_firework(
+            actor_adder.add_particle_firework(
                 general.position.x as u16,
                 general.position.y as u16,
                 4,
@@ -153,7 +153,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         if self.counter > 10 && !self.touching_hero {

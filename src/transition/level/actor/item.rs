@@ -5,7 +5,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_SODA, HALFTILE_HEIGHT, OBJECT_ACCESS_CARD, OBJECT_BOOT,
@@ -92,7 +92,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         match general.actor_type {
@@ -100,7 +100,7 @@ impl ActorInterface for Specific {
                 general.is_alive = false;
                 hero_data.fetched_letter_state.picked(FetchedLetter::D);
                 hero_data.score.add(500);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score500,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -110,7 +110,7 @@ impl ActorInterface for Specific {
                 general.is_alive = false;
                 hero_data.fetched_letter_state.picked(FetchedLetter::U);
                 hero_data.score.add(500);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score500,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -120,7 +120,7 @@ impl ActorInterface for Specific {
                 general.is_alive = false;
                 hero_data.fetched_letter_state.picked(FetchedLetter::K);
                 hero_data.score.add(500);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score500,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -131,14 +131,14 @@ impl ActorInterface for Specific {
                 hero_data.fetched_letter_state.picked(FetchedLetter::E);
                 hero_data.score.add(500);
                 if hero_data.fetched_letter_state.succeeded() {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::Score10000,
                         general.position.x as u16,
                         general.position.y as u16,
                     );
                     hero_data.score.add(10000);
                 } else {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::Score500,
                         general.position.x as u16,
                         general.position.y as u16,
@@ -150,7 +150,7 @@ impl ActorInterface for Specific {
                 hero_data.health.fill_max();
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -160,7 +160,7 @@ impl ActorInterface for Specific {
                 hero_data.firepower.increase(1);
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -170,7 +170,7 @@ impl ActorInterface for Specific {
                 hero_data.inventory.set(InventoryItem::AccessCard);
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -180,7 +180,7 @@ impl ActorInterface for Specific {
                 hero_data.inventory.set(InventoryItem::Glove);
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -190,7 +190,7 @@ impl ActorInterface for Specific {
                 hero_data.inventory.set(InventoryItem::Boot);
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -200,7 +200,7 @@ impl ActorInterface for Specific {
                 hero_data.inventory.set(InventoryItem::Clamp);
                 general.is_alive = false;
                 hero_data.score.add(1000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score1000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -209,7 +209,7 @@ impl ActorInterface for Specific {
             ActorType::Football => {
                 general.is_alive = false;
                 hero_data.score.add(100);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score100,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -218,7 +218,7 @@ impl ActorInterface for Specific {
             ActorType::Disk => {
                 general.is_alive = false;
                 hero_data.score.add(5000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score5000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -227,7 +227,7 @@ impl ActorInterface for Specific {
             ActorType::Joystick => {
                 general.is_alive = false;
                 hero_data.score.add(2000);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score2000,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -238,7 +238,7 @@ impl ActorInterface for Specific {
                 match self.current_frame {
                     0 => {
                         hero_data.score.add(100);
-                        actor_queue.push_back(
+                        actor_adder.add_actor(
                             ActorType::Score100,
                             general.position.x as u16,
                             general.position.y as u16,
@@ -246,7 +246,7 @@ impl ActorInterface for Specific {
                     }
                     1 => {
                         hero_data.score.add(2000);
-                        actor_queue.push_back(
+                        actor_adder.add_actor(
                             ActorType::Score2000,
                             general.position.x as u16,
                             general.position.y as u16,
@@ -254,7 +254,7 @@ impl ActorInterface for Specific {
                     }
                     2 => {
                         hero_data.score.add(5000);
-                        actor_queue.push_back(
+                        actor_adder.add_actor(
                             ActorType::Score5000,
                             general.position.x as u16,
                             general.position.y as u16,
@@ -267,7 +267,7 @@ impl ActorInterface for Specific {
                 hero_data.health.increase(1);
                 general.is_alive = false;
                 hero_data.score.add(200);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score200,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -277,7 +277,7 @@ impl ActorInterface for Specific {
                 hero_data.health.increase(1);
                 general.is_alive = false;
                 hero_data.score.add(100);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score100,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -287,7 +287,7 @@ impl ActorInterface for Specific {
                 hero_data.health.increase(2);
                 general.is_alive = false;
                 hero_data.score.add(200);
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Score200,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -301,7 +301,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;
@@ -362,7 +362,7 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _level_solids: &mut LevelSolids,
         _level_tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         let x = general.position.x as u16;
@@ -370,114 +370,114 @@ impl ActorInterface for Specific {
         match general.actor_type {
             ActorType::BoxBlueFootball => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Football, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Football, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueJoystick => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Joystick, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Joystick, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueDisk => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Disk, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Disk, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueBalloon => {
                 general.is_alive = false;
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Balloon,
                     x,
                     y - TILE_HEIGHT as u16,
                 );
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueFlag => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Flag, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Flag, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueRadio => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Radio, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Radio, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxRedSoda => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Soda, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Soda, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxRedChicken => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::ChickenSingle, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::ChickenSingle, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyEmpty => {
                 general.is_alive = false;
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyBoots => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Boots, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Boots, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyClamps => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Clamps, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Clamps, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyGun => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Gun, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Gun, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyBomb => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Bomb, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Bomb, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyGlove => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::Glove, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::Glove, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyFullLife => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::FullLife, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::FullLife, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyAccessCard => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::AccessCard, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::AccessCard, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterD => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::LetterD, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::LetterD, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterU => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::LetterU, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::LetterU, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterK => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::LetterK, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::LetterK, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterE => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::LetterE, x, y);
-                actor_queue.push_particle_firework(x, y, 4);
+                actor_adder.add_actor(ActorType::LetterE, x, y);
+                actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::ChickenSingle => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::ChickenDouble, x, y);
+                actor_adder.add_actor(ActorType::ChickenDouble, x, y);
             }
             ActorType::Soda => {
                 general.is_alive = false;
-                actor_queue.push_back(ActorType::SodaFlying, x, y);
+                actor_adder.add_actor(ActorType::SodaFlying, x, y);
             }
             _ => {}
         }

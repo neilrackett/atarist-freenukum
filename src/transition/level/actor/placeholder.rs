@@ -1,7 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorCreateInterface, ActorData, ActorInterface, ActorQueue};
+use super::{ActorAdder, ActorCreateInterface, ActorData, ActorInterface};
 use transdl::video::Surface;
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }

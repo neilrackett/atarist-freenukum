@@ -1,6 +1,6 @@
 use super::geometry::Geometry;
 use super::hero::HeroData;
-use super::level::actor::{ActorQueue, ActorType};
+use super::level::actor::{ActorAdder, ActorType};
 use super::level::LevelData;
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
@@ -42,7 +42,7 @@ impl Shot {
         &mut self,
         hero_data: &mut HeroData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
     ) -> bool {
         self.counter += 1;
         self.counter %= 4;
@@ -68,8 +68,8 @@ impl Shot {
             // we only push half of the distance, but do it twice, so that
             // also the intermediate position gets covered, not just the
             // end position.
-            self.push(hero_data, level_data, distance, actor_queue);
-            self.push(hero_data, level_data, distance, actor_queue);
+            self.push(hero_data, level_data, distance, actor_adder);
+            self.push(hero_data, level_data, distance, actor_adder);
 
             let x = self.position.x;
 
@@ -108,30 +108,24 @@ impl Shot {
         hero_data: &mut HeroData,
         level_data: &mut LevelData,
         offset: i16,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
     ) {
         if self.countdown == 2 {
             self.position.x += offset;
-            for actor in level_data.actors.iter_mut() {
-                if actor.can_get_shot()
-                    && self.position.touches(actor.position())
-                {
-                    actor.shot(
-                        &mut level_data.solids,
-                        &mut level_data.tiles,
-                        actor_queue,
-                        hero_data,
-                    );
-                    if !actor.is_alive() {
-                        self.countdown = 1;
-                    }
-                }
+            if level_data.actors.process_shot(
+                self.position,
+                &mut level_data.solids,
+                &mut level_data.tiles,
+                actor_adder,
+                hero_data,
+            ) {
+                self.countdown = 1;
             }
         }
         if self.countdown == 2 {
             if level_data.solids.collides(self.position) {
                 self.countdown = 1;
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Explosion,
                     self.position.x as u16 + self.position.w / 2
                         - HALFTILE_WIDTH as u16,

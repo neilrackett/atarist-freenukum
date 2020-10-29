@@ -3,7 +3,7 @@ use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{OBJECT_FIRELEFT, OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -58,7 +58,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         general.hurts_hero = self.state == State::Burning;
@@ -78,7 +78,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         match self.state {

@@ -276,6 +276,8 @@ typedef struct ActorMessageQueue ActorMessageQueue;
 
 typedef struct ActorQueue ActorQueue;
 
+typedef struct ActorsList ActorsList;
+
 typedef struct Episodes Episodes;
 
 typedef struct FetchedLetterState FetchedLetterState;
@@ -309,8 +311,6 @@ typedef struct Score Score;
 typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
-
-typedef struct Vec_Actor Vec_Actor;
 
 typedef struct Vec_Shot Vec_Shot;
 
@@ -389,8 +389,6 @@ typedef struct {
 typedef ActorMessage FnLevelActorMessage;
 
 typedef ActorMessageType FnLevelActorMessageType;
-
-typedef Vec_Actor ActorsList;
 
 typedef ActorsList FnLevelActorsList;
 

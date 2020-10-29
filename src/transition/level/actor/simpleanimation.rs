@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG, ANIMATION_WINDOWBG,
@@ -74,7 +74,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_queue: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;

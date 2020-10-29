@@ -18,7 +18,7 @@ impl LevelData {
             solids: solids::LevelSolids::new(),
             do_play: true,
             level_passed: false,
-            actors: Vec::new(),
+            actors: actor::ActorsList::new(),
         }
     }
 }
@@ -30,7 +30,7 @@ impl actor::ActorAdder for LevelData {
         general.position.y = y as i16;
         let specific =
             actor_type.create_actor_interface(&mut general, self);
-        self.actors.push(actor::Actor { general, specific });
+        self.actors.add(actor::Actor { general, specific });
     }
 }
 

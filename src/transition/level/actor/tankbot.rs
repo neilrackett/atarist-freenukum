@@ -5,7 +5,7 @@ use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_CARBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
@@ -47,7 +47,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         general.hurts_hero = true;
@@ -67,7 +67,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;
@@ -75,12 +75,12 @@ impl ActorInterface for Specific {
 
         if self.was_shot == 2 {
             general.is_alive = false;
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Explosion,
                 general.position.x as u16 + HALFTILE_WIDTH as u16,
                 general.position.y as u16,
             );
-            actor_queue.push_particle_firework(
+            actor_adder.add_particle_firework(
                 general.position.x as u16,
                 general.position.y as u16,
                 4,
@@ -147,13 +147,13 @@ impl ActorInterface for Specific {
                     self.tile = tile as usize;
 
                     if direction > 0 {
-                        actor_queue.push_back(
+                        actor_adder.add_actor(
                             ActorType::HostileShotRight,
                             general.position.x as u16,
                             general.position.y as u16 - 6,
                         );
                     } else {
-                        actor_queue.push_back(
+                        actor_adder.add_actor(
                             ActorType::HostileShotLeft,
                             general.position.x as u16,
                             general.position.y as u16 - 6,
@@ -165,7 +165,7 @@ impl ActorInterface for Specific {
         if self.was_shot == 1 {
             // create steam clouds
             if self.current_frame == 0 {
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Steam,
                     general.position.x as u16 + HALFTILE_WIDTH as u16,
                     general.position.y as u16 - TILE_HEIGHT as u16,
@@ -203,7 +203,7 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         if self.was_shot == 1 && self.touching_hero {

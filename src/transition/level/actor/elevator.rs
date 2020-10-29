@@ -3,8 +3,8 @@ use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
-    ActorQueue,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageQueue,
 };
 use crate::{
     HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR, TILE_HEIGHT,
@@ -42,7 +42,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         let hero_geometry = hero_data.position.geometry;

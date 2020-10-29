@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{SOLID_START, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -50,7 +50,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         // Detect whether the hero is standing upon the floor.
@@ -82,13 +82,13 @@ impl ActorInterface for Specific {
                     r.y as usize / TILE_HEIGHT,
                     false,
                 );
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Explosion,
                     r.x as u16,
                     r.y as u16,
                 );
-                actor_queue
-                    .push_particle_firework(r.x as u16, r.y as u16, 4);
+                actor_adder
+                    .add_particle_firework(r.x as u16, r.y as u16, 4);
                 r.x += TILE_WIDTH as i16;
             }
             general.is_alive = false;

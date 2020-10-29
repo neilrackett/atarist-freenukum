@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
@@ -37,7 +37,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }
@@ -74,17 +74,17 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         general.is_alive = false;
         hero_data.score.add(100);
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Score100,
             general.position.x as u16,
             general.position.y as u16,
         );
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Explosion,
             general.position.x as u16,
             general.position.y as u16,

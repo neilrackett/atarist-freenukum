@@ -3,7 +3,7 @@ use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
-use super::{ActorCreateInterface, ActorData, ActorInterface, ActorQueue};
+use super::{ActorAdder, ActorCreateInterface, ActorData, ActorInterface};
 use crate::{HALFTILE_HEIGHT, OBJECT_ROCKET, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
 
@@ -41,7 +41,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         match self.state {
@@ -112,7 +112,7 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         if self.state == State::Idle {

@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -40,7 +40,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         match self.running {
@@ -132,11 +132,11 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _level_solids: &mut LevelSolids,
         _level_tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.running = 9;
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Steam,
             general.position.x as u16,
             general.position.y as u16,

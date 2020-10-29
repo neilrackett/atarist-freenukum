@@ -5,7 +5,7 @@ use super::super::super::tilecache::TileCache;
 use super::super::super::{HorizontalDirection, VerticalDirection};
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
@@ -60,7 +60,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         general.hurts_hero = true;
@@ -80,7 +80,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         let direction = match self.direction {
@@ -171,7 +171,7 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         if !self.was_shot {
@@ -183,12 +183,12 @@ impl ActorInterface for Specific {
             general.is_alive = false;
 
             hero_data.score.add(100);
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Steam,
                 general.position.x as u16,
                 general.position.y as u16,
             );
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Explosion,
                 general.position.x as u16,
                 general.position.y as u16,

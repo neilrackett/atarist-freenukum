@@ -3,7 +3,7 @@ use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     HALFTILE_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_CENTER,
@@ -73,7 +73,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         let hero_push_offset = match self.direction {

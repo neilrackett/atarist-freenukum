@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -34,13 +34,13 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         if !self.destroyed {
             general.is_alive = false;
             hero_data.score.add(10000);
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Score10000,
                 general.position.x as u16,
                 general.position.y as u16,
@@ -51,7 +51,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;
@@ -67,7 +67,7 @@ impl ActorInterface for Specific {
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     ActorType::Steam,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -112,11 +112,11 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _level_solids: &mut LevelSolids,
         _level_tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.destroyed = true;
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Steam,
             general.position.x as u16,
             general.position.y as u16,

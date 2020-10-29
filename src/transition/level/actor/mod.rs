@@ -45,7 +45,74 @@ use super::super::level::tiles::LevelTiles;
 use super::super::level::LevelData;
 use super::super::tilecache::TileCache;
 
-pub type ActorsList = Vec<Actor>;
+pub struct ActorsList {
+    actors: Vec<Actor>,
+}
+
+impl ActorsList {
+    pub fn new() -> Self {
+        ActorsList { actors: Vec::new() }
+    }
+
+    pub fn add(&mut self, actor: Actor) {
+        self.actors.push(actor);
+    }
+
+    pub fn count(&self) -> usize {
+        self.actors.len()
+    }
+
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Actor> {
+        self.actors.get_mut(index)
+    }
+
+    pub fn remove_dead(&mut self) {
+        self.actors.retain(|a| a.general.is_alive);
+    }
+
+    pub fn send_message(
+        &mut self,
+        receivers: ActorType,
+        message: ActorMessageType,
+        hero_data: &mut HeroData,
+        level_data: &mut LevelData,
+    ) {
+        for actor in self
+            .actors
+            .iter_mut()
+            .filter(|a| a.general.actor_type == receivers)
+        {
+            actor.specific.receive_message(
+                &mut actor.general,
+                message,
+                hero_data,
+                level_data,
+            );
+        }
+    }
+
+    pub fn process_shot(
+        &mut self,
+        shot_position: Geometry,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
+        actor_queue: &mut dyn ActorAdder,
+        hero_data: &mut HeroData,
+    ) -> bool {
+        let mut hit_actor = false;
+        for actor in self.actors.iter_mut() {
+            if actor.can_get_shot()
+                && shot_position.touches(actor.position())
+            {
+                actor.shot(solids, tiles, actor_queue, hero_data);
+                if !actor.is_alive() {
+                    hit_actor = true;
+                }
+            }
+        }
+        hit_actor
+    }
+}
 
 #[repr(C)]
 #[derive(Debug)]
@@ -120,7 +187,7 @@ impl Actor {
         &mut self,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_queue: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         self.specific.shot(
@@ -648,8 +715,21 @@ pub struct ActorQueueItem {
     pub y: u16,
 }
 
-pub(crate) trait ActorAdder {
+pub trait ActorAdder {
     fn add_actor(&mut self, actor_type: ActorType, x: u16, y: u16);
+
+    fn add_particle_firework(&mut self, x: u16, y: u16, count: usize) {
+        for i in 0..count {
+            let actor_type = match i % 4 {
+                0 => ActorType::ParticlePink,
+                1 => ActorType::ParticleBlue,
+                2 => ActorType::ParticleWhite,
+                3 => ActorType::ParticleGreen,
+                _ => unreachable!(),
+            };
+            self.add_actor(actor_type, x, y);
+        }
+    }
 }
 
 #[derive(Default)]
@@ -666,24 +746,6 @@ impl ActorAdder for ActorQueue {
 impl ActorQueue {
     pub fn push_back(&mut self, actor_type: ActorType, x: u16, y: u16) {
         self.actors.push(ActorQueueItem { actor_type, x, y });
-    }
-
-    pub fn push_particle_firework(
-        &mut self,
-        x: u16,
-        y: u16,
-        count: usize,
-    ) {
-        for i in 0..count {
-            let actor_type = match i % 4 {
-                0 => ActorType::ParticlePink,
-                1 => ActorType::ParticleBlue,
-                2 => ActorType::ParticleWhite,
-                3 => ActorType::ParticleGreen,
-                _ => unreachable!(),
-            };
-            self.push_back(actor_type, x, y);
-        }
     }
 
     pub(crate) fn process(&mut self, destination: &mut dyn ActorAdder) {
@@ -738,7 +800,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn hero_touch_start(
         &mut self,
         _general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }
@@ -776,7 +838,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_queue: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     );
 
@@ -797,7 +859,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
         _general: &mut ActorData,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        _actor_queue: &mut ActorQueue,
+        _actor_queue: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }
@@ -1177,7 +1239,7 @@ pub mod ffi {
     ) -> usize {
         assert!(!ptr.is_null());
         let d: &FnLevelActorsList = unsafe { &(*ptr) };
-        d.len()
+        d.count()
     }
 
     #[no_mangle]
@@ -1199,7 +1261,7 @@ pub mod ffi {
     ) {
         assert!(!ptr.is_null());
         let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
-        d.retain(|a| a.general.is_alive);
+        d.remove_dead();
     }
 
     #[no_mangle]
@@ -1221,7 +1283,7 @@ pub mod ffi {
         general.position.y = y;
         let specific =
             actor_type.create_actor_interface(&mut general, level_data);
-        d.push(super::Actor { general, specific });
+        d.add(super::Actor { general, specific });
     }
 
     #[no_mangle]
@@ -1241,15 +1303,6 @@ pub mod ffi {
         assert!(!level_data.is_null());
         let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
 
-        for actor in
-            d.iter_mut().filter(|a| a.general.actor_type == receivers)
-        {
-            actor.specific.receive_message(
-                &mut actor.general,
-                message,
-                hero_data,
-                level_data,
-            );
-        }
+        d.send_message(receivers, message, hero_data, level_data);
     }
 }

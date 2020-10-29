@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS, TILE_HEIGHT,
@@ -33,7 +33,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_queue: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }
@@ -47,11 +47,11 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         hero_data.score.add(10);
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Explosion,
             general.position.x as u16,
             general.position.y as u16,

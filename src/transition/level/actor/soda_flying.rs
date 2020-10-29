@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -26,11 +26,11 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         hero_data.score.add(1000);
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Score1000,
             general.position.x as u16,
             general.position.y as u16,
@@ -42,7 +42,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         general.position.y -= HALFTILE_HEIGHT as i16;
@@ -50,7 +50,7 @@ impl ActorInterface for Specific {
             general.position.x as usize / TILE_WIDTH,
             general.position.y as usize / TILE_HEIGHT,
         ) {
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Explosion,
                 general.position.x as u16,
                 general.position.y as u16,

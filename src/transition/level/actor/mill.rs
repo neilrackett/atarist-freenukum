@@ -4,7 +4,7 @@ use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -49,7 +49,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         _general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         hero_data.health.kill();
@@ -59,7 +59,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         if self.lives > 0 {
@@ -94,12 +94,12 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         _level_solids: &mut LevelSolids,
         _level_tiles: &mut LevelTiles,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         self.lives -= 1;
         if self.lives > 0 {
-            actor_queue.push_particle_firework(
+            actor_adder.add_particle_firework(
                 general.position.x as u16 + general.position.w / 2,
                 general.position.y as u16 + general.position.h / 2,
                 4,
@@ -108,18 +108,18 @@ impl ActorInterface for Specific {
             // TODO: add removal animation (destroyed body)
             general.is_alive = false;
             hero_data.score.add(20000);
-            actor_queue.push_particle_firework(
+            actor_adder.add_particle_firework(
                 general.position.x as u16 + general.position.w / 2,
                 general.position.y as u16 + general.position.h / 2,
                 20,
             );
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Score10000,
                 general.position.x as u16,
                 general.position.y as u16 + general.position.h / 2
                     - TILE_HEIGHT as u16,
             );
-            actor_queue.push_back(
+            actor_adder.add_actor(
                 ActorType::Score10000,
                 general.position.x as u16,
                 general.position.y as u16 + general.position.h / 2,

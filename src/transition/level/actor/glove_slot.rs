@@ -3,8 +3,8 @@ use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorMessageQueue,
-    ActorMessageType, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageQueue, ActorMessageType, ActorType,
 };
 use crate::{OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -79,7 +79,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         _level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         match self.state {
@@ -92,13 +92,13 @@ impl ActorInterface for Specific {
                 self.current_frame %= self.num_frames;
                 self.countdown -= 1;
                 if self.countdown % 4 == 0 {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::HostileShotRight,
                         general.position.x as u16,
                         general.position.y as u16,
                     );
                 } else if self.countdown % 4 == 2 {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::HostileShotLeft,
                         general.position.x as u16,
                         general.position.y as u16,

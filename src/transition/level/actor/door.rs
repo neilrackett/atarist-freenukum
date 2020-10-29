@@ -2,8 +2,8 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorMessageType,
-    ActorQueue,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageType,
 };
 use crate::{OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -43,7 +43,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         match self.state {

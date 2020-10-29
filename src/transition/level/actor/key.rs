@@ -2,7 +2,7 @@ use super::super::super::hero::{HeroData, InventoryItem};
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
@@ -30,7 +30,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
         let item = match general.actor_type {
@@ -43,7 +43,7 @@ impl ActorInterface for Specific {
 
         hero_data.inventory.set(item);
         hero_data.score.add(1000);
-        actor_queue.push_back(
+        actor_adder.add_actor(
             ActorType::Score1000,
             general.position.x as u16,
             general.position.y as u16,
@@ -55,7 +55,7 @@ impl ActorInterface for Specific {
         &mut self,
         _general: &mut ActorData,
         _level_data: &mut LevelData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
     }

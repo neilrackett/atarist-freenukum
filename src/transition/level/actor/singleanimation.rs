@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{
     ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
@@ -62,14 +62,14 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         _level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;
         if self.current_frame == self.num_frames {
             general.is_alive = false;
             if let Some(successor) = self.replaced_by {
-                actor_queue.push_back(
+                actor_adder.add_actor(
                     successor,
                     general.position.x as u16,
                     general.position.y as u16,
@@ -81,7 +81,7 @@ impl ActorInterface for Specific {
     fn hero_touch_start(
         &mut self,
         general: &mut ActorData,
-        _actor_queue: &mut ActorQueue,
+        _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         if self.can_hurt_hero {

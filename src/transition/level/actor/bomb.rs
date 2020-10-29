@@ -2,7 +2,7 @@ use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::LevelData;
 use super::{
-    ActorCreateInterface, ActorData, ActorInterface, ActorQueue, ActorType,
+    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
 use crate::{ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -45,7 +45,7 @@ impl ActorInterface for Specific {
         &mut self,
         general: &mut ActorData,
         level_data: &mut LevelData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
     ) {
         self.current_frame += 1;
@@ -67,7 +67,7 @@ impl ActorInterface for Specific {
                     general.position.y as usize / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::BombFire,
                         general.position.x as u16
                             - distance as u16 * TILE_WIDTH as u16,
@@ -88,7 +88,7 @@ impl ActorInterface for Specific {
                     general.position.y as usize / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
-                    actor_queue.push_back(
+                    actor_adder.add_actor(
                         ActorType::BombFire,
                         general.position.x as u16
                             + distance as u16 * TILE_WIDTH as u16,
