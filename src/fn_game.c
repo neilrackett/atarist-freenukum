@@ -524,7 +524,7 @@ int fn_game_start_in_level(
               break;
             case SDLK_LALT:
               fn_hero_data_set_is_shooting(hero, true);
-              fn_level_fire_shot(lv, hero, actor_queue);
+              fn_level_data_fire_shot(lv->data, hero, actor_queue);
               fn_hero_data_update_animation(hero);
               break;
             default:
@@ -572,7 +572,7 @@ int fn_game_start_in_level(
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
               fn_hero_data_set_is_shooting(hero, true);
-              fn_level_fire_shot(lv, hero, actor_queue);
+              fn_level_data_fire_shot(lv->data, hero, actor_queue);
               fn_hero_data_update_animation(hero);
               break;
             case SDL_BUTTON_RIGHT:

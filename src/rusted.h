@@ -312,8 +312,6 @@ typedef struct Texture Texture;
 
 typedef struct TileCache TileCache;
 
-typedef struct Vec_Shot Vec_Shot;
-
 typedef Texture FnTexture;
 
 typedef File FnFile;
@@ -411,10 +409,6 @@ typedef struct {
 } Settings;
 
 typedef Settings FnSettings;
-
-typedef Vec_Shot ShotList;
-
-typedef ShotList FnShotList;
 
 typedef struct {
     uint8_t tiles;
@@ -805,9 +799,22 @@ void fn_level_actors_list_send_message(FnLevelActorsList *ptr,
                                        FnHeroData *hero_data,
                                        FnLevelData *level_data);
 
+void fn_level_data_act(FnLevelData *ptr,
+                       FnHeroData *hero,
+                       FnLevelActorQueue *actor_queue);
+
 uintptr_t fn_level_data_animated_frames_since_last_act_increase(FnLevelData *ptr);
 
+void fn_level_data_blit(const FnLevelData *ptr,
+                        SDL_Surface *target,
+                        const FnTileCache *tilecache,
+                        bool draw_collision_bounds);
+
 FnLevelData *fn_level_data_create(void);
+
+void fn_level_data_fire_shot(FnLevelData *ptr,
+                             FnHeroData *hero,
+                             FnLevelActorQueue *actor_queue);
 
 void fn_level_data_free(FnLevelData *ptr);
 
@@ -922,30 +929,6 @@ FnSettings fn_settings_load_or_create(void);
 void fn_settings_save(FnSettings settings);
 
 bool fn_settings_toggle_fullscreen(FnSettings *settings);
-
-void fn_shot_list_act(FnShotList *l,
-                      FnHeroData *hero_data,
-                      FnLevelData *level_data,
-                      FnLevelActorQueue *actor_queue);
-
-void fn_shot_list_add(FnShotList *l,
-                      FnHeroData *hero_data,
-                      FnLevelData *level_data,
-                      FnLevelActorQueue *actor_queue,
-                      int16_t x,
-                      int16_t y,
-                      HorizontalDirection direction);
-
-void fn_shot_list_blit(const FnShotList *ptr,
-                       SDL_Surface *target,
-                       const FnTileCache *tilecache,
-                       bool draw_collision_bounds);
-
-uintptr_t fn_shot_list_count(const FnShotList *l);
-
-FnShotList *fn_shot_list_create(void);
-
-void fn_shot_list_free(FnShotList *ptr);
 
 void fn_text_print(FnTexture *target,
                    FnGeometry geometry,

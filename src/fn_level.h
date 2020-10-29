@@ -62,11 +62,6 @@ struct fn_level_t {
    * The surface for blitting the level.
    */
   SDL_Surface * surface;
-
-  /**
-   * The shots inside the level.
-   */
-  FnShotList * shots;
 };
 
 /* --------------------------------------------------------------- */
@@ -145,21 +140,6 @@ int fn_level_act(
         FnHeroData * hero,
         FnLevelActorQueue * actor_queue,
         FnLevelActorMessageQueue * actor_message_queue);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Let the hero fire a shot.
- *
- * If there are already the maximum of shots in the level,
- * no shot is created and this function returns.
- * 
- * @param  lv  The level.
- */
-void fn_level_fire_shot(
-        fn_level_t * lv,
-        FnHeroData * hero,
-        FnLevelActorQueue * actor_queue);
 
 /* --------------------------------------------------------------- */
 

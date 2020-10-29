@@ -1182,8 +1182,6 @@ pub mod ffi {
         let tilecache = unsafe { &(*tilecache) };
 
         assert!(!target.is_null());
-        let target = unsafe { &mut (*target) };
-
         let mut target = transdl::video::Surface { raw: target };
 
         actor.specific.blit(

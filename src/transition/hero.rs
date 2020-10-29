@@ -31,7 +31,7 @@ pub struct HeroData {
     pub fetched_letter_state: FetchedLetterState,
     pub immunity: Immunity,
     pub hidden: bool,
-    direction: HorizontalDirection,
+    pub direction: HorizontalDirection,
     just_turned_around: bool,
     motion: Motion,
     is_in_the_air: bool,

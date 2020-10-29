@@ -56,8 +56,6 @@ fn_level_t * fn_level_load(
 
   lv->data = fn_level_data_create();
 
-  lv->shots = fn_shot_list_create();
-
   lv->surface_fixed = SDL_CreateRGBSurface(
       texture_creation_params.flags,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
@@ -801,8 +799,6 @@ fn_level_t * fn_level_load(
 
 void fn_level_free(fn_level_t * lv)
 {
-  fn_shot_list_free(lv->shots);
-
   SDL_FreeSurface(lv->surface);
   SDL_FreeSurface(lv->surface_fixed);
 
@@ -916,8 +912,8 @@ void fn_level_blit_to_surface(
     }
   }
 
-  /* blit the shots */
-  fn_shot_list_blit(lv->shots, lv->surface, tilecache, draw_collision_bounds);
+  /* blit the rest of the level_data */
+  fn_level_data_blit(lv->data, lv->surface, tilecache, draw_collision_bounds);
 
   SDL_Rect trect = fn_geometry_as_sdl_rect(targetrect);
 
@@ -942,7 +938,7 @@ int fn_level_act(
   size_t animated_frames_since_last_act =
       fn_level_data_animated_frames_since_last_act_increase(lv->data);
 
-  fn_shot_list_act(lv->shots, hero, lv->data, actor_queue);
+  fn_level_data_act(lv->data, hero, actor_queue);
 
   int sum = 0;
   size_t actors_hurting_hero = 0;
@@ -990,29 +986,4 @@ int fn_level_act(
   fn_hero_data_update_animation(hero);
 
   return 1;
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_fire_shot(
-        fn_level_t * lv,
-        FnHeroData * hero,
-        FnLevelActorQueue * actor_queue)
-{
-  FnHeroFirepower * firepower = fn_hero_data_get_firepower(hero);
-  FnHeroPosition * position = fn_hero_data_get_position(hero);
-
-  if (fn_shot_list_count(lv->shots) < fn_hero_firepower_num_shots(firepower)) {
-    FnGeometry geometry = fn_hero_position_get_geometry(position);
-    HorizontalDirection direction = fn_hero_data_get_direction(hero);
-
-    fn_shot_list_add(
-            lv->shots,
-            hero,
-            lv->data,
-            actor_queue,
-            geometry.x,
-            geometry.y,
-            direction);
-  }
 }
