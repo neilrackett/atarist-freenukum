@@ -59,7 +59,6 @@ fn_level_t * fn_level_load(
   lv->animated_frames = 0;
 
   lv->shots = fn_shot_list_create();
-  lv->interactor = NULL;
 
   lv->surface_fixed = SDL_CreateRGBSurface(
       texture_creation_params.flags,
@@ -999,11 +998,7 @@ int fn_level_act(
 
 void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero)
 {
-  if (lv->interactor != NULL) {
-    fn_level_actor_hero_interact_end(
-            lv->interactor, lv->data, hero);
-  }
-  lv->interactor = NULL;
+  fn_level_data_hero_interact_end(lv->data, hero);
 }
 
 /* --------------------------------------------------------------- */
@@ -1014,30 +1009,8 @@ void fn_level_hero_interact_start(
         FnInfoMessageQueue * info_message_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
-  FnLevelActorsList * actors = fn_level_data_get_actors_list(lv->data);
-  for (size_t i = 0; i < fn_level_actors_list_count(actors); i++) {
-    FnLevelActor * actor = fn_level_actors_list_get(actors, i);
-
-    if (fn_level_actor_hero_can_interact(actor, hero)) {
-      FnHeroPosition * position = fn_hero_data_get_position(hero);
-
-      FnGeometry heropos = fn_hero_position_get_geometry(position);
-
-      if (fn_geometry_touches(heropos, fn_level_actor_get_position(actor)))
-      {
-        fn_level_hero_interact_stop(lv, hero);
-
-        lv->interactor = actor;
-        fn_level_actor_hero_interact_start(
-                actor,
-                lv->data,
-                hero,
-                info_message_queue,
-                actor_message_queue);
-        return;
-      }
-    }
-  }
+  fn_level_data_hero_interact_start(
+          lv->data, hero, info_message_queue, actor_message_queue);
 }
 
 /* --------------------------------------------------------------- */

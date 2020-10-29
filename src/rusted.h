@@ -819,6 +819,13 @@ FnLevelSolids *fn_level_data_get_solids(FnLevelData *ptr);
 
 FnLevelTiles *fn_level_data_get_tiles(FnLevelData *ptr);
 
+void fn_level_data_hero_interact_end(FnLevelData *ptr, FnHeroData *hero);
+
+void fn_level_data_hero_interact_start(FnLevelData *ptr,
+                                       FnHeroData *hero,
+                                       FnInfoMessageQueue *info_message_queue,
+                                       FnLevelActorMessageQueue *actor_message_queue);
+
 void fn_level_data_set_do_play(FnLevelData *ptr, bool do_play);
 
 void fn_level_data_set_level_passed(FnLevelData *ptr, bool level_passed);

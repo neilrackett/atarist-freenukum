@@ -3,6 +3,11 @@ pub mod raw;
 pub mod solids;
 pub mod tiles;
 
+use super::hero::HeroData;
+use super::infobox::InfoMessageQueue;
+use actor::ActorMessageQueue;
+
+#[derive(Debug)]
 pub struct LevelData {
     pub tiles: tiles::LevelTiles,
     pub solids: solids::LevelSolids,
@@ -21,6 +26,24 @@ impl LevelData {
             actors: actor::ActorsList::new(),
         }
     }
+
+    pub fn hero_interact_start(
+        &mut self,
+        hero: &mut HeroData,
+        info_message_queue: &mut InfoMessageQueue,
+        actor_message_queue: &mut ActorMessageQueue,
+    ) {
+        self.actors.start_interaction(
+            &mut self.level_passed,
+            hero,
+            info_message_queue,
+            actor_message_queue,
+        );
+    }
+
+    pub fn hero_interact_end(&mut self, hero: &mut HeroData) {
+        self.actors.end_interaction(&mut self.level_passed, hero);
+    }
 }
 
 impl actor::ActorAdder for LevelData {
@@ -37,7 +60,9 @@ impl actor::ActorAdder for LevelData {
 pub mod ffi {
     pub type FnLevelData = super::LevelData;
 
-    use super::actor::ffi::FnLevelActorsList;
+    use super::super::hero::ffi::FnHeroData;
+    use super::super::infobox::ffi::FnInfoMessageQueue;
+    use super::actor::ffi::{FnLevelActorMessageQueue, FnLevelActorsList};
     use super::solids::ffi::FnLevelSolids;
     use super::tiles::ffi::FnLevelTiles;
 
@@ -53,6 +78,48 @@ pub mod ffi {
                 Box::from_raw(ptr);
             }
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_hero_interact_start(
+        ptr: *mut FnLevelData,
+        hero: *mut FnHeroData,
+        info_message_queue: *mut FnInfoMessageQueue,
+        actor_message_queue: *mut FnLevelActorMessageQueue,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+
+        assert!(!hero.is_null());
+        let hero: &mut FnHeroData = unsafe { &mut (*hero) };
+
+        assert!(!info_message_queue.is_null());
+        let info_message_queue: &mut FnInfoMessageQueue =
+            unsafe { &mut (*info_message_queue) };
+
+        assert!(!actor_message_queue.is_null());
+        let actor_message_queue: &mut FnLevelActorMessageQueue =
+            unsafe { &mut (*actor_message_queue) };
+
+        d.hero_interact_start(
+            hero,
+            info_message_queue,
+            actor_message_queue,
+        );
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_hero_interact_end(
+        ptr: *mut FnLevelData,
+        hero: *mut FnHeroData,
+    ) {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+
+        assert!(!hero.is_null());
+        let hero: &mut FnHeroData = unsafe { &mut (*hero) };
+
+        d.hero_interact_end(hero);
     }
 
     #[no_mangle]

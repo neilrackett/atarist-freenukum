@@ -48,7 +48,7 @@ impl ActorInterface for Specific {
     fn hero_interact_start(
         &mut self,
         _general: &mut ActorData,
-        level_data: &mut LevelData,
+        level_passed: &mut bool,
         _hero_data: &mut HeroData,
         _info_message_queue: &mut InfoMessageQueue,
         _actor_message_queue: &mut ActorMessageQueue,
@@ -56,7 +56,7 @@ impl ActorInterface for Specific {
         if self.state == State::Closed {
             self.state = State::Opening;
         }
-        level_data.level_passed = true;
+        *level_passed = true;
     }
 
     fn act(

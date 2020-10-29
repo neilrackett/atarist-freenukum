@@ -1,5 +1,6 @@
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH};
 
+#[derive(Debug)]
 #[repr(C)]
 pub struct LevelTiles {
     tiles: [[u16; LEVEL_WIDTH]; LEVEL_HEIGHT],

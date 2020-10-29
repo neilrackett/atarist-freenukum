@@ -45,13 +45,18 @@ use super::super::level::tiles::LevelTiles;
 use super::super::level::LevelData;
 use super::super::tilecache::TileCache;
 
+#[derive(Debug)]
 pub struct ActorsList {
     actors: Vec<Actor>,
+    interaction_target: Option<usize>,
 }
 
 impl ActorsList {
     pub fn new() -> Self {
-        ActorsList { actors: Vec::new() }
+        ActorsList {
+            actors: Vec::new(),
+            interaction_target: None,
+        }
     }
 
     pub fn add(&mut self, actor: Actor) {
@@ -72,6 +77,13 @@ impl ActorsList {
             match self.actors.get(i) {
                 Some(a) if !a.general.is_alive => {
                     self.actors.remove(i);
+                    self.interaction_target = match self.interaction_target
+                    {
+                        Some(index) if index == i => None,
+                        Some(index) if index > i => Some(index - 1),
+                        Some(index) => Some(index),
+                        None => None,
+                    };
                 }
                 _ => {
                     i += 1;
@@ -121,6 +133,52 @@ impl ActorsList {
             }
         }
         hit_actor
+    }
+
+    pub fn start_interaction(
+        &mut self,
+        level_passed: &mut bool,
+        hero_data: &mut HeroData,
+        info_message_queue: &mut InfoMessageQueue,
+        actor_message_queue: &mut ActorMessageQueue,
+    ) {
+        let new_interactor = self.actors.iter().position(|actor| {
+            actor.hero_can_interact(hero_data)
+                && hero_data
+                    .position
+                    .geometry
+                    .touches(actor.general.position)
+        });
+
+        if let Some(i) = new_interactor {
+            self.end_interaction(level_passed, hero_data);
+
+            let actor = self.actors.get_mut(i).unwrap();
+            self.interaction_target = Some(i);
+            actor.specific.hero_interact_start(
+                &mut actor.general,
+                level_passed,
+                hero_data,
+                info_message_queue,
+                actor_message_queue,
+            );
+        }
+    }
+
+    pub fn end_interaction(
+        &mut self,
+        level_passed: &mut bool,
+        hero_data: &mut HeroData,
+    ) {
+        if let Some(i) = self.interaction_target.take() {
+            if let Some(actor) = self.actors.get_mut(i) {
+                actor.specific.hero_interact_end(
+                    &mut actor.general,
+                    level_passed,
+                    hero_data,
+                );
+            }
+        }
     }
 }
 
@@ -829,7 +887,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn hero_interact_start(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _level_passed: &mut bool,
         _hero_data: &mut HeroData,
         _info_message_queue: &mut InfoMessageQueue,
         _actor_message_queue: &mut ActorMessageQueue,
@@ -839,7 +897,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn hero_interact_end(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _level_passed: &mut bool,
         _hero_data: &mut HeroData,
     ) {
     }
@@ -891,7 +949,7 @@ pub mod ffi {
     pub type FnLevelActorQueue = super::ActorQueue;
     type FnLevelActorMessage = super::ActorMessage;
     pub type FnLevelActorMessageType = super::ActorMessageType;
-    type FnLevelActorMessageQueue = super::ActorMessageQueue;
+    pub type FnLevelActorMessageQueue = super::ActorMessageQueue;
     pub type FnLevelActorsList = super::ActorsList;
 
     use super::super::super::geometry::ffi::FnGeometry;
@@ -1077,7 +1135,7 @@ pub mod ffi {
 
         actor.specific.hero_interact_start(
             &mut actor.general,
-            level_data,
+            &mut level_data.level_passed,
             hero_data,
             info_message_queue,
             actor_message_queue,
@@ -1101,7 +1159,7 @@ pub mod ffi {
 
         actor.specific.hero_interact_end(
             &mut actor.general,
-            level_data,
+            &mut level_data.level_passed,
             hero_data,
         )
     }

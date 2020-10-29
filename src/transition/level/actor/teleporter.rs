@@ -33,7 +33,7 @@ impl ActorInterface for Specific {
     fn hero_interact_start(
         &mut self,
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _level_passed: &mut bool,
         _hero_data: &mut HeroData,
         _info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,

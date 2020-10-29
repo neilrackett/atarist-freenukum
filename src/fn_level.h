@@ -72,11 +72,6 @@ struct fn_level_t {
    * The number of animated frames since last action.
    */
   size_t animated_frames;
-
-  /**
-   * The actor with which the hero interacts.
-   */
-  FnLevelActor * interactor;
 };
 
 /* --------------------------------------------------------------- */
