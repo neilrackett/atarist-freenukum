@@ -52,7 +52,6 @@ c_src = [
     'src/fn_error_cmdline.c',
     'src/fn_game.c',
     'src/fn_level.c',
-    'src/fn_picture_splash.c',
     'src/freenukum.c'
 ]
 
@@ -322,7 +321,6 @@ test_picture_splash = executable(
         'src/fn_error.c',
         'src/fn_error_cmdline.c',
         'src/fn_level.c',
-        'src/fn_picture_splash.c',
     ],
     dependencies: [
         curl_lib,

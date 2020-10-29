@@ -35,7 +35,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_game.h"
-#include "fn_picture_splash.h"
 #include "fn_level.h"
 #include "rusted.h"
 

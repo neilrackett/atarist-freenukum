@@ -893,6 +893,19 @@ void fn_messagebox_get_text_information(const char *text,
 
 FnTexture *fn_picture_load(FnFile *file, FnTextureCreationParams params);
 
+bool fn_picture_splash_show(const FnTileCache *tilecache,
+                            FnTextureCreationParams texture_creation_params,
+                            SDL_Surface *target,
+                            FnFile *file);
+
+bool fn_picture_splash_show_with_message(const FnTileCache *tilecache,
+                                         FnTextureCreationParams texture_creation_params,
+                                         SDL_Surface *target,
+                                         FnFile *file,
+                                         const char *message,
+                                         int16_t x,
+                                         int16_t y);
+
 FnTextureCreationParams fn_sdl_surface_creation_params(SDL_Surface *surface);
 
 uint32_t fn_sdl_surface_transparent(SDL_Surface *surface);

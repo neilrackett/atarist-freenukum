@@ -44,7 +44,6 @@
 #include "fn.h"
 #include "fn_error_cmdline.h"
 #include "fn_error.h"
-#include "fn_picture_splash.h"
 #include "fn_game.h"
 #include "rusted.h"
 
