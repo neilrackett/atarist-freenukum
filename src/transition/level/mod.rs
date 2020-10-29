@@ -8,9 +8,11 @@ use super::infobox::InfoMessageQueue;
 use super::level::solids::LevelSolids;
 use super::level::tiles::LevelTiles;
 use super::shot::{Shot, ShotList};
+use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
 use crate::HALFTILE_WIDTH;
+use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 use actor::{ActorAdder, ActorMessageQueue, ActorsList};
 use transdl::video::Surface;
 
@@ -23,10 +25,12 @@ pub struct LevelData {
     pub actors: ActorsList,
     pub animated_frames_since_last_act: usize,
     pub shots: ShotList,
+    pub surface_fixed: Surface,
+    pub surface: Surface,
 }
 
 impl LevelData {
-    pub fn new() -> Self {
+    pub fn new(texture_creation_params: TextureCreationParams) -> Self {
         LevelData {
             tiles: LevelTiles::new(),
             solids: LevelSolids::new(),
@@ -35,6 +39,14 @@ impl LevelData {
             actors: ActorsList::new(),
             animated_frames_since_last_act: 0,
             shots: Vec::new(),
+            surface_fixed: texture_creation_params.create_surface(
+                TILE_WIDTH as u16 * LEVEL_WIDTH as u16,
+                TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
+            ),
+            surface: texture_creation_params.create_surface(
+                TILE_WIDTH as u16 * LEVEL_WIDTH as u16,
+                TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
+            ),
         }
     }
 
@@ -138,6 +150,7 @@ pub mod ffi {
 
     use super::super::hero::ffi::FnHeroData;
     use super::super::infobox::ffi::FnInfoMessageQueue;
+    use super::super::texture::ffi::FnTextureCreationParams;
     use super::super::tilecache::ffi::FnTileCache;
     use super::actor::ffi::{
         FnLevelActorMessageQueue, FnLevelActorQueue, FnLevelActorsList,
@@ -147,8 +160,10 @@ pub mod ffi {
     use transdl::ll::SDL_Surface;
 
     #[no_mangle]
-    pub extern "C" fn fn_level_data_create() -> *mut FnLevelData {
-        Box::into_raw(Box::new(FnLevelData::new()))
+    pub extern "C" fn fn_level_data_create(
+        texture_creation_params: FnTextureCreationParams,
+    ) -> *mut FnLevelData {
+        Box::into_raw(Box::new(FnLevelData::new(texture_creation_params)))
     }
 
     #[no_mangle]
@@ -331,5 +346,23 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnLevelData = unsafe { &mut (*ptr) };
         d.animated_frames_since_last_act_increase()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_get_surface(
+        ptr: *mut FnLevelData,
+    ) -> *mut SDL_Surface {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+        d.surface.raw
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_get_surface_fixed(
+        ptr: *mut FnLevelData,
+    ) -> *mut SDL_Surface {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+        d.surface_fixed.raw
     }
 }

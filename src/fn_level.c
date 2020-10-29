@@ -54,37 +54,7 @@ fn_level_t * fn_level_load(
   Uint8 uppertile;
   Uint8 lowertile;
 
-  lv->data = fn_level_data_create();
-
-  lv->surface_fixed = SDL_CreateRGBSurface(
-      texture_creation_params.flags,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
-      texture_creation_params.bits_per_pixel,
-      0,
-      0,
-      0,
-      0);
-
-  SDL_SetColorKey(
-          lv->surface_fixed,
-          SDL_SRCCOLORKEY,
-          texture_creation_params.transparent);
-
-  lv->surface = SDL_CreateRGBSurface(
-      texture_creation_params.flags,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT,
-      texture_creation_params.bits_per_pixel,
-      0,
-      0,
-      0,
-      0);
-
-  SDL_SetColorKey(
-          lv->surface,
-          SDL_SRCCOLORKEY,
-          texture_creation_params.transparent);
+  lv->data = fn_level_data_create(texture_creation_params);
 
   FnLevelTiles * tiles = fn_level_data_get_tiles(lv->data);
   FnLevelSolids * solids = fn_level_data_get_solids(lv->data);
@@ -767,10 +737,10 @@ fn_level_t * fn_level_load(
   /*
    * Blit everything fixed to lv->surface_fixed.
    */
-  Uint32 transparent;
-  transparent = SDL_MapRGB(lv->surface_fixed->format, 100, 1, 1);
-  SDL_SetColorKey(lv->surface, SDL_SRCCOLORKEY, transparent);
-  SDL_FillRect(lv->surface_fixed, NULL, transparent);
+  SDL_Surface * surface_fixed = fn_level_data_get_surface_fixed(lv->data);
+  Uint32 transparent = SDL_MapRGB(surface_fixed->format, 100, 1, 1);
+  SDL_SetColorKey(surface_fixed, SDL_SRCCOLORKEY, transparent);
+  SDL_FillRect(surface_fixed, NULL, transparent);
 
   FnGeometry r;
   r.w = FN_TILE_WIDTH;
@@ -787,7 +757,7 @@ fn_level_t * fn_level_load(
         r.x = x * FN_TILE_WIDTH;
         r.y = y * FN_TILE_HEIGHT;
         tile = fn_tilecache_get_tile(tilecache, tilenr);
-        fn_texture_blit_to_sdl_surface(tile, NULL, lv->surface_fixed, &r);
+        fn_texture_blit_to_sdl_surface(tile, NULL, surface_fixed, &r);
       }
     }
   }
@@ -799,9 +769,6 @@ fn_level_t * fn_level_load(
 
 void fn_level_free(fn_level_t * lv)
 {
-  SDL_FreeSurface(lv->surface);
-  SDL_FreeSurface(lv->surface_fixed);
-
   fn_level_data_free(lv->data);
 
   free(lv);
@@ -830,15 +797,17 @@ void fn_level_blit_to_surface(
   SDL_FillRect(lv->surface, sourcerect, 0);
   */
   SDL_Rect srcrect = fn_geometry_as_sdl_rect(sourcerect);
+  SDL_Surface * surface_fixed = fn_level_data_get_surface_fixed(lv->data);
+  SDL_Surface * surface = fn_level_data_get_surface(lv->data);
   if (backdrop1 != NULL) {
     fn_texture_blit_to_sdl_surface(
-        backdrop1, NULL, lv->surface, sourcerect);
+        backdrop1, NULL, surface, sourcerect);
   } else {
-    SDL_FillRect(lv->surface, &srcrect, 0);
+    SDL_FillRect(surface, &srcrect, 0);
   }
 
   SDL_BlitSurface(
-      lv->surface_fixed, &srcrect, lv->surface, &srcrect);
+      surface_fixed, &srcrect, surface, &srcrect);
 
   /* calculate the bounds of the area we have to blit. */
   if (sourcerect) {
@@ -881,7 +850,7 @@ void fn_level_blit_to_surface(
                 actor,
                 hero,
                 tilecache,
-                lv->surface,
+                surface,
                 draw_collision_bounds);
       }
     } else {
@@ -891,7 +860,7 @@ void fn_level_blit_to_surface(
 
   /* blit the hero */
   fn_hero_data_blit(hero,
-      lv->surface,
+      surface,
       tilecache,
       fn_level_data_get_solids(lv->data),
       draw_collision_bounds);
@@ -906,19 +875,19 @@ void fn_level_blit_to_surface(
                 actor,
                 hero,
                 tilecache,
-                lv->surface,
+                surface,
                 draw_collision_bounds);
       }
     }
   }
 
   /* blit the rest of the level_data */
-  fn_level_data_blit(lv->data, lv->surface, tilecache, draw_collision_bounds);
+  fn_level_data_blit(lv->data, surface, tilecache, draw_collision_bounds);
 
   SDL_Rect trect = fn_geometry_as_sdl_rect(targetrect);
 
   /* blit the whole thing to the caller */
-  SDL_BlitSurface(lv->surface, &srcrect, target, &trect);
+  SDL_BlitSurface(surface, &srcrect, target, &trect);
 }
 
 /* --------------------------------------------------------------- */

@@ -810,7 +810,7 @@ void fn_level_data_blit(const FnLevelData *ptr,
                         const FnTileCache *tilecache,
                         bool draw_collision_bounds);
 
-FnLevelData *fn_level_data_create(void);
+FnLevelData *fn_level_data_create(FnTextureCreationParams texture_creation_params);
 
 void fn_level_data_fire_shot(FnLevelData *ptr,
                              FnHeroData *hero,
@@ -825,6 +825,10 @@ bool fn_level_data_get_do_play(const FnLevelData *ptr);
 bool fn_level_data_get_level_passed(const FnLevelData *ptr);
 
 FnLevelSolids *fn_level_data_get_solids(FnLevelData *ptr);
+
+SDL_Surface *fn_level_data_get_surface(FnLevelData *ptr);
+
+SDL_Surface *fn_level_data_get_surface_fixed(FnLevelData *ptr);
 
 FnLevelTiles *fn_level_data_get_tiles(FnLevelData *ptr);
 

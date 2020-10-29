@@ -52,16 +52,6 @@ struct fn_level_t {
    * Level data
    */
   FnLevelData * data;
-
-  /**
-   * The surface which contains the always fixed tiles.
-   */
-  SDL_Surface * surface_fixed;
-
-  /**
-   * The surface for blitting the level.
-   */
-  SDL_Surface * surface;
 };
 
 /* --------------------------------------------------------------- */
