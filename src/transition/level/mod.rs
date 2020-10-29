@@ -1,4 +1,5 @@
 pub mod actor;
+pub mod raw;
 pub mod solids;
 pub mod tiles;
 

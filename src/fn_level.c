@@ -44,7 +44,8 @@ fn_level_t * fn_level_load(
         FnFile* file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
-        FnTextureCreationParams texture_creation_params)
+        FnTextureCreationParams texture_creation_params,
+        FnLevelRaw * out_param_raw_to_fill)
 {
   size_t i = 0;
   fn_level_t * lv = malloc(sizeof(fn_level_t));
@@ -106,7 +107,9 @@ fn_level_t * fn_level_load(
     fn_file_read(file, &uppertile, 1);
     tilenr = (uppertile << 8) | lowertile;
 
-    lv->raw[y][x] = tilenr;
+    if (out_param_raw_to_fill != NULL) {
+        fn_level_raw_set(out_param_raw_to_fill, x, y, tilenr);
+    }
 
     if ((tilenr >= 4) && (tilenr <= 0x2fe0)) {
       fn_level_tiles_set(tiles, x, y, tilenr / 0x20);
@@ -813,13 +816,6 @@ void fn_level_free(fn_level_t * lv)
   fn_level_data_free(lv->data);
 
   free(lv);
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y)
-{
-  return lv->raw[y][x];
 }
 
 /* --------------------------------------------------------------- */

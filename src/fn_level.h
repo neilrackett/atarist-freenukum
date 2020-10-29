@@ -49,11 +49,6 @@ typedef struct fn_level_t fn_level_t;
  */
 struct fn_level_t {
   /**
-   * Stores the raw data loaded from the level.
-   */
-  Uint16 raw[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
-
-  /**
    * Level data
    */
   FnLevelData * data;
@@ -100,7 +95,8 @@ fn_level_t * fn_level_load(
         FnFile * file,
         FnHeroData * hero,
         const FnTileCache * tilecache,
-        FnTextureCreationParams texture_creation_params);
+        FnTextureCreationParams texture_creation_params,
+        FnLevelRaw * out_param_raw_to_fill);
 
 /* --------------------------------------------------------------- */
 
@@ -110,19 +106,6 @@ fn_level_t * fn_level_load(
  * @param  level  The level to destroy.
  */
 void fn_level_free(fn_level_t * lv);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the raw value of a certain position inside the level.
- *
- * @param  lv  The level.
- * @param  x   The x coordinate.
- * @param  y   The y coordinate.
- *
- * @return  The raw tile number of the position.
- */
-Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
 
 /* --------------------------------------------------------------- */
 

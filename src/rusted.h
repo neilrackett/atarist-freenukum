@@ -298,6 +298,8 @@ typedef struct Inventory Inventory;
 
 typedef struct LevelData LevelData;
 
+typedef struct LevelRaw LevelRaw;
+
 typedef struct Menu Menu;
 
 typedef struct Position Position;
@@ -405,6 +407,8 @@ typedef struct {
 } LevelTiles;
 
 typedef LevelTiles FnLevelTiles;
+
+typedef LevelRaw FnLevelRaw;
 
 typedef MainMenuEntry FnMainMenuEntry;
 
@@ -829,6 +833,17 @@ FnLevelTiles *fn_level_data_get_tiles(FnLevelData *ptr);
 void fn_level_data_set_do_play(FnLevelData *ptr, bool do_play);
 
 void fn_level_data_set_level_passed(FnLevelData *ptr, bool level_passed);
+
+FnLevelRaw *fn_level_raw_create(void);
+
+void fn_level_raw_free(FnLevelRaw *ptr);
+
+uint16_t fn_level_raw_get(const FnLevelRaw *ptr, uintptr_t x, uintptr_t y);
+
+void fn_level_raw_set(FnLevelRaw *ptr,
+                      uintptr_t x,
+                      uintptr_t y,
+                      uint16_t tile);
 
 bool fn_level_solids_collides(const FnLevelSolids *ptr, FnGeometry rect);
 

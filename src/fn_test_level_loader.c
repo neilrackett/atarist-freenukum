@@ -154,8 +154,9 @@ int main(int argc, char ** argv)
     FnHeroData * hero = fn_hero_data_create();
     bool draw_collision_bounds = settings.draw_collision_bounds;
 
+    FnLevelRaw * raw = fn_level_raw_create();
     lv = fn_level_load(
-            file, hero, tilecache, texture_creation_params);
+            file, hero, tilecache, texture_creation_params, raw);
     if (lv == NULL)
     {
         fn_file_free(file);
@@ -268,7 +269,7 @@ int main(int argc, char ** argv)
                       tile_x = global_x / FN_TILE_WIDTH;
                       tile_y = global_y / FN_TILE_HEIGHT;
 
-                      tilenr = fn_level_get_raw(lv, tile_x, tile_y);
+                      tilenr = fn_level_raw_get(raw, tile_x, tile_y);
                       FnLevelSolids * solids =
                           fn_level_data_get_solids(lv->data);
                       is_solid = fn_level_solids_get(
@@ -287,6 +288,7 @@ int main(int argc, char ** argv)
         }
     }
 
+    fn_level_raw_free(raw);
     fn_level_free(lv);
     fn_hero_data_free(hero);
     fn_episodes_free(episodes);
