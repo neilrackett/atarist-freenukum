@@ -14,6 +14,7 @@ pub struct LevelData {
     pub do_play: bool,
     pub level_passed: bool,
     pub actors: actor::ActorsList,
+    pub animated_frames_since_last_act: usize,
 }
 
 impl LevelData {
@@ -24,6 +25,7 @@ impl LevelData {
             do_play: true,
             level_passed: false,
             actors: actor::ActorsList::new(),
+            animated_frames_since_last_act: 0,
         }
     }
 
@@ -43,6 +45,12 @@ impl LevelData {
 
     pub fn hero_interact_end(&mut self, hero: &mut HeroData) {
         self.actors.end_interaction(&mut self.level_passed, hero);
+    }
+
+    pub fn animated_frames_since_last_act_increase(&mut self) -> usize {
+        self.animated_frames_since_last_act += 1;
+        self.animated_frames_since_last_act %= 1;
+        self.animated_frames_since_last_act
     }
 }
 
@@ -185,5 +193,14 @@ pub mod ffi {
         assert!(!ptr.is_null());
         let d: &mut FnLevelData = unsafe { &mut (*ptr) };
         d.level_passed = level_passed
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_level_data_animated_frames_since_last_act_increase(
+        ptr: *mut FnLevelData,
+    ) -> usize {
+        assert!(!ptr.is_null());
+        let d: &mut FnLevelData = unsafe { &mut (*ptr) };
+        d.animated_frames_since_last_act_increase()
     }
 }

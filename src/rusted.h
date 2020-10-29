@@ -805,6 +805,8 @@ void fn_level_actors_list_send_message(FnLevelActorsList *ptr,
                                        FnHeroData *hero_data,
                                        FnLevelData *level_data);
 
+uintptr_t fn_level_data_animated_frames_since_last_act_increase(FnLevelData *ptr);
+
 FnLevelData *fn_level_data_create(void);
 
 void fn_level_data_free(FnLevelData *ptr);

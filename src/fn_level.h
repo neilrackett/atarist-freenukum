@@ -67,11 +67,6 @@ struct fn_level_t {
    * The shots inside the level.
    */
   FnShotList * shots;
-
-  /**
-   * The number of animated frames since last action.
-   */
-  size_t animated_frames;
 };
 
 /* --------------------------------------------------------------- */

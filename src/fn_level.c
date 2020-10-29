@@ -56,8 +56,6 @@ fn_level_t * fn_level_load(
 
   lv->data = fn_level_data_create();
 
-  lv->animated_frames = 0;
-
   lv->shots = fn_shot_list_create();
 
   lv->surface_fixed = SDL_CreateRGBSurface(
@@ -941,8 +939,8 @@ int fn_level_act(
         FnLevelActorQueue * actor_queue,
         FnLevelActorMessageQueue * actor_message_queue)
 {
-  lv->animated_frames ++;
-  lv->animated_frames %= 1;
+  size_t animated_frames_since_last_act =
+      fn_level_data_animated_frames_since_last_act_increase(lv->data);
 
   fn_shot_list_act(lv->shots, hero, lv->data, actor_queue);
 
@@ -983,7 +981,7 @@ int fn_level_act(
 
   fn_hero_data_set_gets_hurt(hero, actors_hurting_hero > 0);
 
-  if (lv->animated_frames == 0) {
+  if (animated_frames_since_last_act == 0) {
     /* do some action, not just animation */
     fn_hero_data_act(hero, fn_level_data_get_solids(lv->data));
   }
