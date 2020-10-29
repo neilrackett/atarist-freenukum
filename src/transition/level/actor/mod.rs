@@ -67,7 +67,17 @@ impl ActorsList {
     }
 
     pub fn remove_dead(&mut self) {
-        self.actors.retain(|a| a.general.is_alive);
+        let mut i = 0;
+        while i < self.actors.len() {
+            match self.actors.get(i) {
+                Some(a) if !a.general.is_alive => {
+                    self.actors.remove(i);
+                }
+                _ => {
+                    i += 1;
+                }
+            }
+        }
     }
 
     pub fn send_message(
