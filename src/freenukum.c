@@ -42,8 +42,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn.h"
-#include "fn_error_cmdline.h"
-#include "fn_error.h"
 #include "fn_game.h"
 #include "rusted.h"
 
@@ -59,8 +57,6 @@ int main(int argc, char ** argv)
 
   char backgroundfile[10] = "dn.dn1";
 /* --------------------------------------------------------------- */
-
-  fn_error_set_handler(fn_error_print_commandline);
 
   FnSettings settings = fn_settings_load_or_create();
   
@@ -101,7 +97,6 @@ int main(int argc, char ** argv)
       file);
   fn_file_free(file);
   if (!res) {
-    fn_error_printf(1024, "Could not show splash screen.\n");
     exit(retval);
   }
 

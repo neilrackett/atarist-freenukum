@@ -38,8 +38,6 @@
 #include "config.h"
 #include "fn.h"
 #include "fn_object.h"
-#include "fn_error.h"
-#include "fn_error_cmdline.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -110,9 +108,6 @@ int main(int argc, char ** argv)
       fn_sdl_surface_creation_params(screen);
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
-
-  fn_error_set_handler(fn_error_print_commandline);
-
 
   Uint8 size[] = {
     48,

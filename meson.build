@@ -18,7 +18,6 @@ rust_src = files(
     'src/borders.rs',
     'src/game.rs',
     'src/lib.rs',
-    'src/settings.rs',
     'src/sprite.rs',
     'src/text.rs',
     'src/tile.rs',
@@ -48,8 +47,6 @@ cargo_build = custom_target(
 )
 
 c_src = [
-    'src/fn_error.c',
-    'src/fn_error_cmdline.c',
     'src/fn_game.c',
     'src/fn_level.c',
     'src/freenukum.c'
@@ -79,8 +76,6 @@ test_tile = executable(
     'test_tile',
     [
         'src/fn_test_tile.c',
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -102,8 +97,6 @@ test_borders = executable(
     'test_borders',
     [
         'src/fn_test_borders.c',
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -125,8 +118,6 @@ test_drop = executable(
     [
         'src/fn_test_drop.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -143,22 +134,11 @@ test_drop = executable(
     ],
 )
 
-test_error = executable(
-    'test_error',
-    [
-        'src/fn_test_error.c',
-
-        'src/fn_error.c',
-    ],
-)
-
 test_hero = executable(
     'test_hero',
     [
         'src/fn_test_hero.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -180,8 +160,6 @@ test_infobox = executable(
     [
         'src/fn_test_infobox.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -203,8 +181,6 @@ test_inputbox = executable(
     [
         'src/fn_test_inputbox.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -226,8 +202,6 @@ test_level_loader = executable(
     [
         'src/fn_test_level_loader.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -249,8 +223,6 @@ test_menu = executable(
     [
         'src/fn_test_menu.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -272,8 +244,6 @@ test_msgbox = executable(
     [
         'src/fn_test_msgbox.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -295,8 +265,6 @@ test_picture = executable(
     [
         'src/fn_test_picture.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -318,8 +286,6 @@ test_picture_splash = executable(
     [
         'src/fn_test_picture_splash.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [
@@ -341,8 +307,6 @@ test_tilecache = executable(
     [
         'src/fn_test_tilecache.c',
 
-        'src/fn_error.c',
-        'src/fn_error_cmdline.c',
         'src/fn_level.c',
     ],
     dependencies: [

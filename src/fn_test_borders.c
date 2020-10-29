@@ -34,8 +34,6 @@
 #include "config.h"
 #include "fn.h"
 #include "fn_object.h"
-#include "fn_error.h"
-#include "fn_error_cmdline.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -45,8 +43,6 @@ int main(int argc, char ** argv)
   SDL_Event event;
 
   int res;
-
-  fn_error_set_handler(fn_error_print_commandline);
 
   FnSettings settings = fn_settings_load_or_create();
   
