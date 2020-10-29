@@ -996,25 +996,6 @@ int fn_level_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero)
-{
-  fn_level_data_hero_interact_end(lv->data, hero);
-}
-
-/* --------------------------------------------------------------- */
-
-void fn_level_hero_interact_start(
-        fn_level_t * lv,
-        FnHeroData * hero,
-        FnInfoMessageQueue * info_message_queue,
-        FnLevelActorMessageQueue * actor_message_queue)
-{
-  fn_level_data_hero_interact_start(
-          lv->data, hero, info_message_queue, actor_message_queue);
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_level_add_shot(
     fn_level_t * lv,
     FnHeroData * hero,

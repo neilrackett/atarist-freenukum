@@ -154,28 +154,6 @@ int fn_level_act(
 /* --------------------------------------------------------------- */
 
 /**
- * Call this function to make the hero interact with items around.
- *
- * @param  lv  The level whose hero should interact.
- */
-void fn_level_hero_interact_start(
-        fn_level_t * lv,
-        FnHeroData * hero,
-        FnInfoMessageQueue * info_message_queue,
-        FnLevelActorMessageQueue * actor_message_queue);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Call this function to make the hero stop interacting with an item.
- *
- * @param  lv  The level whose hero should interact.
- */
-void fn_level_hero_interact_stop(fn_level_t * lv, FnHeroData * hero);
-
-/* --------------------------------------------------------------- */
-
-/**
  * Let the hero fire a shot.
  *
  * If there are already the maximum of shots in the level,
