@@ -56,7 +56,7 @@ int fn_picture_splash_show(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
-    char * filename);
+    FnFile * file);
 
 /* --------------------------------------------------------------- */
 
@@ -81,7 +81,7 @@ int fn_picture_splash_show_with_message(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
-    char * filename,
+    FnFile * file,
     char * message,
     Uint8 x,
     Uint8 y);

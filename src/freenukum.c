@@ -94,11 +94,13 @@ int main(int argc, char ** argv)
 
 
   /* show the splash screen */
+  FnFile * file = fn_data_open_file(backgroundfile);
   res = fn_picture_splash_show(
       tilecache,
       texture_creation_params,
       screen,
-      backgroundfile);
+      file);
+  fn_file_free(file);
   if (!res) {
     fn_error_printf(1024, "Could not show splash screen.\n");
     exit(retval);
@@ -109,18 +111,22 @@ int main(int argc, char ** argv)
     choice = fn_mainmenu(screen, tilecache, texture_creation_params);
     switch(choice) {
       case MainMenuEntry_Start:
-        fn_game_start(
-            tilecache,
-            hero_data,
-            texture_creation_params,
-            screen,
-            &settings,
-            fn_episodes_current(episodes) + 1);
-        res = fn_picture_splash_show(
-            tilecache,
-            texture_creation_params,
-            screen,
-            backgroundfile);
+        {
+          fn_game_start(
+              tilecache,
+              hero_data,
+              texture_creation_params,
+              screen,
+              &settings,
+              fn_episodes_current(episodes) + 1);
+          FnFile * file = fn_data_open_file(backgroundfile);
+          res = fn_picture_splash_show(
+              tilecache,
+              texture_creation_params,
+              screen,
+              file);
+          fn_file_free(file);
+        }
         break;
       case MainMenuEntry_Restore:
         fn_infobox_show(screen, tilecache, texture_creation_params,
@@ -159,11 +165,15 @@ int main(int argc, char ** argv)
                 "We stay in this episode\n");
             snprintf(backgroundfile,
                 7, "dn.dn%d", episode);
+            FnFile * file = fn_data_open_file(backgroundfile);
             res = fn_picture_splash_show(
-                    tilecache, texture_creation_params, screen, backgroundfile);
+                    tilecache, texture_creation_params, screen, file);
+            fn_file_free(file);
           } else {
+            FnFile * file = fn_data_open_file(backgroundfile);
             res = fn_picture_splash_show(
-                    tilecache, texture_creation_params, screen, backgroundfile);
+                    tilecache, texture_creation_params, screen, file);
+            fn_file_free(file);
           }
         }
         break;
@@ -180,8 +190,12 @@ int main(int argc, char ** argv)
             "Userdemo not implemented yet.\n");
         break;
       case MainMenuEntry_TitleScreen:
-        res = fn_picture_splash_show(tilecache, texture_creation_params, screen,
-            backgroundfile);
+        {
+            FnFile * file = fn_data_open_file(backgroundfile);
+            res = fn_picture_splash_show(tilecache, texture_creation_params, screen,
+                    file);
+            fn_file_free(file);
+        }
         break;
       case MainMenuEntry_Credits:
         fn_infobox_show(screen, tilecache, texture_creation_params,

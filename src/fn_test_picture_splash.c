@@ -61,8 +61,10 @@ int main(int argc, char ** argv)
   const FnTileCache * tilecache =
       fn_tilecache_load(texture_creation_params);
 
+  FnFile * file = fn_data_open_file("dn.dn1");
   fn_picture_splash_show(
-          tilecache, texture_creation_params, screen, "dn.dn1");
+          tilecache, texture_creation_params, screen, file);
+  fn_file_free(file);
 
   SDL_FreeSurface(screen);
   

@@ -5,7 +5,7 @@ use crate::{
 use std::fs::File;
 use std::io::Read;
 
-pub fn picture_load(
+pub fn load(
     input: &mut File,
     params: TextureCreationParams,
 ) -> Result<Texture> {
@@ -94,7 +94,7 @@ mod ffi {
         params: FnTextureCreationParams,
     ) -> *mut FnTexture {
         let file = unsafe { &mut (*file) };
-        match super::picture_load(file.as_ref_mut(), params) {
+        match super::load(file.as_ref_mut(), params) {
             Ok(t) => Box::into_raw(Box::new(t)),
             Err(e) => {
                 eprintln!("Error loading picture: {:?}", e);

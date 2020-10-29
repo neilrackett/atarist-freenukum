@@ -78,29 +78,35 @@ void fn_game_start(
     "with you and still have\n"
     "time to watch Oprah!\n";
 
-  char filename[30];
 
+  FnFile * file = NULL;
+
+  char filename[30];
   snprintf(
       filename, 30, "badguy.dn%ld", episode);
+  file = fn_data_open_file(filename);
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
       target,
-      filename,
+      file,
       msg1,
       0,
       144);
+  fn_file_free(file);
 
   snprintf(
       filename, 30, "duke.dn%ld", episode);
+  file = fn_data_open_file(filename);
   fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
       target,
-      filename,
+      file,
       msg2,
       79,
       144);
+  fn_file_free(file);
 
   fn_hero_data_reset(hero_data);
   FnHeroInventory * inventory = fn_hero_data_get_inventory(hero_data);

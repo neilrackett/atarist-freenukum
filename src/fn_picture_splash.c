@@ -48,13 +48,13 @@ int fn_picture_splash_show(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
-    char * filename)
+    FnFile * file)
 {
   return fn_picture_splash_show_with_message(
       tilecache,
       texture_creation_params,
       target,
-      filename,
+      file,
       NULL,
       0,0);
 }
@@ -65,17 +65,14 @@ int fn_picture_splash_show_with_message(
     const FnTileCache * tilecache,
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
-    char * filename,
+    FnFile * file,
     char * msg,
     Uint8 x,
     Uint8 y)
 {
-  FnFile * file;
   int res;
   SDL_Event event;
   FnTexture * picture;
-
-  file = fn_data_open_file(filename);
 
   picture = fn_picture_load(file, texture_creation_params);
 
