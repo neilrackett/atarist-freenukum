@@ -994,19 +994,6 @@ int fn_level_act(
 
 /* --------------------------------------------------------------- */
 
-void fn_level_add_shot(
-    fn_level_t * lv,
-    FnHeroData * hero,
-    FnHorizontalDirection direction,
-    Uint16 x,
-    Uint16 y,
-    FnLevelActorQueue * actor_queue)
-{
-  fn_shot_list_add(lv->shots, hero, lv->data, actor_queue, x, y, direction);
-}
-
-/* --------------------------------------------------------------- */
-
 void fn_level_fire_shot(
         fn_level_t * lv,
         FnHeroData * hero,
@@ -1019,123 +1006,13 @@ void fn_level_fire_shot(
     FnGeometry geometry = fn_hero_position_get_geometry(position);
     HorizontalDirection direction = fn_hero_data_get_direction(hero);
 
-    fn_level_add_shot(
-            lv,
+    fn_shot_list_add(
+            lv->shots,
             hero,
-            direction,
+            lv->data,
+            actor_queue,
             geometry.x,
             geometry.y,
-            actor_queue);
+            direction);
   }
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_level_stands_on_solid_ground_completely(
-        FnLevelSolids * solids,
-        FnGeometry rect)
-{
-  if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
-    return 0;
-  }
-  Uint16 i = 0;
-  Uint16 j = (rect.y + rect.h) / FN_TILE_HEIGHT;
-  for (i = rect.x / FN_TILE_WIDTH;
-      i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
-      i++)
-  {
-    if (!fn_level_solids_get(solids, i, j)) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-/* --------------------------------------------------------------- */
-
-
-Uint8 fn_level_stands_on_solid_ground_partially(
-        FnLevelSolids * solids, FnGeometry rect)
-{
-  if ((rect.y + rect.h) % FN_TILE_HEIGHT) {
-    return 0;
-  }
-  Uint16 i = 0;
-  Uint16 j = (rect.y + rect.h) / FN_TILE_HEIGHT;
-  for (i = rect.x / FN_TILE_WIDTH;
-      i < (rect.x + rect.w - 1) / FN_TILE_WIDTH + 1;
-      i++)
-  {
-    if (fn_level_solids_get(solids, i, j)) {
-      return 1;
-    }
-  }
-  return 0;
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_level_push_rect_standing_on_solid_ground(
-        FnLevelSolids * solids,
-        FnGeometry rect,
-        Sint8 offset,
-        Uint8 gravity)
-{
-  if (fn_level_solids_collides(solids, rect)) {
-    /* locked in, so don't move at all */
-    return 0;
-  }
-
-  /* fall down as far as possible */
-  fn_level_rect_fall_down(solids, rect, gravity);
-
-  /* check if we stand on solid ground before movement */
-  Uint8 stood_solid = fn_level_stands_on_solid_ground_completely(
-      solids, rect);
-
-  rect.x += offset;
-
-  if (fn_level_solids_collides(solids, rect)) {
-    /* we collide with something, so we revert to original position */
-    rect.x -= offset;
-    return 0;
-  }
-
-  if (stood_solid && fn_level_stands_on_solid_ground_completely(
-        solids, rect)) {
-    /* we stood on solid ground before, and still do. */
-    return 1;
-  } else if (stood_solid) {
-    /* we stood on solid ground before, but do no longer now. */
-    rect.x -= offset;
-    return 0;
-  } else {
-    /* we walk on partial solid ground as long as possible. */
-    return 1;
-  }
-}
-
-/* --------------------------------------------------------------- */
-
-Uint8 fn_level_rect_fall_down(
-    FnLevelSolids * solids, FnGeometry rect, Uint8 dist)
-{
-  if (fn_level_solids_collides(solids, rect)) {
-    /* can't fall down because collides with solid ground */
-    return 0;
-  }
-  if (fn_level_stands_on_solid_ground_partially(solids, rect)) {
-    /* stands on solid ground so can't fall down */
-    return 0;
-  }
-  Uint8 i = 0;
-  while (i < dist) {
-    /* check how far we can fall down */
-    rect.y++;
-    if (fn_level_stands_on_solid_ground_partially(solids, rect)) {
-      return i;
-    }
-    i++;
-  }
-  return i;
 }
