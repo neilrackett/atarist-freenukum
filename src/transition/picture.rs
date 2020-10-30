@@ -89,7 +89,7 @@ pub fn load(
     Ok(picture)
 }
 
-fn show_splash_with_message(
+pub fn show_splash_with_message(
     tilecache: &TileCache,
     texture_creation_params: TextureCreationParams,
     target: &mut Surface,

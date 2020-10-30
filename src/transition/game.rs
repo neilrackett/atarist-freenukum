@@ -3,9 +3,11 @@ use super::data::original_data_dir;
 use super::episodes::Episodes;
 use super::geometry::Geometry;
 use super::hero::{HeroData, InventoryItem, Motion};
+use super::infobox;
 use super::infobox::InfoMessageQueue;
 use super::level::actor::{ActorMessageQueue, ActorQueue, ActorType};
 use super::level::LevelData;
+use super::picture::show_splash_with_message;
 use super::settings::Settings;
 use super::texture::TextureCreationParams;
 use super::tile::TileHeader;
@@ -23,6 +25,7 @@ use transdl::timer::Timer;
 use transdl::ttf::Font;
 use transdl::video::Surface;
 
+#[derive(PartialEq, Eq)]
 enum Ending {
     Passed,
     Failed,
@@ -36,6 +39,7 @@ fn start_in_level(
     target: &mut Surface,
     settings: &mut Settings,
     episodes: &Episodes,
+    borders: &Borders,
 ) -> Result<Ending> {
     let mut level_surface = texture_creation_params.create_surface(
         (TILE_WIDTH * LEVEL_WIDTH) as u16,
@@ -112,8 +116,6 @@ fn start_in_level(
     let mut do_update = true;
     let mut update_whole_screen = true;
     let mut directions = HashSet::new();
-
-    let borders = Borders {};
 
     'game_loop: while level_data.do_play {
         if do_update {
@@ -503,6 +505,134 @@ fn start_in_level(
     Ok(ending)
 }
 
+fn start(
+    tilecache: &TileCache,
+    hero: &mut HeroData,
+    texture_creation_params: TextureCreationParams,
+    target: &mut Surface,
+    settings: &mut Settings,
+    episodes: &Episodes,
+) -> Result<()> {
+    {
+        let filename = format!("badguy.{}", episodes.file_extension());
+        let filepath = original_data_dir().join(filename);
+        let mut file = File::open(filepath)?;
+        let message = "\
+            So you're the pitiful\n\
+            hero they sent to stop\n\
+            me. I, Dr. Proton, will\n\
+            soon rule the world!";
+        show_splash_with_message(
+            tilecache,
+            texture_creation_params,
+            target,
+            &mut file,
+            Some(message),
+            0,
+            144,
+        )?;
+    }
+    {
+        let filename = format!("duke.{}", episodes.file_extension());
+        let filepath = original_data_dir().join(filename);
+        let mut file = File::open(filepath)?;
+        let message = "\
+            You're wrong, Proton\n\
+            breath. I'll be done\n\
+            with you and still have\n\
+            time to watch Oprah!";
+        show_splash_with_message(
+            tilecache,
+            texture_creation_params,
+            target,
+            &mut file,
+            Some(message),
+            79,
+            144,
+        )?;
+    }
+
+    hero.reset();
+
+    target.fill(0);
+
+    let borders = Borders {};
+    borders.blit(target, texture_creation_params, tilecache);
+    borders.blit_life(
+        target,
+        texture_creation_params,
+        tilecache,
+        hero.health.life(),
+    );
+    borders.blit_score(
+        target,
+        texture_creation_params,
+        tilecache,
+        hero.score.value(),
+    );
+    borders.blit_firepower(
+        target,
+        texture_creation_params,
+        tilecache,
+        &hero.firepower,
+    );
+    borders.blit_inventory(
+        target,
+        texture_creation_params,
+        tilecache,
+        &hero.inventory,
+    );
+
+    target.update();
+
+    // start the game itself
+    let mut level = 1;
+    let mut interlevel = false;
+    let mut success = Ending::Passed;
+
+    infobox::show(
+        target,
+        tilecache,
+        texture_creation_params,
+        "Get ready FreeNukum,\nyou are going in.\n",
+    );
+
+    while success == Ending::Passed && level < 13 {
+        if interlevel {
+            success = start_in_level(
+                2,
+                tilecache,
+                hero,
+                texture_creation_params,
+                target,
+                settings,
+                episodes,
+                &borders,
+            )?;
+            level = if level == 1 { level + 2 } else { level + 1 };
+            interlevel = false;
+        } else {
+            success = start_in_level(
+                level,
+                tilecache,
+                hero,
+                texture_creation_params,
+                target,
+                settings,
+                episodes,
+                &borders,
+            )?;
+            interlevel = true;
+        }
+    }
+
+    if success == Ending::Passed {
+        // TODO: the player finished, so we should show the end sequence
+    }
+
+    Ok(())
+}
+
 fn check_episodes(target: &mut Surface) -> Episodes {
     let episodes = Episodes::find_installed();
     if episodes.count() == 0 {
@@ -607,6 +737,7 @@ pub mod ffi {
     use super::super::settings::ffi::FnSettings;
     use super::super::texture::ffi::FnTextureCreationParams;
     use super::super::tilecache::ffi::FnTileCache;
+    use super::Borders;
     use super::Ending;
     use libc::c_char;
     use transdl::ll::SDL_Surface;
@@ -680,6 +811,7 @@ pub mod ffi {
         assert!(!episodes.is_null());
         let episodes = unsafe { &(*episodes) };
 
+        let borders = Borders {};
         match super::start_in_level(
             level_number,
             tilecache,
@@ -688,11 +820,47 @@ pub mod ffi {
             &mut target,
             settings,
             episodes,
+            &borders,
         )
         .unwrap()
         {
             Ending::Passed => true,
             Ending::Failed => false,
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn fn_game_start(
+        tilecache: *const FnTileCache,
+        hero: *mut FnHeroData,
+        texture_creation_params: FnTextureCreationParams,
+        target: *mut SDL_Surface,
+        settings: *mut FnSettings,
+        episodes: *const FnEpisodes,
+    ) {
+        assert!(!tilecache.is_null());
+        let tilecache = unsafe { &(*tilecache) };
+
+        assert!(!hero.is_null());
+        let hero = unsafe { &mut (*hero) };
+
+        assert!(!target.is_null());
+        let mut target = transdl::video::Surface { raw: target };
+
+        assert!(!settings.is_null());
+        let settings = unsafe { &mut (*settings) };
+
+        assert!(!episodes.is_null());
+        let episodes = unsafe { &(*episodes) };
+
+        super::start(
+            tilecache,
+            hero,
+            texture_creation_params,
+            &mut target,
+            settings,
+            episodes,
+        )
+        .unwrap();
     }
 }

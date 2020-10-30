@@ -21,6 +21,7 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
+        general.is_in_foreground = false;
         Specific {}
     }
 }

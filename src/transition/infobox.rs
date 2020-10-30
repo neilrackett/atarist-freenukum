@@ -5,7 +5,7 @@ use super::tilecache::TileCache;
 use transdl::event::Event;
 use transdl::video::Surface;
 
-fn show(
+pub fn show(
     screen: &mut Surface,
     tilecache: &TileCache,
     texture_creation_params: TextureCreationParams,
