@@ -5,8 +5,8 @@ use std::path::PathBuf;
 #[repr(C)]
 pub struct Settings {
     pixelsize: u8,
-    fullscreen: bool,
-    draw_collision_bounds: bool,
+    pub fullscreen: bool,
+    pub draw_collision_bounds: bool,
 }
 
 impl Default for Settings {

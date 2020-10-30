@@ -52,27 +52,7 @@ void fn_game_start(
     FnTextureCreationParams texture_creation_params,
     SDL_Surface * target,
     FnSettings * settings,
-    size_t episode);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Start the game from a certain level.
- *
- * @param  levelnumber  The level number (must be between 1 and 12).
- * @param  env          The environment.
- * @param  hero         The hero to use.
- *
- * @return Non-zero if the level was completed successfully, else zero.
- */
-int fn_game_start_in_level(
-    int levelnumber,
-    const FnTileCache * tilecache,
-    FnHeroData * hero,
-    FnTextureCreationParams texture_creation_params,
-    SDL_Surface * target,
-    FnSettings * settings,
-    size_t episode);
+    FnEpisodes * episodes);
 
 /* --------------------------------------------------------------- */
 

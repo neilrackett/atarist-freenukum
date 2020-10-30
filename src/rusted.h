@@ -328,6 +328,16 @@ typedef Inventory FnHeroInventory;
 
 typedef Episodes FnEpisodes;
 
+typedef HeroData FnHeroData;
+
+typedef struct {
+    uint8_t pixelsize;
+    bool fullscreen;
+    bool draw_collision_bounds;
+} Settings;
+
+typedef Settings FnSettings;
+
 typedef struct {
     int16_t x;
     int16_t y;
@@ -336,8 +346,6 @@ typedef struct {
 } Geometry;
 
 typedef Geometry FnGeometry;
-
-typedef HeroData FnHeroData;
 
 typedef struct {
     bool solids[LEVEL_HEIGHT][LEVEL_WIDTH];
@@ -388,14 +396,6 @@ typedef LevelRaw FnLevelRaw;
 typedef MainMenuEntry FnMainMenuEntry;
 
 typedef Menu FnMenu;
-
-typedef struct {
-    uint8_t pixelsize;
-    bool fullscreen;
-    bool draw_collision_bounds;
-} Settings;
-
-typedef Settings FnSettings;
 
 typedef struct {
     uint8_t tiles;
@@ -468,6 +468,14 @@ SDL_Surface *fn_game_initialize_and_get_window(int32_t width,
                                                const char *icon);
 
 void fn_game_show_missing_data_information(SDL_Surface *target);
+
+bool fn_game_start_in_level(uintptr_t level_number,
+                            const FnTileCache *tilecache,
+                            FnHeroData *hero,
+                            FnTextureCreationParams texture_creation_params,
+                            SDL_Surface *target,
+                            FnSettings *settings,
+                            const FnEpisodes *episodes);
 
 SDL_Rect fn_geometry_as_sdl_rect(const FnGeometry *ptr);
 

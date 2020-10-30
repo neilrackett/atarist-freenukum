@@ -1005,6 +1005,12 @@ pub struct ActorMessageQueue {
 }
 
 impl ActorMessageQueue {
+    pub fn new() -> Self {
+        ActorMessageQueue {
+            messages: Vec::new(),
+        }
+    }
+
     pub fn push_back(
         &mut self,
         receivers: ActorType,

@@ -88,6 +88,12 @@ impl Surface {
         }
     }
 
+    pub fn update(&mut self) {
+        unsafe {
+            ll::SDL_UpdateRect(self.raw, 0, 0, 0, 0);
+        }
+    }
+
     pub fn blit(
         &self,
         srcrect: Option<Rect>,
@@ -116,6 +122,10 @@ impl Surface {
 
     pub fn height(&self) -> usize {
         unsafe { *self.raw }.h as usize
+    }
+
+    pub fn toggle_fullscreen(&mut self) -> bool {
+        unsafe { ll::SDL_WM_ToggleFullScreen(self.raw) != 0 }
     }
 }
 

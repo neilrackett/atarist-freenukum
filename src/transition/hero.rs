@@ -33,9 +33,9 @@ pub struct HeroData {
     pub hidden: bool,
     pub direction: HorizontalDirection,
     just_turned_around: bool,
-    motion: Motion,
+    pub motion: Motion,
     is_in_the_air: bool,
-    is_shooting: bool,
+    pub is_shooting: bool,
     counter: usize,
     base_tile_number: usize,
     current_frame: usize,
@@ -282,7 +282,7 @@ impl HeroData {
         };
     }
 
-    fn jump(&mut self) {
+    pub fn jump(&mut self) {
         if !self.is_in_the_air {
             self.counter = if self.inventory.is_set(InventoryItem::Boot) {
                 7
@@ -587,7 +587,7 @@ impl Immunity {
 
 #[derive(Debug)]
 pub struct Score {
-    count: u64,
+    count: u128,
 }
 
 impl Score {
@@ -595,7 +595,7 @@ impl Score {
         Score { count: 0 }
     }
 
-    pub fn add(&mut self, amount: u64) {
+    pub fn add(&mut self, amount: u128) {
         self.count = self.count.saturating_add(amount);
         self.emit_update();
     }
@@ -607,6 +607,10 @@ impl Score {
 
     fn emit_update(&self) {
         transdl::event::push_user_event(UserEvent::HeroScored as i32);
+    }
+
+    pub fn value(&self) -> u128 {
+        self.count
     }
 }
 
@@ -660,6 +664,10 @@ impl Health {
         transdl::event::push_user_event(
             UserEvent::HeroHealthChanged as i32,
         );
+    }
+
+    pub fn life(&self) -> u8 {
+        self.life
     }
 }
 
@@ -1320,7 +1328,7 @@ pub mod ffi {
     ) {
         assert!(!score.is_null());
         let score: &mut FnHeroScore = unsafe { &mut (*score) };
-        score.add(amount);
+        score.add(amount as u128);
     }
 
     #[no_mangle]
@@ -1364,7 +1372,7 @@ pub mod ffi {
     pub extern "C" fn fn_hero_score_get(score: *const FnHeroScore) -> u64 {
         assert!(!score.is_null());
         let score: &FnHeroScore = unsafe { &(*score) };
-        score.count
+        score.count as u64
     }
 
     #[no_mangle]

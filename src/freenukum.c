@@ -112,7 +112,7 @@ int main(int argc, char ** argv)
               texture_creation_params,
               screen,
               &settings,
-              fn_episodes_current(episodes) + 1);
+              episodes);
           FnFile * file = fn_data_open_file(backgroundfile);
           res = fn_picture_splash_show(
               tilecache,

@@ -218,7 +218,7 @@ impl Menu {
                     screen.update_rect(0, 0, 0, 0);
                     None
                 }
-                Ok(Event::UserEvent) => {
+                Ok(Event::UserEvent { code: 0 }) => {
                     animationframe += 1;
                     animationframe %= 4;
                     changed = true;

@@ -65,6 +65,12 @@ pub struct InfoMessageQueue {
 }
 
 impl InfoMessageQueue {
+    pub fn new() -> Self {
+        InfoMessageQueue {
+            messages: Vec::new(),
+        }
+    }
+
     pub fn process(
         &mut self,
         screen: &mut Surface,

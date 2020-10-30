@@ -37,7 +37,9 @@ pub enum Event {
     Quit,
     VideoResize,
     VideoExpose,
-    UserEvent,
+    UserEvent {
+        code: i32,
+    },
 }
 
 impl Event {
@@ -133,8 +135,8 @@ impl Event {
                 Ok(Event::VideoExpose)
             }
             ll::SDL_EventType_SDL_USEREVENT => {
-                // TODO: Incomplete
-                Ok(Event::UserEvent)
+                let e = unsafe { raw.user };
+                Ok(Event::UserEvent { code: e.code })
             }
             v => Err(format!("Unknown event type {:?}", v)),
         }
