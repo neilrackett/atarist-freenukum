@@ -3,7 +3,6 @@ use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -26,7 +25,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16 * 2;
         general.position.h = TILE_HEIGHT as u16;
@@ -66,9 +66,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
@@ -87,10 +89,10 @@ impl ActorInterface for Specific {
             );
             hero_data.score.add(2500);
         } else {
-            if level_data.solids.get(
+            if solids.get(
                 general.position.x as usize / TILE_WIDTH,
                 general.position.y as usize / TILE_HEIGHT + 1,
-            ) && !level_data.solids.get(
+            ) && !solids.get(
                 general.position.x as usize / TILE_WIDTH + 1,
                 general.position.y as usize / TILE_HEIGHT + 1,
             ) {
@@ -104,14 +106,14 @@ impl ActorInterface for Specific {
                     HorizontalDirection::Center => unreachable!(),
                 };
 
-                if !level_data.solids.get(
+                if !solids.get(
                     // check if the place next ot the bot is free
                     (general.position.x as isize
                         + direction * HALFTILE_WIDTH as isize)
                         as usize
                         / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT,
-                ) && level_data.solids.get(
+                ) && solids.get(
                     // check if the tile below is solid
                     (general.position.x as isize
                         + direction * HALFTILE_WIDTH as isize)

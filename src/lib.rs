@@ -32,6 +32,7 @@ pub const MAX_LIFE: usize = 8;
 pub const MAX_FIREPOWER: usize = 4;
 pub const SCORE_DIGITS: usize = 8;
 pub const LEVELWINDOW_WIDTH: usize = 13;
+pub const LEVELWINDOW_HEIGHT: usize = 10;
 
 /// The height of the level in full tiles
 pub const LEVEL_HEIGHT: usize = 90;
@@ -93,7 +94,7 @@ const SOLID_CONVEYORBELT_RIGHTEND: usize = SOLID_CONVEYORBELT + 6;
 
 const ANIMATION_START: usize = SOLID_START + 4 * 48;
 
-const ANIMATION_FOOTBOT: usize = ANIMATION_START + 10;
+const _ANIMATION_FOOTBOT: usize = ANIMATION_START + 10;
 const ANIMATION_CARBOT: usize = ANIMATION_START + 34;
 const ANIMATION_EXPLOSION: usize = ANIMATION_START + 42;
 const ANIMATION_FIREWHEEL_OFF: usize = ANIMATION_START + 48;

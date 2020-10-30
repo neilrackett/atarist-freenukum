@@ -41,7 +41,7 @@ pub struct HeroData {
     current_frame: usize,
     num_frames: usize,
     vertical_speed: usize,
-    gets_hurt: bool,
+    pub gets_hurt: bool,
 }
 
 impl HeroData {
@@ -214,7 +214,7 @@ impl HeroData {
         }
     }
 
-    fn enter_level(&mut self, x: i16, y: i16) {
+    pub fn enter_level(&mut self, x: i16, y: i16) {
         self.position.geometry.x = x;
         self.position.geometry.y = y;
         self.reset_for_level();
@@ -306,7 +306,7 @@ impl HeroData {
     }
 
     /// Returns the remaining health
-    fn act(&mut self, solids: &LevelSolids) -> u8 {
+    pub fn act(&mut self, solids: &LevelSolids) -> u8 {
         let mut hero_moved = false;
 
         self.immunity.count_down();

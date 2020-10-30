@@ -1,6 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -18,14 +19,15 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         let mut floor_length = 0;
-        while !level_data.solids.get(
+        while !solids.get(
             general.position.x as usize / TILE_WIDTH + floor_length,
             general.position.y as usize / TILE_HEIGHT,
         ) {
-            level_data.solids.set(
+            solids.set(
                 general.position.x as usize / TILE_WIDTH + floor_length,
                 general.position.y as usize / TILE_HEIGHT,
                 true,
@@ -49,9 +51,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         // Detect whether the hero is standing upon the floor.
         // We can't use the hero_touch_start functionality here
@@ -77,7 +81,7 @@ impl ActorInterface for Specific {
         if self.touch_count >= 2 {
             let mut r = general.position;
             for _ in 0..self.floor_length {
-                level_data.solids.set(
+                solids.set(
                     r.x as usize / TILE_WIDTH,
                     r.y as usize / TILE_HEIGHT,
                     false,

@@ -35,7 +35,6 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_game.h"
-#include "fn_level.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -208,7 +207,6 @@ int fn_game_start_in_level(
 {
   int returnvalue = 0;
   FnFile * file = NULL;
-  fn_level_t * lv = NULL;
   FnGeometry dstrect;
   FnGeometry srcrect;
   SDL_Event event;
@@ -301,7 +299,7 @@ int fn_game_start_in_level(
     goto cleanup;
   }
 
-  lv = fn_level_load(
+  FnLevelData * lv = fn_level_data_load(
           file, hero, tilecache, texture_creation_params, NULL);
   if (lv == NULL)
   {
@@ -354,18 +352,18 @@ int fn_game_start_in_level(
       fn_level_actor_message_queue_create();
 
   /* The mainloop of the level */
-  while (fn_level_keep_on_playing(lv))
+  while (fn_level_data_get_do_play(lv))
   {
     if (doupdate) {
       SDL_Rect srect = fn_geometry_as_sdl_rect(&srcrect);
-      fn_level_blit_to_surface(
+      fn_level_data_blit(
           lv,
+          level,
           tilecache,
           hero,
           settings->draw_collision_bounds,
-          level,
-          &srcrect,
-          &srcrect,
+          srcrect,
+          srcrect,
           backdrop,
           NULL);
       // I don't know the reason, but when using
@@ -449,8 +447,8 @@ int fn_game_start_in_level(
               updateWholeScreen = 1;
               break;
             case SDLK_0:
-              fn_level_data_set_level_passed(lv->data, true);
-              fn_level_data_set_do_play(lv->data, false);
+              fn_level_data_set_level_passed(lv, true);
+              fn_level_data_set_do_play(lv, false);
               break;
             case SDLK_f:
               {
@@ -477,7 +475,7 @@ int fn_game_start_in_level(
                 }
               } else {
                 fn_level_data_hero_interact_start(
-                        lv->data, hero, info_message_queue, actor_message_queue);
+                        lv, hero, info_message_queue, actor_message_queue);
               }
               doupdate = 1;
               break;
@@ -524,7 +522,7 @@ int fn_game_start_in_level(
               break;
             case SDLK_LALT:
               fn_hero_data_set_is_shooting(hero, true);
-              fn_level_data_fire_shot(lv->data, hero, actor_queue);
+              fn_level_data_fire_shot(lv, hero, actor_queue);
               fn_hero_data_update_animation(hero);
               break;
             default:
@@ -535,7 +533,7 @@ int fn_game_start_in_level(
         case SDL_KEYUP:
           switch(event.key.keysym.sym) {
             case SDLK_UP:
-              fn_level_data_hero_interact_end(lv->data, hero);
+              fn_level_data_hero_interact_end(lv, hero);
               doupdate = 1;
               break;
             case SDLK_LEFT:
@@ -572,7 +570,7 @@ int fn_game_start_in_level(
           switch(event.button.button) {
             case SDL_BUTTON_LEFT:
               fn_hero_data_set_is_shooting(hero, true);
-              fn_level_data_fire_shot(lv->data, hero, actor_queue);
+              fn_level_data_fire_shot(lv, hero, actor_queue);
               fn_hero_data_update_animation(hero);
               break;
             case SDL_BUTTON_RIGHT:
@@ -581,7 +579,7 @@ int fn_game_start_in_level(
               break;
             case SDL_BUTTON_MIDDLE:
               fn_level_data_hero_interact_start(
-                      lv->data, hero, info_message_queue, actor_message_queue);
+                      lv, hero, info_message_queue, actor_message_queue);
               doupdate = 1;
               break;
             default:
@@ -598,7 +596,7 @@ int fn_game_start_in_level(
             case SDL_BUTTON_RIGHT:
               break;
             case SDL_BUTTON_MIDDLE:
-              fn_level_data_hero_interact_end(lv->data, hero);
+              fn_level_data_hero_interact_end(lv, hero);
               doupdate = 1;
               break;
             default:
@@ -611,7 +609,7 @@ int fn_game_start_in_level(
         case SDL_USEREVENT:
           switch(event.user.code) {
             case UserEvent_Timer:
-              fn_level_act(lv, hero, actor_queue, actor_message_queue);
+              fn_level_data_act(lv, hero, actor_queue, actor_message_queue);
               doupdate = 1;
               break;
             case UserEvent_HeroMoved:
@@ -710,8 +708,8 @@ cleanup:
     fn_texture_free(backdrop);
   }
   if (lv != NULL) {
-    returnvalue = fn_level_data_get_level_passed(lv->data);
-    fn_level_free(lv);
+    returnvalue = fn_level_data_get_level_passed(lv);
+    fn_level_data_free(lv);
   }
   SDL_RemoveTimer(tick);
   SDL_FreeSurface(level);

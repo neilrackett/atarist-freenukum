@@ -2,7 +2,6 @@ use super::super::super::hero::HeroData;
 use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -20,14 +19,15 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
         general.is_in_foreground = false;
 
         while general.position.y > 0
-            && !level_data.solids.get(
+            && !solids.get(
                 general.position.x as usize / TILE_WIDTH,
                 general.position.y as usize / TILE_HEIGHT - 1,
             )
@@ -58,9 +58,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         if self.lives > 0 {
             self.current_frame += 1;

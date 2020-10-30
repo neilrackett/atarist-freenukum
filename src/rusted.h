@@ -21,6 +21,8 @@
 
 #define INVENTORY_WIDTH (HEALTH_COUNT / 2)
 
+#define LEVELWINDOW_HEIGHT 10
+
 #define LEVELWINDOW_WIDTH 13
 
 /**
@@ -54,12 +56,6 @@
 #define WINDOW_HEIGHT 200
 
 #define WINDOW_WIDTH 320
-
-typedef enum {
-    ActorMessageType_OpenDoor,
-    ActorMessageType_Teleport,
-    ActorMessageType_Expand,
-} ActorMessageType;
 
 typedef enum {
     ActorType_FireWheelBot,
@@ -373,20 +369,11 @@ typedef Actor FnLevelActor;
 
 typedef LevelData FnLevelData;
 
+typedef ActorMessageQueue FnLevelActorMessageQueue;
+
 typedef ActorQueue FnLevelActorQueue;
 
 typedef ActorType FnLevelActorType;
-
-typedef ActorMessageQueue FnLevelActorMessageQueue;
-
-typedef struct {
-    ActorType receivers;
-    ActorMessageType message;
-} ActorMessage;
-
-typedef ActorMessage FnLevelActorMessage;
-
-typedef ActorMessageType FnLevelActorMessageType;
 
 typedef ActorsList FnLevelActorsList;
 
@@ -706,32 +693,13 @@ void fn_inputfield_symbol_pressed(FnInputField *ptr, char symbol);
 
 uintptr_t fn_inputfield_text_length(const FnInputField *ptr);
 
-bool fn_level_actor_act(FnLevelActor *actor,
-                        FnLevelData *level_data,
-                        FnHeroData *hero_data,
-                        FnLevelActorQueue *actor_queue);
-
-bool fn_level_actor_acts_while_invisible(const FnLevelActor *actor);
-
 void fn_level_actor_blit(FnLevelActor *actor,
                          FnHeroData *hero_data,
                          const FnTileCache *tilecache,
                          SDL_Surface *target,
                          bool draw_collision_bounds);
 
-bool fn_level_actor_can_get_shot(const FnLevelActor *actor);
-
-FnLevelActor *fn_level_actor_create(FnLevelActorType actor_type,
-                                    FnLevelData *level_data,
-                                    int16_t x,
-                                    int16_t y);
-
-void fn_level_actor_free(FnLevelActor *ptr);
-
 FnGeometry fn_level_actor_get_position(const FnLevelActor *actor);
-
-bool fn_level_actor_hero_can_interact(const FnLevelActor *actor,
-                                      const FnHeroData *hero_data);
 
 void fn_level_actor_hero_interact_end(FnLevelActor *actor,
                                       FnLevelData *level_data,
@@ -755,62 +723,33 @@ FnLevelActorMessageQueue *fn_level_actor_message_queue_create(void);
 
 void fn_level_actor_message_queue_free(FnLevelActorMessageQueue *ptr);
 
-bool fn_level_actor_message_queue_has_items(const FnLevelActorMessageQueue *ptr);
-
-FnLevelActorMessage fn_level_actor_message_queue_pop_front(FnLevelActorMessageQueue *ptr);
-
 FnLevelActorQueue *fn_level_actor_queue_create(void);
 
 void fn_level_actor_queue_free(FnLevelActorQueue *ptr);
-
-void fn_level_actor_queue_process(FnLevelActorQueue *queue,
-                                  FnLevelData *destination);
 
 void fn_level_actor_queue_push_back(FnLevelActorQueue *ptr,
                                     FnLevelActorType actor_type,
                                     uint16_t x,
                                     uint16_t y);
 
-void fn_level_actor_receive_message(FnLevelActor *actor,
-                                    FnLevelActorMessageType message,
-                                    FnHeroData *hero_data,
-                                    FnLevelData *level_data);
-
 void fn_level_actor_set_visible(FnLevelActor *actor, bool visible);
-
-FnLevelActorType fn_level_actor_type(const FnLevelActor *actor);
-
-void fn_level_actors_list_add_actor(FnLevelActorsList *ptr,
-                                    FnLevelData *level_data,
-                                    FnLevelActorType actor_type,
-                                    int16_t x,
-                                    int16_t y);
-
-uintptr_t fn_level_actors_list_count(const FnLevelActorsList *ptr);
-
-FnLevelActor *fn_level_actors_list_get(FnLevelActorsList *ptr,
-                                       uintptr_t index);
-
-void fn_level_actors_list_remove_dead(FnLevelActorsList *ptr);
-
-void fn_level_actors_list_send_message(FnLevelActorsList *ptr,
-                                       FnLevelActorType receivers,
-                                       FnLevelActorMessageType message,
-                                       FnHeroData *hero_data,
-                                       FnLevelData *level_data);
 
 void fn_level_data_act(FnLevelData *ptr,
                        FnHeroData *hero,
-                       FnLevelActorQueue *actor_queue);
+                       FnLevelActorQueue *actor_queue,
+                       FnLevelActorMessageQueue *actor_message_queue);
 
 uintptr_t fn_level_data_animated_frames_since_last_act_increase(FnLevelData *ptr);
 
-void fn_level_data_blit(const FnLevelData *ptr,
+void fn_level_data_blit(FnLevelData *ptr,
                         SDL_Surface *target,
                         const FnTileCache *tilecache,
-                        bool draw_collision_bounds);
-
-FnLevelData *fn_level_data_create(FnTextureCreationParams texture_creation_params);
+                        FnHeroData *hero,
+                        bool draw_collision_bounds,
+                        FnGeometry targetrect,
+                        FnGeometry sourcerect,
+                        const FnTexture *backdrop1,
+                        const FnTexture *backdrop2);
 
 void fn_level_data_fire_shot(FnLevelData *ptr,
                              FnHeroData *hero,
@@ -838,6 +777,12 @@ void fn_level_data_hero_interact_start(FnLevelData *ptr,
                                        FnHeroData *hero,
                                        FnInfoMessageQueue *info_message_queue,
                                        FnLevelActorMessageQueue *actor_message_queue);
+
+FnLevelData *fn_level_data_load(FnFile *file,
+                                FnHeroData *hero,
+                                const FnTileCache *tilecache,
+                                FnTextureCreationParams texture_creation_params,
+                                FnLevelRaw *raw);
 
 void fn_level_data_set_do_play(FnLevelData *ptr, bool do_play);
 

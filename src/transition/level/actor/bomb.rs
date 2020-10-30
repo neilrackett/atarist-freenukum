@@ -1,6 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -22,7 +23,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Self {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
@@ -44,9 +46,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
@@ -58,11 +62,11 @@ impl ActorInterface for Specific {
             let distance = self.counter - self.explode_threshold;
             if self.explode_left {
                 // explode to the left if possible
-                let space_is_free = !level_data.solids.get(
+                let space_is_free = !solids.get(
                     general.position.x as usize / TILE_WIDTH - distance,
                     general.position.y as usize / TILE_HEIGHT,
                 );
-                let space_has_solid_below = level_data.solids.get(
+                let space_has_solid_below = solids.get(
                     general.position.x as usize / TILE_WIDTH - distance,
                     general.position.y as usize / TILE_HEIGHT + 1,
                 );
@@ -79,11 +83,11 @@ impl ActorInterface for Specific {
             }
             if self.explode_right {
                 // explode to the right if possible
-                let space_is_free = !level_data.solids.get(
+                let space_is_free = !solids.get(
                     general.position.x as usize / TILE_WIDTH + distance,
                     general.position.y as usize / TILE_HEIGHT,
                 );
-                let space_has_solid_below = level_data.solids.get(
+                let space_has_solid_below = solids.get(
                     general.position.x as usize / TILE_WIDTH + distance,
                     general.position.y as usize / TILE_HEIGHT + 1,
                 );

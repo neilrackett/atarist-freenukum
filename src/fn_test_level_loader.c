@@ -36,7 +36,6 @@
 
 #include "config.h"
 #include "fn.h"
-#include "fn_level.h"
 #include "rusted.h"
 
 /* --------------------------------------------------------------- */
@@ -69,7 +68,6 @@ void scroll(
 
 int main(int argc, char ** argv)
 {
-    fn_level_t * lv = NULL;
     FnFile * file;
     int quit = 0;
     int res;
@@ -155,7 +153,7 @@ int main(int argc, char ** argv)
     bool draw_collision_bounds = settings.draw_collision_bounds;
 
     FnLevelRaw * raw = fn_level_raw_create();
-    lv = fn_level_load(
+    FnLevelData * lv = fn_level_data_load(
             file, hero, tilecache, texture_creation_params, raw);
     if (lv == NULL)
     {
@@ -188,14 +186,14 @@ int main(int argc, char ** argv)
     r.w = FN_TILE_WIDTH * FN_LEVEL_WIDTH;
     r.h = FN_TILE_HEIGHT * FN_LEVEL_HEIGHT;
 
-    fn_level_blit_to_surface(
+    fn_level_data_blit(
             lv,
+            level,
             tilecache,
             hero,
             draw_collision_bounds,
-            level,
-            &r,
-            &r,
+            r,
+            r,
             NULL,
             NULL);
 
@@ -271,7 +269,7 @@ int main(int argc, char ** argv)
 
                       tilenr = fn_level_raw_get(raw, tile_x, tile_y);
                       FnLevelSolids * solids =
-                          fn_level_data_get_solids(lv->data);
+                          fn_level_data_get_solids(lv);
                       is_solid = fn_level_solids_get(
                               solids, tile_x, tile_y);
                       printf("Tile number x=%d y=%d: 0x%04x; Solid: %s\n",
@@ -289,7 +287,7 @@ int main(int argc, char ** argv)
     }
 
     fn_level_raw_free(raw);
-    fn_level_free(lv);
+    fn_level_data_free(lv);
     fn_hero_data_free(hero);
     fn_episodes_free(episodes);
 

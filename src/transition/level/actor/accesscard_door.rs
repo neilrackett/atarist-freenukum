@@ -1,6 +1,7 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
     ActorMessageType,
@@ -18,7 +19,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Self {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
@@ -36,9 +38,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
@@ -62,14 +66,14 @@ impl ActorInterface for Specific {
         general: &mut ActorData,
         message: ActorMessageType,
         _hero_data: &mut HeroData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
     ) {
         if message != ActorMessageType::OpenDoor {
             return;
         }
         let x = general.position.x as usize / TILE_WIDTH;
         let y = general.position.y as usize / TILE_HEIGHT;
-        level_data.solids.set(x, y, false);
+        solids.set(x, y, false);
         general.is_alive = false;
     }
 }

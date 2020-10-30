@@ -3,7 +3,6 @@ use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -28,7 +27,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
@@ -71,9 +71,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         if self.was_shot == 2 {
             general.is_alive = false;
@@ -111,7 +113,7 @@ impl ActorInterface for Specific {
                 HorizontalDirection::Center => unreachable!(),
             };
 
-            if !level_data.solids.push_rect_standing_on_ground(
+            if !solids.push_rect_standing_on_ground(
                 &mut general.position,
                 direction * HALFTILE_WIDTH as i16 / 2,
                 HALFTILE_HEIGHT as u8,

@@ -2,7 +2,6 @@ use super::super::super::hero::HeroData;
 use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -18,7 +17,8 @@ pub(crate) struct Specific {}
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
     ) -> Self {
         general.is_in_foreground = false;
         general.position.w = TILE_WIDTH as u16;
@@ -26,7 +26,7 @@ impl ActorCreateInterface for Specific {
 
         let x = general.position.x as usize / TILE_WIDTH;
         let y = general.position.y as usize / TILE_HEIGHT;
-        level_data.tiles.copy_from_to(x, y + 1, x, y);
+        tiles.copy_from_to(x, y + 1, x, y);
 
         Specific {}
     }
@@ -36,9 +36,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
     }
 

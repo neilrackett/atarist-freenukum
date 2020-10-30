@@ -1,7 +1,8 @@
 use super::super::super::hero::HeroData;
 use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
     ActorMessageQueue,
@@ -27,7 +28,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16 * 2;
         general.position.h = TILE_HEIGHT as u16;
@@ -41,9 +43,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         let hero_geometry = hero_data.position.geometry;
 
@@ -61,27 +65,26 @@ impl ActorInterface for Specific {
 
         match self.state {
             State::Ascending => {
-                if level_data.solids.get(
+                if solids.get(
                     general.position.x as usize / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT - 3,
                 ) {
                     // hero touches solid with head
                     self.state = State::Idle;
                 } else {
-                    let offset = hero_data.position.push_vertically(
-                        &level_data.solids,
-                        -(TILE_HEIGHT as i16),
-                    );
+                    let offset = hero_data
+                        .position
+                        .push_vertically(&solids, -(TILE_HEIGHT as i16));
                     if -offset < TILE_HEIGHT as i16 {
                         hero_data
                             .position
-                            .push_vertically(&level_data.solids, -offset);
+                            .push_vertically(&solids, -offset);
                         self.state = State::Idle;
                     } else {
                         general.position.h += (-offset) as u16;
                         general.position.y += offset as i16;
 
-                        level_data.solids.set(
+                        solids.set(
                             general.position.x as usize / TILE_WIDTH,
                             general.position.y as usize / TILE_HEIGHT,
                             true,
@@ -92,7 +95,7 @@ impl ActorInterface for Specific {
             State::Descending => {
                 for _ in 0..2 {
                     if general.position.h as usize > TILE_HEIGHT {
-                        level_data.solids.set(
+                        solids.set(
                             general.position.x as usize / TILE_WIDTH,
                             general.position.y as usize / TILE_HEIGHT,
                             false,

@@ -76,6 +76,12 @@ impl Surface {
         }
     }
 
+    pub fn fill(&mut self, color: u32) {
+        unsafe {
+            ll::SDL_FillRect(self.raw, std::ptr::null_mut(), color);
+        }
+    }
+
     pub fn update_rect(&mut self, x: i32, y: i32, w: u32, h: u32) {
         unsafe {
             ll::SDL_UpdateRect(self.raw, x, y, w, h);

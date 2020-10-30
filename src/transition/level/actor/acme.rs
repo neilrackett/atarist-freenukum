@@ -2,7 +2,6 @@ use super::super::super::hero::HeroData;
 use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -19,7 +18,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Self {
         general.position.w = TILE_WIDTH as u16 * 2;
         general.position.h = TILE_HEIGHT as u16;
@@ -37,9 +37,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         let hero_geometry = hero_data.position.geometry;
 
@@ -58,9 +60,7 @@ impl ActorInterface for Specific {
                         ..hy as usize / TILE_HEIGHT
                     {
                         let x = xl as usize / TILE_WIDTH;
-                        if level_data.solids.get(x, i)
-                            || level_data.solids.get(x + 1, i)
-                        {
+                        if solids.get(x, i) || solids.get(x + 1, i) {
                             solid_between = true;
                             break;
                         }
@@ -79,7 +79,7 @@ impl ActorInterface for Specific {
                 self.counter += 1;
             }
             _ => {
-                if level_data.solids.get(
+                if solids.get(
                     general.position.x as usize / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT + 1,
                 ) {

@@ -1,4 +1,4 @@
-pub struct File(std::fs::File);
+pub struct File(pub std::fs::File);
 
 impl File {
     pub fn open(name: &str) -> std::io::Result<Self> {

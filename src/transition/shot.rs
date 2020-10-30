@@ -3,7 +3,6 @@ use super::hero::HeroData;
 use super::level::actor::{ActorAdder, ActorType, ActorsList};
 use super::level::solids::LevelSolids;
 use super::level::tiles::LevelTiles;
-use super::level::LevelData;
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
 use crate::{

@@ -2,7 +2,6 @@ use super::super::super::hero::HeroData;
 use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
 use super::{ActorAdder, ActorCreateInterface, ActorData, ActorInterface};
 use crate::{HALFTILE_HEIGHT, OBJECT_ROCKET, TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -21,16 +20,15 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
 
         let tile_x = general.position.x as usize / TILE_WIDTH;
         let tile_y = general.position.y as usize / TILE_HEIGHT;
-        level_data
-            .tiles
-            .copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
+        tiles.copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
 
         Specific { state: State::Idle }
     }
@@ -40,25 +38,22 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         _hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         match self.state {
             State::Idle => {}
             State::Flying => {
                 general.position.y -= HALFTILE_HEIGHT as i16;
-                if level_data.solids.collides(general.position) {
+                if solids.collides(general.position) {
                     let tile_x = general.position.x as usize / TILE_WIDTH;
                     let tile_y = general.position.y as usize / TILE_HEIGHT;
-                    level_data.solids.set(tile_x, tile_y + 1, false);
+                    solids.set(tile_x, tile_y + 1, false);
                     // TODO: trigger a re-rendering of the affected tiles
-                    level_data.tiles.copy_from_to(
-                        tile_x,
-                        tile_y - 1,
-                        tile_x,
-                        tile_y,
-                    );
+                    tiles.copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
                 }
             }
         }

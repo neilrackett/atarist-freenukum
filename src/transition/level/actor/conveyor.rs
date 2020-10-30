@@ -1,7 +1,8 @@
 use super::super::super::hero::HeroData;
 use super::super::super::tilecache::TileCache;
 use super::super::super::HorizontalDirection;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -22,7 +23,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
     ) -> Self {
         general.position.w = TILE_WIDTH as u16;
         general.position.h = TILE_HEIGHT as u16;
@@ -43,7 +45,7 @@ impl ActorCreateInterface for Specific {
         while !found_begin {
             general.position.x -= TILE_WIDTH as i16;
             general.position.w += TILE_WIDTH as u16;
-            tile = level_data.tiles.get(
+            tile = tiles.get(
                 general.position.x as usize / TILE_WIDTH,
                 general.position.y as usize / TILE_HEIGHT,
             );
@@ -52,7 +54,7 @@ impl ActorCreateInterface for Specific {
                 || tile == 0
             {
                 found_begin = true;
-                level_data.tiles.set(
+                tiles.set(
                     general.position.x as usize / TILE_WIDTH,
                     general.position.y as usize / TILE_HEIGHT,
                     SOLID_BLACK as u16,
@@ -72,9 +74,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         let hero_push_offset = match self.direction {
             HorizontalDirection::Left => {
@@ -102,7 +106,7 @@ impl ActorInterface for Specific {
         {
             hero_data
                 .position
-                .push_horizontally(&level_data.solids, hero_push_offset);
+                .push_horizontally(solids, hero_push_offset);
         }
     }
 

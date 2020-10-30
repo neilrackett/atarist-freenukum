@@ -1,7 +1,8 @@
 use super::super::super::hero::HeroData;
 use super::super::super::infobox::InfoMessageQueue;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
+use super::super::solids::LevelSolids;
+use super::super::tiles::LevelTiles;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
     ActorMessageQueue,
@@ -26,7 +27,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.w = TILE_WIDTH as u16 * 2;
         general.position.h = TILE_HEIGHT as u16 * 2;
@@ -62,9 +64,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         _general: &mut ActorData,
-        level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        do_play: &mut bool,
     ) {
         match self.state {
             State::Closed => {}
@@ -78,7 +82,7 @@ impl ActorInterface for Specific {
             }
             State::Closing => {
                 if self.counter == 0 {
-                    level_data.do_play = false;
+                    *do_play = false;
                     hero_data.hidden = false;
                 } else {
                     self.counter -= 1;

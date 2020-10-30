@@ -2,7 +2,6 @@ use super::super::super::hero::HeroData;
 use super::super::super::level::solids::LevelSolids;
 use super::super::super::level::tiles::LevelTiles;
 use super::super::super::tilecache::TileCache;
-use super::super::LevelData;
 use super::{
     ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
 };
@@ -20,7 +19,8 @@ pub(crate) struct Specific {
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.y -= TILE_HEIGHT as i16;
         general.position.w = TILE_WIDTH as u16;
@@ -39,9 +39,11 @@ impl ActorInterface for Specific {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        _tiles: &mut LevelTiles,
         _actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        _do_play: &mut bool,
     ) {
         match self.running {
             0 => {}
@@ -96,7 +98,7 @@ impl ActorInterface for Specific {
 
                 if hdistance.abs() < 8 * HALFTILE_WIDTH as i32 {
                     hero_data.position.push_horizontally(
-                        &level_data.solids,
+                        &solids,
                         fan_direction as i16 * TILE_WIDTH as i16,
                     );
                 }

@@ -42,8 +42,9 @@ use super::super::hero::HeroData;
 use super::super::infobox::InfoMessageQueue;
 use super::super::level::solids::LevelSolids;
 use super::super::level::tiles::LevelTiles;
-use super::super::level::LevelData;
 use super::super::tilecache::TileCache;
+use crate::{TILE_HEIGHT, TILE_WIDTH};
+use transdl::video::Surface;
 
 #[derive(Debug)]
 pub struct ActorsList {
@@ -57,10 +58,6 @@ impl ActorsList {
             actors: Vec::new(),
             interaction_target: None,
         }
-    }
-
-    pub fn add(&mut self, actor: Actor) {
-        self.actors.push(actor);
     }
 
     pub fn count(&self) -> usize {
@@ -97,7 +94,7 @@ impl ActorsList {
         receivers: ActorType,
         message: ActorMessageType,
         hero_data: &mut HeroData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
     ) {
         for actor in self
             .actors
@@ -108,7 +105,7 @@ impl ActorsList {
                 &mut actor.general,
                 message,
                 hero_data,
-                level_data,
+                solids,
             );
         }
     }
@@ -180,6 +177,91 @@ impl ActorsList {
             }
         }
     }
+
+    pub fn act(
+        &mut self,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
+        hero_data: &mut HeroData,
+        actor_queue: &mut ActorQueue,
+        do_play: &mut bool,
+    ) {
+        let mut actors_hurting_hero = 0usize;
+        for actor in self.actors.iter_mut() {
+            if actor.general.acts_while_invisible
+                || actor.general.is_visible
+            {
+                actor.act(solids, tiles, hero_data, actor_queue, do_play);
+                if actor.general.is_alive && actor.general.hurts_hero {
+                    actors_hurting_hero += 1;
+                }
+            }
+        }
+
+        let mut adder = LevelActorAdder {
+            solids,
+            tiles,
+            actors: self,
+        };
+
+        actor_queue.process(&mut adder);
+        self.remove_dead();
+        hero_data.gets_hurt = actors_hurting_hero > 0;
+    }
+
+    pub fn update_visibility(
+        &mut self,
+        vis_x_start: i16,
+        vis_x_end: i16,
+        vis_y_start: i16,
+        vis_y_end: i16,
+    ) {
+        self.actors.iter_mut().for_each(|actor| {
+            let pos = actor.general.position;
+            let x_left = pos.x / TILE_WIDTH as i16;
+            let y_top = pos.y / TILE_HEIGHT as i16;
+            let x_right = x_left + pos.w as i16 / TILE_WIDTH as i16;
+            let y_bottom = y_top + pos.h as i16 / TILE_HEIGHT as i16;
+            actor.general.is_visible = x_right > vis_x_start
+                && y_bottom > vis_y_start
+                && x_left < vis_x_end
+                && y_top < vis_y_end;
+        });
+    }
+
+    pub fn blit_background_actors(
+        &mut self,
+        hero: &mut HeroData,
+        target: &mut Surface,
+        tilecache: &TileCache,
+        draw_collision_bounds: bool,
+    ) {
+        self.actors
+            .iter_mut()
+            .filter(|actor| {
+                actor.general.is_visible && !actor.general.is_in_foreground
+            })
+            .for_each(|actor| {
+                actor.blit(hero, target, tilecache, draw_collision_bounds)
+            });
+    }
+
+    pub fn blit_foreground_actors(
+        &mut self,
+        hero: &mut HeroData,
+        target: &mut Surface,
+        tilecache: &TileCache,
+        draw_collision_bounds: bool,
+    ) {
+        self.actors
+            .iter_mut()
+            .filter(|actor| {
+                actor.general.is_visible && actor.general.is_in_foreground
+            })
+            .for_each(|actor| {
+                actor.blit(hero, target, tilecache, draw_collision_bounds)
+            });
+    }
 }
 
 #[repr(C)]
@@ -192,17 +274,21 @@ pub struct Actor {
 impl Actor {
     fn act(
         &mut self,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
         hero_data: &mut HeroData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
+        do_play: &mut bool,
     ) -> bool {
-        self.check_hero_touch(hero_data, actor_queue);
+        self.check_hero_touch(hero_data, actor_adder);
 
         self.specific.act(
             &mut self.general,
-            level_data,
-            actor_queue,
+            solids,
+            tiles,
+            actor_adder,
             hero_data,
+            do_play,
         );
         self.general.is_alive
     }
@@ -210,7 +296,7 @@ impl Actor {
     fn check_hero_touch(
         &mut self,
         hero_data: &mut HeroData,
-        actor_queue: &mut ActorQueue,
+        actor_adder: &mut dyn ActorAdder,
     ) {
         let touching_hero =
             self.general.position.overlaps(hero_data.position.geometry);
@@ -221,7 +307,7 @@ impl Actor {
 
                 self.specific.hero_touch_start(
                     &mut self.general,
-                    actor_queue,
+                    actor_adder,
                     hero_data,
                 );
             }
@@ -273,6 +359,22 @@ impl Actor {
 
     pub fn position(&self) -> Geometry {
         self.general.position
+    }
+
+    pub fn blit(
+        &mut self,
+        hero: &mut HeroData,
+        target: &mut Surface,
+        tilecache: &TileCache,
+        draw_collision_bounds: bool,
+    ) {
+        self.specific
+            .blit(&mut self.general, hero, tilecache, target);
+
+        if draw_collision_bounds {
+            let color = crate::collision_bounds_color(&target.format());
+            self.general.position.draw_outline(target, color);
+        }
     }
 }
 
@@ -432,317 +534,354 @@ impl ActorType {
     pub(crate) fn create_actor_interface(
         &self,
         g: &mut ActorData,
-        l: &mut LevelData,
+        s: &mut LevelSolids,
+        t: &mut LevelTiles,
     ) -> Box<dyn ActorInterface> {
         match self {
             ActorType::FireWheelBot => {
-                firewheelbot::Specific::create_boxed(g, l)
+                firewheelbot::Specific::create_boxed(g, s, t)
             }
             ActorType::FlameGnomeBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::FlyingBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::FootBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::HelicopterBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::RabbitoidBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::RedBallJumping => {
-                redball_jumping::Specific::create_boxed(g, l)
+                redball_jumping::Specific::create_boxed(g, s, t)
             }
             ActorType::RedBallLying => {
-                redball_lying::Specific::create_boxed(g, l)
+                redball_lying::Specific::create_boxed(g, s, t)
             }
-            ActorType::Robot => robot::Specific::create_boxed(g, l),
+            ActorType::Robot => robot::Specific::create_boxed(g, s, t),
             ActorType::RobotDisappearing => {
-                singleanimation::Specific::create_boxed(g, l)
+                singleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::SnakeBot => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
-            ActorType::TankBot => tankbot::Specific::create_boxed(g, l),
+            ActorType::TankBot => tankbot::Specific::create_boxed(g, s, t),
             ActorType::WallCrawlerBotLeft => {
-                wallcrawler::Specific::create_boxed(g, l)
+                wallcrawler::Specific::create_boxed(g, s, t)
             }
             ActorType::WallCrawlerBotRight => {
-                wallcrawler::Specific::create_boxed(g, l)
+                wallcrawler::Specific::create_boxed(g, s, t)
             }
             ActorType::DrProton => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
-            ActorType::Camera => camera::Specific::create_boxed(g, l),
+            ActorType::Camera => camera::Specific::create_boxed(g, s, t),
             ActorType::Explosion => {
-                singleanimation::Specific::create_boxed(g, l)
+                singleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::DustCloud => {
-                singleanimation::Specific::create_boxed(g, l)
+                singleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::Steam => {
-                singleanimation::Specific::create_boxed(g, l)
+                singleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::ParticlePink => {
-                particle::Specific::create_boxed(g, l)
+                particle::Specific::create_boxed(g, s, t)
             }
             ActorType::ParticleBlue => {
-                particle::Specific::create_boxed(g, l)
+                particle::Specific::create_boxed(g, s, t)
             }
             ActorType::ParticleWhite => {
-                particle::Specific::create_boxed(g, l)
+                particle::Specific::create_boxed(g, s, t)
             }
             ActorType::ParticleGreen => {
-                particle::Specific::create_boxed(g, l)
+                particle::Specific::create_boxed(g, s, t)
             }
-            ActorType::Rocket => rocket::Specific::create_boxed(g, l),
-            ActorType::Bomb => bomb::Specific::create_boxed(g, l),
+            ActorType::Rocket => rocket::Specific::create_boxed(g, s, t),
+            ActorType::Bomb => bomb::Specific::create_boxed(g, s, t),
             ActorType::BombFire => {
-                singleanimation::Specific::create_boxed(g, l)
+                singleanimation::Specific::create_boxed(g, s, t)
             }
-            ActorType::Water => placeholder::Specific::create_boxed(g, l),
-            ActorType::ExitDoor => exitdoor::Specific::create_boxed(g, l),
-            ActorType::Notebook => notebook::Specific::create_boxed(g, l),
+            ActorType::Water => {
+                placeholder::Specific::create_boxed(g, s, t)
+            }
+            ActorType::ExitDoor => {
+                exitdoor::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Notebook => {
+                notebook::Specific::create_boxed(g, s, t)
+            }
             ActorType::SurveillanceScreen => {
-                surveillancescreen::Specific::create_boxed(g, l)
+                surveillancescreen::Specific::create_boxed(g, s, t)
             }
             ActorType::HostileShotLeft => {
-                hostileshot::Specific::create_boxed(g, l)
+                hostileshot::Specific::create_boxed(g, s, t)
             }
             ActorType::HostileShotRight => {
-                hostileshot::Specific::create_boxed(g, l)
+                hostileshot::Specific::create_boxed(g, s, t)
             }
-            ActorType::Soda => item::Specific::create_boxed(g, l),
+            ActorType::Soda => item::Specific::create_boxed(g, s, t),
             ActorType::SodaFlying => {
-                soda_flying::Specific::create_boxed(g, l)
+                soda_flying::Specific::create_boxed(g, s, t)
             }
             ActorType::UnstableFloor => {
-                unstablefloor::Specific::create_boxed(g, l)
+                unstablefloor::Specific::create_boxed(g, s, t)
             }
             ActorType::ExpandingFloor => {
-                expandingfloor::Specific::create_boxed(g, l)
+                expandingfloor::Specific::create_boxed(g, s, t)
             }
             ActorType::ConveyorLeftMovingRightEnd => {
-                conveyor::Specific::create_boxed(g, l)
+                conveyor::Specific::create_boxed(g, s, t)
             }
             ActorType::ConveyorRightMovingRightEnd => {
-                conveyor::Specific::create_boxed(g, l)
+                conveyor::Specific::create_boxed(g, s, t)
             }
-            ActorType::FanLeft => fan::Specific::create_boxed(g, l),
-            ActorType::FanRight => fan::Specific::create_boxed(g, l),
+            ActorType::FanLeft => fan::Specific::create_boxed(g, s, t),
+            ActorType::FanRight => fan::Specific::create_boxed(g, s, t),
             ActorType::BrokenWallBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::StoneBackground => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::Teleporter1 => {
-                teleporter::Specific::create_boxed(g, l)
+                teleporter::Specific::create_boxed(g, s, t)
             }
             ActorType::Teleporter2 => {
-                teleporter::Specific::create_boxed(g, l)
+                teleporter::Specific::create_boxed(g, s, t)
             }
             ActorType::FenceBackground => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::StoneWindowBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::WindowLeftBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::WindowRightBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
-            ActorType::Screen => placeholder::Specific::create_boxed(g, l),
-            ActorType::BoxGreyEmpty => item::Specific::create_boxed(g, l),
-            ActorType::BoxGreyBoots => item::Specific::create_boxed(g, l),
-            ActorType::Boots => item::Specific::create_boxed(g, l),
-            ActorType::BoxGreyClamps => item::Specific::create_boxed(g, l),
-            ActorType::Clamps => item::Specific::create_boxed(g, l),
-            ActorType::BoxGreyGun => item::Specific::create_boxed(g, l),
-            ActorType::Gun => item::Specific::create_boxed(g, l),
-            ActorType::BoxGreyBomb => item::Specific::create_boxed(g, l),
-            ActorType::BoxRedSoda => item::Specific::create_boxed(g, l),
-            ActorType::BoxRedChicken => item::Specific::create_boxed(g, l),
-            ActorType::ChickenSingle => item::Specific::create_boxed(g, l),
-            ActorType::ChickenDouble => item::Specific::create_boxed(g, l),
+            ActorType::Screen => {
+                placeholder::Specific::create_boxed(g, s, t)
+            }
+            ActorType::BoxGreyEmpty => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::BoxGreyBoots => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Boots => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxGreyClamps => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Clamps => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxGreyGun => item::Specific::create_boxed(g, s, t),
+            ActorType::Gun => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxGreyBomb => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::BoxRedSoda => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxRedChicken => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::ChickenSingle => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::ChickenDouble => {
+                item::Specific::create_boxed(g, s, t)
+            }
             ActorType::BoxBlueFootball => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::Football => item::Specific::create_boxed(g, l),
-            ActorType::Flag => item::Specific::create_boxed(g, l),
+            ActorType::Football => item::Specific::create_boxed(g, s, t),
+            ActorType::Flag => item::Specific::create_boxed(g, s, t),
             ActorType::BoxBlueJoystick => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::Joystick => item::Specific::create_boxed(g, l),
-            ActorType::BoxBlueDisk => item::Specific::create_boxed(g, l),
-            ActorType::Disk => item::Specific::create_boxed(g, l),
+            ActorType::Joystick => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxBlueDisk => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Disk => item::Specific::create_boxed(g, s, t),
             ActorType::BoxBlueBalloon => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::Balloon => balloon::Specific::create_boxed(g, l),
-            ActorType::BoxGreyGlove => item::Specific::create_boxed(g, l),
-            ActorType::Glove => item::Specific::create_boxed(g, l),
+            ActorType::Balloon => balloon::Specific::create_boxed(g, s, t),
+            ActorType::BoxGreyGlove => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Glove => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyFullLife => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::FullLife => item::Specific::create_boxed(g, l),
-            ActorType::BoxBlueFlag => item::Specific::create_boxed(g, l),
-            ActorType::BlueFlag => item::Specific::create_boxed(g, l),
-            ActorType::BoxBlueRadio => item::Specific::create_boxed(g, l),
-            ActorType::Radio => item::Specific::create_boxed(g, l),
+            ActorType::FullLife => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxBlueFlag => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::BlueFlag => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxBlueRadio => {
+                item::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Radio => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyAccessCard => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::AccessCard => item::Specific::create_boxed(g, l),
+            ActorType::AccessCard => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyLetterD => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::LetterD => item::Specific::create_boxed(g, l),
+            ActorType::LetterD => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyLetterU => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::LetterU => item::Specific::create_boxed(g, l),
+            ActorType::LetterU => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyLetterK => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::LetterK => item::Specific::create_boxed(g, l),
+            ActorType::LetterK => item::Specific::create_boxed(g, s, t),
             ActorType::BoxGreyLetterE => {
-                item::Specific::create_boxed(g, l)
+                item::Specific::create_boxed(g, s, t)
             }
-            ActorType::LetterE => item::Specific::create_boxed(g, l),
+            ActorType::LetterE => item::Specific::create_boxed(g, s, t),
             ActorType::AccessCardSlot => {
-                accesscard_slot::Specific::create_boxed(g, l)
+                accesscard_slot::Specific::create_boxed(g, s, t)
             }
             ActorType::GloveSlot => {
-                glove_slot::Specific::create_boxed(g, l)
+                glove_slot::Specific::create_boxed(g, s, t)
             }
-            ActorType::KeyRed => key::Specific::create_boxed(g, l),
-            ActorType::KeyholeRed => keyhole::Specific::create_boxed(g, l),
-            ActorType::DoorRed => door::Specific::create_boxed(g, l),
-            ActorType::KeyBlue => key::Specific::create_boxed(g, l),
+            ActorType::KeyRed => key::Specific::create_boxed(g, s, t),
+            ActorType::KeyholeRed => {
+                keyhole::Specific::create_boxed(g, s, t)
+            }
+            ActorType::DoorRed => door::Specific::create_boxed(g, s, t),
+            ActorType::KeyBlue => key::Specific::create_boxed(g, s, t),
             ActorType::KeyholeBlue => {
-                keyhole::Specific::create_boxed(g, l)
+                keyhole::Specific::create_boxed(g, s, t)
             }
-            ActorType::DoorBlue => door::Specific::create_boxed(g, l),
-            ActorType::KeyPink => key::Specific::create_boxed(g, l),
+            ActorType::DoorBlue => door::Specific::create_boxed(g, s, t),
+            ActorType::KeyPink => key::Specific::create_boxed(g, s, t),
             ActorType::KeyholePink => {
-                keyhole::Specific::create_boxed(g, l)
+                keyhole::Specific::create_boxed(g, s, t)
             }
-            ActorType::DoorPink => door::Specific::create_boxed(g, l),
-            ActorType::KeyGreen => key::Specific::create_boxed(g, l),
+            ActorType::DoorPink => door::Specific::create_boxed(g, s, t),
+            ActorType::KeyGreen => key::Specific::create_boxed(g, s, t),
             ActorType::KeyholeGreen => {
-                keyhole::Specific::create_boxed(g, l)
+                keyhole::Specific::create_boxed(g, s, t)
             }
-            ActorType::DoorGreen => door::Specific::create_boxed(g, l),
+            ActorType::DoorGreen => door::Specific::create_boxed(g, s, t),
             ActorType::ShootableWall => {
-                shootable_wall::Specific::create_boxed(g, l)
+                shootable_wall::Specific::create_boxed(g, s, t)
             }
-            ActorType::Lift => elevator::Specific::create_boxed(g, l),
-            ActorType::Acme => acme::Specific::create_boxed(g, l),
-            ActorType::FireRight => fire::Specific::create_boxed(g, l),
-            ActorType::FireLeft => fire::Specific::create_boxed(g, l),
-            ActorType::Mill => mill::Specific::create_boxed(g, l),
+            ActorType::Lift => elevator::Specific::create_boxed(g, s, t),
+            ActorType::Acme => acme::Specific::create_boxed(g, s, t),
+            ActorType::FireRight => fire::Specific::create_boxed(g, s, t),
+            ActorType::FireLeft => fire::Specific::create_boxed(g, s, t),
+            ActorType::Mill => mill::Specific::create_boxed(g, s, t),
             ActorType::Laserbeam => {
-                placeholder::Specific::create_boxed(g, l)
+                placeholder::Specific::create_boxed(g, s, t)
             }
             ActorType::AccessCardDoor => {
-                accesscard_door::Specific::create_boxed(g, l)
+                accesscard_door::Specific::create_boxed(g, s, t)
             }
-            ActorType::SpikesUp => spikes::Specific::create_boxed(g, l),
-            ActorType::SpikesDown => spikes::Specific::create_boxed(g, l),
-            ActorType::Spike => spikes::Specific::create_boxed(g, l),
-            ActorType::Score100 => score::Specific::create_boxed(g, l),
-            ActorType::Score200 => score::Specific::create_boxed(g, l),
-            ActorType::Score500 => score::Specific::create_boxed(g, l),
-            ActorType::Score1000 => score::Specific::create_boxed(g, l),
-            ActorType::Score2000 => score::Specific::create_boxed(g, l),
-            ActorType::Score5000 => score::Specific::create_boxed(g, l),
-            ActorType::Score10000 => score::Specific::create_boxed(g, l),
+            ActorType::SpikesUp => spikes::Specific::create_boxed(g, s, t),
+            ActorType::SpikesDown => {
+                spikes::Specific::create_boxed(g, s, t)
+            }
+            ActorType::Spike => spikes::Specific::create_boxed(g, s, t),
+            ActorType::Score100 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score200 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score500 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score1000 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score2000 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score5000 => score::Specific::create_boxed(g, s, t),
+            ActorType::Score10000 => {
+                score::Specific::create_boxed(g, s, t)
+            }
             ActorType::ScoreBonus1Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus1Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus2Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus2Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus3Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus3Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus4Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus4Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus5Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus5Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus6Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus6Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus7Left => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::ScoreBonus7Right => {
-                score::Specific::create_boxed(g, l)
+                score::Specific::create_boxed(g, s, t)
             }
             ActorType::BlueLightBackground1 => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::BlueLightBackground2 => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::BlueLightBackground3 => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::BlueLightBackground4 => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::TextOnScreenBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::HighVoltageFlashBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::RedFlashlightBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::BlueFlashlightBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::KeypanelBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::RedRotationLightBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::UpArrowBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::GreenPoisonBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
             ActorType::LavaBackground => {
-                simpleanimation::Specific::create_boxed(g, l)
+                simpleanimation::Specific::create_boxed(g, s, t)
             }
         }
     }
@@ -812,6 +951,10 @@ impl ActorAdder for ActorQueue {
 }
 
 impl ActorQueue {
+    pub fn new() -> Self {
+        Self { actors: Vec::new() }
+    }
+
     pub fn push_back(&mut self, actor_type: ActorType, x: u16, y: u16) {
         self.actors.push(ActorQueueItem { actor_type, x, y });
     }
@@ -820,6 +963,25 @@ impl ActorQueue {
         for ActorQueueItem { actor_type, x, y } in self.actors.drain(..) {
             destination.add_actor(actor_type, x, y);
         }
+    }
+}
+
+pub struct LevelActorAdder<'a> {
+    pub solids: &'a mut LevelSolids,
+    pub tiles: &'a mut LevelTiles,
+    pub actors: &'a mut ActorsList,
+}
+impl<'a> ActorAdder for LevelActorAdder<'a> {
+    fn add_actor(&mut self, actor_type: ActorType, x: u16, y: u16) {
+        let mut general = ActorData::new(actor_type);
+        general.position.x = x as i16;
+        general.position.y = y as i16;
+        let specific = actor_type.create_actor_interface(
+            &mut general,
+            self.solids,
+            self.tiles,
+        );
+        self.actors.actors.push(Actor { general, specific });
     }
 }
 
@@ -853,14 +1015,18 @@ impl ActorMessageQueue {
 }
 
 pub(crate) trait ActorCreateInterface: Sized {
-    fn create(general: &mut ActorData, level_data: &mut LevelData)
-        -> Self;
+    fn create(
+        general: &mut ActorData,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
+    ) -> Self;
 
     fn create_boxed(
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
     ) -> Box<Self> {
-        Box::new(Self::create(general, level_data))
+        Box::new(Self::create(general, solids, tiles))
     }
 }
 
@@ -905,9 +1071,11 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn act(
         &mut self,
         general: &mut ActorData,
-        level_data: &mut LevelData,
+        solids: &mut LevelSolids,
+        tiles: &mut LevelTiles,
         actor_queue: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        do_play: &mut bool,
     );
 
     fn blit(
@@ -937,17 +1105,15 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
         _general: &mut ActorData,
         _message: ActorMessageType,
         _hero_data: &mut HeroData,
-        _level_data: &mut LevelData,
+        _solids: &mut LevelSolids,
     ) {
     }
 }
 
 pub mod ffi {
     pub type FnLevelActor = super::Actor;
-    type FnLevelActorData = super::ActorData;
     pub type FnLevelActorType = super::ActorType;
     pub type FnLevelActorQueue = super::ActorQueue;
-    type FnLevelActorMessage = super::ActorMessage;
     pub type FnLevelActorMessageType = super::ActorMessageType;
     pub type FnLevelActorMessageQueue = super::ActorMessageQueue;
     pub type FnLevelActorsList = super::ActorsList;
@@ -960,64 +1126,6 @@ pub mod ffi {
     use transdl::ll::SDL_Surface;
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_create(
-        actor_type: FnLevelActorType,
-        level_data: &mut FnLevelData,
-        x: i16,
-        y: i16,
-    ) -> *mut FnLevelActor {
-        let mut general = FnLevelActorData::new(actor_type);
-        general.position.x = x;
-        general.position.y = y;
-        let specific =
-            actor_type.create_actor_interface(&mut general, level_data);
-        Box::into_raw(Box::new(FnLevelActor { general, specific }))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_free(ptr: *mut FnLevelActor) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_hero_can_interact(
-        actor: *const FnLevelActor,
-        hero_data: *const FnHeroData,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &(*hero_data) };
-
-        actor.hero_can_interact(hero_data)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_type(
-        actor: *const FnLevelActor,
-    ) -> FnLevelActorType {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.actor_type
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_can_get_shot(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.specific.can_get_shot(&actor.general)
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_level_actor_in_foreground(
         actor: *const FnLevelActor,
     ) -> bool {
@@ -1025,16 +1133,6 @@ pub mod ffi {
         let actor = unsafe { &(*actor) };
 
         actor.general.is_in_foreground
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_acts_while_invisible(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.acts_while_invisible
     }
 
     #[no_mangle]
@@ -1086,28 +1184,6 @@ pub mod ffi {
         let actor = unsafe { &(*actor) };
 
         actor.general.position
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_act(
-        actor: *mut FnLevelActor,
-        level_data: *mut FnLevelData,
-        hero_data: *mut FnHeroData,
-        actor_queue: *mut FnLevelActorQueue,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!level_data.is_null());
-        let level_data = unsafe { &mut (*level_data) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        assert!(!actor_queue.is_null());
-        let actor_queue = unsafe { &mut (*actor_queue) };
-
-        actor.act(level_data, hero_data, actor_queue)
     }
 
     #[no_mangle]
@@ -1198,30 +1274,6 @@ pub mod ffi {
     }
 
     #[no_mangle]
-    pub extern "C" fn fn_level_actor_receive_message(
-        actor: *mut FnLevelActor,
-        message: FnLevelActorMessageType,
-        hero_data: *mut FnHeroData,
-        level_data: *mut FnLevelData,
-    ) {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        assert!(!level_data.is_null());
-        let level_data = unsafe { &mut (*level_data) };
-
-        actor.specific.receive_message(
-            &mut actor.general,
-            message,
-            hero_data,
-            level_data,
-        )
-    }
-
-    #[no_mangle]
     pub extern "C" fn fn_level_actor_queue_create(
     ) -> *mut FnLevelActorQueue {
         Box::into_raw(Box::new(FnLevelActorQueue::default()))
@@ -1236,19 +1288,6 @@ pub mod ffi {
                 Box::from_raw(ptr);
             }
         }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_queue_process(
-        queue: *mut FnLevelActorQueue,
-        destination: *mut FnLevelData,
-    ) {
-        assert!(!queue.is_null());
-        let queue = unsafe { &mut (*queue) };
-
-        assert!(!destination.is_null());
-        let destination = unsafe { &mut (*destination) };
-        queue.process(destination);
     }
 
     #[no_mangle]
@@ -1280,95 +1319,5 @@ pub mod ffi {
                 Box::from_raw(ptr);
             }
         }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_message_queue_has_items(
-        ptr: *const FnLevelActorMessageQueue,
-    ) -> bool {
-        let queue = unsafe { &(*ptr) };
-        !queue.messages.is_empty()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_message_queue_pop_front(
-        ptr: *mut FnLevelActorMessageQueue,
-    ) -> FnLevelActorMessage {
-        assert!(!ptr.is_null());
-        let queue = unsafe { &mut (*ptr) };
-        queue.messages.remove(0)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actors_list_count(
-        ptr: *const FnLevelActorsList,
-    ) -> usize {
-        assert!(!ptr.is_null());
-        let d: &FnLevelActorsList = unsafe { &(*ptr) };
-        d.count()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actors_list_get(
-        ptr: *mut FnLevelActorsList,
-        index: usize,
-    ) -> *mut FnLevelActor {
-        assert!(!ptr.is_null());
-        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
-        match d.get_mut(index) {
-            Some(actor) => actor as *mut FnLevelActor,
-            None => std::ptr::null_mut(),
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actors_list_remove_dead(
-        ptr: *mut FnLevelActorsList,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
-        d.remove_dead();
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actors_list_add_actor(
-        ptr: *mut FnLevelActorsList,
-        level_data: *mut FnLevelData,
-        actor_type: FnLevelActorType,
-        x: i16,
-        y: i16,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
-
-        assert!(!level_data.is_null());
-        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
-
-        let mut general = super::ActorData::new(actor_type);
-        general.position.x = x;
-        general.position.y = y;
-        let specific =
-            actor_type.create_actor_interface(&mut general, level_data);
-        d.add(super::Actor { general, specific });
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actors_list_send_message(
-        ptr: *mut FnLevelActorsList,
-        receivers: FnLevelActorType,
-        message: FnLevelActorMessageType,
-        hero_data: *mut FnHeroData,
-        level_data: *mut FnLevelData,
-    ) {
-        assert!(!ptr.is_null());
-        let d: &mut FnLevelActorsList = unsafe { &mut (*ptr) };
-
-        assert!(!hero_data.is_null());
-        let hero_data: &mut FnHeroData = unsafe { &mut (*hero_data) };
-
-        assert!(!level_data.is_null());
-        let level_data: &mut FnLevelData = unsafe { &mut (*level_data) };
-
-        d.send_message(receivers, message, hero_data, level_data);
     }
 }
