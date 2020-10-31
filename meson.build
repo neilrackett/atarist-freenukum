@@ -84,66 +84,6 @@ test_tile = executable(
     ],
 )
 
-test_infobox = executable(
-    'test_infobox',
-    [
-        'src/fn_test_infobox.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
-test_inputbox = executable(
-    'test_inputbox',
-    [
-        'src/fn_test_inputbox.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
-test_level_loader = executable(
-    'test_level_loader',
-    [
-        'src/fn_test_level_loader.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_menu = executable(
     'test_menu',
     [

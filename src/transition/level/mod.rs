@@ -933,8 +933,8 @@ impl LevelData {
             let mut end = start + (sourcerect.w as usize / TILE_WIDTH) * 2;
             if end > LEVEL_WIDTH {
                 let diff = end - LEVEL_WIDTH;
-                start -= diff;
-                end -= diff;
+                start = start.saturating_sub(diff);
+                end = end.saturating_sub(diff);
             }
             (start, end)
         };
@@ -946,8 +946,8 @@ impl LevelData {
                 + LEVELWINDOW_HEIGHT / 2;
             if end > LEVEL_HEIGHT {
                 let diff = end - LEVEL_HEIGHT;
-                start -= diff;
-                end -= diff;
+                start = start.saturating_sub(diff);
+                end = end.saturating_sub(diff);
             }
             (start, end)
         };

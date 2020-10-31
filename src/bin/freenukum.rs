@@ -84,7 +84,7 @@ fn main() -> Result<()> {
             }
             MainMenuEntry::EpisodeChange => {
                 let old = episodes.current();
-                let new = episodes.switch();
+                let new = episodes.switch_next();
 
                 bg_filepath = original_data_dir()
                     .join(format!("dn.{}", episodes.file_extension()));

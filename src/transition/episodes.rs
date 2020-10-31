@@ -1,4 +1,5 @@
 use super::data::original_data_dir;
+use anyhow::{anyhow, Result};
 
 #[derive(Debug)]
 pub struct Episodes {
@@ -40,10 +41,22 @@ impl Episodes {
         return true;
     }
 
-    pub fn switch(&mut self) -> usize {
+    pub fn switch_next(&mut self) -> usize {
         self.current += 1;
         self.current %= self.count;
         self.current
+    }
+
+    pub fn switch_to(&mut self, episode: usize) -> Result<()> {
+        if self.count > episode {
+            self.current = episode;
+            Ok(())
+        } else {
+            Err(anyhow!(
+                "Episode with number {} not installed",
+                episode + 1
+            ))
+        }
     }
 
     pub fn current(&self) -> usize {
@@ -73,7 +86,7 @@ pub mod ffi {
     ) -> usize {
         assert!(!episodes.is_null());
         let episodes = unsafe { &mut (*episodes) };
-        episodes.switch()
+        episodes.switch_next()
     }
 
     #[no_mangle]
