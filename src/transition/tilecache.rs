@@ -9,28 +9,28 @@ pub struct TileCache {
     tiles: Vec<Texture>,
 }
 
-impl TileCache {
-    pub fn load_from_path(
-        path: &Path,
-        params: TextureCreationParams,
-    ) -> Result<Self> {
-        struct Properties {
-            transparent: bool,
-            name: &'static str,
-            max_tiles: usize,
-        };
-        fn p(
-            transparent: bool,
-            name: &'static str,
-            max_tiles: usize,
-        ) -> Properties {
-            Properties {
-                transparent,
-                name,
-                max_tiles,
-            }
+pub struct FileProperties {
+    pub transparent: bool,
+    pub name: &'static str,
+    pub num_tiles: usize,
+}
+
+impl FileProperties {
+    fn build(
+        transparent: bool,
+        name: &'static str,
+        num_tiles: usize,
+    ) -> FileProperties {
+        FileProperties {
+            transparent,
+            name,
+            num_tiles,
         }
-        let files = vec![
+    }
+
+    pub fn get_all() -> Vec<Self> {
+        let p = Self::build;
+        vec![
             p(true, "back0.dn1", 48),
             p(false, "back1.dn1", 48),
             p(false, "back2.dn1", 48),
@@ -57,26 +57,33 @@ impl TileCache {
             p(true, "font2.dn1", 50),
             p(true, "border.dn1", 48),
             p(true, "numbers.dn1", 44),
-        ];
+        ]
+    }
+}
 
+impl TileCache {
+    pub fn load_from_path(
+        path: &Path,
+        params: TextureCreationParams,
+    ) -> Result<Self> {
         let mut tiles = Vec::new();
 
-        for Properties {
+        for FileProperties {
             transparent,
             name,
-            max_tiles,
-        } in files.into_iter()
+            num_tiles,
+        } in FileProperties::get_all().into_iter()
         {
             let path = path.join(name);
             let mut file = File::open(path)?;
             let header = TileHeader::load_from(&mut file)?;
-            let max_tiles =
-                std::cmp::min(max_tiles, header.tiles as usize);
+            let num_tiles =
+                std::cmp::min(num_tiles, header.tiles as usize);
             tiles.append(&mut Self::load_file(
                 &mut file,
                 params,
                 header,
-                max_tiles,
+                num_tiles,
                 transparent,
             )?);
         }
@@ -88,11 +95,11 @@ impl TileCache {
         r: &mut R,
         params: TextureCreationParams,
         header: TileHeader,
-        max_tiles: usize,
+        num_tiles: usize,
         has_transparency: bool,
     ) -> Result<Vec<Texture>> {
         let mut tiles = Vec::new();
-        for _ in 0..max_tiles {
+        for _ in 0..num_tiles {
             tiles.push(tile::load(
                 r,
                 params,

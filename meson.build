@@ -64,23 +64,3 @@ configure_file(
     output: 'freenukum.desktop',
     configuration: conf
 )
-
-test_tilecache = executable(
-    'test_tilecache',
-    [
-        'src/fn_test_tilecache.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
