@@ -89,6 +89,23 @@ pub fn load(
     Ok(picture)
 }
 
+pub fn show_splash(
+    tilecache: &TileCache,
+    texture_creation_params: TextureCreationParams,
+    target: &mut Surface,
+    file: &mut File,
+) -> Result<()> {
+    show_splash_with_message(
+        tilecache,
+        texture_creation_params,
+        target,
+        file,
+        None,
+        0,
+        0,
+    )
+}
+
 pub fn show_splash_with_message(
     tilecache: &TileCache,
     texture_creation_params: TextureCreationParams,

@@ -46,11 +46,6 @@ cargo_build = custom_target(
     ]
 )
 
-c_src = [
-    'src/fn_game.c',
-    'src/freenukum.c'
-]
-
 sdl_lib = meson.get_compiler('c').find_library('SDL')
 sdl_ttf_lib = meson.get_compiler('c').find_library('SDL_ttf')
 curl_lib = meson.get_compiler('c').find_library('curl')
@@ -302,24 +297,6 @@ test_tilecache = executable(
         sdl_ttf_lib,
         zip_lib,
     ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
-executable(
-    'freenukum',
-    c_src,
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    include_directories: include_directories('.'),
     objects: [
         'build/libfreenukum.so',
     ],

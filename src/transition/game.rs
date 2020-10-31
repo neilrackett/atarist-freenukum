@@ -505,7 +505,7 @@ fn start_in_level(
     Ok(ending)
 }
 
-fn start(
+pub fn start(
     tilecache: &TileCache,
     hero: &mut HeroData,
     texture_creation_params: TextureCreationParams,
@@ -633,7 +633,7 @@ fn start(
     Ok(())
 }
 
-fn check_episodes(target: &mut Surface) -> Episodes {
+pub fn check_episodes(target: &mut Surface) -> Episodes {
     let episodes = Episodes::find_installed();
     if episodes.count() == 0 {
         show_missing_data_information(target);
@@ -669,7 +669,7 @@ fn show_missing_data_information(target: &mut Surface) {
     }
 }
 
-fn initialize_sdl() -> Result<(), String> {
+fn initialize_sdl() -> Result<()> {
     if unsafe {
         transdl::ll::SDL_Init(
             transdl::ll::SDL_INIT_VIDEO | transdl::ll::SDL_INIT_TIMER,
@@ -678,7 +678,7 @@ fn initialize_sdl() -> Result<(), String> {
     {
         use std::ffi::CString;
         let s = unsafe { CString::from_raw(transdl::ll::SDL_GetError()) };
-        Err(format!(
+        Err(anyhow!(
             "Can't initialize SDL: {}",
             s.into_string().unwrap()
         ))
@@ -712,13 +712,13 @@ pub fn create_screen(
     )
 }
 
-fn initialize_and_get_window(
+pub fn initialize_and_get_window(
     width: i32,
     height: i32,
     fullscreen: bool,
     title: String,
     icon: String,
-) -> Result<Surface, String> {
+) -> Result<Surface> {
     initialize_sdl()?;
 
     use std::ffi::CString;
