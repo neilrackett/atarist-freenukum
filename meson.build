@@ -84,26 +84,6 @@ test_tile = executable(
     ],
 )
 
-test_menu = executable(
-    'test_menu',
-    [
-        'src/fn_test_menu.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_msgbox = executable(
     'test_msgbox',
     [
