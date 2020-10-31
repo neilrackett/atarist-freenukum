@@ -5,7 +5,7 @@ use std::io::Read;
 const SOLID_START: u16 = 4 * 48;
 const SOLID_END: u16 = 8 * 48;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 #[repr(C)]
 pub struct TileHeader {
     pub tiles: u8,

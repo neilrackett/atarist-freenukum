@@ -65,25 +65,6 @@ configure_file(
     configuration: conf
 )
 
-test_tile = executable(
-    'test_tile',
-    [
-        'src/fn_test_tile.c',
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_tilecache = executable(
     'test_tilecache',
     [
