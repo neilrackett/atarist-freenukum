@@ -84,26 +84,6 @@ test_tile = executable(
     ],
 )
 
-test_picture_splash = executable(
-    'test_picture_splash',
-    [
-        'src/fn_test_picture_splash.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_tilecache = executable(
     'test_tilecache',
     [
