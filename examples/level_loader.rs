@@ -1,12 +1,10 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::backdrop;
 use freenukum::transition::data::original_data_dir;
 use freenukum::transition::geometry::Geometry;
 use freenukum::transition::hero::HeroData;
 use freenukum::transition::level::raw::LevelRaw;
 use freenukum::transition::level::LevelData;
 use freenukum::transition::settings::Settings;
-use freenukum::transition::tile::TileHeader;
 use freenukum::transition::tilecache::TileCache;
 use freenukum::transition::{game, sdl_surface_creation_params};
 use freenukum::{
@@ -16,7 +14,6 @@ use freenukum::{
 use std::fs::File;
 use std::num::NonZeroUsize;
 use std::num::ParseIntError;
-use std::path::PathBuf;
 use structopt::StructOpt;
 use transdl::event::{Event, KeyCode, MouseButton};
 use transdl::video::Surface;
