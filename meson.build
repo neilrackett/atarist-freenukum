@@ -15,7 +15,6 @@ cargo_manifest = files(
 )
 
 rust_src = files(
-    'src/borders.rs',
     'src/game.rs',
     'src/lib.rs',
     'src/sprite.rs',
@@ -85,25 +84,6 @@ test_tile = executable(
     ],
 )
 
-
-test_borders = executable(
-    'test_borders',
-    [
-        'src/fn_test_borders.c',
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
 
 test_drop = executable(
     'test_drop',
