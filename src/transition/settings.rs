@@ -1,8 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
-#[repr(C)]
 pub struct Settings {
     pixelsize: u8,
     pub fullscreen: bool,
@@ -80,29 +78,5 @@ impl Settings {
                 return;
             }
         }
-    }
-}
-
-pub mod ffi {
-    pub type FnSettings = super::Settings;
-
-    #[no_mangle]
-    pub extern "C" fn fn_settings_load_or_create() -> FnSettings {
-        FnSettings::load_or_create()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_settings_save(settings: FnSettings) {
-        settings.save()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_settings_toggle_fullscreen(
-        settings: *mut FnSettings,
-    ) -> bool {
-        assert!(!settings.is_null());
-        let settings = unsafe { &mut (*settings) };
-        settings.fullscreen = !settings.fullscreen;
-        settings.fullscreen
     }
 }

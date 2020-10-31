@@ -264,7 +264,6 @@ impl ActorsList {
     }
 }
 
-#[repr(C)]
 #[derive(Debug)]
 pub struct Actor {
     pub(crate) general: ActorData,
@@ -378,7 +377,6 @@ impl Actor {
     }
 }
 
-#[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ActorType {
     FireWheelBot,
@@ -887,7 +885,6 @@ impl ActorType {
     }
 }
 
-#[repr(C)]
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
@@ -915,7 +912,6 @@ impl ActorData {
     }
 }
 
-#[repr(C)]
 pub struct ActorQueueItem {
     pub actor_type: ActorType,
     pub x: u16,
@@ -985,7 +981,6 @@ impl<'a> ActorAdder for LevelActorAdder<'a> {
     }
 }
 
-#[repr(C)]
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum ActorMessageType {
     OpenDoor,
@@ -993,7 +988,6 @@ pub enum ActorMessageType {
     Expand,
 }
 
-#[repr(C)]
 pub struct ActorMessage {
     pub receivers: ActorType,
     pub message: ActorMessageType,
@@ -1113,217 +1107,5 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
         _hero_data: &mut HeroData,
         _solids: &mut LevelSolids,
     ) {
-    }
-}
-
-pub mod ffi {
-    pub type FnLevelActor = super::Actor;
-    pub type FnLevelActorType = super::ActorType;
-    pub type FnLevelActorQueue = super::ActorQueue;
-    pub type FnLevelActorMessageType = super::ActorMessageType;
-    pub type FnLevelActorMessageQueue = super::ActorMessageQueue;
-    pub type FnLevelActorsList = super::ActorsList;
-
-    use super::super::super::geometry::ffi::FnGeometry;
-    use super::super::super::hero::ffi::FnHeroData;
-    use super::super::super::infobox::ffi::FnInfoMessageQueue;
-    use super::super::super::level::ffi::FnLevelData;
-    use super::super::super::tilecache::ffi::FnTileCache;
-    use transdl::ll::SDL_Surface;
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_in_foreground(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.is_in_foreground
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_is_visible(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.is_visible
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_is_alive(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.is_alive
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_hurts_hero(
-        actor: *const FnLevelActor,
-    ) -> bool {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.hurts_hero
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_set_visible(
-        actor: *mut FnLevelActor,
-        visible: bool,
-    ) {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        actor.general.is_visible = visible
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_get_position(
-        actor: *const FnLevelActor,
-    ) -> FnGeometry {
-        assert!(!actor.is_null());
-        let actor = unsafe { &(*actor) };
-
-        actor.general.position
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_hero_interact_start(
-        actor: *mut FnLevelActor,
-        level_data: *mut FnLevelData,
-        hero_data: *mut FnHeroData,
-        info_message_queue: *mut FnInfoMessageQueue,
-        actor_message_queue: *mut FnLevelActorMessageQueue,
-    ) {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!level_data.is_null());
-        let level_data = unsafe { &mut (*level_data) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        assert!(!info_message_queue.is_null());
-        let info_message_queue = unsafe { &mut (*info_message_queue) };
-
-        assert!(!actor_message_queue.is_null());
-        let actor_message_queue = unsafe { &mut (*actor_message_queue) };
-
-        actor.specific.hero_interact_start(
-            &mut actor.general,
-            &mut level_data.level_passed,
-            hero_data,
-            info_message_queue,
-            actor_message_queue,
-        )
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_hero_interact_end(
-        actor: *mut FnLevelActor,
-        level_data: *mut FnLevelData,
-        hero_data: *mut FnHeroData,
-    ) {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!level_data.is_null());
-        let level_data = unsafe { &mut (*level_data) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        actor.specific.hero_interact_end(
-            &mut actor.general,
-            &mut level_data.level_passed,
-            hero_data,
-        )
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_blit(
-        actor: *mut FnLevelActor,
-        hero_data: *mut FnHeroData,
-        tilecache: *const FnTileCache,
-        target: *mut SDL_Surface,
-        draw_collision_bounds: bool,
-    ) {
-        assert!(!actor.is_null());
-        let actor = unsafe { &mut (*actor) };
-
-        assert!(!hero_data.is_null());
-        let hero_data = unsafe { &mut (*hero_data) };
-
-        assert!(!tilecache.is_null());
-        let tilecache = unsafe { &(*tilecache) };
-
-        assert!(!target.is_null());
-        let mut target = transdl::video::Surface { raw: target };
-
-        actor.specific.blit(
-            &mut actor.general,
-            hero_data,
-            tilecache,
-            &mut target,
-        );
-
-        if draw_collision_bounds {
-            let color = crate::collision_bounds_color(&target.format());
-            actor.general.position.draw_outline(&mut target, color);
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_queue_create(
-    ) -> *mut FnLevelActorQueue {
-        Box::into_raw(Box::new(FnLevelActorQueue::default()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_queue_free(
-        ptr: *mut FnLevelActorQueue,
-    ) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_queue_push_back(
-        ptr: *mut FnLevelActorQueue,
-        actor_type: FnLevelActorType,
-        x: u16,
-        y: u16,
-    ) {
-        assert!(!ptr.is_null());
-        let queue = unsafe { &mut (*ptr) };
-        queue
-            .actors
-            .push(super::ActorQueueItem { actor_type, x, y })
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_message_queue_create(
-    ) -> *mut FnLevelActorMessageQueue {
-        Box::into_raw(Box::new(FnLevelActorMessageQueue::default()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_actor_message_queue_free(
-        ptr: *mut FnLevelActorMessageQueue,
-    ) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
     }
 }

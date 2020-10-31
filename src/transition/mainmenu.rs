@@ -5,7 +5,6 @@ use std::convert::Into;
 use transdl::video::Surface;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[repr(C)]
 pub enum MainMenuEntry {
     Start,
     Restore,
@@ -117,29 +116,4 @@ pub fn mainmenu(
         tilecache,
         texture_creation_paramns,
     ))
-}
-
-pub mod ffi {
-    use super::super::texture::ffi::FnTextureCreationParams;
-    use super::super::tilecache::ffi::FnTileCache;
-    use super::mainmenu;
-    use transdl::ll::SDL_Surface;
-    use transdl::video::Surface;
-
-    pub type FnMainMenuEntry = super::MainMenuEntry;
-
-    #[no_mangle]
-    pub extern "C" fn fn_mainmenu(
-        screen: *mut SDL_Surface,
-        tilecache: *const FnTileCache,
-        texture_creation_paramns: FnTextureCreationParams,
-    ) -> FnMainMenuEntry {
-        assert!(!screen.is_null());
-        assert!(!tilecache.is_null());
-
-        let mut screen = Surface { raw: screen };
-        let tilecache = unsafe { &(*tilecache) };
-
-        mainmenu(&mut screen, tilecache, texture_creation_paramns)
-    }
 }

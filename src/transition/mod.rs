@@ -21,7 +21,6 @@ pub mod texture;
 pub mod tile;
 pub mod tilecache;
 
-#[repr(C)]
 #[derive(Hash, Debug, Eq, PartialEq, Clone, Copy)]
 pub enum HorizontalDirection {
     Center,
@@ -29,7 +28,6 @@ pub enum HorizontalDirection {
     Right,
 }
 
-#[repr(C)]
 #[derive(Debug, Eq, PartialEq)]
 pub enum VerticalDirection {
     Center,
@@ -37,7 +35,6 @@ pub enum VerticalDirection {
     Down,
 }
 
-#[repr(C)]
 #[derive(Debug, Eq, PartialEq)]
 pub enum UserEvent {
     Timer,
@@ -60,54 +57,5 @@ pub fn sdl_surface_creation_params(
         flags: surface.flags(),
         bits_per_pixel: surface.format().bits_per_pixel(),
         transparent: sdl_surface_transparent(surface),
-    }
-}
-
-pub mod ffi {
-    pub type FnHorizontalDirection = super::HorizontalDirection;
-    pub type FnVerticalDirection = super::VerticalDirection;
-    pub type FnUserEvent = super::UserEvent;
-
-    // Just a placeholder so the enum gets exported
-    // without extra creating a cbindgen config.
-    #[no_mangle]
-    pub extern "C" fn fn_horizontal_direction_print(
-        direction: FnHorizontalDirection,
-    ) {
-        println!("{:?}", direction);
-    }
-
-    // Just a placeholder so the enum gets exported
-    // without extra creating a cbindgen config.
-    #[no_mangle]
-    pub extern "C" fn fn_vertical_direction_print(
-        direction: FnVerticalDirection,
-    ) {
-        println!("{:?}", direction);
-    }
-
-    // Just a placeholder so the enum gets exported
-    // without extra creating a cbindgen config.
-    #[no_mangle]
-    pub extern "C" fn fn_user_event_print(e: FnUserEvent) {
-        println!("{:?}", e);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_sdl_surface_transparent(
-        surface: *mut transdl::ll::SDL_Surface,
-    ) -> u32 {
-        assert!(!surface.is_null());
-        let surface = transdl::video::Surface { raw: surface };
-        super::sdl_surface_transparent(&surface)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_sdl_surface_creation_params(
-        surface: *mut transdl::ll::SDL_Surface,
-    ) -> super::texture::ffi::FnTextureCreationParams {
-        assert!(!surface.is_null());
-        let surface = transdl::video::Surface { raw: surface };
-        super::sdl_surface_creation_params(&surface)
     }
 }

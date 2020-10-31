@@ -1,7 +1,6 @@
 use super::super::geometry::Geometry;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 
-#[repr(C)]
 #[derive(Debug)]
 pub struct LevelSolids {
     solids: [[bool; LEVEL_WIDTH]; LEVEL_HEIGHT],
@@ -191,58 +190,5 @@ impl LevelSolids {
             }
         }
         return true;
-    }
-}
-
-pub mod ffi {
-    use super::super::super::geometry::ffi::FnGeometry;
-
-    pub type FnLevelSolids = super::LevelSolids;
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_solids_create() -> *mut FnLevelSolids {
-        Box::into_raw(Box::new(FnLevelSolids::new()))
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_solids_free(ptr: *mut FnLevelSolids) {
-        if !ptr.is_null() {
-            unsafe {
-                Box::from_raw(ptr);
-            }
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_solids_get(
-        ptr: *const FnLevelSolids,
-        x: usize,
-        y: usize,
-    ) -> bool {
-        assert!(!ptr.is_null());
-        let solids: &FnLevelSolids = unsafe { &(*ptr) };
-        solids.get(x, y)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_solids_set(
-        ptr: *mut FnLevelSolids,
-        x: usize,
-        y: usize,
-        value: bool,
-    ) {
-        assert!(!ptr.is_null());
-        let solids = unsafe { &mut (*ptr) };
-        solids.set(x, y, value);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_level_solids_collides(
-        ptr: *const FnLevelSolids,
-        rect: FnGeometry,
-    ) -> bool {
-        assert!(!ptr.is_null());
-        let solids: &FnLevelSolids = unsafe { &(*ptr) };
-        solids.collides(rect)
     }
 }

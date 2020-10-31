@@ -8,7 +8,6 @@ pub struct Texture {
     surface: Surface,
 }
 
-#[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct TextureCreationParams {
     pub flags: u32,
@@ -137,102 +136,5 @@ impl Texture {
         let color = map_rgb(&format, red, green, blue);
 
         self.surface.fill_rect(r, color);
-    }
-}
-
-pub mod ffi {
-    pub type FnTexture = super::Texture;
-    pub type FnTextureCreationParams = super::TextureCreationParams;
-    use crate::Geometry;
-    use transdl::video::Surface;
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_new_with_params(
-        w: u16,
-        h: u16,
-        params: FnTextureCreationParams,
-    ) -> *mut FnTexture {
-        Box::into_raw(Box::new(FnTexture::create_with_params(
-            w, h, params,
-        )))
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_free(ptr: *mut FnTexture) {
-        if !ptr.is_null() {
-            Box::from_raw(ptr);
-        }
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_set_data(
-        ptr: *mut FnTexture,
-        data: *const u8,
-        transparent: u32,
-    ) {
-        let t: &mut FnTexture = &mut (*ptr);
-        assert!(!data.is_null());
-        let data = std::slice::from_raw_parts(
-            data,
-            t.w as usize * t.h as usize * 4,
-        );
-        t.set_data(data, transparent);
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_blit_to_sdl_surface(
-        ptr: *const FnTexture,
-        srcrect: *const Geometry,
-        destination: *mut transdl::ll::SDL_Surface,
-        dstrect: *const Geometry,
-    ) {
-        let t: &FnTexture = &(*ptr);
-        let srcrect = srcrect.as_ref().cloned();
-        let mut destination = Surface { raw: destination };
-        let dstrect = dstrect.as_ref().cloned();
-        t.blit_to_sdl_surface(srcrect, &mut destination, dstrect);
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_clone_to_texture(
-        ptr: *const FnTexture,
-        srcrect: *const Geometry,
-        destination: *mut FnTexture,
-        dstrect: *const Geometry,
-    ) {
-        let t: &FnTexture = &(*ptr);
-        let srcrect = srcrect.as_ref().cloned();
-        let destination: &mut FnTexture = &mut (*destination);
-        let dstrect = dstrect.as_ref().cloned();
-        t.clone_to_texture(srcrect, destination, dstrect);
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_fill_area(
-        ptr: *mut FnTexture,
-        area: *const Geometry,
-        red: u8,
-        green: u8,
-        blue: u8,
-    ) {
-        let t: &mut FnTexture = &mut (*ptr);
-        let area = area.as_ref().cloned();
-        t.fill_area(area, red, green, blue);
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_get_width(
-        ptr: *const FnTexture,
-    ) -> u16 {
-        let t: &FnTexture = &(*ptr);
-        t.width()
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_texture_get_height(
-        ptr: *const FnTexture,
-    ) -> u16 {
-        let t: &FnTexture = &(*ptr);
-        t.height()
     }
 }

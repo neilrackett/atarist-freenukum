@@ -48,36 +48,3 @@ pub fn print(
         }
     }
 }
-
-pub mod ffi {
-    use super::super::geometry::ffi::FnGeometry;
-    use super::super::texture::ffi::FnTexture;
-    use super::super::tilecache::ffi::FnTileCache;
-    use libc::c_char;
-    use std::ffi::CStr;
-
-    #[no_mangle]
-    pub extern "C" fn fn_text_print(
-        target: *mut FnTexture,
-        geometry: FnGeometry,
-        tilecache: *const FnTileCache,
-        text: *const c_char,
-    ) {
-        assert!(!target.is_null());
-        let target = unsafe { &mut (*target) };
-
-        assert!(!tilecache.is_null());
-        let tilecache = unsafe { &(*tilecache) };
-
-        assert!(!text.is_null());
-
-        match unsafe { CStr::from_ptr(text) }.to_str() {
-            Ok(text) => {
-                super::print(target, geometry, tilecache, text);
-            }
-            Err(e) => {
-                eprintln!("Couldn't read text: {:?}.", e);
-            }
-        }
-    }
-}

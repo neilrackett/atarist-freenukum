@@ -2,11 +2,7 @@ use super::texture::{Texture, TextureCreationParams};
 use crate::Result;
 use std::io::Read;
 
-const SOLID_START: u16 = 4 * 48;
-const SOLID_END: u16 = 8 * 48;
-
 #[derive(Clone, Copy)]
-#[repr(C)]
 pub struct TileHeader {
     pub tiles: u8,
     pub width: u8,
@@ -83,49 +79,4 @@ pub fn load<R: Read>(
     tile.set_data(&data, params.transparent);
 
     Ok(tile)
-}
-
-fn is_solid(index: u16) -> bool {
-    index >= SOLID_START && index < SOLID_END
-}
-
-mod ffi {
-    type FnTileHeader = super::TileHeader;
-    use super::super::file::ffi::FnFile;
-    use super::super::texture::ffi::{FnTexture, FnTextureCreationParams};
-
-    #[no_mangle]
-    pub extern "C" fn fn_tileheader_load(
-        file: *mut FnFile,
-    ) -> FnTileHeader {
-        let file = unsafe { &mut (*file) };
-        FnTileHeader::load_from(file.as_ref_mut()).unwrap()
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_tile_load(
-        file: *mut FnFile,
-        params: FnTextureCreationParams,
-        header: FnTileHeader,
-        has_transparency: bool,
-    ) -> *mut FnTexture {
-        let file = unsafe { &mut (*file) };
-        match super::load(
-            file.as_ref_mut(),
-            params,
-            header,
-            has_transparency,
-        ) {
-            Ok(t) => Box::into_raw(Box::new(t)),
-            Err(e) => {
-                eprintln!("Error loading tile: {:?}", e);
-                std::ptr::null_mut()
-            }
-        }
-    }
-
-    #[no_mangle]
-    pub extern "C" fn fn_tile_is_solid(index: u16) -> bool {
-        super::is_solid(index)
-    }
 }

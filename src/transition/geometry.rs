@@ -1,7 +1,6 @@
 use transdl::video::Surface;
 
 #[derive(Copy, Clone, Debug, Default)]
-#[repr(C)]
 pub struct Geometry {
     pub x: i16,
     pub y: i16,
@@ -129,74 +128,5 @@ impl Geometry {
             r.h = 1;
             surface.fill_rect(r.as_sdl_rect(), color);
         }
-    }
-}
-
-pub mod ffi {
-    use transdl::ll::SDL_Surface;
-    use transdl::video::Surface;
-
-    pub type FnGeometry = super::Geometry;
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_create(
-        x: i16,
-        y: i16,
-        w: u16,
-        h: u16,
-    ) -> FnGeometry {
-        FnGeometry::new(x, y, w, h)
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_as_sdl_rect(
-        ptr: *const FnGeometry,
-    ) -> transdl::ll::SDL_Rect {
-        let g: &FnGeometry = &(*ptr);
-        g.as_sdl_rect()
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_overlaps(
-        r1: FnGeometry,
-        r2: FnGeometry,
-    ) -> bool {
-        r1.overlaps(r2)
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_overlaps_vertically(
-        r1: FnGeometry,
-        r2: FnGeometry,
-    ) -> bool {
-        r1.overlaps_vertically(r2)
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_touches(
-        r1: FnGeometry,
-        r2: FnGeometry,
-    ) -> bool {
-        r1.touches(r2)
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_horizontal_distance(
-        r1: FnGeometry,
-        r2: FnGeometry,
-    ) -> i32 {
-        r1.horizontal_distance(r2)
-    }
-
-    #[no_mangle]
-    pub unsafe extern "C" fn fn_geometry_draw_outline(
-        surface: *mut SDL_Surface,
-        geometry: FnGeometry,
-        color: u32,
-    ) {
-        assert!(!surface.is_null());
-        let mut surface = Surface { raw: surface };
-
-        geometry.draw_outline(&mut surface, color)
     }
 }

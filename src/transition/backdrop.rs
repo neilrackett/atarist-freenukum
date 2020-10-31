@@ -42,25 +42,3 @@ pub fn load<R: Read>(
 
     Ok(backdrop)
 }
-
-pub mod ffi {
-    pub type FnTexture = super::Texture;
-    pub type FnTextureCreationParams = super::TextureCreationParams;
-    pub use super::super::file::ffi::FnFile;
-
-    #[no_mangle]
-    pub extern "C" fn fn_backdrop_load(
-        ptr: *mut FnFile,
-        params: FnTextureCreationParams,
-    ) -> *mut FnTexture {
-        assert!(!ptr.is_null());
-        let file = unsafe { &mut (*ptr) };
-        match super::load(file.as_ref_mut(), params) {
-            Ok(t) => Box::into_raw(Box::new(t)),
-            Err(e) => {
-                eprintln!("Error loading picture: {:?}", e);
-                std::ptr::null_mut()
-            }
-        }
-    }
-}
