@@ -14,6 +14,12 @@ impl LevelSolids {
         }
     }
 
+    pub fn new_all_solid() -> Self {
+        LevelSolids {
+            solids: [[true; LEVEL_WIDTH]; LEVEL_HEIGHT],
+        }
+    }
+
     pub fn dump(&self) {
         print!("    ");
         for i in 0..LEVEL_WIDTH {

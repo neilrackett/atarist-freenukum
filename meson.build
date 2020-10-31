@@ -84,27 +84,6 @@ test_tile = executable(
     ],
 )
 
-
-test_hero = executable(
-    'test_hero',
-    [
-        'src/fn_test_hero.c',
-
-    ],
-    dependencies: [
-        curl_lib,
-        sdl_lib,
-        sdl_ttf_lib,
-        zip_lib,
-    ],
-    objects: [
-        'build/libfreenukum.so',
-    ],
-    link_depends: [
-        cargo_build,
-    ],
-)
-
 test_infobox = executable(
     'test_infobox',
     [

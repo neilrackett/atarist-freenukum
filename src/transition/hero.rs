@@ -294,7 +294,7 @@ impl HeroData {
         }
     }
 
-    fn land(&mut self) {
+    pub fn land(&mut self) {
         self.vertical_speed = 0;
         self.is_in_the_air = false;
         self.counter = 0;
