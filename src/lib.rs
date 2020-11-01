@@ -3,16 +3,6 @@ extern crate serde_derive;
 
 use anyhow::Result;
 
-mod settings;
-pub mod tile;
-
-// TODO: reactivate when required for SDL2 migration
-// mod sprite;
-// mod borders;
-// mod game;
-// pub use game::Game;
-// mod text;
-
 pub const HALFTILE_WIDTH: usize = 8;
 pub const HALFTILE_HEIGHT: usize = 8;
 pub const TILE_WIDTH: usize = HALFTILE_WIDTH * 2;
@@ -192,8 +182,6 @@ const HERO_STANDING_LEFT: usize = HERO_START + 0x30;
 const HERO_STANDING_RIGHT: usize = HERO_START + 0x34;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
-
-pub use settings::Settings;
 
 pub mod transition;
 
