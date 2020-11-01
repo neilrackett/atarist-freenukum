@@ -1,8 +1,9 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::picture;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::{game, sdl_surface_creation_params};
-use freenukum::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::picture;
+use freenukum::settings::Settings;
+use freenukum::{
+    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;

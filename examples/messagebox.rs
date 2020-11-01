@@ -1,10 +1,11 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::messagebox::messagebox;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tilecache::TileCache;
-use freenukum::transition::{game, sdl_surface_creation_params};
-use freenukum::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::data::original_data_dir;
+use freenukum::messagebox::messagebox;
+use freenukum::settings::Settings;
+use freenukum::tilecache::TileCache;
+use freenukum::{
+    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 use transdl::event::{Event, KeyCode};
 
 fn main() -> Result<()> {

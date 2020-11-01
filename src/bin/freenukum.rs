@@ -1,13 +1,14 @@
 use anyhow::Result;
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::hero::HeroData;
-use freenukum::transition::infobox;
-use freenukum::transition::mainmenu::{mainmenu, MainMenuEntry};
-use freenukum::transition::picture::show_splash;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tilecache::TileCache;
-use freenukum::transition::{game, sdl_surface_creation_params};
-use freenukum::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::data::original_data_dir;
+use freenukum::hero::HeroData;
+use freenukum::infobox;
+use freenukum::mainmenu::{mainmenu, MainMenuEntry};
+use freenukum::picture::show_splash;
+use freenukum::settings::Settings;
+use freenukum::tilecache::TileCache;
+use freenukum::{
+    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 use std::fs::File;
 
 fn main() -> Result<()> {

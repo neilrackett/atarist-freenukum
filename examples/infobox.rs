@@ -1,10 +1,11 @@
 use anyhow::Result;
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::infobox;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tilecache::TileCache;
-use freenukum::transition::{game, sdl_surface_creation_params};
-use freenukum::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::data::original_data_dir;
+use freenukum::infobox;
+use freenukum::settings::Settings;
+use freenukum::tilecache::TileCache;
+use freenukum::{
+    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 
 fn main() -> Result<()> {
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");

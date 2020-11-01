@@ -1,6 +1,30 @@
 #[macro_use]
 extern crate serde_derive;
 
+pub mod actor;
+pub mod backdrop;
+pub mod borders;
+pub mod data;
+pub mod episodes;
+pub mod file;
+pub mod game;
+pub mod geometry;
+pub mod hero;
+pub mod infobox;
+pub mod inputbox;
+pub mod inputfield;
+pub mod level;
+pub mod mainmenu;
+pub mod menu;
+pub mod messagebox;
+pub mod picture;
+pub mod settings;
+pub mod shot;
+pub mod text;
+pub mod texture;
+pub mod tile;
+pub mod tilecache;
+
 use anyhow::Result;
 
 pub const HALFTILE_WIDTH: usize = 8;
@@ -183,10 +207,8 @@ const HERO_STANDING_RIGHT: usize = HERO_START + 0x34;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
-pub mod transition;
-
-pub use transition::geometry::Geometry;
-pub use transition::texture::Texture;
+pub use geometry::Geometry;
+pub use texture::Texture;
 
 fn directories() -> directories::ProjectDirs {
     directories::ProjectDirs::from("", "", "freenukum").unwrap()
@@ -202,4 +224,43 @@ pub fn data_dir() -> std::path::PathBuf {
 
 fn collision_bounds_color(format: &transdl::video::PixelFormat) -> u32 {
     transdl::video::map_rgb(format, 182, 6, 0)
+}
+
+#[derive(Hash, Debug, Eq, PartialEq, Clone, Copy)]
+pub enum HorizontalDirection {
+    Center,
+    Left,
+    Right,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum VerticalDirection {
+    Center,
+    Up,
+    Down,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum UserEvent {
+    Timer,
+    HeroMoved,
+    HeroScored,
+    HeroFirepowerChanged,
+    HeroInventoryChanged,
+    HeroHealthChanged,
+    HeroLanded,
+}
+
+pub fn sdl_surface_transparent(surface: &transdl::video::Surface) -> u32 {
+    transdl::video::map_rgb(&surface.format(), 100, 1, 1)
+}
+
+pub fn sdl_surface_creation_params(
+    surface: &transdl::video::Surface,
+) -> texture::TextureCreationParams {
+    texture::TextureCreationParams {
+        flags: surface.flags(),
+        bits_per_pixel: surface.format().bits_per_pixel(),
+        transparent: sdl_surface_transparent(surface),
+    }
 }

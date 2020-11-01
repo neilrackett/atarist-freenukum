@@ -1,12 +1,13 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::geometry::Geometry;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::text;
-use freenukum::transition::texture::Texture;
-use freenukum::transition::tilecache::{FileProperties, TileCache};
-use freenukum::transition::{game, sdl_surface_creation_params};
-use freenukum::{TILE_HEIGHT, TILE_WIDTH};
+use freenukum::data::original_data_dir;
+use freenukum::geometry::Geometry;
+use freenukum::settings::Settings;
+use freenukum::text;
+use freenukum::texture::Texture;
+use freenukum::tilecache::{FileProperties, TileCache};
+use freenukum::{
+    game, sdl_surface_creation_params, TILE_HEIGHT, TILE_WIDTH,
+};
 use transdl::event::{Event, KeyCode};
 use transdl::video::Surface;
 

@@ -1,15 +1,14 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::geometry::Geometry;
-use freenukum::transition::hero::HeroData;
-use freenukum::transition::level::raw::LevelRaw;
-use freenukum::transition::level::LevelData;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tilecache::TileCache;
-use freenukum::transition::{game, sdl_surface_creation_params};
+use freenukum::data::original_data_dir;
+use freenukum::geometry::Geometry;
+use freenukum::hero::HeroData;
+use freenukum::level::raw::LevelRaw;
+use freenukum::level::LevelData;
+use freenukum::settings::Settings;
+use freenukum::tilecache::TileCache;
 use freenukum::{
-    BACKDROP_HEIGHT, BACKDROP_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
+    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::File;
 use std::num::NonZeroUsize;

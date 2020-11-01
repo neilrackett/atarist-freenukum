@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::backdrop;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tile::TileHeader;
-use freenukum::transition::{game, sdl_surface_creation_params};
+use freenukum::backdrop;
+use freenukum::settings::Settings;
+use freenukum::tile::TileHeader;
 use freenukum::{
-    BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::File;
 use std::path::PathBuf;

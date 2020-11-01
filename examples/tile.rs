@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::geometry::Geometry;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tile::{self, TileHeader};
-use freenukum::transition::{game, sdl_surface_creation_params};
+use freenukum::geometry::Geometry;
+use freenukum::settings::Settings;
+use freenukum::tile::{self, TileHeader};
+use freenukum::{game, sdl_surface_creation_params};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;

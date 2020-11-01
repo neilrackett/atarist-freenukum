@@ -1,14 +1,14 @@
 use anyhow::{anyhow, Result};
-use freenukum::transition::data::original_data_dir;
-use freenukum::transition::hero::{HeroData, Motion};
-use freenukum::transition::level::solids::LevelSolids;
-use freenukum::transition::settings::Settings;
-use freenukum::transition::tilecache::TileCache;
-use freenukum::transition::HorizontalDirection;
-use freenukum::transition::UserEvent;
-use freenukum::transition::{game, sdl_surface_creation_params};
+use freenukum::data::original_data_dir;
+use freenukum::hero::{HeroData, Motion};
+use freenukum::level::solids::LevelSolids;
+use freenukum::settings::Settings;
+use freenukum::tilecache::TileCache;
+use freenukum::HorizontalDirection;
+use freenukum::UserEvent;
 use freenukum::{
-    BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use std::collections::HashSet;
 use transdl::event::{Event, KeyCode, MouseButton};
