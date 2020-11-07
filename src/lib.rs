@@ -18,6 +18,7 @@ pub mod mainmenu;
 pub mod menu;
 pub mod messagebox;
 pub mod picture;
+pub mod rendering;
 pub mod settings;
 pub mod shot;
 pub mod text;

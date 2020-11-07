@@ -62,8 +62,6 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        let tile = p.tilecache.get_tile((self.tile) as usize).unwrap();
-        let destrect = p.general.position;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(self.tile, p.general.position);
     }
 }

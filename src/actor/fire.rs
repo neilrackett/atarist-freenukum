@@ -135,27 +135,15 @@ impl ActorInterface for Specific {
 
         let mut destrect = p.general.position;
         if let Some(tile) = tile0 {
-            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-                None,
-                p.target,
-                Some(destrect),
-            );
+            p.renderer.place_tile(tile, destrect);
         }
         destrect.x += TILE_WIDTH as i16;
         if let Some(tile) = tile1 {
-            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-                None,
-                p.target,
-                Some(destrect),
-            );
+            p.renderer.place_tile(tile, destrect);
         }
         destrect.x += TILE_WIDTH as i16;
         if let Some(tile) = tile2 {
-            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-                None,
-                p.target,
-                Some(destrect),
-            );
+            p.renderer.place_tile(tile, destrect);
         }
     }
 }

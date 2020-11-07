@@ -52,11 +52,7 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-            None,
-            p.target,
-            Some(p.general.position),
-        );
+        p.renderer.place_tile(tile, p.general.position);
     }
 
     fn hero_can_interact(&self) -> bool {

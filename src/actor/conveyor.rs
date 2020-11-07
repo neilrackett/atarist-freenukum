@@ -101,32 +101,19 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        let mut tile = p
-            .tilecache
-            .get_tile(SOLID_CONVEYORBELT_LEFTEND + self.current_frame)
-            .unwrap();
+        let mut tile = SOLID_CONVEYORBELT_LEFTEND + self.current_frame;
         let mut destrect = p.general.position;
 
         let num_elements = p.general.position.w as usize / TILE_WIDTH;
         for i in 0..num_elements {
             if i == num_elements - 1 {
                 // right end of the conveyor
-                tile = p
-                    .tilecache
-                    .get_tile(
-                        SOLID_CONVEYORBELT_RIGHTEND + self.current_frame,
-                    )
-                    .unwrap();
+                tile = SOLID_CONVEYORBELT_RIGHTEND + self.current_frame;
             } else if i == 1 {
                 // center parts of the conveyor
-                tile = p
-                    .tilecache
-                    .get_tile(
-                        SOLID_CONVEYORBELT_CENTER + self.current_frame % 2,
-                    )
-                    .unwrap();
+                tile = SOLID_CONVEYORBELT_CENTER + self.current_frame % 2;
             }
-            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+            p.renderer.place_tile(tile, destrect);
             destrect.x += TILE_WIDTH as i16;
         }
     }

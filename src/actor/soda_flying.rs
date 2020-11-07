@@ -49,15 +49,8 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        let tile = p
-            .tilecache
-            .get_tile(
-                ANIMATION_SODAFLY
-                    + ((p.general.position.y as usize / HALFTILE_HEIGHT)
-                        % 4),
-            )
-            .unwrap();
-        let destrect = p.general.position;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        let tile = ANIMATION_SODAFLY
+            + ((p.general.position.y as usize / HALFTILE_HEIGHT) % 4);
+        p.renderer.place_tile(tile, p.general.position);
     }
 }

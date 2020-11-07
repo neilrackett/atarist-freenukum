@@ -50,15 +50,9 @@ impl ActorInterface for Specific {
                     p.general.position.x - (1 - j) * TILE_WIDTH as i16;
                 destrect.y =
                     p.general.position.y - (2 - i) * TILE_HEIGHT as i16;
-                let tile = p
-                    .tilecache
-                    .get_tile(
-                        ANIMATION_TELEPORTER1
-                            + i as usize * 3
-                            + j as usize,
-                    )
-                    .unwrap();
-                tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+                let tile =
+                    ANIMATION_TELEPORTER1 + i as usize * 3 + j as usize;
+                p.renderer.place_tile(tile, destrect);
             }
         }
     }

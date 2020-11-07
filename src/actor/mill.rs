@@ -57,13 +57,10 @@ impl ActorInterface for Specific {
 
     fn render(&mut self, p: RenderParameters) {
         let mut destrect = p.general.position;
-        let tile = p
-            .tilecache
-            .get_tile(self.tile + self.current_frame)
-            .unwrap();
 
         for _ in 0..p.general.position.h as usize / TILE_WIDTH {
-            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+            p.renderer
+                .place_tile(self.tile + self.current_frame, destrect);
             destrect.y += TILE_HEIGHT as i16;
         }
     }

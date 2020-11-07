@@ -42,6 +42,7 @@ use crate::hero::HeroData;
 use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
+use crate::rendering::Renderer;
 use crate::tilecache::TileCache;
 use crate::{TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -376,12 +377,23 @@ impl Actor {
         tilecache: &TileCache,
         draw_collision_bounds: bool,
     ) {
+        let mut renderer = Vec::new();
         let p = RenderParameters {
             general: &mut self.general,
-            target,
-            tilecache,
+            renderer: &mut renderer,
         };
         self.specific.render(p);
+
+        for instruction in renderer.into_iter() {
+            tilecache
+                .get_tile(instruction.tile)
+                .unwrap()
+                .blit_to_sdl_surface(
+                    None,
+                    target,
+                    Some(instruction.destination),
+                );
+        }
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color(&target.format());
@@ -1062,8 +1074,7 @@ pub struct ShotParameters<'a> {
 
 pub struct RenderParameters<'a> {
     pub general: &'a mut ActorData,
-    pub target: &'a mut Surface,
-    pub tilecache: &'a TileCache,
+    pub renderer: &'a mut dyn Renderer,
 }
 
 pub struct ReceiveMessageParameters<'a> {

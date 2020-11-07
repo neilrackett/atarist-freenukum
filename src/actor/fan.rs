@@ -99,15 +99,11 @@ impl ActorInterface for Specific {
 
     fn render(&mut self, p: RenderParameters) {
         let mut destrect = p.general.position;
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 2)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 2, destrect);
         destrect.y += TILE_HEIGHT as i16;
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 2 + 1)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 2 + 1, destrect);
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

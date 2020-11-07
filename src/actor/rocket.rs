@@ -62,32 +62,32 @@ impl ActorInterface for Specific {
         let mut destrect = p.general.position;
         destrect.y -= TILE_HEIGHT as i16 * 3;
 
-        let tile = p.tilecache.get_tile(OBJECT_ROCKET).unwrap();
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        let tile = OBJECT_ROCKET;
+        p.renderer.place_tile(tile, destrect);
 
-        let tile = p.tilecache.get_tile(OBJECT_ROCKET + 1).unwrap();
+        let tile = OBJECT_ROCKET + 1;
         for _ in 0..2 {
             destrect.y += TILE_HEIGHT as i16;
-            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+            p.renderer.place_tile(tile, destrect);
         }
 
-        let tile = p.tilecache.get_tile(OBJECT_ROCKET + 2).unwrap();
+        let tile = OBJECT_ROCKET + 2;
         destrect.y += TILE_HEIGHT as i16;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(tile, destrect);
 
-        let tile = p.tilecache.get_tile(OBJECT_ROCKET + 3).unwrap();
+        let tile = OBJECT_ROCKET + 3;
         destrect.x -= TILE_WIDTH as i16;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(tile, destrect);
 
-        let tile = p.tilecache.get_tile(OBJECT_ROCKET + 4).unwrap();
+        let tile = OBJECT_ROCKET + 4;
         destrect.x += 2 * TILE_WIDTH as i16;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(tile, destrect);
 
         if self.state == State::Flying {
-            let tile = p.tilecache.get_tile(OBJECT_ROCKET + 6).unwrap();
+            let tile = OBJECT_ROCKET + 6;
             destrect.x -= TILE_WIDTH as i16;
             destrect.y += TILE_HEIGHT as i16;
-            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+            p.renderer.place_tile(tile, destrect);
         }
     }
 

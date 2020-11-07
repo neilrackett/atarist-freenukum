@@ -132,26 +132,18 @@ impl ActorInterface for Specific {
         destrect.y -= TILE_HEIGHT as i16;
         destrect.w = TILE_WIDTH as u16 * 2;
 
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 4)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 4, destrect);
         destrect.x += TILE_WIDTH as i16;
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 4 + 1)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 4 + 1, destrect);
         destrect.x -= TILE_WIDTH as i16;
         destrect.y += TILE_HEIGHT as i16;
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 4 + 2)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 4 + 2, destrect);
         destrect.x += TILE_WIDTH as i16;
-        p.tilecache
-            .get_tile(self.tile + self.current_frame * 4 + 3)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer
+            .place_tile(self.tile + self.current_frame * 4 + 3, destrect);
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

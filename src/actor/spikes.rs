@@ -53,8 +53,6 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        let tile = p.tilecache.get_tile(tile).unwrap();
-        let destrect = p.general.position;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(tile, p.general.position);
     }
 }

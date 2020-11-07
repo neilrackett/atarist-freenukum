@@ -72,17 +72,13 @@ impl ActorInterface for Specific {
         } else {
             OBJECT_BALLOON
         };
-        p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-            None,
-            p.target,
-            Some(destrect),
-        );
+        p.renderer.place_tile(tile, destrect);
 
         destrect.y += TILE_HEIGHT as i16;
-        p.tilecache
-            .get_tile(OBJECT_BALLOON + 1 + self.current_frame / 3)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(
+            OBJECT_BALLOON + 1 + self.current_frame / 3,
+            destrect,
+        );
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

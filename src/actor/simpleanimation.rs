@@ -11,9 +11,9 @@ use crate::{
 
 #[derive(Debug)]
 pub(crate) struct Specific {
-    tile: u16,
-    current_frame: u16,
-    num_frames: u16,
+    tile: usize,
+    current_frame: usize,
+    num_frames: usize,
 }
 
 impl ActorCreateInterface for Specific {
@@ -40,18 +40,14 @@ impl ActorCreateInterface for Specific {
             ActorType::BlueLightBackground4 => (0x0023, 4),
             ActorType::GreenPoisonBackground => (0x0028, 4),
             ActorType::LavaBackground => (0x002C, 4),
-            ActorType::WindowLeftBackground => {
-                (ANIMATION_WINDOWBG as u16, 1)
-            }
+            ActorType::WindowLeftBackground => (ANIMATION_WINDOWBG, 1),
             ActorType::WindowRightBackground => {
-                (ANIMATION_WINDOWBG as u16 + 1, 1)
+                (ANIMATION_WINDOWBG + 1, 1)
             }
             ActorType::StoneWindowBackground => {
-                (ANIMATION_STONEWINDOWBG as u16, 1)
+                (ANIMATION_STONEWINDOWBG, 1)
             }
-            ActorType::BrokenWallBackground => {
-                (ANIMATION_BROKENWALLBG as u16, 1)
-            }
+            ActorType::BrokenWallBackground => (ANIMATION_BROKENWALLBG, 1),
             _ => {
                 unreachable!(
                     "Actor type {:?} added as an animation \
@@ -76,11 +72,9 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        let tile = p
-            .tilecache
-            .get_tile((self.tile + self.current_frame) as usize)
-            .unwrap();
-        let destrect = p.general.position;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(
+            self.tile + self.current_frame,
+            p.general.position,
+        );
     }
 }

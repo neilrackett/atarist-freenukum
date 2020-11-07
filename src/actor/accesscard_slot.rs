@@ -60,9 +60,9 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        p.tilecache
-            .get_tile(self.tile + self.current_frame)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
+        p.renderer.place_tile(
+            self.tile + self.current_frame,
+            p.general.position,
+        );
     }
 }

@@ -60,10 +60,8 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        p.tilecache
-            .get_tile(self.tile + self.counter)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
+        p.renderer
+            .place_tile(self.tile + self.counter, p.general.position);
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {

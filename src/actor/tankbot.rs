@@ -159,18 +159,12 @@ impl ActorInterface for Specific {
 
     fn render(&mut self, p: RenderParameters) {
         let mut destrect = p.general.position;
-        let tile = p
-            .tilecache
-            .get_tile(self.tile + (self.current_frame / 2) * 2)
-            .unwrap();
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        let tile = self.tile + (self.current_frame / 2) * 2;
+        p.renderer.place_tile(tile, destrect);
 
-        let tile = p
-            .tilecache
-            .get_tile(self.tile + (self.current_frame / 2) * 2 + 1)
-            .unwrap();
+        let tile = self.tile + (self.current_frame / 2) * 2 + 1;
         destrect.x += TILE_WIDTH as i16;
-        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+        p.renderer.place_tile(tile, destrect);
     }
 
     fn can_get_shot(&self, _gerenal: &ActorData) -> bool {

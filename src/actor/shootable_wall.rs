@@ -49,13 +49,9 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        p.tilecache
-            .get_tile(BACKGROUND_LIGHT_GREY)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
-        p.tilecache
-            .get_tile(SOLID_SHOOTABLE_WALL_BRICKS)
-            .unwrap()
-            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
+        p.renderer
+            .place_tile(BACKGROUND_LIGHT_GREY, p.general.position);
+        p.renderer
+            .place_tile(SOLID_SHOOTABLE_WALL_BRICKS, p.general.position);
     }
 }

@@ -47,11 +47,10 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) {
-        let tile =
-            p.tilecache.get_tile(SOLID_EXPANDINGFLOOR as usize).unwrap();
+        let tile = SOLID_EXPANDINGFLOOR;
         let mut destrect = p.general.position;
         for _ in 0..p.general.position.w as usize / TILE_WIDTH {
-            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
+            p.renderer.place_tile(tile, destrect);
             destrect.x += TILE_WIDTH as i16;
         }
     }
