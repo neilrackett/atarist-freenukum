@@ -1,12 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -46,43 +44,26 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        _general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
-        hero_data.health.kill();
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        p.hero_data.health.kill();
     }
 
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, _p: ActParameters) {
         if self.lives > 0 {
             self.current_frame += 1;
             self.current_frame %= self.num_frames;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let mut destrect = general.position;
-        let tile =
-            tilecache.get_tile(self.tile + self.current_frame).unwrap();
+    fn render(&mut self, p: RenderParameters) {
+        let mut destrect = p.general.position;
+        let tile = p
+            .tilecache
+            .get_tile(self.tile + self.current_frame)
+            .unwrap();
 
-        for _ in 0..general.position.h as usize / TILE_WIDTH {
-            tile.blit_to_sdl_surface(None, target, Some(destrect));
+        for _ in 0..p.general.position.h as usize / TILE_WIDTH {
+            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
             destrect.y += TILE_HEIGHT as i16;
         }
     }
@@ -91,40 +72,33 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        _level_solids: &mut LevelSolids,
-        _level_tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
+    fn shot(&mut self, p: ShotParameters) {
         self.lives -= 1;
         if self.lives > 0 {
-            actor_adder.add_particle_firework(
-                general.position.x as u16 + general.position.w / 2,
-                general.position.y as u16 + general.position.h / 2,
+            p.actor_adder.add_particle_firework(
+                p.general.position.x as u16 + p.general.position.w / 2,
+                p.general.position.y as u16 + p.general.position.h / 2,
                 4,
             );
         } else {
             // TODO: add removal animation (destroyed body)
-            general.is_alive = false;
-            hero_data.score.add(20000);
-            actor_adder.add_particle_firework(
-                general.position.x as u16 + general.position.w / 2,
-                general.position.y as u16 + general.position.h / 2,
+            p.general.is_alive = false;
+            p.hero_data.score.add(20000);
+            p.actor_adder.add_particle_firework(
+                p.general.position.x as u16 + p.general.position.w / 2,
+                p.general.position.y as u16 + p.general.position.h / 2,
                 20,
             );
-            actor_adder.add_actor(
+            p.actor_adder.add_actor(
                 ActorType::Score10000,
-                general.position.x as u16,
-                general.position.y as u16 + general.position.h / 2
+                p.general.position.x as u16,
+                p.general.position.y as u16 + p.general.position.h / 2
                     - TILE_HEIGHT as u16,
             );
-            actor_adder.add_actor(
+            p.actor_adder.add_actor(
                 ActorType::Score10000,
-                general.position.x as u16,
-                general.position.y as u16 + general.position.h / 2,
+                p.general.position.x as u16,
+                p.general.position.y as u16 + p.general.position.h / 2,
             );
         }
     }

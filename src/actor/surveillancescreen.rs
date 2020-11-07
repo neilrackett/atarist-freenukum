@@ -1,14 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageQueue,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    HeroInteractStartParameters, RenderParameters,
 };
-use crate::hero::HeroData;
-use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -31,45 +27,24 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(
-        &mut self,
-        _general: &mut ActorData,
-        _level_passed: &mut bool,
-        _hero_data: &mut HeroData,
-        info_message_queue: &mut InfoMessageQueue,
-        _actor_message_queue: &mut ActorMessageQueue,
-    ) {
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         // TODO: implement functionality.
-        info_message_queue.push_back("Not implemented yet.".to_string());
+        p.info_message_queue
+            .push_back("Not implemented yet.".to_string());
     }
 
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-    }
+    fn act(&mut self, _p: ActParameters) {}
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let mut destrect = general.position;
-        tilecache
+    fn render(&mut self, p: RenderParameters) {
+        let mut destrect = p.general.position;
+        p.tilecache
             .get_tile(ANIMATION_BADGUYSCREEN)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
         destrect.x += TILE_WIDTH as i16;
-        tilecache
+        p.tilecache
             .get_tile(ANIMATION_BADGUYSCREEN + 1)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

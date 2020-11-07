@@ -1,15 +1,13 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters, ShotParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS, TILE_HEIGHT,
     TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -29,57 +27,35 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_queue: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-    }
+    fn act(&mut self, _p: ActParameters) {}
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
         true
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
-        hero_data.score.add(10);
-        actor_adder.add_actor(
+    fn shot(&mut self, p: ShotParameters) {
+        p.hero_data.score.add(10);
+        p.actor_adder.add_actor(
             ActorType::Explosion,
-            general.position.x as u16,
-            general.position.y as u16,
+            p.general.position.x as u16,
+            p.general.position.y as u16,
         );
-        general.is_alive = false;
-        solids.set(
-            general.position.x as usize / TILE_WIDTH,
-            general.position.y as usize / TILE_HEIGHT,
+        p.general.is_alive = false;
+        p.solids.set(
+            p.general.position.x as usize / TILE_WIDTH,
+            p.general.position.y as usize / TILE_HEIGHT,
             false,
         );
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        tilecache
+    fn render(&mut self, p: RenderParameters) {
+        p.tilecache
             .get_tile(BACKGROUND_LIGHT_GREY)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(general.position));
-        tilecache
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
+        p.tilecache
             .get_tile(SOLID_SHOOTABLE_WALL_BRICKS)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(general.position));
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
     }
 }

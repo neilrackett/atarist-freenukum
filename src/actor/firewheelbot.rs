@@ -1,15 +1,14 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters, ShotParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     HorizontalDirection, ANIMATION_FIREWHEEL_OFF, ANIMATION_FIREWHEEL_ON,
     HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -46,49 +45,32 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
         if self.was_shot < 2 {
             self.touching_hero = true;
-            general.hurts_hero = true;
+            p.general.hurts_hero = true;
         }
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
         self.touching_hero = false;
-        general.hurts_hero = false;
+        p.general.hurts_hero = false;
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
-            general.is_alive = false;
-            actor_adder.add_actor(
+            p.general.is_alive = false;
+            p.actor_adder.add_actor(
                 ActorType::Explosion,
-                general.position.x as u16 + HALFTILE_WIDTH as u16,
-                general.position.y as u16,
+                p.general.position.x as u16 + HALFTILE_WIDTH as u16,
+                p.general.position.y as u16,
             );
-            actor_adder.add_particle_firework(
-                general.position.x as u16,
-                general.position.y as u16,
+            p.actor_adder.add_particle_firework(
+                p.general.position.x as u16,
+                p.general.position.y as u16,
                 8,
             );
-            hero_data.score.add(2500);
+            p.hero_data.score.add(2500);
         } else {
             self.counter += 1;
             if self.counter % 2 == 1 {
@@ -112,8 +94,8 @@ impl ActorInterface for Specific {
                 HorizontalDirection::Center => unreachable!(),
             };
 
-            if !solids.push_rect_standing_on_ground(
-                &mut general.position,
+            if !p.solids.push_rect_standing_on_ground(
+                &mut p.general.position,
                 direction * HALFTILE_WIDTH as i16 / 2,
                 HALFTILE_HEIGHT as u8,
             ) {
@@ -132,66 +114,54 @@ impl ActorInterface for Specific {
             if self.was_shot == 1 {
                 // create steam clouds
                 if self.current_frame == 0 {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::Steam,
-                        general.position.x as u16 + HALFTILE_WIDTH as u16,
-                        general.position.y as u16 - TILE_HEIGHT as u16,
+                        p.general.position.x as u16
+                            + HALFTILE_WIDTH as u16,
+                        p.general.position.y as u16 - TILE_HEIGHT as u16,
                     );
                 }
             }
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let mut destrect = general.position;
+    fn render(&mut self, p: RenderParameters) {
+        let mut destrect = p.general.position;
         destrect.x =
             destrect.x + destrect.w as i16 / 2 - TILE_WIDTH as i16;
         destrect.y -= TILE_HEIGHT as i16;
         destrect.w = TILE_WIDTH as u16 * 2;
 
-        tilecache
+        p.tilecache
             .get_tile(self.tile + self.current_frame * 4)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
         destrect.x += TILE_WIDTH as i16;
-        tilecache
+        p.tilecache
             .get_tile(self.tile + self.current_frame * 4 + 1)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
         destrect.x -= TILE_WIDTH as i16;
         destrect.y += TILE_HEIGHT as i16;
-        tilecache
+        p.tilecache
             .get_tile(self.tile + self.current_frame * 4 + 2)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
         destrect.x += TILE_WIDTH as i16;
-        tilecache
+        p.tilecache
             .get_tile(self.tile + self.current_frame * 4 + 3)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
         true
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        _level_solids: &mut LevelSolids,
-        _level_tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
+    fn shot(&mut self, p: ShotParameters) {
         if !self.fire_is_on {
             if self.was_shot == 1 && self.touching_hero {
-                general.hurts_hero = false;
+                p.general.hurts_hero = false;
                 self.touching_hero = false;
             }
             if self.was_shot != 2 {

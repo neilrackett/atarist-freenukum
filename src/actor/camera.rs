@@ -1,15 +1,13 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters, ShotParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
     ANIMATION_CAMERA_RIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -33,37 +31,22 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-    }
+    fn act(&mut self, _p: ActParameters) {}
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let x = hero_data.position.geometry.x;
-        let tile = if x - 1 > general.position.x {
+    fn render(&mut self, p: RenderParameters) {
+        let x = p.hero_data.position.geometry.x;
+        let tile = if x - 1 > p.general.position.x {
             ANIMATION_CAMERA_RIGHT
-        } else if x + 1 < general.position.x {
+        } else if x + 1 < p.general.position.x {
             ANIMATION_CAMERA_LEFT
         } else {
             ANIMATION_CAMERA_CENTER
         };
 
-        tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+        p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
             None,
-            target,
-            Some(general.position),
+            p.target,
+            Some(p.general.position),
         );
     }
 
@@ -71,25 +54,18 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
-        general.is_alive = false;
-        hero_data.score.add(100);
-        actor_adder.add_actor(
+    fn shot(&mut self, p: ShotParameters) {
+        p.general.is_alive = false;
+        p.hero_data.score.add(100);
+        p.actor_adder.add_actor(
             ActorType::Score100,
-            general.position.x as u16,
-            general.position.y as u16,
+            p.general.position.x as u16,
+            p.general.position.y as u16,
         );
-        actor_adder.add_actor(
+        p.actor_adder.add_actor(
             ActorType::Explosion,
-            general.position.x as u16,
-            general.position.y as u16,
+            p.general.position.x as u16,
+            p.general.position.y as u16,
         );
     }
 }

@@ -1,10 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
 };
-use crate::hero::{FetchedLetter, HeroData, InventoryItem};
+use crate::hero::{FetchedLetter, InventoryItem};
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     ANIMATION_SODA, HALFTILE_HEIGHT, OBJECT_ACCESS_CARD, OBJECT_BOOT,
     OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
@@ -14,7 +14,6 @@ use crate::{
     OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE, OBJECT_RADIO, TILE_HEIGHT,
     TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -88,246 +87,227 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
-        match general.actor_type {
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        match p.general.actor_type {
             ActorType::LetterD => {
-                general.is_alive = false;
-                hero_data.fetched_letter_state.picked(FetchedLetter::D);
-                hero_data.score.add(500);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.fetched_letter_state.picked(FetchedLetter::D);
+                p.hero_data.score.add(500);
+                p.actor_adder.add_actor(
                     ActorType::Score500,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::LetterU => {
-                general.is_alive = false;
-                hero_data.fetched_letter_state.picked(FetchedLetter::U);
-                hero_data.score.add(500);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.fetched_letter_state.picked(FetchedLetter::U);
+                p.hero_data.score.add(500);
+                p.actor_adder.add_actor(
                     ActorType::Score500,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::LetterK => {
-                general.is_alive = false;
-                hero_data.fetched_letter_state.picked(FetchedLetter::K);
-                hero_data.score.add(500);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.fetched_letter_state.picked(FetchedLetter::K);
+                p.hero_data.score.add(500);
+                p.actor_adder.add_actor(
                     ActorType::Score500,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::LetterE => {
-                general.is_alive = false;
-                hero_data.fetched_letter_state.picked(FetchedLetter::E);
-                hero_data.score.add(500);
-                if hero_data.fetched_letter_state.succeeded() {
-                    actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.fetched_letter_state.picked(FetchedLetter::E);
+                p.hero_data.score.add(500);
+                if p.hero_data.fetched_letter_state.succeeded() {
+                    p.actor_adder.add_actor(
                         ActorType::Score10000,
-                        general.position.x as u16,
-                        general.position.y as u16,
+                        p.general.position.x as u16,
+                        p.general.position.y as u16,
                     );
-                    hero_data.score.add(10000);
+                    p.hero_data.score.add(10000);
                 } else {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::Score500,
-                        general.position.x as u16,
-                        general.position.y as u16,
+                        p.general.position.x as u16,
+                        p.general.position.y as u16,
                     );
-                    hero_data.score.add(500);
+                    p.hero_data.score.add(500);
                 }
             }
             ActorType::FullLife => {
-                hero_data.health.fill_max();
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.health.fill_max();
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Gun => {
-                hero_data.firepower.increase(1);
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.firepower.increase(1);
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::AccessCard => {
-                hero_data.inventory.set(InventoryItem::AccessCard);
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.inventory.set(InventoryItem::AccessCard);
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Glove => {
-                hero_data.inventory.set(InventoryItem::Glove);
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.inventory.set(InventoryItem::Glove);
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Boots => {
-                hero_data.inventory.set(InventoryItem::Boot);
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.inventory.set(InventoryItem::Boot);
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Clamps => {
-                hero_data.inventory.set(InventoryItem::Clamp);
-                general.is_alive = false;
-                hero_data.score.add(1000);
-                actor_adder.add_actor(
+                p.hero_data.inventory.set(InventoryItem::Clamp);
+                p.general.is_alive = false;
+                p.hero_data.score.add(1000);
+                p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Football => {
-                general.is_alive = false;
-                hero_data.score.add(100);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.score.add(100);
+                p.actor_adder.add_actor(
                     ActorType::Score100,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Disk => {
-                general.is_alive = false;
-                hero_data.score.add(5000);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.score.add(5000);
+                p.actor_adder.add_actor(
                     ActorType::Score5000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Joystick => {
-                general.is_alive = false;
-                hero_data.score.add(2000);
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.hero_data.score.add(2000);
+                p.actor_adder.add_actor(
                     ActorType::Score2000,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::Radio | ActorType::Flag => {
-                general.is_alive = false;
+                p.general.is_alive = false;
                 match self.current_frame {
                     0 => {
-                        hero_data.score.add(100);
-                        actor_adder.add_actor(
+                        p.hero_data.score.add(100);
+                        p.actor_adder.add_actor(
                             ActorType::Score100,
-                            general.position.x as u16,
-                            general.position.y as u16,
+                            p.general.position.x as u16,
+                            p.general.position.y as u16,
                         );
                     }
                     1 => {
-                        hero_data.score.add(2000);
-                        actor_adder.add_actor(
+                        p.hero_data.score.add(2000);
+                        p.actor_adder.add_actor(
                             ActorType::Score2000,
-                            general.position.x as u16,
-                            general.position.y as u16,
+                            p.general.position.x as u16,
+                            p.general.position.y as u16,
                         );
                     }
                     2 => {
-                        hero_data.score.add(5000);
-                        actor_adder.add_actor(
+                        p.hero_data.score.add(5000);
+                        p.actor_adder.add_actor(
                             ActorType::Score5000,
-                            general.position.x as u16,
-                            general.position.y as u16,
+                            p.general.position.x as u16,
+                            p.general.position.y as u16,
                         );
                     }
                     _ => unreachable!(),
                 }
             }
             ActorType::Soda => {
-                hero_data.health.increase(1);
-                general.is_alive = false;
-                hero_data.score.add(200);
-                actor_adder.add_actor(
+                p.hero_data.health.increase(1);
+                p.general.is_alive = false;
+                p.hero_data.score.add(200);
+                p.actor_adder.add_actor(
                     ActorType::Score200,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::ChickenSingle => {
-                hero_data.health.increase(1);
-                general.is_alive = false;
-                hero_data.score.add(100);
-                actor_adder.add_actor(
+                p.hero_data.health.increase(1);
+                p.general.is_alive = false;
+                p.hero_data.score.add(100);
+                p.actor_adder.add_actor(
                     ActorType::Score100,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             ActorType::ChickenDouble => {
-                hero_data.health.increase(2);
-                general.is_alive = false;
-                hero_data.score.add(200);
-                actor_adder.add_actor(
+                p.hero_data.health.increase(2);
+                p.general.is_alive = false;
+                p.hero_data.score.add(200);
+                p.actor_adder.add_actor(
                     ActorType::Score200,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
             _ => {}
         }
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
 
-        if !solids.get(
-            general.position.x as usize / TILE_WIDTH,
-            general.position.y as usize / TILE_HEIGHT + 1,
+        if !p.solids.get(
+            p.general.position.x as usize / TILE_WIDTH,
+            p.general.position.y as usize / TILE_HEIGHT + 1,
         ) {
             // fall down until the actor lands on solid ground
-            general.position.y += HALFTILE_HEIGHT as i16;
+            p.general.position.y += HALFTILE_HEIGHT as i16;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        tilecache
+    fn render(&mut self, p: RenderParameters) {
+        p.tilecache
             .get_tile(self.tile + self.current_frame)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(general.position));
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
     }
 
     fn can_get_shot(&self, general: &ActorData) -> bool {
@@ -358,127 +338,120 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        _level_solids: &mut LevelSolids,
-        _level_tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-        let x = general.position.x as u16;
-        let y = general.position.y as u16;
-        match general.actor_type {
+    fn shot(&mut self, p: ShotParameters) {
+        let x = p.general.position.x as u16;
+        let y = p.general.position.y as u16;
+        match p.general.actor_type {
             ActorType::BoxBlueFootball => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Football, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Football, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueJoystick => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Joystick, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Joystick, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueDisk => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Disk, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Disk, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueBalloon => {
-                general.is_alive = false;
-                actor_adder.add_actor(
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(
                     ActorType::Balloon,
                     x,
                     y - TILE_HEIGHT as u16,
                 );
-                actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueFlag => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Flag, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Flag, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxBlueRadio => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Radio, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Radio, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxRedSoda => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Soda, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Soda, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxRedChicken => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::ChickenSingle, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::ChickenSingle, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyEmpty => {
-                general.is_alive = false;
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyBoots => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Boots, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Boots, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyClamps => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Clamps, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Clamps, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyGun => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Gun, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Gun, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyBomb => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Bomb, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Bomb, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyGlove => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::Glove, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::Glove, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyFullLife => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::FullLife, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::FullLife, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyAccessCard => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::AccessCard, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::AccessCard, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterD => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::LetterD, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::LetterD, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterU => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::LetterU, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::LetterU, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterK => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::LetterK, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::LetterK, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::BoxGreyLetterE => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::LetterE, x, y);
-                actor_adder.add_particle_firework(x, y, 4);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::LetterE, x, y);
+                p.actor_adder.add_particle_firework(x, y, 4);
             }
             ActorType::ChickenSingle => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::ChickenDouble, x, y);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::ChickenDouble, x, y);
             }
             ActorType::Soda => {
-                general.is_alive = false;
-                actor_adder.add_actor(ActorType::SodaFlying, x, y);
+                p.general.is_alive = false;
+                p.actor_adder.add_actor(ActorType::SodaFlying, x, y);
             }
             _ => {}
         }

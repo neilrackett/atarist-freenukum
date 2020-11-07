@@ -1,15 +1,13 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -52,34 +50,20 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;
-            general.position.x += self.hspeed;
-            general.position.y += self.vspeed;
+            p.general.position.x += self.hspeed;
+            p.general.position.y += self.vspeed;
             self.vspeed += 2;
         } else {
-            general.is_alive = false;
+            p.general.is_alive = false;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache.get_tile((self.tile) as usize).unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p.tilecache.get_tile((self.tile) as usize).unwrap();
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

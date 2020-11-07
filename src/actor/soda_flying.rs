@@ -1,12 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchStartParameters, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -25,59 +23,41 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
-        hero_data.score.add(1000);
-        actor_adder.add_actor(
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        p.hero_data.score.add(1000);
+        p.actor_adder.add_actor(
             ActorType::Score1000,
-            general.position.x as u16,
-            general.position.y as u16,
+            p.general.position.x as u16,
+            p.general.position.y as u16,
         );
-        general.is_alive = false;
+        p.general.is_alive = false;
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-        general.position.y -= HALFTILE_HEIGHT as i16;
-        if solids.get(
-            general.position.x as usize / TILE_WIDTH,
-            general.position.y as usize / TILE_HEIGHT,
+    fn act(&mut self, p: ActParameters) {
+        p.general.position.y -= HALFTILE_HEIGHT as i16;
+        if p.solids.get(
+            p.general.position.x as usize / TILE_WIDTH,
+            p.general.position.y as usize / TILE_HEIGHT,
         ) {
-            actor_adder.add_actor(
+            p.actor_adder.add_actor(
                 ActorType::Explosion,
-                general.position.x as u16,
-                general.position.y as u16,
+                p.general.position.x as u16,
+                p.general.position.y as u16,
             );
-            general.is_alive = false;
+            p.general.is_alive = false;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p
+            .tilecache
             .get_tile(
                 ANIMATION_SODAFLY
-                    + ((general.position.y as usize / HALFTILE_HEIGHT)
+                    + ((p.general.position.y as usize / HALFTILE_HEIGHT)
                         % 4),
             )
             .unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

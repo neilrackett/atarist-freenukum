@@ -1,15 +1,14 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP, TILE_HEIGHT,
     TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -33,44 +32,20 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-    }
+    fn act(&mut self, _p: ActParameters) {}
 
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = true;
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        p.general.hurts_hero = true;
         self.touching_hero = true;
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = false;
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
+        p.general.hurts_hero = false;
         self.touching_hero = false;
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = match general.actor_type {
+    fn render(&mut self, p: RenderParameters) {
+        let tile = match p.general.actor_type {
             ActorType::SpikesUp => OBJECT_SPIKES_UP,
             ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
             ActorType::Spike if self.touching_hero => OBJECT_SPIKE + 1,
@@ -78,8 +53,8 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        let tile = tilecache.get_tile(tile).unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+        let tile = p.tilecache.get_tile(tile).unwrap();
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

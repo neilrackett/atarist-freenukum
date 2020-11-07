@@ -1,11 +1,9 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -27,23 +25,7 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-    }
+    fn act(&mut self, _p: ActParameters) {}
 
-    fn blit(
-        &mut self,
-        _general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        _tilecache: &TileCache,
-        _target: &mut Surface,
-    ) {
-    }
+    fn render(&mut self, _p: RenderParameters) {}
 }

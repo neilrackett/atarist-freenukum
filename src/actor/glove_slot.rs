@@ -1,14 +1,12 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageQueue, ActorMessageType, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageType, ActorType, HeroInteractStartParameters,
+    RenderParameters,
 };
-use crate::hero::{HeroData, InventoryItem};
-use crate::infobox::InfoMessageQueue;
+use crate::hero::InventoryItem;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 enum State {
@@ -51,18 +49,11 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(
-        &mut self,
-        _general: &mut ActorData,
-        _level_passed: &mut bool,
-        hero_data: &mut HeroData,
-        _info_message_queue: &mut InfoMessageQueue,
-        actor_message_queue: &mut ActorMessageQueue,
-    ) {
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         match self.state {
             State::Idle => {
-                if hero_data.inventory.is_set(InventoryItem::Glove) {
-                    actor_message_queue.push_back(
+                if p.hero_data.inventory.is_set(InventoryItem::Glove) {
+                    p.actor_message_queue.push_back(
                         ActorType::ExpandingFloor,
                         ActorMessageType::Expand,
                     );
@@ -77,15 +68,7 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Idle => {
                 self.current_frame += 1;
@@ -96,16 +79,16 @@ impl ActorInterface for Specific {
                 self.current_frame %= self.num_frames;
                 self.countdown -= 1;
                 if self.countdown % 4 == 0 {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::HostileShotRight,
-                        general.position.x as u16,
-                        general.position.y as u16,
+                        p.general.position.x as u16,
+                        p.general.position.y as u16,
                     );
                 } else if self.countdown % 4 == 2 {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::HostileShotLeft,
-                        general.position.x as u16,
-                        general.position.y as u16,
+                        p.general.position.x as u16,
+                        p.general.position.y as u16,
                     );
                 }
                 if self.countdown == 0 {
@@ -116,30 +99,24 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
+    fn render(&mut self, p: RenderParameters) {
         let adder = if self.current_frame == 0 { 0 } else { 1 };
-        let mut destrect = general.position;
-        tilecache
+        let mut destrect = p.general.position;
+        p.tilecache
             .get_tile(self.tile + adder)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
 
         destrect.x -= TILE_WIDTH as i16;
-        tilecache
+        p.tilecache
             .get_tile(self.tile + 2)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
 
         destrect.x += 2 * TILE_WIDTH as i16;
-        tilecache
+        p.tilecache
             .get_tile(self.tile + 3)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+            .blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

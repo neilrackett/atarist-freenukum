@@ -1,12 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{SOLID_START, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -48,26 +46,18 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         // Detect whether the hero is standing upon the floor.
         // We can't use the hero_touch_start functionality here
         // because it only gets triggered when the hero geometry
         // overlaps with the part, which is not the case here.
-        let hero_geometry = hero_data.position.geometry;
+        let hero_geometry = p.hero_data.position.geometry;
         let hero_center = hero_geometry.x + (hero_geometry.w as i16) / 2;
-        let stands_upon = hero_center >= general.position.x
+        let stands_upon = hero_center >= p.general.position.x
             && hero_center
-                <= general.position.x + general.position.w as i16
+                <= p.general.position.x + p.general.position.w as i16
             && hero_geometry.y + hero_geometry.h as i16
-                == general.position.y;
+                == p.general.position.y;
 
         if stands_upon {
             if !self.touching_hero {
@@ -79,37 +69,31 @@ impl ActorInterface for Specific {
         }
 
         if self.touch_count >= 2 {
-            let mut r = general.position;
+            let mut r = p.general.position;
             for _ in 0..self.floor_length {
-                solids.set(
+                p.solids.set(
                     r.x as usize / TILE_WIDTH,
                     r.y as usize / TILE_HEIGHT,
                     false,
                 );
-                actor_adder.add_actor(
+                p.actor_adder.add_actor(
                     ActorType::Explosion,
                     r.x as u16,
                     r.y as u16,
                 );
-                actor_adder
+                p.actor_adder
                     .add_particle_firework(r.x as u16, r.y as u16, 4);
                 r.x += TILE_WIDTH as i16;
             }
-            general.is_alive = false;
+            p.general.is_alive = false;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache.get_tile(self.tile as usize).unwrap();
-        let mut destrect = general.position;
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p.tilecache.get_tile(self.tile as usize).unwrap();
+        let mut destrect = p.general.position;
         for _ in 0..self.floor_length {
-            tile.blit_to_sdl_surface(None, target, Some(destrect));
+            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
             destrect.x += TILE_WIDTH as i16;
         }
     }

@@ -1,17 +1,15 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageQueue, ActorMessageType, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageType, ActorType, HeroInteractStartParameters,
+    RenderParameters,
 };
-use crate::hero::{HeroData, InventoryItem};
-use crate::infobox::InfoMessageQueue;
+use crate::hero::InventoryItem;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN,
     OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -37,29 +35,15 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, _p: ActParameters) {
         if self.counter < 5 {
             self.counter += 1;
             self.counter %= 4;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = match (self.counter, general.actor_type) {
+    fn render(&mut self, p: RenderParameters) {
+        let tile = match (self.counter, p.general.actor_type) {
             (0, _) => self.tile,
             (_, ActorType::KeyholeRed) => OBJECT_KEYHOLE_RED,
             (_, ActorType::KeyholeBlue) => OBJECT_KEYHOLE_BLUE,
@@ -68,10 +52,10 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+        p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
             None,
-            target,
-            Some(general.position),
+            p.target,
+            Some(p.general.position),
         );
     }
 
@@ -79,15 +63,8 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(
-        &mut self,
-        general: &mut ActorData,
-        _level_passed: &mut bool,
-        hero_data: &mut HeroData,
-        info_message_queue: &mut InfoMessageQueue,
-        actor_message_queue: &mut ActorMessageQueue,
-    ) {
-        let (required_item, door_actor_type) = match general.actor_type {
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+        let (required_item, door_actor_type) = match p.general.actor_type {
             ActorType::KeyholeRed => {
                 (InventoryItem::KeyRed, ActorType::DoorRed)
             }
@@ -103,11 +80,11 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        if hero_data.inventory.is_set(required_item) {
-            actor_message_queue
+        if p.hero_data.inventory.is_set(required_item) {
+            p.actor_message_queue
                 .push_back(door_actor_type, ActorMessageType::OpenDoor);
             self.counter = 5;
-            hero_data.inventory.unset(required_item);
+            p.hero_data.inventory.unset(required_item);
         } else if self.counter < 5 {
             let color = match required_item {
                 InventoryItem::KeyRed => "red",
@@ -116,7 +93,7 @@ impl ActorInterface for Specific {
                 InventoryItem::KeyGreen => "green",
                 _ => unreachable!(),
             };
-            info_message_queue
+            p.info_message_queue
                 .push_back(format!("You don't have the {} key.", color));
         }
     }

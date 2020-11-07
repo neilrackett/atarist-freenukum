@@ -1,15 +1,14 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
     OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -60,58 +59,36 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         if self.current_frame == self.num_frames {
-            general.is_alive = false;
+            p.general.is_alive = false;
             if let Some(successor) = self.replaced_by {
-                actor_adder.add_actor(
+                p.actor_adder.add_actor(
                     successor,
-                    general.position.x as u16,
-                    general.position.y as u16,
+                    p.general.position.x as u16,
+                    p.general.position.y as u16,
                 );
             }
         }
     }
 
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
         if self.can_hurt_hero {
-            general.hurts_hero = true;
+            p.general.hurts_hero = true;
         }
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = false;
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
+        p.general.hurts_hero = false;
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p
+            .tilecache
             .get_tile((self.tile + self.current_frame) as usize)
             .unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

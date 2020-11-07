@@ -1,17 +1,14 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageQueue,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    HeroInteractEndParameters, HeroInteractStartParameters,
+    RenderParameters,
 };
-use crate::hero::HeroData;
-use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR, TILE_HEIGHT,
     TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(PartialEq, Eq, Debug)]
 enum State {
@@ -40,24 +37,16 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-        let hero_geometry = hero_data.position.geometry;
+    fn act(&mut self, p: ActParameters) {
+        let hero_geometry = p.hero_data.position.geometry;
 
         if self.state == State::Ascending
             || self.state == State::Idle
-                && general.position.h as usize > TILE_HEIGHT
+                && p.general.position.h as usize > TILE_HEIGHT
         {
             // check if hero leaves elevator
-            if !hero_geometry.touches(general.position)
-                || general.position.x != hero_geometry.x
+            if !hero_geometry.touches(p.general.position)
+                || p.general.position.x != hero_geometry.x
             {
                 self.state = State::Descending;
             }
@@ -65,28 +54,29 @@ impl ActorInterface for Specific {
 
         match self.state {
             State::Ascending => {
-                if solids.get(
-                    general.position.x as usize / TILE_WIDTH,
-                    general.position.y as usize / TILE_HEIGHT - 3,
+                if p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH,
+                    p.general.position.y as usize / TILE_HEIGHT - 3,
                 ) {
                     // hero touches solid with head
                     self.state = State::Idle;
                 } else {
-                    let offset = hero_data
+                    let offset = p
+                        .hero_data
                         .position
-                        .push_vertically(&solids, -(TILE_HEIGHT as i16));
+                        .push_vertically(&p.solids, -(TILE_HEIGHT as i16));
                     if -offset < TILE_HEIGHT as i16 {
-                        hero_data
+                        p.hero_data
                             .position
-                            .push_vertically(&solids, -offset);
+                            .push_vertically(&p.solids, -offset);
                         self.state = State::Idle;
                     } else {
-                        general.position.h += (-offset) as u16;
-                        general.position.y += offset as i16;
+                        p.general.position.h += (-offset) as u16;
+                        p.general.position.y += offset as i16;
 
-                        solids.set(
-                            general.position.x as usize / TILE_WIDTH,
-                            general.position.y as usize / TILE_HEIGHT,
+                        p.solids.set(
+                            p.general.position.x as usize / TILE_WIDTH,
+                            p.general.position.y as usize / TILE_HEIGHT,
                             true,
                         );
                     }
@@ -94,14 +84,14 @@ impl ActorInterface for Specific {
             }
             State::Descending => {
                 for _ in 0..2 {
-                    if general.position.h as usize > TILE_HEIGHT {
-                        solids.set(
-                            general.position.x as usize / TILE_WIDTH,
-                            general.position.y as usize / TILE_HEIGHT,
+                    if p.general.position.h as usize > TILE_HEIGHT {
+                        p.solids.set(
+                            p.general.position.x as usize / TILE_WIDTH,
+                            p.general.position.y as usize / TILE_HEIGHT,
                             false,
                         );
-                        general.position.y += TILE_HEIGHT as i16;
-                        general.position.h -= TILE_HEIGHT as u16;
+                        p.general.position.y += TILE_HEIGHT as i16;
+                        p.general.position.h -= TILE_HEIGHT as u16;
                     } else {
                         self.state = State::Idle;
                     }
@@ -115,31 +105,19 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(
-        &mut self,
-        general: &mut ActorData,
-        _level_passed: &mut bool,
-        hero_data: &mut HeroData,
-        _info_message_queue: &mut InfoMessageQueue,
-        _actor_message_queue: &mut ActorMessageQueue,
-    ) {
-        if hero_data.position.geometry.touches(general.position)
-            && hero_data.position.geometry.y
-                + hero_data.position.geometry.h as i16
-                == general.position.y
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+        if p.hero_data.position.geometry.touches(p.general.position)
+            && p.hero_data.position.geometry.y
+                + p.hero_data.position.geometry.h as i16
+                == p.general.position.y
         {
             self.state = State::Ascending;
         }
     }
 
-    fn hero_interact_end(
-        &mut self,
-        general: &mut ActorData,
-        _level_passed: &mut bool,
-        hero_data: &mut HeroData,
-    ) {
-        if hero_data.position.geometry.touches(general.position)
-            && hero_data.position.geometry.x == general.position.x
+    fn hero_interact_end(&mut self, p: HeroInteractEndParameters) {
+        if p.hero_data.position.geometry.touches(p.general.position)
+            && p.hero_data.position.geometry.x == p.general.position.x
         {
             self.state = State::Idle;
         } else {
@@ -147,21 +125,15 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache.get_tile(SOLID_ELEVATOR).unwrap();
-        let mut destrect = general.position;
-        for _ in 0..(general.position.h as usize / TILE_HEIGHT - 1) * 2 {
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p.tilecache.get_tile(SOLID_ELEVATOR).unwrap();
+        let mut destrect = p.general.position;
+        for _ in 0..(p.general.position.h as usize / TILE_HEIGHT - 1) * 2 {
             destrect.y += HALFTILE_HEIGHT as i16;
-            tile.blit_to_sdl_surface(None, target, Some(destrect));
+            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
         }
-        destrect = general.position;
-        let tile = tilecache.get_tile(OBJECT_ELEVATOR_TOP).unwrap();
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+        destrect = p.general.position;
+        let tile = p.tilecache.get_tile(OBJECT_ELEVATOR_TOP).unwrap();
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

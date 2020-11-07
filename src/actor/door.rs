@@ -1,13 +1,10 @@
 use super::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageType, ReceiveMessageParameters, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -41,56 +38,36 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Closed => {}
             State::Opening => {
                 if self.counter == 0 {
-                    solids.set(
-                        general.position.x as usize / TILE_WIDTH,
-                        general.position.y as usize / TILE_HEIGHT,
+                    p.solids.set(
+                        p.general.position.x as usize / TILE_WIDTH,
+                        p.general.position.y as usize / TILE_HEIGHT,
                         false,
                     );
                 }
                 self.counter += 1;
                 if self.counter == 8 {
                     self.state = State::Open;
-                    general.is_alive = false;
+                    p.general.is_alive = false;
                 }
             }
             State::Open => {}
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        tilecache
+    fn render(&mut self, p: RenderParameters) {
+        p.tilecache
             .get_tile(self.tile + self.counter)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(general.position));
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
     }
 
-    fn receive_message(
-        &mut self,
-        _general: &mut ActorData,
-        message: ActorMessageType,
-        _hero_data: &mut HeroData,
-        _solids: &mut LevelSolids,
-    ) {
-        if message != ActorMessageType::OpenDoor {
+    fn receive_message(&mut self, p: ReceiveMessageParameters) {
+        if p.message != ActorMessageType::OpenDoor {
             return;
         }
         self.state = State::Opening;

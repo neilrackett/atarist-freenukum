@@ -1,15 +1,14 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters, ShotParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     HorizontalDirection, VerticalDirection, ANIMATION_WALLCRAWLERBOT_LEFT,
     ANIMATION_WALLCRAWLERBOT_RIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -56,34 +55,17 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = true;
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        p.general.hurts_hero = true;
         self.touching_hero = true;
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = false;
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
+        p.general.hurts_hero = false;
         self.touching_hero = false;
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         let direction = match self.direction {
             VerticalDirection::Up => 1,
             VerticalDirection::Down => -1,
@@ -102,22 +84,22 @@ impl ActorInterface for Specific {
 
             if
             // bot collides with solid tile
-            solids.get(
-                general.position.x as usize / TILE_WIDTH,
-                (general.position.y as usize - 1) / TILE_WIDTH) ||
+            p.solids.get(
+                p.general.position.x as usize / TILE_WIDTH,
+                (p.general.position.y as usize - 1) / TILE_WIDTH) ||
             // bot has no more wall to stick upon
-            !solids.get(
+            !p.solids.get(
                 (
-                    general.position.x as isize +
+                    p.general.position.x as isize +
                     orientation as isize *
                     TILE_WIDTH as isize
                 ) as usize / TILE_WIDTH,
-                (general.position.y as usize - 1) / TILE_HEIGHT)
+                (p.general.position.y as usize - 1) / TILE_HEIGHT)
             {
-                general.position.y += 1;
+                p.general.position.y += 1;
                 self.direction = VerticalDirection::Down;
             } else {
-                general.position.y -= 1;
+                p.general.position.y -= 1;
             }
         } else {
             // going down
@@ -128,71 +110,60 @@ impl ActorInterface for Specific {
 
             if
             // bot collides with solid tile
-            solids.get(
-                    general.position.x as usize / TILE_WIDTH,
+            p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH,
                     (
-                        general.position.y as usize + TILE_HEIGHT
+                        p.general.position.y as usize + TILE_HEIGHT
                     ) / TILE_HEIGHT) ||
             // bot has no more wall to stick upon
-            !solids.get(
+            !p.solids.get(
                 (
-                    general.position.x as isize +
+                    p.general.position.x as isize +
                     orientation as isize *
                     TILE_WIDTH as isize) as usize /
                 TILE_WIDTH,
-                (general.position.y as usize + TILE_HEIGHT) / TILE_HEIGHT)
+                (p.general.position.y as usize + TILE_HEIGHT) / TILE_HEIGHT)
             {
-                general.position.y -= 1;
+                p.general.position.y -= 1;
                 self.direction = VerticalDirection::Up;
             } else {
-                general.position.y += 1;
+                p.general.position.y += 1;
             }
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile =
-            tilecache.get_tile(self.tile + self.current_frame).unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p
+            .tilecache
+            .get_tile(self.tile + self.current_frame)
+            .unwrap();
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
         true
     }
 
-    fn shot(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-    ) {
+    fn shot(&mut self, p: ShotParameters) {
         if !self.was_shot {
             if self.touching_hero {
-                general.hurts_hero = false;
+                p.general.hurts_hero = false;
                 self.touching_hero = false;
                 self.current_frame = 0;
             }
-            general.is_alive = false;
+            p.general.is_alive = false;
 
-            hero_data.score.add(100);
-            actor_adder.add_actor(
+            p.hero_data.score.add(100);
+            p.actor_adder.add_actor(
                 ActorType::Steam,
-                general.position.x as u16,
-                general.position.y as u16,
+                p.general.position.x as u16,
+                p.general.position.y as u16,
             );
-            actor_adder.add_actor(
+            p.actor_adder.add_actor(
                 ActorType::Explosion,
-                general.position.x as u16,
-                general.position.y as u16,
+                p.general.position.x as u16,
+                p.general.position.y as u16,
             );
         }
     }

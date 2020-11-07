@@ -1,10 +1,9 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{
     NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200, NUMBER_2000,
     NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT, NUMBER_BONUS_1_RIGHT,
@@ -14,7 +13,6 @@ use crate::{
     NUMBER_BONUS_6_RIGHT, NUMBER_BONUS_7_LEFT, NUMBER_BONUS_7_RIGHT,
     TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -71,33 +69,19 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         self.countdown -= 1;
-        general.position.y -= 1;
+        p.general.position.y -= 1;
         if self.countdown == 0
-            || general.position.y == -(TILE_HEIGHT as i16)
+            || p.general.position.y == -(TILE_HEIGHT as i16)
         {
-            general.is_alive = false;
+            p.general.is_alive = false;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile = tilecache.get_tile(self.tile as usize).unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p.tilecache.get_tile(self.tile as usize).unwrap();
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

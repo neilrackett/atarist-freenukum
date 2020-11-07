@@ -1,13 +1,12 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::HorizontalDirection;
 use crate::{OBJECT_FIRELEFT, OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -57,34 +56,17 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = self.state == State::Burning;
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+        p.general.hurts_hero = self.state == State::Burning;
         self.touching_hero = true;
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
-        general.hurts_hero = false;
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
+        p.general.hurts_hero = false;
         self.touching_hero = false;
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Off => {
                 if self.counter == 40 {
@@ -97,7 +79,7 @@ impl ActorInterface for Specific {
                     self.counter = 0;
                     self.state = State::Burning;
                     if self.touching_hero {
-                        general.hurts_hero = true;
+                        p.general.hurts_hero = true;
                     }
                 }
             }
@@ -106,7 +88,7 @@ impl ActorInterface for Specific {
                     self.counter = 0;
                     self.state = State::Off;
                     if self.touching_hero {
-                        general.hurts_hero = false;
+                        p.general.hurts_hero = false;
                     }
                 }
             }
@@ -115,13 +97,7 @@ impl ActorInterface for Specific {
         self.counter += 1;
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
+    fn render(&mut self, p: RenderParameters) {
         let (tile0, tile1, tile2) = match self.state {
             State::Off => (None, None, None),
             State::Ignition => {
@@ -157,27 +133,27 @@ impl ActorInterface for Specific {
             }
         };
 
-        let mut destrect = general.position;
+        let mut destrect = p.general.position;
         if let Some(tile) = tile0 {
-            tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
                 None,
-                target,
+                p.target,
                 Some(destrect),
             );
         }
         destrect.x += TILE_WIDTH as i16;
         if let Some(tile) = tile1 {
-            tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
                 None,
-                target,
+                p.target,
                 Some(destrect),
             );
         }
         destrect.x += TILE_WIDTH as i16;
         if let Some(tile) = tile2 {
-            tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+            p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
                 None,
-                target,
+                p.target,
                 Some(destrect),
             );
         }

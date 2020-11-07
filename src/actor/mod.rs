@@ -101,12 +101,13 @@ impl ActorsList {
             .iter_mut()
             .filter(|a| a.general.actor_type == receivers)
         {
-            actor.specific.receive_message(
-                &mut actor.general,
+            let p = ReceiveMessageParameters {
+                general: &mut actor.general,
                 message,
                 hero_data,
                 solids,
-            );
+            };
+            actor.specific.receive_message(p);
         }
     }
 
@@ -115,7 +116,7 @@ impl ActorsList {
         shot_position: Geometry,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        actor_queue: &mut dyn ActorAdder,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) -> bool {
         let mut hit_actor = false;
@@ -123,7 +124,7 @@ impl ActorsList {
             if actor.can_get_shot()
                 && shot_position.touches(actor.position())
             {
-                actor.shot(solids, tiles, actor_queue, hero_data);
+                actor.shot(solids, tiles, actor_adder, hero_data);
                 if !actor.is_alive() {
                     hit_actor = true;
                 }
@@ -151,14 +152,15 @@ impl ActorsList {
             self.end_interaction(level_passed, hero_data);
 
             let actor = self.actors.get_mut(i).unwrap();
-            self.interaction_target = Some(i);
-            actor.specific.hero_interact_start(
-                &mut actor.general,
+            let p = HeroInteractStartParameters {
+                general: &mut actor.general,
                 level_passed,
                 hero_data,
                 info_message_queue,
                 actor_message_queue,
-            );
+            };
+            self.interaction_target = Some(i);
+            actor.specific.hero_interact_start(p);
         }
     }
 
@@ -169,11 +171,12 @@ impl ActorsList {
     ) {
         if let Some(i) = self.interaction_target.take() {
             if let Some(actor) = self.actors.get_mut(i) {
-                actor.specific.hero_interact_end(
-                    &mut actor.general,
+                let p = HeroInteractEndParameters {
+                    general: &mut actor.general,
                     level_passed,
                     hero_data,
-                );
+                };
+                actor.specific.hero_interact_end(p);
             }
         }
     }
@@ -242,7 +245,12 @@ impl ActorsList {
                 actor.general.is_visible && !actor.general.is_in_foreground
             })
             .for_each(|actor| {
-                actor.blit(hero, target, tilecache, draw_collision_bounds)
+                actor.render(
+                    hero,
+                    target,
+                    tilecache,
+                    draw_collision_bounds,
+                )
             });
     }
 
@@ -259,7 +267,12 @@ impl ActorsList {
                 actor.general.is_visible && actor.general.is_in_foreground
             })
             .for_each(|actor| {
-                actor.blit(hero, target, tilecache, draw_collision_bounds)
+                actor.render(
+                    hero,
+                    target,
+                    tilecache,
+                    draw_collision_bounds,
+                )
             });
     }
 }
@@ -281,14 +294,15 @@ impl Actor {
     ) -> bool {
         self.check_hero_touch(hero_data, actor_adder);
 
-        self.specific.act(
-            &mut self.general,
+        let p = ActParameters {
+            general: &mut self.general,
             solids,
             tiles,
-            actor_adder,
             hero_data,
+            actor_adder,
             do_play,
-        );
+        };
+        self.specific.act(p);
         self.general.is_alive
     }
 
@@ -304,16 +318,23 @@ impl Actor {
             if !self.general.touches_hero {
                 self.general.touches_hero = true;
 
-                self.specific.hero_touch_start(
-                    &mut self.general,
-                    actor_adder,
+                let p = HeroTouchStartParameters {
+                    general: &mut self.general,
                     hero_data,
-                );
+                    actor_adder,
+                };
+
+                self.specific.hero_touch_start(p);
             }
         } else {
             if self.general.touches_hero {
                 self.general.touches_hero = false;
-                self.specific.hero_touch_end(&mut self.general, hero_data);
+
+                let p = HeroTouchEndParameters {
+                    general: &mut self.general,
+                    hero_data,
+                };
+                self.specific.hero_touch_end(p);
             }
         }
     }
@@ -340,16 +361,17 @@ impl Actor {
         &mut self,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        actor_queue: &mut dyn ActorAdder,
+        actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) {
-        self.specific.shot(
-            &mut self.general,
+        let p = ShotParameters {
+            general: &mut self.general,
             solids,
             tiles,
-            actor_queue,
+            actor_adder,
             hero_data,
-        );
+        };
+        self.specific.shot(p);
     }
 
     pub fn is_alive(&self) -> bool {
@@ -360,15 +382,20 @@ impl Actor {
         self.general.position
     }
 
-    pub fn blit(
+    pub fn render(
         &mut self,
-        hero: &mut HeroData,
+        hero_data: &mut HeroData,
         target: &mut Surface,
         tilecache: &TileCache,
         draw_collision_bounds: bool,
     ) {
-        self.specific
-            .blit(&mut self.general, hero, tilecache, target);
+        let p = RenderParameters {
+            general: &mut self.general,
+            hero_data,
+            target,
+            tilecache,
+        };
+        self.specific.render(p);
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color(&target.format());
@@ -1030,82 +1057,84 @@ pub(crate) trait ActorCreateInterface: Sized {
     }
 }
 
-pub(crate) trait ActorInterface: std::fmt::Debug {
-    fn hero_touch_start(
-        &mut self,
-        _general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-    }
+pub struct ActParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub solids: &'a mut LevelSolids,
+    pub tiles: &'a mut LevelTiles,
+    pub hero_data: &'a mut HeroData,
+    pub actor_adder: &'a mut dyn ActorAdder,
+    pub do_play: &'a mut bool,
+}
 
-    fn hero_touch_end(
-        &mut self,
-        _general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
-    }
+pub struct ShotParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub solids: &'a mut LevelSolids,
+    pub tiles: &'a mut LevelTiles,
+    pub actor_adder: &'a mut dyn ActorAdder,
+    pub hero_data: &'a mut HeroData,
+}
+
+pub struct RenderParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub hero_data: &'a mut HeroData,
+    pub target: &'a mut Surface,
+    pub tilecache: &'a TileCache,
+}
+
+pub struct ReceiveMessageParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub message: ActorMessageType,
+    pub hero_data: &'a mut HeroData,
+    pub solids: &'a mut LevelSolids,
+}
+
+pub struct HeroInteractStartParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub level_passed: &'a mut bool,
+    pub hero_data: &'a mut HeroData,
+    pub info_message_queue: &'a mut InfoMessageQueue,
+    pub actor_message_queue: &'a mut ActorMessageQueue,
+}
+
+pub struct HeroInteractEndParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub hero_data: &'a mut HeroData,
+    pub level_passed: &'a mut bool,
+}
+
+pub struct HeroTouchStartParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub hero_data: &'a mut HeroData,
+    pub actor_adder: &'a mut dyn ActorAdder,
+}
+
+pub struct HeroTouchEndParameters<'a> {
+    pub general: &'a mut ActorData,
+    pub hero_data: &'a mut HeroData,
+}
+
+pub(crate) trait ActorInterface: std::fmt::Debug {
+    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {}
+
+    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {}
 
     fn hero_can_interact(&self) -> bool {
         false
     }
 
-    fn hero_interact_start(
-        &mut self,
-        _general: &mut ActorData,
-        _level_passed: &mut bool,
-        _hero_data: &mut HeroData,
-        _info_message_queue: &mut InfoMessageQueue,
-        _actor_message_queue: &mut ActorMessageQueue,
-    ) {
-    }
+    fn hero_interact_start(&mut self, _p: HeroInteractStartParameters) {}
 
-    fn hero_interact_end(
-        &mut self,
-        _general: &mut ActorData,
-        _level_passed: &mut bool,
-        _hero_data: &mut HeroData,
-    ) {
-    }
+    fn hero_interact_end(&mut self, _p: HeroInteractEndParameters) {}
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
-        actor_queue: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-        do_play: &mut bool,
-    );
+    fn act(&mut self, p: ActParameters);
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut transdl::video::Surface,
-    );
+    fn render(&mut self, p: RenderParameters);
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
         false
     }
 
-    fn shot(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_queue: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
-    }
+    fn shot(&mut self, _p: ShotParameters) {}
 
-    fn receive_message(
-        &mut self,
-        _general: &mut ActorData,
-        _message: ActorMessageType,
-        _hero_data: &mut HeroData,
-        _solids: &mut LevelSolids,
-    ) {
-    }
+    fn receive_message(&mut self, _p: ReceiveMessageParameters) {}
 }

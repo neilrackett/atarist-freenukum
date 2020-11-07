@@ -1,17 +1,15 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::HorizontalDirection;
 use crate::{
     HALFTILE_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_CENTER,
     SOLID_CONVEYORBELT_LEFTEND, SOLID_CONVEYORBELT_RIGHTEND, TILE_HEIGHT,
     TILE_WIDTH,
 };
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -71,15 +69,7 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         let hero_push_offset = match self.direction {
             HorizontalDirection::Left => {
                 if self.current_frame == 0 {
@@ -96,50 +86,47 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        let hero_geometry = hero_data.position.geometry;
+        let hero_geometry = p.hero_data.position.geometry;
 
-        if hero_geometry.x + hero_geometry.w as i16 > general.position.x
+        if hero_geometry.x + hero_geometry.w as i16 > p.general.position.x
             && hero_geometry.x
-                < general.position.x + general.position.w as i16
+                < p.general.position.x + p.general.position.w as i16
             && hero_geometry.y + hero_geometry.h as i16
-                == general.position.y
+                == p.general.position.y
         {
-            hero_data
+            p.hero_data
                 .position
-                .push_horizontally(solids, hero_push_offset);
+                .push_horizontally(p.solids, hero_push_offset);
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let mut tile = tilecache
+    fn render(&mut self, p: RenderParameters) {
+        let mut tile = p
+            .tilecache
             .get_tile(SOLID_CONVEYORBELT_LEFTEND + self.current_frame)
             .unwrap();
-        let mut destrect = general.position;
+        let mut destrect = p.general.position;
 
-        let num_elements = general.position.w as usize / TILE_WIDTH;
+        let num_elements = p.general.position.w as usize / TILE_WIDTH;
         for i in 0..num_elements {
             if i == num_elements - 1 {
                 // right end of the conveyor
-                tile = tilecache
+                tile = p
+                    .tilecache
                     .get_tile(
                         SOLID_CONVEYORBELT_RIGHTEND + self.current_frame,
                     )
                     .unwrap();
             } else if i == 1 {
                 // center parts of the conveyor
-                tile = tilecache
+                tile = p
+                    .tilecache
                     .get_tile(
                         SOLID_CONVEYORBELT_CENTER + self.current_frame % 2,
                     )
                     .unwrap();
             }
-            tile.blit_to_sdl_surface(None, target, Some(destrect));
+            tile.blit_to_sdl_surface(None, p.target, Some(destrect));
             destrect.x += TILE_WIDTH as i16;
         }
     }

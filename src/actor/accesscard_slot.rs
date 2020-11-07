@@ -1,14 +1,12 @@
-use super::super::hero::{HeroData, InventoryItem};
-use super::super::infobox::InfoMessageQueue;
+use super::super::hero::InventoryItem;
 use super::super::level::solids::LevelSolids;
 use super::super::level::tiles::LevelTiles;
-use super::super::tilecache::TileCache;
 use super::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageQueue, ActorMessageType, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorMessageType, ActorType, HeroInteractStartParameters,
+    RenderParameters,
 };
 use crate::{OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -40,52 +38,31 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(
-        &mut self,
-        _general: &mut ActorData,
-        _level_passed: &mut bool,
-        hero_data: &mut HeroData,
-        info_message_queue: &mut InfoMessageQueue,
-        actor_message_queue: &mut ActorMessageQueue,
-    ) {
-        if hero_data.inventory.is_set(InventoryItem::AccessCard) {
-            actor_message_queue.push_back(
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+        if p.hero_data.inventory.is_set(InventoryItem::AccessCard) {
+            p.actor_message_queue.push_back(
                 ActorType::AccessCardDoor,
                 ActorMessageType::OpenDoor,
             );
             self.current_frame = 0;
             self.num_frames = 1;
             self.tile = OBJECT_ACCESS_CARD_SLOT + 8;
-            hero_data.inventory.unset(InventoryItem::AccessCard);
+            p.hero_data.inventory.unset(InventoryItem::AccessCard);
         } else {
-            info_message_queue
+            p.info_message_queue
                 .push_back("You don't have the access card\n".to_string());
         }
     }
 
-    fn act(
-        &mut self,
-        _general: &mut ActorData,
-        _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, _p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        tilecache
+    fn render(&mut self, p: RenderParameters) {
+        p.tilecache
             .get_tile(self.tile + self.current_frame)
             .unwrap()
-            .blit_to_sdl_surface(None, target, Some(general.position));
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
     }
 }

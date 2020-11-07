@@ -1,12 +1,11 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+    RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -45,48 +44,31 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(
-        &mut self,
-        general: &mut ActorData,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-    ) {
+    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
         self.touching_hero = true;
-        general.hurts_hero = true;
+        p.general.hurts_hero = true;
     }
 
-    fn hero_touch_end(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-    ) {
+    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
         self.touching_hero = false;
-        general.hurts_hero = false;
+        p.general.hurts_hero = false;
     }
 
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        _actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
-        let offset = match general.actor_type {
+    fn act(&mut self, p: ActParameters) {
+        let offset = match p.general.actor_type {
             ActorType::HostileShotLeft => -(TILE_WIDTH as i16),
             ActorType::HostileShotRight => TILE_WIDTH as i16,
             _ => unreachable!(),
         };
-        general.position.x += offset;
+        p.general.position.x += offset;
 
-        if solids.get(
-            general.position.x as usize / TILE_WIDTH,
-            general.position.y as usize / TILE_HEIGHT,
+        if p.solids.get(
+            p.general.position.x as usize / TILE_WIDTH,
+            p.general.position.y as usize / TILE_HEIGHT,
         ) {
-            general.is_alive = false;
+            p.general.is_alive = false;
             if self.touching_hero {
-                general.hurts_hero = false;
+                p.general.hurts_hero = false;
             }
         }
 
@@ -94,16 +76,12 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
-        let tile =
-            tilecache.get_tile(self.tile + self.current_frame).unwrap();
-        let destrect = general.position;
-        tile.blit_to_sdl_surface(None, target, Some(destrect));
+    fn render(&mut self, p: RenderParameters) {
+        let tile = p
+            .tilecache
+            .get_tile(self.tile + self.current_frame)
+            .unwrap();
+        let destrect = p.general.position;
+        tile.blit_to_sdl_surface(None, p.target, Some(destrect));
     }
 }

@@ -1,12 +1,10 @@
 use crate::actor::{
-    ActorAdder, ActorCreateInterface, ActorData, ActorInterface, ActorType,
+    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+    ActorType, RenderParameters,
 };
-use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::tilecache::TileCache;
 use crate::{ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct Specific {
@@ -43,15 +41,7 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(
-        &mut self,
-        general: &mut ActorData,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
-        _hero_data: &mut HeroData,
-        _do_play: &mut bool,
-    ) {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
 
@@ -62,20 +52,20 @@ impl ActorInterface for Specific {
             let distance = self.counter - self.explode_threshold;
             if self.explode_left {
                 // explode to the left if possible
-                let space_is_free = !solids.get(
-                    general.position.x as usize / TILE_WIDTH - distance,
-                    general.position.y as usize / TILE_HEIGHT,
+                let space_is_free = !p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH - distance,
+                    p.general.position.y as usize / TILE_HEIGHT,
                 );
-                let space_has_solid_below = solids.get(
-                    general.position.x as usize / TILE_WIDTH - distance,
-                    general.position.y as usize / TILE_HEIGHT + 1,
+                let space_has_solid_below = p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH - distance,
+                    p.general.position.y as usize / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::BombFire,
-                        general.position.x as u16
+                        p.general.position.x as u16
                             - distance as u16 * TILE_WIDTH as u16,
-                        general.position.y as u16,
+                        p.general.position.y as u16,
                     );
                 } else {
                     self.explode_left = false;
@@ -83,42 +73,40 @@ impl ActorInterface for Specific {
             }
             if self.explode_right {
                 // explode to the right if possible
-                let space_is_free = !solids.get(
-                    general.position.x as usize / TILE_WIDTH + distance,
-                    general.position.y as usize / TILE_HEIGHT,
+                let space_is_free = !p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH + distance,
+                    p.general.position.y as usize / TILE_HEIGHT,
                 );
-                let space_has_solid_below = solids.get(
-                    general.position.x as usize / TILE_WIDTH + distance,
-                    general.position.y as usize / TILE_HEIGHT + 1,
+                let space_has_solid_below = p.solids.get(
+                    p.general.position.x as usize / TILE_WIDTH + distance,
+                    p.general.position.y as usize / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
-                    actor_adder.add_actor(
+                    p.actor_adder.add_actor(
                         ActorType::BombFire,
-                        general.position.x as u16
+                        p.general.position.x as u16
                             + distance as u16 * TILE_WIDTH as u16,
-                        general.position.y as u16,
+                        p.general.position.y as u16,
                     );
                 } else {
                     self.explode_right = false;
                 }
             }
         } else {
-            general.is_alive = false;
+            p.general.is_alive = false;
         }
     }
 
-    fn blit(
-        &mut self,
-        general: &mut ActorData,
-        _hero_data: &mut HeroData,
-        tilecache: &TileCache,
-        target: &mut Surface,
-    ) {
+    fn render(&mut self, p: RenderParameters) {
         if self.counter < self.explode_threshold {
-            tilecache
+            p.tilecache
                 .get_tile(self.tile + self.current_frame)
                 .unwrap()
-                .blit_to_sdl_surface(None, target, Some(general.position));
+                .blit_to_sdl_surface(
+                    None,
+                    p.target,
+                    Some(p.general.position),
+                );
         }
     }
 }
