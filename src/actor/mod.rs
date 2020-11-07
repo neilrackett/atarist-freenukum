@@ -234,7 +234,6 @@ impl ActorsList {
 
     pub fn blit_background_actors(
         &mut self,
-        hero: &mut HeroData,
         target: &mut Surface,
         tilecache: &TileCache,
         draw_collision_bounds: bool,
@@ -245,18 +244,12 @@ impl ActorsList {
                 actor.general.is_visible && !actor.general.is_in_foreground
             })
             .for_each(|actor| {
-                actor.render(
-                    hero,
-                    target,
-                    tilecache,
-                    draw_collision_bounds,
-                )
+                actor.render(target, tilecache, draw_collision_bounds)
             });
     }
 
     pub fn blit_foreground_actors(
         &mut self,
-        hero: &mut HeroData,
         target: &mut Surface,
         tilecache: &TileCache,
         draw_collision_bounds: bool,
@@ -267,12 +260,7 @@ impl ActorsList {
                 actor.general.is_visible && actor.general.is_in_foreground
             })
             .for_each(|actor| {
-                actor.render(
-                    hero,
-                    target,
-                    tilecache,
-                    draw_collision_bounds,
-                )
+                actor.render(target, tilecache, draw_collision_bounds)
             });
     }
 }
@@ -384,14 +372,12 @@ impl Actor {
 
     pub fn render(
         &mut self,
-        hero_data: &mut HeroData,
         target: &mut Surface,
         tilecache: &TileCache,
         draw_collision_bounds: bool,
     ) {
         let p = RenderParameters {
             general: &mut self.general,
-            hero_data,
             target,
             tilecache,
         };
@@ -1076,7 +1062,6 @@ pub struct ShotParameters<'a> {
 
 pub struct RenderParameters<'a> {
     pub general: &'a mut ActorData,
-    pub hero_data: &'a mut HeroData,
     pub target: &'a mut Surface,
     pub tilecache: &'a TileCache,
 }

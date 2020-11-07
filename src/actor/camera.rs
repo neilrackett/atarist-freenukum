@@ -10,7 +10,9 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub(crate) struct Specific {}
+pub(crate) struct Specific {
+    tile: usize,
+}
 
 impl ActorCreateInterface for Specific {
     fn create(
@@ -26,28 +28,29 @@ impl ActorCreateInterface for Specific {
         let y = general.position.y as usize / TILE_HEIGHT;
         tiles.copy_from_to(x, y + 1, x, y);
 
-        Specific {}
+        Specific {
+            tile: ANIMATION_CAMERA_CENTER,
+        }
     }
 }
 
 impl ActorInterface for Specific {
-    fn act(&mut self, _p: ActParameters) {}
-
-    fn render(&mut self, p: RenderParameters) {
+    fn act(&mut self, p: ActParameters) {
         let x = p.hero_data.position.geometry.x;
-        let tile = if x - 1 > p.general.position.x {
+        self.tile = if x - 1 > p.general.position.x {
             ANIMATION_CAMERA_RIGHT
         } else if x + 1 < p.general.position.x {
             ANIMATION_CAMERA_LEFT
         } else {
             ANIMATION_CAMERA_CENTER
         };
+    }
 
-        p.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
-            None,
-            p.target,
-            Some(p.general.position),
-        );
+    fn render(&mut self, p: RenderParameters) {
+        p.tilecache
+            .get_tile(self.tile)
+            .unwrap()
+            .blit_to_sdl_surface(None, p.target, Some(p.general.position));
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

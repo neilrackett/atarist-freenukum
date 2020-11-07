@@ -959,7 +959,6 @@ impl LevelData {
         );
 
         self.actors.blit_background_actors(
-            hero,
             &mut self.surface,
             tilecache,
             draw_collision_bounds,
@@ -973,7 +972,6 @@ impl LevelData {
         );
 
         self.actors.blit_foreground_actors(
-            hero,
             &mut self.surface,
             tilecache,
             draw_collision_bounds,
