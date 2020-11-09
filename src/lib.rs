@@ -6,6 +6,7 @@ pub mod backdrop;
 pub mod borders;
 pub mod data;
 pub mod episodes;
+pub mod event;
 pub mod file;
 pub mod game;
 pub mod geometry;
