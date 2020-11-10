@@ -2,8 +2,9 @@ use crate::actor::{ActorMessageQueue, ActorQueue, ActorType};
 use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
+use crate::event::GameEvent;
 use crate::geometry::Geometry;
-use crate::hero::{HeroData, InventoryItem, Motion};
+use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
 use crate::picture::show_splash_with_message;
@@ -13,14 +14,14 @@ use crate::tile::TileHeader;
 use crate::tilecache::TileCache;
 use crate::{backdrop, HorizontalDirection, UserEvent};
 use crate::{
-    Result, HALFTILE_HEIGHT, HALFTILE_WIDTH, LEVELWINDOW_HEIGHT,
-    LEVELWINDOW_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    Result, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH, LEVEL_HEIGHT,
+    LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 
 use anyhow::anyhow;
 use std::collections::HashSet;
 use std::fs::File;
-use transdl::event::{Event, KeyCode, Modifier, MouseButton};
+use transdl::event::{Event, KeyCode};
 use transdl::timer::Timer;
 use transdl::ttf::Font;
 use transdl::video::Surface;
@@ -154,155 +155,52 @@ fn start_in_level(
             texture_creation_params,
         );
 
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
-            | Event::KeyDown {
-                key: Some(KeyCode::Escape),
-                ..
-            }
-            | Event::KeyDown {
-                key: Some(KeyCode::Q),
-                ..
-            } => break 'game_loop,
-            Event::KeyDown {
-                key: Some(KeyCode::Num1),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::KeyRed);
+        use crate::event::WaitEvent;
+        match GameEvent::wait()? {
+            GameEvent::Escape => break 'game_loop,
+            GameEvent::GetInventoryItem(item) => {
+                hero.inventory.set(item);
                 update_whole_screen = true;
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Num2),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::KeyGreen);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num3),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::KeyBlue);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num4),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::KeyPink);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num5),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::Boot);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num6),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::Glove);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num7),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::Clamp);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num8),
-                ..
-            } => {
-                hero.inventory.set(InventoryItem::AccessCard);
-                update_whole_screen = true;
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Num9),
-                ..
-            } => {
+            GameEvent::IncreaseLife => {
                 hero.firepower.increase(1);
                 update_whole_screen = true;
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Num0),
-                ..
-            } => {
+            GameEvent::FinishLevel => {
                 level_data.level_passed = true;
                 level_data.do_play = false;
             }
-            Event::KeyDown {
-                key: Some(KeyCode::F),
-                ..
-            }
-            | Event::KeyDown {
-                key: Some(KeyCode::F11),
-                ..
-            } => {
+            GameEvent::ToggleFullscreen => {
                 if target.toggle_fullscreen() {
                     settings.fullscreen = !settings.fullscreen;
                     settings.save();
                 }
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Down),
-                modifiers,
-            } if modifiers.contains(&Modifier::LeftShift)
-                || modifiers.contains(&Modifier::RightShift) =>
-            {
-                if (srcrect.y as usize + srcrect.h as usize)
-                    < LEVEL_HEIGHT * TILE_HEIGHT
+            GameEvent::MoveViewPoint { x, y } => {
+                srcrect.x += x as i16;
+                srcrect.y += y as i16;
+
+                if srcrect.x < 0 {
+                    srcrect.x = 0;
+                }
+                if srcrect.y < 0 {
+                    srcrect.y = 0;
+                }
+                if srcrect.x + srcrect.w as i16
+                    > (LEVEL_WIDTH * TILE_WIDTH) as i16
                 {
-                    srcrect.y += HALFTILE_HEIGHT as i16;
-                    do_update = true;
+                    srcrect.x = (LEVEL_WIDTH * TILE_WIDTH) as i16
+                        - srcrect.w as i16;
                 }
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Up),
-                modifiers,
-            } if modifiers.contains(&Modifier::LeftShift)
-                || modifiers.contains(&Modifier::RightShift) =>
-            {
-                if (srcrect.y as usize + srcrect.h as usize) > 0 {
-                    srcrect.y -= HALFTILE_HEIGHT as i16;
-                    do_update = true;
-                }
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Right),
-                modifiers,
-            } if modifiers.contains(&Modifier::LeftShift)
-                || modifiers.contains(&Modifier::RightShift) =>
-            {
-                if (srcrect.x as usize + srcrect.w as usize)
-                    < LEVEL_WIDTH * TILE_WIDTH
+                if srcrect.y + srcrect.h as i16
+                    > (LEVEL_HEIGHT * TILE_HEIGHT) as i16
                 {
-                    srcrect.x += HALFTILE_WIDTH as i16;
-                    do_update = true;
+                    srcrect.y = (LEVEL_HEIGHT * TILE_HEIGHT) as i16
+                        - srcrect.h as i16;
                 }
+                do_update = true;
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Left),
-                modifiers,
-            } if modifiers.contains(&Modifier::LeftShift)
-                || modifiers.contains(&Modifier::RightShift) =>
-            {
-                if (srcrect.x as usize + srcrect.w as usize) > 0 {
-                    srcrect.x -= HALFTILE_WIDTH as i16;
-                    do_update = true;
-                }
-            }
-            Event::KeyDown {
-                key: Some(KeyCode::Up),
-                ..
-            }
-            | Event::MouseButtonDown {
-                button: Some(MouseButton::Middle),
-                ..
-            } => {
+            GameEvent::HeroInteractionStart => {
                 level_data.hero_interact_start(
                     hero,
                     &mut info_message_queue,
@@ -310,109 +208,54 @@ fn start_in_level(
                 );
                 do_update = true;
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Right),
-                ..
-            } => {
-                directions.insert(HorizontalDirection::Right);
-                if directions.contains(&HorizontalDirection::Left) {
-                    hero.motion = Motion::NotMoving;
+            GameEvent::HeroInteractionEnd => {
+                level_data.hero_interact_end(hero);
+                do_update = true;
+            }
+            GameEvent::HeroSetWalkingDirectionEnabled((
+                direction,
+                enabled,
+            )) => {
+                if enabled {
+                    directions.insert(direction);
                 } else {
-                    hero.motion = Motion::Walking;
-                    hero.direction = HorizontalDirection::Right;
+                    directions.remove(&direction);
+                }
+                match (
+                    directions.contains(&HorizontalDirection::Left),
+                    directions.contains(&HorizontalDirection::Right),
+                ) {
+                    (true, true) | (false, false) => {
+                        hero.motion = Motion::NotMoving
+                    }
+                    (true, false) => {
+                        hero.motion = Motion::Walking;
+                        hero.direction = HorizontalDirection::Left;
+                    }
+                    (false, true) => {
+                        hero.motion = Motion::Walking;
+                        hero.direction = HorizontalDirection::Right;
+                    }
                 }
                 hero.update_animation();
             }
-            Event::KeyDown {
-                key: Some(KeyCode::Left),
-                ..
-            } => {
-                directions.insert(HorizontalDirection::Left);
-                if directions.contains(&HorizontalDirection::Right) {
-                    hero.motion = Motion::NotMoving;
-                } else {
-                    hero.motion = Motion::Walking;
-                    hero.direction = HorizontalDirection::Left;
-                }
-                hero.update_animation();
+            GameEvent::RefreshScreen => {
+                target.update();
             }
-            Event::KeyDown {
-                key: Some(KeyCode::LeftCtrl),
-                ..
-            }
-            | Event::MouseButtonDown {
-                button: Some(MouseButton::Right),
-                ..
-            } => {
+            GameEvent::HeroJump => {
                 hero.jump();
                 hero.update_animation();
             }
-            Event::KeyDown {
-                key: Some(KeyCode::LeftAlt),
-                ..
-            }
-            | Event::MouseButtonDown {
-                button: Some(MouseButton::Left),
-                ..
-            } => {
+            GameEvent::HeroStartFiring => {
                 hero.is_shooting = true;
                 level_data.fire_shot(hero, &mut actor_queue);
                 hero.update_animation();
             }
-            Event::KeyUp {
-                key: Some(KeyCode::Up),
-                ..
-            }
-            | Event::MouseButtonUp {
-                button: Some(MouseButton::Middle),
-                ..
-            } => {
-                level_data.hero_interact_end(hero);
-                do_update = true;
-            }
-            Event::KeyUp {
-                key: Some(KeyCode::Right),
-                ..
-            } => {
-                directions.remove(&HorizontalDirection::Right);
-                if directions.contains(&HorizontalDirection::Left) {
-                    hero.motion = Motion::Walking;
-                    hero.direction = HorizontalDirection::Left;
-                } else {
-                    hero.motion = Motion::NotMoving;
-                }
-                hero.update_animation();
-            }
-            Event::KeyUp {
-                key: Some(KeyCode::Left),
-                ..
-            } => {
-                directions.remove(&HorizontalDirection::Left);
-                if directions.contains(&HorizontalDirection::Right) {
-                    hero.motion = Motion::Walking;
-                    hero.direction = HorizontalDirection::Right;
-                } else {
-                    hero.motion = Motion::NotMoving;
-                }
-                hero.update_animation();
-            }
-            Event::KeyUp {
-                key: Some(KeyCode::LeftAlt),
-                ..
-            }
-            | Event::MouseButtonUp {
-                button: Some(MouseButton::Left),
-                ..
-            } => {
+            GameEvent::HeroStopFiring => {
                 hero.is_shooting = false;
                 hero.update_animation();
             }
-            Event::VideoExpose => {
-                target.update();
-            }
-            Event::UserEvent { code }
-                if code == UserEvent::Timer as i32 =>
-            {
+            GameEvent::TimerTriggered => {
                 level_data.act(
                     hero,
                     &mut actor_queue,
@@ -420,9 +263,7 @@ fn start_in_level(
                 );
                 do_update = true;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroMoved as i32 =>
-            {
+            GameEvent::HeroMoved => {
                 let heropos = hero.position.geometry;
                 srcrect.x = std::cmp::min(
                     (heropos.x as usize + heropos.w as usize / 2)
@@ -438,9 +279,7 @@ fn start_in_level(
                     LEVEL_HEIGHT * TILE_HEIGHT - srcrect.h as usize,
                 ) as i16;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroScored as i32 =>
-            {
+            GameEvent::HeroScored => {
                 borders.blit_score(
                     target,
                     texture_creation_params,
@@ -449,9 +288,7 @@ fn start_in_level(
                 );
                 update_whole_screen = true;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroFirepowerChanged as i32 =>
-            {
+            GameEvent::HeroFirepowerChanged => {
                 borders.blit_firepower(
                     target,
                     texture_creation_params,
@@ -460,9 +297,7 @@ fn start_in_level(
                 );
                 update_whole_screen = true;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroInventoryChanged as i32 =>
-            {
+            GameEvent::HeroInventoryChanged => {
                 borders.blit_inventory(
                     target,
                     texture_creation_params,
@@ -471,9 +306,7 @@ fn start_in_level(
                 );
                 update_whole_screen = true;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroHealthChanged as i32 =>
-            {
+            GameEvent::HeroHealthChanged => {
                 borders.blit_life(
                     target,
                     texture_creation_params,
@@ -482,9 +315,7 @@ fn start_in_level(
                 );
                 update_whole_screen = true;
             }
-            Event::UserEvent { code }
-                if code == UserEvent::HeroLanded as i32 =>
-            {
+            GameEvent::HeroLanded => {
                 actor_queue.push_back(
                     ActorType::DustCloud,
                     hero.position.geometry.x as u16,
@@ -492,7 +323,6 @@ fn start_in_level(
                         as u16,
                 );
             }
-            _ => {}
         }
     }
     timer.remove();

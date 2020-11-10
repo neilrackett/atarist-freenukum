@@ -14,8 +14,7 @@ pub enum GameEvent {
     MoveViewPoint { x: i32, y: i32 },
     HeroInteractionStart,
     HeroInteractionEnd,
-    HeroSetWalkingDirection(HorizontalDirection),
-    HeroClearWalkingDirection(HorizontalDirection),
+    HeroSetWalkingDirectionEnabled((HorizontalDirection, bool)),
     RefreshScreen,
     HeroJump,
     HeroStartFiring,
@@ -27,6 +26,22 @@ pub enum GameEvent {
     HeroInventoryChanged,
     HeroHealthChanged,
     HeroLanded,
+}
+
+pub trait WaitEvent: Sized {
+    fn wait() -> Result<Self>;
+}
+
+impl<T: TryFrom<transdl::event::Event>> WaitEvent for T {
+    fn wait() -> Result<Self> {
+        loop {
+            let event = transdl::event::Event::wait()
+                .map_err(|e| anyhow!("{}", e))?;
+            if let Ok(e) = T::try_from(event) {
+                return Ok(e);
+            }
+        }
+    }
 }
 
 impl TryFrom<transdl::event::Event> for GameEvent {
@@ -137,14 +152,16 @@ impl TryFrom<transdl::event::Event> for GameEvent {
             E::KeyDown {
                 key: Some(K::Right),
                 ..
-            } => Ok(GameEvent::HeroSetWalkingDirection(
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
-            )),
+                true,
+            ))),
             E::KeyDown {
                 key: Some(K::Left), ..
-            } => Ok(GameEvent::HeroSetWalkingDirection(
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
-            )),
+                true,
+            ))),
             E::KeyDown {
                 key: Some(K::LeftCtrl),
                 ..
@@ -171,14 +188,16 @@ impl TryFrom<transdl::event::Event> for GameEvent {
             E::KeyUp {
                 key: Some(K::Right),
                 ..
-            } => Ok(GameEvent::HeroClearWalkingDirection(
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
-            )),
+                false,
+            ))),
             E::KeyUp {
                 key: Some(K::Left), ..
-            } => Ok(GameEvent::HeroClearWalkingDirection(
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
-            )),
+                false,
+            ))),
             E::KeyUp {
                 key: Some(K::LeftAlt),
                 ..
