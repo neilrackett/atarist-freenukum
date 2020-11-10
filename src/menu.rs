@@ -2,8 +2,10 @@ use super::geometry::Geometry;
 use super::messagebox;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
+use crate::event::{MenuEvent, WaitEvent};
+use crate::UserEvent;
 use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
-use transdl::event::{Event, KeyCode, MouseButton};
+use anyhow::Result;
 use transdl::video::Surface;
 
 pub struct MenuEntry {
@@ -38,7 +40,7 @@ impl Menu {
         screen: &mut Surface,
         tilecache: &TileCache,
         texture_creation_paramns: TextureCreationParams,
-    ) -> char {
+    ) -> Result<char> {
         let (headercols, headerrows) =
             messagebox::get_information(&self.header);
 
@@ -77,7 +79,7 @@ impl Menu {
         transdl::event::enable_key_repeat();
 
         let timer = transdl::timer::Timer::add(80, || {
-            transdl::event::push_user_event(0)
+            transdl::event::push_user_event(UserEvent::Timer as i32)
         });
 
         let pointrect = Geometry {
@@ -143,28 +145,18 @@ impl Menu {
                 changed = false;
             }
 
-            let choice: Option<char> = match Event::wait() {
-                Ok(Event::KeyDown {
-                    key: Some(KeyCode::Return),
-                    ..
-                }) => Some(self.entries[self.current].shortcut),
-                Ok(Event::KeyDown {
-                    key: Some(KeyCode::Escape),
-                    ..
-                }) => Some('\0'),
-                Ok(Event::KeyDown {
-                    key: Some(KeyCode::Down),
-                    ..
-                }) => {
+            let choice: Option<char> = match MenuEvent::wait()? {
+                MenuEvent::ChooseCurrentEntry | MenuEvent::ClickMouse => {
+                    Some(self.entries[self.current].shortcut)
+                }
+                MenuEvent::Abort => Some('\0'),
+                MenuEvent::NextEntry => {
                     self.current += 1;
                     self.current %= self.entries.len();
                     update_whole_menu = true;
                     None
                 }
-                Ok(Event::KeyDown {
-                    key: Some(KeyCode::Up),
-                    ..
-                }) => {
+                MenuEvent::PreviousEntry => {
                     if self.current == 0 {
                         self.current = self.entries.len();
                     }
@@ -172,22 +164,16 @@ impl Menu {
                     update_whole_menu = true;
                     None
                 }
-                Ok(Event::KeyDown { key: Some(key), .. }) => {
-                    use std::convert::TryFrom;
+                MenuEvent::ChooseShortcutEntry(key) => {
                     let mut choice = None;
                     for entry in self.entries.iter() {
-                        let c = KeyCode::try_from(entry.shortcut as isize)
-                            .ok();
-                        if let Some(c) = c {
-                            if key == c {
-                                choice = Some(entry.shortcut);
-                                break;
-                            }
+                        if key == entry.shortcut {
+                            choice = Some(entry.shortcut);
                         }
                     }
                     choice
                 }
-                Ok(Event::MouseMotion { x, y, .. }) => {
+                MenuEvent::MoveMouse { x, y } => {
                     let x = x as i16 - destrect.x - FONT_WIDTH as i16 * 3;
                     let y = y as i16
                         - destrect.y
@@ -207,37 +193,22 @@ impl Menu {
 
                     None
                 }
-                Ok(Event::MouseButtonDown { button, .. }) => {
-                    if button == Some(MouseButton::Left) {
-                        Some(self.entries[self.current].shortcut)
-                    } else {
-                        None
-                    }
-                }
-                Ok(Event::VideoExpose) => {
+                MenuEvent::RefreshScreen => {
                     screen.update_rect(0, 0, 0, 0);
                     None
                 }
-                Ok(Event::UserEvent { code: 0 }) => {
+                MenuEvent::TimerTriggered => {
                     animationframe += 1;
                     animationframe %= 4;
                     changed = true;
                     update_whole_menu = true;
                     None
                 }
-                Ok(_) => {
-                    // Ignore other events
-                    None
-                }
-                Err(e) => {
-                    eprintln!("Error handling SDL event: {:?}", e);
-                    None
-                }
             };
             if let Some(choice) = choice {
                 timer.remove();
                 transdl::event::disable_key_repeat();
-                return choice;
+                return Ok(choice);
             }
         }
     }

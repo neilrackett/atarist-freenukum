@@ -42,7 +42,7 @@ fn main() -> Result<()> {
     let mut hero = HeroData::new();
 
     'menu_loop: loop {
-        match mainmenu(&mut screen, &tilecache, texture_creation_params) {
+        match mainmenu(&mut screen, &tilecache, texture_creation_params)? {
             MainMenuEntry::Start => {
                 game::start(
                     &tilecache,

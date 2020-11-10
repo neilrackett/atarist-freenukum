@@ -48,6 +48,19 @@ pub enum InputEvent {
     RefreshScreen,
 }
 
+#[must_use]
+pub enum MenuEvent {
+    ChooseCurrentEntry,
+    Abort,
+    NextEntry,
+    PreviousEntry,
+    ChooseShortcutEntry(char),
+    MoveMouse { x: i16, y: i16 },
+    ClickMouse,
+    RefreshScreen,
+    TimerTriggered,
+}
+
 pub trait WaitEvent: Sized {
     fn wait() -> Result<Self>;
 }
@@ -375,6 +388,53 @@ impl TryFrom<transdl::event::Event> for InputEvent {
             },
             E::VideoExpose => Ok(InputEvent::RefreshScreen),
             _ => Err(anyhow!("Event not handled")),
+        }
+    }
+}
+
+impl TryFrom<transdl::event::Event> for MenuEvent {
+    type Error = Error;
+
+    fn try_from(e: transdl::event::Event) -> Result<MenuEvent> {
+        use transdl::event::{Event as E, KeyCode as K, MouseButton};
+        match e {
+            E::KeyDown {
+                key: Some(K::Return),
+                ..
+            } => Ok(MenuEvent::ChooseCurrentEntry),
+            E::KeyDown {
+                key: Some(K::Escape),
+                ..
+            } => Ok(MenuEvent::Abort),
+            E::KeyDown {
+                key: Some(K::Down), ..
+            } => Ok(MenuEvent::NextEntry),
+            E::KeyDown {
+                key: Some(K::Up), ..
+            } => Ok(MenuEvent::PreviousEntry),
+            E::KeyDown { key: Some(key), .. } => {
+                let c = key as u8 as char;
+                Ok(MenuEvent::ChooseShortcutEntry(c))
+            }
+            E::MouseMotion { x, y, .. } => Ok(MenuEvent::MoveMouse {
+                x: x as i16,
+                y: y as i16,
+            }),
+            E::MouseButtonDown { button, .. } => {
+                if button == Some(MouseButton::Left) {
+                    Ok(MenuEvent::ClickMouse)
+                } else {
+                    Err(anyhow!("Event not handled"))
+                }
+            }
+            E::VideoExpose => Ok(MenuEvent::RefreshScreen),
+            E::UserEvent { code } if code == UserEvent::Timer as i32 => {
+                Ok(MenuEvent::TimerTriggered)
+            }
+            _ => {
+                // Ignore other events
+                Err(anyhow!("Event not handled"))
+            }
         }
     }
 }

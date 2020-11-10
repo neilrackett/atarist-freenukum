@@ -1,6 +1,7 @@
 use super::menu::{Menu, MenuEntry};
 use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
+use anyhow::Result;
 use std::convert::Into;
 use transdl::video::Surface;
 
@@ -91,7 +92,7 @@ pub fn mainmenu(
     screen: &mut Surface,
     tilecache: &TileCache,
     texture_creation_paramns: TextureCreationParams,
-) -> MainMenuEntry {
+) -> Result<MainMenuEntry> {
     use MainMenuEntry as M;
     let msg = r"
   FREENUKUM MAIN MENU 
@@ -111,9 +112,9 @@ pub fn mainmenu(
     menu.append(M::Credits.into());
     menu.append(M::Quit.into());
 
-    MainMenuEntry::from(menu.get_choice(
+    Ok(MainMenuEntry::from(menu.get_choice(
         screen,
         tilecache,
         texture_creation_paramns,
-    ))
+    )?))
 }
