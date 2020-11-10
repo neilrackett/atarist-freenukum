@@ -2,7 +2,7 @@ use crate::actor::{ActorMessageQueue, ActorQueue, ActorType};
 use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
-use crate::event::GameEvent;
+use crate::event::{ConfirmEvent, GameEvent, WaitEvent};
 use crate::geometry::Geometry;
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
@@ -21,7 +21,6 @@ use crate::{
 use anyhow::anyhow;
 use std::collections::HashSet;
 use std::fs::File;
-use transdl::event::{Event, KeyCode};
 use transdl::timer::Timer;
 use transdl::ttf::Font;
 use transdl::video::Surface;
@@ -155,7 +154,6 @@ fn start_in_level(
             texture_creation_params,
         );
 
-        use crate::event::WaitEvent;
         match GameEvent::wait()? {
             GameEvent::Escape => break 'game_loop,
             GameEvent::GetInventoryItem(item) => {
@@ -481,22 +479,7 @@ fn show_missing_data_information(target: &mut Surface) {
 
     super::data::display_text(target, 0, 0, &mut font, msg);
 
-    loop {
-        match Event::wait() {
-            Ok(Event::KeyDown {
-                key: Some(KeyCode::Return),
-                ..
-            })
-            | Ok(Event::KeyDown {
-                key: Some(KeyCode::Escape),
-                ..
-            })
-            | Ok(Event::Quit) => {
-                return;
-            }
-            _ => {}
-        }
-    }
+    ConfirmEvent::wait().unwrap();
 }
 
 fn initialize_sdl() -> Result<()> {

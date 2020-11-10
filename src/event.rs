@@ -28,6 +28,8 @@ pub enum GameEvent {
     HeroLanded,
 }
 
+pub struct ConfirmEvent;
+
 pub trait WaitEvent: Sized {
     fn wait() -> Result<Self>;
 }
@@ -239,6 +241,28 @@ impl TryFrom<transdl::event::Event> for GameEvent {
                 if code == UserEvent::HeroLanded as i32 =>
             {
                 Ok(GameEvent::HeroLanded)
+            }
+            _ => Err(anyhow!("Event not handled")),
+        }
+    }
+}
+
+impl TryFrom<transdl::event::Event> for ConfirmEvent {
+    type Error = Error;
+
+    fn try_from(e: transdl::event::Event) -> Result<ConfirmEvent> {
+        use transdl::event::{Event as E, KeyCode as K};
+        match e {
+            E::KeyDown {
+                key: Some(K::Return),
+                ..
+            }
+            | E::KeyDown {
+                key: Some(K::Escape),
+                ..
+            }
+            | E::Quit => {
+                return Ok(ConfirmEvent);
             }
             _ => Err(anyhow!("Event not handled")),
         }
