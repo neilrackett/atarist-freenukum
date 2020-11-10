@@ -3,8 +3,9 @@ use super::inputfield::InputField;
 use super::messagebox::messagebox;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
+use crate::event::{InputEvent, WaitEvent};
 use crate::{FONT_HEIGHT, FONT_WIDTH};
-use transdl::event::{Event, KeyCode, Modifier};
+use anyhow::Result;
 use transdl::video::Surface;
 
 pub enum Answer {
@@ -18,7 +19,7 @@ pub fn show(
     texture_creation_params: TextureCreationParams,
     msg: &str,
     max_length: usize,
-) -> Answer {
+) -> Result<Answer> {
     let mut input_field_surface = Texture::create_with_params(
         (FONT_WIDTH * max_length) as u16,
         FONT_HEIGHT as u16,
@@ -66,128 +67,48 @@ pub fn show(
     screen.update_rect(0, 0, 0, 0);
 
     loop {
-        match Event::wait() {
-            Ok(Event::KeyDown { key, modifiers }) => {
-                match key {
-                    Some(KeyCode::BackSpace) => {
-                        input_field.backspace_pressed();
-                    }
-                    Some(KeyCode::Delete) => {
-                        input_field.delete_pressed();
-                    }
-                    Some(KeyCode::Left) => {
-                        input_field.left_pressed();
-                    }
-                    Some(KeyCode::Right) => {
-                        input_field.right_pressed();
-                    }
-                    Some(KeyCode::Return) => {
-                        background_backup.blit(
-                            None,
-                            screen,
-                            Some(destrect.as_sdl_rect()),
-                        );
-                        let text = input_field.get_text();
-                        return Answer::Ok(text.to_string());
-                    }
-                    Some(KeyCode::Escape) => {
-                        background_backup.blit(
-                            None,
-                            screen,
-                            Some(destrect.as_sdl_rect()),
-                        );
-                        return Answer::Quit;
-                    }
-                    Some(code)
-                        if code == KeyCode::Space
-                            || code == KeyCode::Exclaim
-                            || code == KeyCode::QuoteDouble
-                            || code == KeyCode::Hash
-                            || code == KeyCode::Dollar
-                            || code == KeyCode::Ampersand
-                            || code == KeyCode::Quote
-                            || code == KeyCode::LeftParen
-                            || code == KeyCode::RightParen
-                            || code == KeyCode::Asterisk
-                            || code == KeyCode::Plus
-                            || code == KeyCode::Comma
-                            || code == KeyCode::Minus
-                            || code == KeyCode::Period
-                            || code == KeyCode::Slash
-                            || code == KeyCode::Num0
-                            || code == KeyCode::Num1
-                            || code == KeyCode::Num2
-                            || code == KeyCode::Num3
-                            || code == KeyCode::Num4
-                            || code == KeyCode::Num5
-                            || code == KeyCode::Num6
-                            || code == KeyCode::Num7
-                            || code == KeyCode::Num8
-                            || code == KeyCode::Num9
-                            || code == KeyCode::Colon
-                            || code == KeyCode::Semicolon
-                            || code == KeyCode::Less
-                            || code == KeyCode::Equals
-                            || code == KeyCode::Greater
-                            || code == KeyCode::Question
-                            || code == KeyCode::At
-                            || code == KeyCode::A
-                            || code == KeyCode::B
-                            || code == KeyCode::C
-                            || code == KeyCode::D
-                            || code == KeyCode::E
-                            || code == KeyCode::F
-                            || code == KeyCode::G
-                            || code == KeyCode::H
-                            || code == KeyCode::I
-                            || code == KeyCode::J
-                            || code == KeyCode::K
-                            || code == KeyCode::L
-                            || code == KeyCode::M
-                            || code == KeyCode::N
-                            || code == KeyCode::O
-                            || code == KeyCode::P
-                            || code == KeyCode::Q
-                            || code == KeyCode::R
-                            || code == KeyCode::S
-                            || code == KeyCode::T
-                            || code == KeyCode::U
-                            || code == KeyCode::V
-                            || code == KeyCode::W
-                            || code == KeyCode::X
-                            || code == KeyCode::Y
-                            || code == KeyCode::Z =>
-                    {
-                        let mut c = code as u8 as char;
-                        if modifiers.contains(&Modifier::LeftShift)
-                            || modifiers.contains(&Modifier::RightShift)
-                        {
-                            c.make_ascii_uppercase();
-                        }
-
-                        input_field.symbol_pressed(c);
-                    }
-                    Some(_) | None => {}
-                };
-                input_field.blit(&mut input_field_surface, tilecache);
-                input_field_surface.clone_to_texture(
-                    None,
-                    &mut msgbox,
-                    Some(input_field_rect.clone()),
-                );
-                msgbox.blit_to_sdl_surface(
+        match InputEvent::wait()? {
+            InputEvent::DeleteLeft => {
+                input_field.backspace_pressed();
+            }
+            InputEvent::DeleteRight => {
+                input_field.delete_pressed();
+            }
+            InputEvent::MoveCursorLeft => {
+                input_field.left_pressed();
+            }
+            InputEvent::MoveCursorRight => {
+                input_field.right_pressed();
+            }
+            InputEvent::Confirm => {
+                background_backup.blit(
                     None,
                     screen,
-                    Some(destrect.clone()),
+                    Some(destrect.as_sdl_rect()),
                 );
-                screen.update_rect(0, 0, 0, 0);
+                let text = input_field.get_text();
+                return Ok(Answer::Ok(text.to_string()));
             }
-            Ok(_) => {
-                // Ignore other events
+            InputEvent::Abort => {
+                background_backup.blit(
+                    None,
+                    screen,
+                    Some(destrect.as_sdl_rect()),
+                );
+                return Ok(Answer::Quit);
             }
-            Err(e) => {
-                panic!("Error getting SDL event: {:?}", e);
+            InputEvent::Letter(c) => {
+                input_field.symbol_pressed(c);
             }
+            InputEvent::RefreshScreen => {}
         }
+        input_field.blit(&mut input_field_surface, tilecache);
+        input_field_surface.clone_to_texture(
+            None,
+            &mut msgbox,
+            Some(input_field_rect.clone()),
+        );
+        msgbox.blit_to_sdl_surface(None, screen, Some(destrect.clone()));
+        screen.update_rect(0, 0, 0, 0);
     }
 }

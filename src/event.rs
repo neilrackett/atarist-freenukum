@@ -36,6 +36,18 @@ pub enum ConfirmEvent {
     RefreshScreen,
 }
 
+#[must_use]
+pub enum InputEvent {
+    DeleteLeft,
+    DeleteRight,
+    MoveCursorLeft,
+    MoveCursorRight,
+    Confirm,
+    Abort,
+    Letter(char),
+    RefreshScreen,
+}
+
 pub trait WaitEvent: Sized {
     fn wait() -> Result<Self>;
 }
@@ -273,6 +285,95 @@ impl TryFrom<transdl::event::Event> for ConfirmEvent {
             E::VideoExpose => {
                 return Ok(ConfirmEvent::RefreshScreen);
             }
+            _ => Err(anyhow!("Event not handled")),
+        }
+    }
+}
+
+impl TryFrom<transdl::event::Event> for InputEvent {
+    type Error = Error;
+
+    fn try_from(e: transdl::event::Event) -> Result<InputEvent> {
+        use transdl::event::{Event as E, KeyCode as K, Modifier as M};
+        match e {
+            E::KeyDown { key, modifiers } => match key {
+                Some(K::BackSpace) => Ok(InputEvent::DeleteLeft),
+                Some(K::Delete) => Ok(InputEvent::DeleteRight),
+                Some(K::Left) => Ok(InputEvent::MoveCursorLeft),
+                Some(K::Right) => Ok(InputEvent::MoveCursorRight),
+                Some(K::Return) => Ok(InputEvent::Confirm),
+                Some(K::Escape) => Ok(InputEvent::Abort),
+                Some(code)
+                    if code == K::Space
+                        || code == K::Exclaim
+                        || code == K::QuoteDouble
+                        || code == K::Hash
+                        || code == K::Dollar
+                        || code == K::Ampersand
+                        || code == K::Quote
+                        || code == K::LeftParen
+                        || code == K::RightParen
+                        || code == K::Asterisk
+                        || code == K::Plus
+                        || code == K::Comma
+                        || code == K::Minus
+                        || code == K::Period
+                        || code == K::Slash
+                        || code == K::Num0
+                        || code == K::Num1
+                        || code == K::Num2
+                        || code == K::Num3
+                        || code == K::Num4
+                        || code == K::Num5
+                        || code == K::Num6
+                        || code == K::Num7
+                        || code == K::Num8
+                        || code == K::Num9
+                        || code == K::Colon
+                        || code == K::Semicolon
+                        || code == K::Less
+                        || code == K::Equals
+                        || code == K::Greater
+                        || code == K::Question
+                        || code == K::At
+                        || code == K::A
+                        || code == K::B
+                        || code == K::C
+                        || code == K::D
+                        || code == K::E
+                        || code == K::F
+                        || code == K::G
+                        || code == K::H
+                        || code == K::I
+                        || code == K::J
+                        || code == K::K
+                        || code == K::L
+                        || code == K::M
+                        || code == K::N
+                        || code == K::O
+                        || code == K::P
+                        || code == K::Q
+                        || code == K::R
+                        || code == K::S
+                        || code == K::T
+                        || code == K::U
+                        || code == K::V
+                        || code == K::W
+                        || code == K::X
+                        || code == K::Y
+                        || code == K::Z =>
+                {
+                    let mut c = code as u8 as char;
+                    if modifiers.contains(&M::LeftShift)
+                        || modifiers.contains(&M::RightShift)
+                    {
+                        c.make_ascii_uppercase();
+                    }
+                    Ok(InputEvent::Letter(c))
+                }
+                _ => Err(anyhow!("Event not handled")),
+            },
+            E::VideoExpose => Ok(InputEvent::RefreshScreen),
             _ => Err(anyhow!("Event not handled")),
         }
     }

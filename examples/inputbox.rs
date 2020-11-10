@@ -31,7 +31,7 @@ fn main() -> Result<()> {
         texture_creation_params,
         "Please enter your name:",
         30,
-    ) {
+    )? {
         Answer::Ok(name) => {
             println!("OK, your name is {:?}", name);
         }
