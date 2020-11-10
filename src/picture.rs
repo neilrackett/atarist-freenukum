@@ -2,13 +2,12 @@ use super::geometry::Geometry;
 use super::messagebox::messagebox;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
+use crate::event::{ConfirmEvent, WaitEvent};
 use crate::{
     Result, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
-use anyhow::anyhow;
 use std::fs::File;
 use std::io::Read;
-use transdl::event::{Event, KeyCode, MouseButton};
 use transdl::video::Surface;
 
 pub fn load(
@@ -132,24 +131,13 @@ pub fn show_splash_with_message(
     target.update_rect(0, 0, 0, 0);
 
     loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
-            | Event::KeyDown {
-                key: Some(KeyCode::Escape),
-                ..
+        match ConfirmEvent::wait()? {
+            ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
+                return Ok(())
             }
-            | Event::KeyDown {
-                key: Some(KeyCode::Return),
-                ..
-            }
-            | Event::MouseButtonDown {
-                button: Some(MouseButton::Left),
-                ..
-            } => return Ok(()),
-            Event::VideoExpose => {
+            ConfirmEvent::RefreshScreen => {
                 target.update_rect(0, 0, 0, 0);
             }
-            _ => {}
         }
     }
 }
