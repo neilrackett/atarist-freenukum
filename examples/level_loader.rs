@@ -52,7 +52,7 @@ fn main() -> Result<()> {
         texture_creation_params,
     )?;
 
-    let mut episodes = game::check_episodes(&mut screen);
+    let mut episodes = game::check_episodes(&mut screen)?;
     episodes.switch_to(args.episode.get() - 1)?;
 
     let level_file = format!(

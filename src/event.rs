@@ -5,6 +5,7 @@ use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH};
 use anyhow::{anyhow, Error, Result};
 use std::convert::TryFrom;
 
+#[must_use]
 pub enum GameEvent {
     Escape,
     GetInventoryItem(InventoryItem),
@@ -28,7 +29,12 @@ pub enum GameEvent {
     HeroLanded,
 }
 
-pub struct ConfirmEvent;
+#[must_use]
+pub enum ConfirmEvent {
+    Confirmed,
+    Aborted,
+    RefreshScreen,
+}
 
 pub trait WaitEvent: Sized {
     fn wait() -> Result<Self>;
@@ -256,13 +262,16 @@ impl TryFrom<transdl::event::Event> for ConfirmEvent {
             E::KeyDown {
                 key: Some(K::Return),
                 ..
-            }
-            | E::KeyDown {
+            } => return Ok(ConfirmEvent::Confirmed),
+            E::KeyDown {
                 key: Some(K::Escape),
                 ..
             }
             | E::Quit => {
-                return Ok(ConfirmEvent);
+                return Ok(ConfirmEvent::Aborted);
+            }
+            E::VideoExpose => {
+                return Ok(ConfirmEvent::RefreshScreen);
             }
             _ => Err(anyhow!("Event not handled")),
         }

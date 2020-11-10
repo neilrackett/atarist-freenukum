@@ -18,7 +18,7 @@ fn main() -> Result<()> {
         format!("Freenukum {} infobox example", VERSION),
     )?;
 
-    game::check_episodes(&mut screen);
+    game::check_episodes(&mut screen)?;
     let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
@@ -30,19 +30,19 @@ fn main() -> Result<()> {
         &tilecache,
         texture_creation_params,
         "This is...",
-    );
+    )?;
     infobox::show(
         &mut screen,
         &tilecache,
         texture_creation_params,
         "...the great\nInfobox example.\n",
-    );
+    )?;
     infobox::show(
         &mut screen,
         &tilecache,
         texture_creation_params,
         "now\nwith\neven\nmore\nlines.",
-    );
+    )?;
 
     Ok(())
 }

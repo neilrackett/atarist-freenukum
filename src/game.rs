@@ -152,7 +152,7 @@ fn start_in_level(
             target,
             tilecache,
             texture_creation_params,
-        );
+        )?;
 
         match GameEvent::wait()? {
             GameEvent::Escape => break 'game_loop,
@@ -423,7 +423,7 @@ pub fn start(
         tilecache,
         texture_creation_params,
         "Get ready FreeNukum,\nyou are going in.\n",
-    );
+    )?;
 
     while success == Ending::Passed && level < 13 {
         if interlevel {
@@ -461,15 +461,15 @@ pub fn start(
     Ok(())
 }
 
-pub fn check_episodes(target: &mut Surface) -> Episodes {
+pub fn check_episodes(target: &mut Surface) -> Result<Episodes> {
     let episodes = Episodes::find_installed();
     if episodes.count() == 0 {
-        show_missing_data_information(target);
+        show_missing_data_information(target)?;
     }
-    episodes
+    Ok(episodes)
 }
 
-fn show_missing_data_information(target: &mut Surface) {
+fn show_missing_data_information(target: &mut Surface) -> Result<()> {
     let msg = "Could not load data level and graphics files.\n\
     Please use the accompanied freenukum-data-tool\n\
     for installing the game data files";
@@ -479,7 +479,16 @@ fn show_missing_data_information(target: &mut Surface) {
 
     super::data::display_text(target, 0, 0, &mut font, msg);
 
-    ConfirmEvent::wait().unwrap();
+    loop {
+        match ConfirmEvent::wait()? {
+            ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
+                return Ok(())
+            }
+            ConfirmEvent::RefreshScreen => {
+                target.update();
+            }
+        }
+    }
 }
 
 fn initialize_sdl() -> Result<()> {

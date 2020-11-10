@@ -27,7 +27,7 @@ fn main() -> Result<()> {
         format!("Freenukum {} tilecache example", VERSION),
     )?;
 
-    game::check_episodes(&mut screen);
+    game::check_episodes(&mut screen)?;
     let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),

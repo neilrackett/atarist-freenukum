@@ -2,7 +2,8 @@ use super::geometry::Geometry;
 use super::messagebox::messagebox;
 use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
-use transdl::event::Event;
+use crate::event::{ConfirmEvent, WaitEvent};
+use anyhow::Result;
 use transdl::video::Surface;
 
 pub fn show(
@@ -10,7 +11,7 @@ pub fn show(
     tilecache: &TileCache,
     texture_creation_params: TextureCreationParams,
     text: &str,
-) {
+) -> Result<()> {
     let messagebox = messagebox(text, tilecache, texture_creation_params);
     let destrect = Geometry {
         x: (screen.width() as isize - messagebox.width() as isize) as i16
@@ -35,25 +36,18 @@ pub fn show(
     screen.update_rect(0, 0, 0, 0);
 
     loop {
-        match Event::wait() {
-            Ok(Event::KeyDown { .. })
-            | Ok(Event::MouseButtonDown { .. }) => {
+        match ConfirmEvent::wait()? {
+            ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
                 background_backup.blit(
                     None,
                     screen,
                     Some(destrect.as_sdl_rect()),
                 );
                 screen.update_rect(0, 0, 0, 0);
-                return;
+                return Ok(());
             }
-            Ok(Event::VideoExpose) => {
+            ConfirmEvent::RefreshScreen => {
                 screen.update_rect(0, 0, 0, 0);
-            }
-            Ok(_) => {
-                // Ignore other events
-            }
-            Err(e) => {
-                panic!("Error getting SDL event: {:?}", e);
             }
         }
     }
@@ -76,10 +70,11 @@ impl InfoMessageQueue {
         screen: &mut Surface,
         tilecache: &TileCache,
         params: TextureCreationParams,
-    ) {
+    ) -> Result<()> {
         for message in self.messages.drain(..) {
-            show(screen, tilecache, params, &message);
+            show(screen, tilecache, params, &message)?;
         }
+        Ok(())
     }
 
     pub fn push_back(&mut self, msg: String) {
