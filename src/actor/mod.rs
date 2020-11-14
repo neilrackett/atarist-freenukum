@@ -42,7 +42,7 @@ use crate::hero::HeroData;
 use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::rendering::{RenderToSdlSurface, Renderer};
+use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::tilecache::TileCache;
 use crate::{TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -377,14 +377,12 @@ impl Actor {
         tilecache: &TileCache,
         draw_collision_bounds: bool,
     ) {
-        let mut renderer = Vec::new();
+        let mut renderer = SurfaceRenderer { target, tilecache };
         let p = RenderParameters {
             general: &mut self.general,
             renderer: &mut renderer,
         };
         self.specific.render(p);
-
-        renderer.render_to_sdl_surface(target, tilecache);
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color(&target.format());

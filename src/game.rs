@@ -8,7 +8,7 @@ use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
 use crate::picture::show_splash_with_message;
-use crate::rendering::{RenderInstruction, RenderToSdlSurface};
+use crate::rendering::SurfaceRenderer;
 use crate::settings::Settings;
 use crate::texture::TextureCreationParams;
 use crate::tile::TileHeader;
@@ -155,7 +155,7 @@ fn start_in_level(
             texture_creation_params,
         )?;
 
-        let mut border_renderer: Vec<RenderInstruction> = Vec::new();
+        let mut border_renderer = SurfaceRenderer { target, tilecache };
 
         match GameEvent::wait()? {
             GameEvent::Escape => break 'game_loop,
@@ -317,7 +317,6 @@ fn start_in_level(
                 );
             }
         }
-        border_renderer.render_to_sdl_surface(target, tilecache);
     }
     timer.remove();
 
@@ -380,19 +379,20 @@ pub fn start(
 
     target.fill(0);
 
-    let mut border_renderer: Vec<RenderInstruction> = Vec::new();
     let borders = Borders {};
-    borders.render(&mut border_renderer);
-    borders.render_life(hero.health.life(), &mut border_renderer);
+    {
+        let mut border_renderer = SurfaceRenderer { target, tilecache };
+        borders.render(&mut border_renderer);
+        borders.render_life(hero.health.life(), &mut border_renderer);
+        borders.render_firepower(&hero.firepower, &mut border_renderer);
+        borders.render_inventory(&hero.inventory, &mut border_renderer);
+    }
     borders.blit_score(
         target,
         texture_creation_params,
         tilecache,
         hero.score.value(),
     );
-    borders.render_firepower(&hero.firepower, &mut border_renderer);
-    borders.render_inventory(&hero.inventory, &mut border_renderer);
-    border_renderer.render_to_sdl_surface(target, tilecache);
     target.update();
 
     // start the game itself
