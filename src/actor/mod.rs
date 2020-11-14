@@ -42,7 +42,7 @@ use crate::hero::HeroData;
 use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
-use crate::rendering::Renderer;
+use crate::rendering::{RenderToSdlSurface, Renderer};
 use crate::tilecache::TileCache;
 use crate::{TILE_HEIGHT, TILE_WIDTH};
 use transdl::video::Surface;
@@ -384,16 +384,7 @@ impl Actor {
         };
         self.specific.render(p);
 
-        for instruction in renderer.into_iter() {
-            tilecache
-                .get_tile(instruction.tile)
-                .unwrap()
-                .blit_to_sdl_surface(
-                    None,
-                    target,
-                    Some(instruction.destination),
-                );
-        }
+        renderer.render_to_sdl_surface(target, tilecache);
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color(&target.format());

@@ -8,6 +8,7 @@ use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
 use crate::picture::show_splash_with_message;
+use crate::rendering::{RenderInstruction, RenderToSdlSurface};
 use crate::settings::Settings;
 use crate::texture::TextureCreationParams;
 use crate::tile::TileHeader;
@@ -154,6 +155,8 @@ fn start_in_level(
             texture_creation_params,
         )?;
 
+        let mut border_renderer: Vec<RenderInstruction> = Vec::new();
+
         match GameEvent::wait()? {
             GameEvent::Escape => break 'game_loop,
             GameEvent::GetInventoryItem(item) => {
@@ -287,30 +290,22 @@ fn start_in_level(
                 update_whole_screen = true;
             }
             GameEvent::HeroFirepowerChanged => {
-                borders.blit_firepower(
-                    target,
-                    texture_creation_params,
-                    tilecache,
+                borders.render_firepower(
                     &hero.firepower,
+                    &mut border_renderer,
                 );
                 update_whole_screen = true;
             }
             GameEvent::HeroInventoryChanged => {
-                borders.blit_inventory(
-                    target,
-                    texture_creation_params,
-                    tilecache,
+                borders.render_inventory(
                     &hero.inventory,
+                    &mut border_renderer,
                 );
                 update_whole_screen = true;
             }
             GameEvent::HeroHealthChanged => {
-                borders.blit_life(
-                    target,
-                    texture_creation_params,
-                    tilecache,
-                    hero.health.life(),
-                );
+                borders
+                    .render_life(hero.health.life(), &mut border_renderer);
                 update_whole_screen = true;
             }
             GameEvent::HeroLanded => {
@@ -322,6 +317,7 @@ fn start_in_level(
                 );
             }
         }
+        border_renderer.render_to_sdl_surface(target, tilecache);
     }
     timer.remove();
 
@@ -384,33 +380,19 @@ pub fn start(
 
     target.fill(0);
 
+    let mut border_renderer: Vec<RenderInstruction> = Vec::new();
     let borders = Borders {};
-    borders.blit(target, texture_creation_params, tilecache);
-    borders.blit_life(
-        target,
-        texture_creation_params,
-        tilecache,
-        hero.health.life(),
-    );
+    borders.render(&mut border_renderer);
+    borders.render_life(hero.health.life(), &mut border_renderer);
     borders.blit_score(
         target,
         texture_creation_params,
         tilecache,
         hero.score.value(),
     );
-    borders.blit_firepower(
-        target,
-        texture_creation_params,
-        tilecache,
-        &hero.firepower,
-    );
-    borders.blit_inventory(
-        target,
-        texture_creation_params,
-        tilecache,
-        &hero.inventory,
-    );
-
+    borders.render_firepower(&hero.firepower, &mut border_renderer);
+    borders.render_inventory(&hero.inventory, &mut border_renderer);
+    border_renderer.render_to_sdl_surface(target, tilecache);
     target.update();
 
     // start the game itself

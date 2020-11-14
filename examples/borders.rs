@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Result};
 use freenukum::borders::Borders;
 use freenukum::data::original_data_dir;
+use freenukum::rendering::{RenderInstruction, RenderToSdlSurface};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
 use freenukum::{
@@ -27,7 +28,9 @@ fn main() -> Result<()> {
     )?;
 
     let borders = Borders {};
-    borders.blit(&mut screen, texture_creation_params, &tilecache);
+    let mut border_renderer: Vec<RenderInstruction> = Vec::new();
+    borders.render(&mut border_renderer);
+    border_renderer.render_to_sdl_surface(&mut screen, &tilecache);
     screen.update();
 
     'event_loop: loop {

@@ -3,10 +3,11 @@ use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
+use crate::rendering::{MovePositionRenderer, Renderer, TileIndex};
 use crate::{
     BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, MAX_FIREPOWER, MAX_LIFE, OBJECT_ACCESS_CARD,
-    OBJECT_BOOT, OBJECT_CLAMP, OBJECT_GLOVE, OBJECT_GUN, OBJECT_HEALTH,
+    HALFTILE_WIDTH, MAX_LIFE, OBJECT_ACCESS_CARD, OBJECT_BOOT,
+    OBJECT_CLAMP, OBJECT_GLOVE, OBJECT_GUN, OBJECT_HEALTH,
     OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
     OBJECT_NONHEALTH, OBJECT_SHOT, SCORE_DIGITS, TILE_HEIGHT, TILE_WIDTH,
     WINDOW_HEIGHT, WINDOW_WIDTH,
@@ -96,61 +97,51 @@ const BORDERS:
 ];
 
 impl Borders {
-    fn blit_tile(
+    fn render_tile(
         &self,
-        target: &mut Texture,
-        tile: &Texture,
         x: i16,
         y: i16,
+        renderer: &mut dyn Renderer,
+        tile: TileIndex,
     ) {
         let geometry = Geometry {
             x,
             y,
-            w: tile.width(),
-            h: tile.height(),
+            w: TILE_WIDTH as u16,
+            h: TILE_HEIGHT as u16,
         };
 
-        tile.clone_to_texture(None, target, Some(geometry));
+        renderer.place_tile(tile, geometry);
     }
 
-    fn blit_iter<I>(
+    fn render_iter<I>(
         &self,
-        tilecache: &TileCache,
-        target: &mut Texture,
-        borders: I,
         columns: u8,
         grid_x: u16,
         grid_y: u16,
+        renderer: &mut dyn Renderer,
+        borders: I,
     ) where
         I: Iterator<Item = Option<usize>>,
     {
         for (i, border) in borders.enumerate() {
             if let Some(border) = border {
-                self.blit_tile(
-                    target,
-                    tilecache.get_tile(border).unwrap(),
+                self.render_tile(
                     (i as i16 % columns as i16) * (grid_x as i16),
                     (i as i16 / columns as i16) * (grid_y as i16),
+                    renderer,
+                    border,
                 )
             }
         }
     }
 
-    pub fn blit(
-        &self,
-        screen: &mut Surface,
-        texture_creation_params: TextureCreationParams,
-        tilecache: &TileCache,
-    ) {
-        let mut texture = Texture::create_with_params(
-            screen.width() as u16,
-            screen.height() as u16,
-            texture_creation_params,
-        );
-
-        self.blit_iter(
-            tilecache,
-            &mut texture,
+    pub fn render(&self, renderer: &mut dyn Renderer) {
+        self.render_iter(
+            (2 * WINDOW_WIDTH / TILE_WIDTH) as u8,
+            HALFTILE_WIDTH as u16,
+            HALFTILE_HEIGHT as u16,
+            renderer,
             BORDERS.iter().map(|i| {
                 if *i < 0 {
                     None
@@ -158,26 +149,11 @@ impl Borders {
                     Some(*i as usize + BORDER_GREY_START)
                 }
             }),
-            (2 * WINDOW_WIDTH / TILE_WIDTH) as u8,
-            HALFTILE_WIDTH as u16,
-            HALFTILE_HEIGHT as u16,
         );
-        texture.blit_to_sdl_surface(None, screen, None);
     }
 
-    pub fn blit_life(
-        &self,
-        screen: &mut Surface,
-        texture_creation_params: TextureCreationParams,
-        tilecache: &TileCache,
-        health: u8,
-    ) {
+    pub fn render_life(&self, health: u8, renderer: &mut dyn Renderer) {
         let health = std::cmp::min(health as usize, MAX_LIFE);
-        let mut lifesurface = Texture::create_with_params(
-            HALFTILE_WIDTH as u16 * MAX_LIFE as u16,
-            TILE_HEIGHT as u16,
-            texture_creation_params,
-        );
         let iter = (0..MAX_LIFE).map(|i| {
             if i < health {
                 Some(OBJECT_HEALTH)
@@ -185,21 +161,18 @@ impl Borders {
                 Some(OBJECT_NONHEALTH)
             }
         });
-        self.blit_iter(
-            tilecache,
-            &mut lifesurface,
-            iter,
+        let mut move_renderer = MovePositionRenderer {
+            start_x: 30 * HALFTILE_WIDTH as i32,
+            start_y: (15 * HALFTILE_HEIGHT as i32) / 2,
+            upstream: renderer,
+        };
+        self.render_iter(
             MAX_LIFE as u8,
             HALFTILE_WIDTH as u16,
             HALFTILE_HEIGHT as u16,
+            &mut move_renderer,
+            iter,
         );
-        let destrect = Geometry {
-            x: 30 * HALFTILE_WIDTH as i16,
-            y: (15 * HALFTILE_HEIGHT as i16) / 2,
-            w: MAX_LIFE as u16 * HALFTILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16,
-        };
-        lifesurface.blit_to_sdl_surface(None, screen, Some(destrect));
     }
 
     pub fn blit_score(
@@ -238,12 +211,10 @@ impl Borders {
         scoresurface.blit_to_sdl_surface(None, screen, Some(destrect));
     }
 
-    pub fn blit_firepower(
+    pub fn render_firepower(
         &self,
-        screen: &mut Surface,
-        texture_creation_params: TextureCreationParams,
-        tilecache: &TileCache,
         firepower: &Firepower,
+        renderer: &mut dyn Renderer,
     ) {
         const GUN: Option<usize> = Some(OBJECT_GUN);
         const SHOT: Option<usize> = Some(OBJECT_SHOT);
@@ -263,35 +234,24 @@ impl Borders {
             None,  None, None,  None, None,  None, None,  None,
         ];
 
-        let mut shotsurface = Texture::create_with_params(
-            TILE_WIDTH as u16 * MAX_FIREPOWER as u16,
-            TILE_HEIGHT as u16 * 2,
-            texture_creation_params,
-        );
-
-        self.blit_iter(
-            tilecache,
-            &mut shotsurface,
-            tiles.into_iter(),
-            MAX_FIREPOWER as u8 * 2,
+        let mut move_renderer = MovePositionRenderer {
+            start_x: 15 * TILE_WIDTH as i32,
+            start_y: 6 * TILE_HEIGHT as i32,
+            upstream: renderer,
+        };
+        self.render_iter(
+            MAX_LIFE as u8,
             HALFTILE_WIDTH as u16,
             HALFTILE_HEIGHT as u16,
+            &mut move_renderer,
+            tiles.into_iter(),
         );
-        let destrect = Geometry {
-            x: 15 * TILE_WIDTH as i16,
-            y: 6 * TILE_HEIGHT as i16,
-            w: MAX_FIREPOWER as u16 * TILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16 * 2,
-        };
-        shotsurface.blit_to_sdl_surface(None, screen, Some(destrect));
     }
 
-    pub fn blit_inventory(
+    pub fn render_inventory(
         &self,
-        screen: &mut Surface,
-        texture_creation_params: TextureCreationParams,
-        tilecache: &TileCache,
         inventory: &Inventory,
+        renderer: &mut dyn Renderer,
     ) {
         let red_key = if inventory.is_set(InventoryItem::KeyRed) {
             Some(OBJECT_KEY_RED)
@@ -340,26 +300,17 @@ impl Borders {
             boot, glove, clamp, access_card,
         ];
 
-        let mut inventorysurface = Texture::create_with_params(
-            TILE_WIDTH as u16 * 4,
-            TILE_HEIGHT as u16 * 2,
-            texture_creation_params,
-        );
-
-        self.blit_iter(
-            tilecache,
-            &mut inventorysurface,
-            tiles.into_iter(),
+        let mut move_renderer = MovePositionRenderer {
+            start_x: 15 * TILE_WIDTH as i32,
+            start_y: 9 * TILE_HEIGHT as i32,
+            upstream: renderer,
+        };
+        self.render_iter(
             4,
             TILE_WIDTH as u16,
             TILE_HEIGHT as u16,
+            &mut move_renderer,
+            tiles.into_iter(),
         );
-        let destrect = Geometry {
-            x: 15 * TILE_WIDTH as i16,
-            y: 9 * TILE_HEIGHT as i16,
-            w: 4 * TILE_WIDTH as u16,
-            h: 2 * TILE_HEIGHT as u16,
-        };
-        inventorysurface.blit_to_sdl_surface(None, screen, Some(destrect));
     }
 }
