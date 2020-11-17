@@ -70,8 +70,8 @@ pub fn messagebox(
         tilecache,
     };
     let mut move_renderer = MovePositionRenderer {
-        start_x: FONT_WIDTH as i32,
-        start_y: FONT_HEIGHT as i32,
+        offset_x: FONT_WIDTH as i32,
+        offset_y: FONT_HEIGHT as i32,
         upstream: &mut renderer,
     };
     text::render(&mut move_renderer, text);

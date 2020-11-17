@@ -9,16 +9,16 @@ pub trait Renderer {
 }
 
 pub struct MovePositionRenderer<'a> {
-    pub start_x: i32,
-    pub start_y: i32,
+    pub offset_x: i32,
+    pub offset_y: i32,
     pub upstream: &'a mut dyn Renderer,
 }
 
 impl<'a> Renderer for MovePositionRenderer<'a> {
     fn place_tile(&mut self, tile: TileIndex, destination: Geometry) {
         let new_destination = Geometry {
-            x: destination.x + self.start_x as i16,
-            y: destination.y + self.start_y as i16,
+            x: destination.x + self.offset_x as i16,
+            y: destination.y + self.offset_y as i16,
             w: destination.w,
             h: destination.h,
         };

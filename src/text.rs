@@ -72,21 +72,21 @@ fn render_letter(renderer: &mut dyn Renderer, letter: char) {
 }
 
 pub fn render(renderer: &mut dyn Renderer, text: &str) {
-    let mut start_x = 0;
-    let mut start_y = 0;
+    let mut offset_x = 0;
+    let mut offset_y = 0;
 
     for c in text.chars() {
         if c == '\n' {
-            start_x = 0;
-            start_y += FONT_HEIGHT as i32;
+            offset_x = 0;
+            offset_y += FONT_HEIGHT as i32;
         } else {
             let mut renderer = MovePositionRenderer {
-                start_x,
-                start_y,
+                offset_x,
+                offset_y,
                 upstream: renderer,
             };
             render_letter(&mut renderer, c);
-            start_x += FONT_WIDTH as i32;
+            offset_x += FONT_WIDTH as i32;
         }
     }
 }

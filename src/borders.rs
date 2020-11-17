@@ -162,8 +162,8 @@ impl Borders {
             }
         });
         let mut move_renderer = MovePositionRenderer {
-            start_x: 30 * HALFTILE_WIDTH as i32,
-            start_y: (15 * HALFTILE_HEIGHT as i32) / 2,
+            offset_x: 30 * HALFTILE_WIDTH as i32,
+            offset_y: (15 * HALFTILE_HEIGHT as i32) / 2,
             upstream: renderer,
         };
         self.render_iter(
@@ -235,8 +235,8 @@ impl Borders {
         ];
 
         let mut move_renderer = MovePositionRenderer {
-            start_x: 15 * TILE_WIDTH as i32,
-            start_y: 6 * TILE_HEIGHT as i32,
+            offset_x: 15 * TILE_WIDTH as i32,
+            offset_y: 6 * TILE_HEIGHT as i32,
             upstream: renderer,
         };
         self.render_iter(
@@ -301,8 +301,8 @@ impl Borders {
         ];
 
         let mut move_renderer = MovePositionRenderer {
-            start_x: 15 * TILE_WIDTH as i32,
-            start_y: 9 * TILE_HEIGHT as i32,
+            offset_x: 15 * TILE_WIDTH as i32,
+            offset_y: 9 * TILE_HEIGHT as i32,
             upstream: renderer,
         };
         self.render_iter(
