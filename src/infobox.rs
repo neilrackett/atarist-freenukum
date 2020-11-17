@@ -3,6 +3,7 @@ use super::messagebox::messagebox;
 use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
+use crate::graphics::SurfaceCreatorProvider;
 use anyhow::Result;
 use transdl::video::Surface;
 
@@ -12,15 +13,16 @@ pub fn show(
     texture_creation_params: TextureCreationParams,
     text: &str,
 ) -> Result<()> {
-    let messagebox = messagebox(text, tilecache, texture_creation_params);
+    let messagebox =
+        messagebox(text, tilecache, &mut screen.surface_creator());
     let destrect = Geometry {
         x: (screen.width() as isize - messagebox.width() as isize) as i16
             / 2,
         y: (screen.height() as isize - messagebox.height() as isize)
             as i16
             / 2,
-        w: messagebox.width(),
-        h: messagebox.height(),
+        w: messagebox.width() as u16,
+        h: messagebox.height() as u16,
     };
 
     // backup the background
@@ -32,7 +34,7 @@ pub fn show(
         &mut background_backup,
         None,
     );
-    messagebox.blit_to_sdl_surface(None, screen, Some(destrect.clone()));
+    messagebox.blit(None, screen, Some(destrect.as_sdl_rect()));
     screen.update_rect(0, 0, 0, 0);
 
     loop {

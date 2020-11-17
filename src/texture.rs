@@ -1,6 +1,30 @@
 use crate::Geometry;
 use transdl::video::{map_rgb, Rect, Surface};
 
+pub trait CloneToTexture {
+    fn clone_to_texture(
+        &self,
+        srcrect: Option<Geometry>,
+        dst: &mut Texture,
+        dstrect: Option<Geometry>,
+    );
+}
+
+impl CloneToTexture for Surface {
+    fn clone_to_texture(
+        &self,
+        srcrect: Option<Geometry>,
+        dst: &mut Texture,
+        dstrect: Option<Geometry>,
+    ) {
+        self.blit(
+            srcrect.map(|r| r.as_sdl_rect()),
+            &mut dst.surface,
+            dstrect.map(|r| r.as_sdl_rect()),
+        );
+    }
+}
+
 #[derive(Debug)]
 pub struct Texture {
     w: u16,

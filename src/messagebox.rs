@@ -1,13 +1,15 @@
 use super::geometry::Geometry;
 use super::text;
-use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
+use crate::graphics::SurfaceCreator;
+use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
 use crate::{
     BORDER_BLUE_BOTTOM, BORDER_BLUE_BOTTOMLEFT, BORDER_BLUE_BOTTOMRIGHT,
     BORDER_BLUE_LEFT, BORDER_BLUE_MIDDLE, BORDER_BLUE_RIGHT,
     BORDER_BLUE_TOP, BORDER_BLUE_TOPLEFT, BORDER_BLUE_TOPRIGHT,
     FONT_HEIGHT, FONT_WIDTH,
 };
+use transdl::video::Surface;
 
 pub fn get_information(text: &str) -> (usize, usize) {
     let mut columns = 0;
@@ -23,14 +25,13 @@ pub fn get_information(text: &str) -> (usize, usize) {
 pub fn messagebox(
     text: &str,
     tilecache: &TileCache,
-    params: TextureCreationParams,
-) -> Texture {
+    surface_creator: &mut dyn SurfaceCreator,
+) -> Surface {
     let (columns, rows) = get_information(text);
 
-    let mut messagebox = Texture::create_with_params(
-        (FONT_WIDTH * (columns + 2)) as u16,
-        (FONT_HEIGHT * (rows + 2)) as u16,
-        params,
+    let mut messagebox = surface_creator.create(
+        (FONT_WIDTH * (columns + 2)) as u32,
+        (FONT_HEIGHT * (rows + 2)) as u32,
     );
 
     for row in 0..=rows {
@@ -56,7 +57,7 @@ pub fn messagebox(
                 FONT_HEIGHT as u16,
             );
 
-            tilecache.get_tile(tilenr).unwrap().clone_to_texture(
+            tilecache.get_tile(tilenr).unwrap().blit_to_sdl_surface(
                 None,
                 &mut messagebox,
                 Some(r),
@@ -64,13 +65,16 @@ pub fn messagebox(
         }
     }
 
-    let r = Geometry::new(
-        FONT_WIDTH as i16,
-        FONT_HEIGHT as i16,
-        FONT_WIDTH as u16,
-        FONT_HEIGHT as u16,
-    );
-    text::print(&mut messagebox, r, tilecache, text);
+    let mut renderer = SurfaceRenderer {
+        target: &mut messagebox,
+        tilecache,
+    };
+    let mut move_renderer = MovePositionRenderer {
+        start_x: FONT_WIDTH as i32,
+        start_y: FONT_HEIGHT as i32,
+        upstream: &mut renderer,
+    };
+    text::render(&mut move_renderer, text);
 
     messagebox
 }

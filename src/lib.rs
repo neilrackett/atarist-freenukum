@@ -10,6 +10,7 @@ pub mod event;
 pub mod file;
 pub mod game;
 pub mod geometry;
+pub mod graphics;
 pub mod hero;
 pub mod infobox;
 pub mod inputbox;

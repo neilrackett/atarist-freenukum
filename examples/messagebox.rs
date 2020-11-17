@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::messagebox::messagebox;
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
@@ -41,8 +42,9 @@ T)itle screen
 C)redits
 Q)it to DOS";
 
-    let msgbox = messagebox(&msg, &tilecache, texture_creation_params);
-    msgbox.blit_to_sdl_surface(None, &mut screen, None);
+    let msgbox =
+        messagebox(&msg, &tilecache, &mut screen.surface_creator());
+    msgbox.blit(None, &mut screen, None);
     screen.update();
 
     'event_loop: loop {

@@ -1,8 +1,9 @@
 use super::geometry::Geometry;
 use super::messagebox;
-use super::texture::{Texture, TextureCreationParams};
+use super::texture::{CloneToTexture, Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
+use crate::graphics::SurfaceCreatorProvider;
 use crate::UserEvent;
 use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
 use anyhow::Result;
@@ -60,20 +61,20 @@ impl Menu {
         let msgbox = messagebox::messagebox(
             &contents,
             tilecache,
-            texture_creation_paramns,
+            &mut screen.surface_creator(),
         );
 
         let mut target = Texture::create_with_params(
-            msgbox.width(),
-            msgbox.height(),
+            msgbox.width() as u16,
+            msgbox.height() as u16,
             texture_creation_paramns,
         );
 
         let destrect = Geometry {
             x: (screen.width() - msgbox.width() as usize) as i16 / 2,
             y: (screen.height() - msgbox.height() as usize) as i16 / 2,
-            w: msgbox.width(),
-            h: msgbox.height(),
+            w: msgbox.width() as u16,
+            h: msgbox.height() as u16,
         };
 
         transdl::event::enable_key_repeat();

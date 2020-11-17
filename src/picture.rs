@@ -3,6 +3,7 @@ use super::messagebox::messagebox;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
+use crate::graphics::SurfaceCreatorProvider;
 use crate::{
     Result, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
@@ -119,14 +120,14 @@ pub fn show_splash_with_message(
 
     if let Some(message) = message {
         let messagebox =
-            messagebox(message, tilecache, texture_creation_params);
+            messagebox(message, tilecache, &mut target.surface_creator());
         let destrect = Geometry {
             x,
             y,
-            w: messagebox.width(),
-            h: messagebox.height(),
+            w: messagebox.width() as u16,
+            h: messagebox.height() as u16,
         };
-        messagebox.blit_to_sdl_surface(None, target, Some(destrect));
+        messagebox.blit(None, target, Some(destrect.as_sdl_rect()));
     }
     target.update_rect(0, 0, 0, 0);
 

@@ -4,6 +4,7 @@ use super::messagebox::messagebox;
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use crate::event::{InputEvent, WaitEvent};
+use crate::graphics::SurfaceCreatorProvider;
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 use anyhow::Result;
 use transdl::video::Surface;
@@ -30,14 +31,17 @@ pub fn show(
         msg,
         " ".repeat(max_length)
     );
-    let mut msgbox =
-        messagebox(&placeholder_msg, tilecache, texture_creation_params);
+    let mut msgbox = messagebox(
+        &placeholder_msg,
+        tilecache,
+        &mut screen.surface_creator(),
+    );
 
     let destrect = Geometry::new(
         (screen.width() as isize - msgbox.width() as isize) as i16 / 2,
         (screen.height() as isize - msgbox.height() as isize) as i16 / 2,
-        msgbox.width(),
-        msgbox.height(),
+        msgbox.width() as u16,
+        msgbox.height() as u16,
     );
 
     let input_field_rect = Geometry::new(
@@ -58,12 +62,12 @@ pub fn show(
 
     let mut input_field = InputField::new(max_length);
     input_field.blit(&mut input_field_surface, tilecache);
-    input_field_surface.clone_to_texture(
+    input_field_surface.blit_to_sdl_surface(
         None,
         &mut msgbox,
         Some(input_field_rect.clone()),
     );
-    msgbox.blit_to_sdl_surface(None, screen, Some(destrect.clone()));
+    msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
     screen.update_rect(0, 0, 0, 0);
 
     loop {
@@ -103,12 +107,12 @@ pub fn show(
             InputEvent::RefreshScreen => {}
         }
         input_field.blit(&mut input_field_surface, tilecache);
-        input_field_surface.clone_to_texture(
+        input_field_surface.blit_to_sdl_surface(
             None,
             &mut msgbox,
             Some(input_field_rect.clone()),
         );
-        msgbox.blit_to_sdl_surface(None, screen, Some(destrect.clone()));
+        msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
         screen.update_rect(0, 0, 0, 0);
     }
 }
