@@ -3,7 +3,7 @@ use freenukum::data::original_data_dir;
 use freenukum::geometry::Geometry;
 use freenukum::settings::Settings;
 use freenukum::text;
-use freenukum::texture::Texture;
+use freenukum::texture::{Texture, TextureRenderer};
 use freenukum::tilecache::{FileProperties, TileCache};
 use freenukum::{
     game, sdl_surface_creation_params, TILE_HEIGHT, TILE_WIDTH,
@@ -48,17 +48,11 @@ fn main() -> Result<()> {
                 TILE_HEIGHT as u16,
                 texture_creation_params,
             );
-            text::print(
-                &mut text,
-                Geometry {
-                    x: 0,
-                    y: 0,
-                    w: TILE_WIDTH as u16,
-                    h: TILE_HEIGHT as u16,
-                },
-                &tilecache,
-                &format!("{:02X}", value),
-            );
+            let mut renderer = TextureRenderer {
+                target: &mut text,
+                tilecache: &tilecache,
+            };
+            text::render(&mut renderer, &format!("{:02X}", value));
             text.blit_to_sdl_surface(None, target, Some(destrect));
         };
 
