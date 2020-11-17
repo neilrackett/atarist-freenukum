@@ -1,7 +1,6 @@
 use super::geometry::Geometry;
 use super::text;
-use super::texture::{Texture, TextureRenderer};
-use super::tilecache::TileCache;
+use crate::rendering::Renderer;
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 
 pub struct InputField {
@@ -59,17 +58,22 @@ impl InputField {
         }
     }
 
-    pub fn blit(&self, target: &mut Texture, tilecache: &TileCache) {
-        target.fill_area(None, 0, 0, 0);
-        let mut renderer = TextureRenderer { target, tilecache };
-        text::render(&mut renderer, &self.text);
+    pub fn render(&self, renderer: &mut dyn Renderer) {
+        let bgrect = Geometry {
+            x: 0,
+            y: 0,
+            w: (FONT_WIDTH * self.max_length) as u16,
+            h: FONT_HEIGHT as u16,
+        };
+        renderer.fill_rect(bgrect, 0, 0, 0);
+        text::render(renderer, &self.text);
         let cursorrect = Geometry {
             x: (self.cursor_position * FONT_WIDTH) as i16,
             y: 1,
             w: 1,
             h: FONT_HEIGHT as u16 - 2,
         };
-        target.fill_area(Some(cursorrect), 0x88, 0x88, 0x88);
+        renderer.fill_rect(cursorrect, 0x88, 0x88, 0x88);
     }
 
     pub fn get_text(&self) -> &str {

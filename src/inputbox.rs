@@ -1,10 +1,11 @@
 use super::geometry::Geometry;
 use super::inputfield::InputField;
 use super::messagebox::messagebox;
-use super::texture::{Texture, TextureCreationParams};
+use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use crate::event::{InputEvent, WaitEvent};
 use crate::graphics::SurfaceCreatorProvider;
+use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 use anyhow::Result;
 use transdl::video::Surface;
@@ -21,11 +22,6 @@ pub fn show(
     msg: &str,
     max_length: usize,
 ) -> Result<Answer> {
-    let mut input_field_surface = Texture::create_with_params(
-        (FONT_WIDTH * max_length) as u16,
-        FONT_HEIGHT as u16,
-        texture_creation_params,
-    );
     let placeholder_msg = format!(
         "{}\n{}\n\nOk (Enter)   Abort (Esc)\n",
         msg,
@@ -44,13 +40,6 @@ pub fn show(
         msgbox.height() as u16,
     );
 
-    let input_field_rect = Geometry::new(
-        FONT_WIDTH as i16,
-        msgbox.height() as i16 - FONT_HEIGHT as i16 * 4,
-        input_field_surface.width(),
-        input_field_surface.height(),
-    );
-
     // backup the background
     let mut background_backup =
         texture_creation_params.create_surface(destrect.w, destrect.h);
@@ -61,12 +50,20 @@ pub fn show(
     );
 
     let mut input_field = InputField::new(max_length);
-    input_field.blit(&mut input_field_surface, tilecache);
-    input_field_surface.blit_to_sdl_surface(
-        None,
-        &mut msgbox,
-        Some(input_field_rect.clone()),
-    );
+    {
+        let offset_y = msgbox.height() as i32 - FONT_HEIGHT as i32 * 4;
+        let mut input_field_renderer = SurfaceRenderer {
+            target: &mut msgbox,
+            tilecache,
+        };
+        let mut input_field_renderer = MovePositionRenderer {
+            offset_x: FONT_WIDTH as i32,
+            offset_y,
+            upstream: &mut input_field_renderer,
+        };
+
+        input_field.render(&mut input_field_renderer);
+    }
     msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
     screen.update_rect(0, 0, 0, 0);
 
@@ -106,12 +103,20 @@ pub fn show(
             }
             InputEvent::RefreshScreen => {}
         }
-        input_field.blit(&mut input_field_surface, tilecache);
-        input_field_surface.blit_to_sdl_surface(
-            None,
-            &mut msgbox,
-            Some(input_field_rect.clone()),
-        );
+
+        {
+            let offset_y = msgbox.height() as i32 - FONT_HEIGHT as i32 * 4;
+            let mut input_field_renderer = SurfaceRenderer {
+                target: &mut msgbox,
+                tilecache,
+            };
+            let mut input_field_renderer = MovePositionRenderer {
+                offset_x: FONT_WIDTH as i32,
+                offset_y,
+                upstream: &mut input_field_renderer,
+            };
+            input_field.render(&mut input_field_renderer);
+        }
         msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
         screen.update_rect(0, 0, 0, 0);
     }

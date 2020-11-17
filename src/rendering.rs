@@ -6,6 +6,8 @@ pub type TileIndex = usize;
 
 pub trait Renderer {
     fn place_tile(&mut self, tile: TileIndex, destination: Geometry);
+    fn fill_rect(&mut self, rect: Geometry, r: u8, g: u8, b: u8);
+    fn fill(&mut self, r: u8, g: u8, b: u8);
 }
 
 pub struct MovePositionRenderer<'a> {
@@ -24,6 +26,16 @@ impl<'a> Renderer for MovePositionRenderer<'a> {
         };
         self.upstream.place_tile(tile, new_destination);
     }
+
+    fn fill_rect(&mut self, mut rect: Geometry, r: u8, g: u8, b: u8) {
+        rect.x += self.offset_x as i16;
+        rect.y += self.offset_y as i16;
+        self.upstream.fill_rect(rect, r, g, b);
+    }
+
+    fn fill(&mut self, r: u8, g: u8, b: u8) {
+        self.upstream.fill(r, g, b);
+    }
 }
 
 pub struct SurfaceRenderer<'a> {
@@ -38,5 +50,21 @@ impl<'a> Renderer for SurfaceRenderer<'a> {
             self.target,
             Some(destination),
         );
+    }
+
+    fn fill_rect(&mut self, rect: Geometry, r: u8, g: u8, b: u8) {
+        self.target.fill_rect(
+            rect.as_sdl_rect(),
+            transdl::video::map_rgb(&self.target.format(), r, g, b),
+        );
+    }
+
+    fn fill(&mut self, r: u8, g: u8, b: u8) {
+        self.target.fill(transdl::video::map_rgb(
+            &self.target.format(),
+            r,
+            g,
+            b,
+        ));
     }
 }
