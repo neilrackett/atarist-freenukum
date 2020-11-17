@@ -1,9 +1,10 @@
 use super::geometry::Geometry;
 use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
-use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
-use crate::rendering::{MovePositionRenderer, Renderer, TileIndex};
+use crate::rendering::{
+    MovePositionRenderer, Renderer, SurfaceRenderer, TileIndex,
+};
 use crate::{
     BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
     HALFTILE_WIDTH, MAX_LIFE, OBJECT_ACCESS_CARD, OBJECT_BOOT,
@@ -178,37 +179,24 @@ impl Borders {
     pub fn blit_score(
         &self,
         screen: &mut Surface,
-        texture_creation_params: TextureCreationParams,
         tilecache: &TileCache,
         score: u128,
     ) {
         let score = std::cmp::min(99999999, score);
-        let score_string = format!("{:08}", score);
+        let score_string =
+            format!("{0:0width$}", score, width = SCORE_DIGITS);
 
-        let mut scoresurface = Texture::create_with_params(
-            FONT_WIDTH as u16 * SCORE_DIGITS as u16,
-            FONT_HEIGHT as u16,
-            texture_creation_params,
-        );
-        let sourcerect = Geometry {
-            x: 0,
-            y: 0,
-            w: FONT_WIDTH as u16 * SCORE_DIGITS as u16,
-            h: FONT_HEIGHT as u16,
-        };
-        text::print(
-            &mut scoresurface,
-            sourcerect,
+        let mut renderer = SurfaceRenderer {
+            target: screen,
             tilecache,
-            &score_string,
-        );
-        let destrect = Geometry {
-            x: 30 * FONT_WIDTH as i16,
-            y: 3 * FONT_HEIGHT as i16,
-            w: SCORE_DIGITS as u16 * FONT_WIDTH as u16,
-            h: FONT_HEIGHT as u16,
         };
-        scoresurface.blit_to_sdl_surface(None, screen, Some(destrect));
+        let mut position_renderer = MovePositionRenderer {
+            offset_x: 30 * FONT_WIDTH as i32,
+            offset_y: 3 * FONT_HEIGHT as i32,
+            upstream: &mut renderer,
+        };
+
+        text::render(&mut position_renderer, &score_string);
     }
 
     pub fn render_firepower(

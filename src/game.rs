@@ -281,12 +281,7 @@ fn start_in_level(
                 ) as i16;
             }
             GameEvent::HeroScored => {
-                borders.blit_score(
-                    target,
-                    texture_creation_params,
-                    tilecache,
-                    hero.score.value(),
-                );
+                borders.blit_score(target, tilecache, hero.score.value());
                 update_whole_screen = true;
             }
             GameEvent::HeroFirepowerChanged => {
@@ -387,12 +382,7 @@ pub fn start(
         borders.render_firepower(&hero.firepower, &mut border_renderer);
         borders.render_inventory(&hero.inventory, &mut border_renderer);
     }
-    borders.blit_score(
-        target,
-        texture_creation_params,
-        tilecache,
-        hero.score.value(),
-    );
+    borders.blit_score(target, tilecache, hero.score.value());
     target.update();
 
     // start the game itself
