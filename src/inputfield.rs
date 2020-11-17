@@ -1,6 +1,6 @@
 use super::geometry::Geometry;
 use super::text;
-use super::texture::Texture;
+use super::texture::{Texture, TextureRenderer};
 use super::tilecache::TileCache;
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 
@@ -61,13 +61,8 @@ impl InputField {
 
     pub fn blit(&self, target: &mut Texture, tilecache: &TileCache) {
         target.fill_area(None, 0, 0, 0);
-        let sourcerect = Geometry {
-            x: 0,
-            y: 0,
-            w: (FONT_WIDTH * self.cursor_position) as u16,
-            h: FONT_HEIGHT as u16,
-        };
-        text::print(target, sourcerect, tilecache, &self.text);
+        let mut renderer = TextureRenderer { target, tilecache };
+        text::render(&mut renderer, &self.text);
         let cursorrect = Geometry {
             x: (self.cursor_position * FONT_WIDTH) as i16,
             y: 1,

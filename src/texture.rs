@@ -1,5 +1,22 @@
+use crate::rendering::{Renderer, TileIndex};
+use crate::tilecache::TileCache;
 use crate::Geometry;
 use transdl::video::{map_rgb, Rect, Surface};
+
+pub struct TextureRenderer<'a> {
+    pub target: &'a mut Texture,
+    pub tilecache: &'a TileCache,
+}
+
+impl<'a> Renderer for TextureRenderer<'a> {
+    fn place_tile(&mut self, tile: TileIndex, destination: Geometry) {
+        self.tilecache.get_tile(tile).unwrap().clone_to_texture(
+            None,
+            self.target,
+            Some(destination),
+        );
+    }
+}
 
 pub trait CloneToTexture {
     fn clone_to_texture(
