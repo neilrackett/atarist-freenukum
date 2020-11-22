@@ -225,8 +225,8 @@ pub fn data_dir() -> std::path::PathBuf {
     directories().data_dir().to_path_buf()
 }
 
-fn collision_bounds_color(format: &transdl::video::PixelFormat) -> u32 {
-    transdl::video::map_rgb(format, 182, 6, 0)
+fn collision_bounds_color() -> impl rendering::Color {
+    (182u8, 6u8, 0u8)
 }
 
 #[derive(Hash, Debug, Eq, PartialEq, Clone, Copy)]

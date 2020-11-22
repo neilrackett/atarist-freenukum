@@ -3,6 +3,7 @@ use crate::geometry::Geometry;
 use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
+use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::tilecache::TileCache;
 use crate::{
     HorizontalDirection, HALFTILE_WIDTH, LEVELWINDOW_WIDTH, OBJECT_SHOT,
@@ -112,10 +113,10 @@ impl Shot {
                 .get_tile(OBJECT_SHOT + self.counter)
                 .unwrap()
                 .blit_to_sdl_surface(None, target, Some(destrect));
+            let mut renderer = SurfaceRenderer { target, tilecache };
             if draw_collision_bounds {
-                let color =
-                    crate::collision_bounds_color(&target.format());
-                self.position.draw_outline(target, color);
+                let color = crate::collision_bounds_color();
+                renderer.draw_rect(self.position, &color);
             }
         }
     }

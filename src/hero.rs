@@ -2,6 +2,7 @@ use super::geometry::Geometry;
 use super::level::solids::LevelSolids;
 use super::tilecache::TileCache;
 use super::{HorizontalDirection, UserEvent};
+use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::{
     HALFTILE_HEIGHT, HALFTILE_WIDTH, HERO_FALLING_LEFT,
     HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT,
@@ -188,9 +189,11 @@ impl HeroData {
             .blit_to_sdl_surface(None, target, Some(destrect));
 
         if draw_collision_bounds {
-            let color = crate::collision_bounds_color(&target.format());
+            let color = crate::collision_bounds_color();
             let g = self.position.geometry;
-            g.draw_outline(target, color);
+            let mut renderer = SurfaceRenderer { target, tilecache };
+
+            renderer.draw_rect(g, &color);
 
             for i in (g.x / TILE_WIDTH as i16) - 1
                 ..(g.x / TILE_WIDTH as i16) + 2
@@ -206,7 +209,7 @@ impl HeroData {
                             w: TILE_WIDTH as u16,
                             h: TILE_HEIGHT as u16,
                         };
-                        obstacle.draw_outline(target, color);
+                        renderer.draw_rect(obstacle, &color);
                     }
                 }
             }

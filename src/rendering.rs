@@ -19,6 +19,31 @@ pub trait Renderer {
     fn place_tile(&mut self, tile: TileIndex, destination: Geometry);
     fn fill_rect(&mut self, rect: Geometry, color: &dyn Color);
     fn fill(&mut self, color: &dyn Color);
+
+    fn draw_rect(&mut self, rect: Geometry, color: &dyn Color) {
+        {
+            let mut r = rect.clone();
+            r.w = 1;
+            self.fill_rect(rect, color);
+        }
+        {
+            let mut r = rect.clone();
+            r.x += r.w as i16 - 1;
+            r.w = 1;
+            self.fill_rect(rect, color);
+        }
+        {
+            let mut r = rect.clone();
+            r.h = 1;
+            self.fill_rect(rect, color);
+        }
+        {
+            let mut r = rect.clone();
+            r.y += r.h as i16 - 1;
+            r.h = 1;
+            self.fill_rect(rect, color);
+        }
+    }
 }
 
 pub struct MovePositionRenderer<'a> {

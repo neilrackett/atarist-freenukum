@@ -1,5 +1,3 @@
-use transdl::video::Surface;
-
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Geometry {
     pub x: i16,
@@ -103,30 +101,5 @@ impl Geometry {
             return false;
         }
         true
-    }
-
-    pub fn draw_outline(&self, surface: &mut Surface, color: u32) {
-        {
-            let mut r = self.clone();
-            r.w = 1;
-            surface.fill_rect(r.as_sdl_rect(), color);
-        }
-        {
-            let mut r = self.clone();
-            r.x += r.w as i16 - 1;
-            r.w = 1;
-            surface.fill_rect(r.as_sdl_rect(), color);
-        }
-        {
-            let mut r = self.clone();
-            r.h = 1;
-            surface.fill_rect(r.as_sdl_rect(), color);
-        }
-        {
-            let mut r = self.clone();
-            r.y += r.h as i16 - 1;
-            r.h = 1;
-            surface.fill_rect(r.as_sdl_rect(), color);
-        }
     }
 }

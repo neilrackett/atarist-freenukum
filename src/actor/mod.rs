@@ -385,8 +385,8 @@ impl Actor {
         self.specific.render(p);
 
         if draw_collision_bounds {
-            let color = crate::collision_bounds_color(&target.format());
-            self.general.position.draw_outline(target, color);
+            let color = crate::collision_bounds_color();
+            renderer.draw_rect(self.general.position, &color);
         }
     }
 }
