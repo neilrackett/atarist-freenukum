@@ -254,8 +254,10 @@ pub enum UserEvent {
     HeroLanded,
 }
 
-pub fn sdl_surface_transparent(surface: &transdl::video::Surface) -> u32 {
-    transdl::video::map_rgb(&surface.format(), 100, 1, 1)
+pub fn sdl_surface_transparent(
+    format: &transdl::video::PixelFormat,
+) -> u32 {
+    transdl::video::map_rgb(format, 100, 1, 1)
 }
 
 pub fn sdl_surface_creation_params(
@@ -264,6 +266,6 @@ pub fn sdl_surface_creation_params(
     texture::TextureCreationParams {
         flags: surface.flags(),
         bits_per_pixel: surface.format().bits_per_pixel(),
-        transparent: sdl_surface_transparent(surface),
+        transparent: sdl_surface_transparent(&surface.format()),
     }
 }

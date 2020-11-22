@@ -12,7 +12,7 @@ impl SurfaceCreatorProvider for Surface {
         SurfaceParams {
             flags: self.flags(),
             bits_per_pixel: self.format().bits_per_pixel(),
-            transparent: crate::sdl_surface_transparent(self),
+            transparent: crate::sdl_surface_transparent(&self.format()),
         }
     }
 }
@@ -41,7 +41,7 @@ impl SurfaceCreator for SurfaceParams {
         );
         surface.set_color_key(
             transdl::ll::SDL_SRCCOLORKEY,
-            crate::sdl_surface_transparent(&surface),
+            crate::sdl_surface_transparent(&surface.format()),
         );
         surface
     }

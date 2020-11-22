@@ -836,7 +836,8 @@ impl LevelData {
             TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
         );
 
-        let transparent = super::sdl_surface_transparent(&surface_fixed);
+        let transparent =
+            super::sdl_surface_transparent(&surface_fixed.format());
         surface_fixed.fill(transparent);
 
         for y in 0..LEVEL_HEIGHT {

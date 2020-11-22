@@ -78,7 +78,7 @@ impl TextureCreationParams {
         );
         surface.set_color_key(
             transdl::ll::SDL_SRCCOLORKEY,
-            super::sdl_surface_transparent(&surface),
+            super::sdl_surface_transparent(&surface.format()),
         );
         surface
     }
