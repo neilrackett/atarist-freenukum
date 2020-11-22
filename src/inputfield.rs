@@ -65,7 +65,7 @@ impl InputField {
             w: (FONT_WIDTH * self.max_length) as u16,
             h: FONT_HEIGHT as u16,
         };
-        renderer.fill_rect(bgrect, 0, 0, 0);
+        renderer.fill_rect(bgrect, &(0, 0, 0));
         text::render(renderer, &self.text);
         let cursorrect = Geometry {
             x: (self.cursor_position * FONT_WIDTH) as i16,
@@ -73,7 +73,7 @@ impl InputField {
             w: 1,
             h: FONT_HEIGHT as u16 - 2,
         };
-        renderer.fill_rect(cursorrect, 0x88, 0x88, 0x88);
+        renderer.fill_rect(cursorrect, &(0x88, 0x88, 0x88));
     }
 
     pub fn get_text(&self) -> &str {

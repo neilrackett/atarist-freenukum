@@ -1,4 +1,4 @@
-use crate::rendering::{Renderer, TileIndex};
+use crate::rendering::{Color, Renderer, TileIndex};
 use crate::tilecache::TileCache;
 use crate::Geometry;
 use transdl::video::{map_rgb, Rect, Surface};
@@ -17,12 +17,12 @@ impl<'a> Renderer for TextureRenderer<'a> {
         );
     }
 
-    fn fill_rect(&mut self, rect: Geometry, r: u8, g: u8, b: u8) {
-        self.target.fill_area(Some(rect), r, g, b);
+    fn fill_rect(&mut self, rect: Geometry, color: &dyn Color) {
+        self.target.fill_area(Some(rect), color);
     }
 
-    fn fill(&mut self, r: u8, g: u8, b: u8) {
-        self.target.fill_area(None, r, g, b);
+    fn fill(&mut self, color: &dyn Color) {
+        self.target.fill_area(None, color);
     }
 }
 
@@ -167,9 +167,7 @@ impl Texture {
     pub fn fill_area(
         &mut self,
         area: Option<Geometry>,
-        red: u8,
-        green: u8,
-        blue: u8,
+        color: &dyn Color,
     ) {
         let r = match area {
             Some(g) => g.as_sdl_rect(),
@@ -182,7 +180,7 @@ impl Texture {
         };
 
         let format = self.surface.format();
-        let color = map_rgb(&format, red, green, blue);
+        let color = color.transdl_map_rgb(&format);
 
         self.surface.fill_rect(r, color);
     }
