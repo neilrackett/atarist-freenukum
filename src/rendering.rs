@@ -15,6 +15,14 @@ impl Color for (u8, u8, u8) {
     }
 }
 
+pub struct Transparent;
+
+impl Color for Transparent {
+    fn transdl_map_rgb(&self, format: &PixelFormat) -> u32 {
+        crate::sdl_surface_transparent(format)
+    }
+}
+
 pub trait Renderer {
     fn place_tile(&mut self, tile: TileIndex, destination: Geometry);
     fn fill_rect(&mut self, rect: Geometry, color: &dyn Color);

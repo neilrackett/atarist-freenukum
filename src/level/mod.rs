@@ -16,6 +16,7 @@ use super::shot::{Shot, ShotList};
 use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
+use crate::rendering::{Renderer, SurfaceRenderer, Transparent};
 use crate::{
     Result, ANIMATION_START, HALFTILE_WIDTH, LEVELWINDOW_HEIGHT,
     LEVELWINDOW_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK,
@@ -836,9 +837,12 @@ impl LevelData {
             TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
         );
 
-        let transparent =
-            super::sdl_surface_transparent(&surface_fixed.format());
-        surface_fixed.fill(transparent);
+        let mut surface_renderer = SurfaceRenderer {
+            target: &mut surface_fixed,
+            tilecache,
+        };
+
+        surface_renderer.fill(&Transparent);
 
         for y in 0..LEVEL_HEIGHT {
             for x in 0..LEVEL_WIDTH {
