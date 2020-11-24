@@ -2,7 +2,7 @@ use super::geometry::Geometry;
 use super::text;
 use super::tilecache::TileCache;
 use crate::graphics::SurfaceCreator;
-use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
+use crate::rendering::{MovePositionRenderer, Renderer, SurfaceRenderer};
 use crate::{
     BORDER_BLUE_BOTTOM, BORDER_BLUE_BOTTOMLEFT, BORDER_BLUE_BOTTOMRIGHT,
     BORDER_BLUE_LEFT, BORDER_BLUE_MIDDLE, BORDER_BLUE_RIGHT,
@@ -33,6 +33,10 @@ pub fn messagebox(
         (FONT_WIDTH * (columns + 2)) as u32,
         (FONT_HEIGHT * (rows + 2)) as u32,
     );
+    let mut renderer = SurfaceRenderer {
+        target: &mut messagebox,
+        tilecache,
+    };
 
     for row in 0..=rows {
         for col in 0..=columns {
@@ -57,18 +61,10 @@ pub fn messagebox(
                 FONT_HEIGHT as u16,
             );
 
-            tilecache.get_tile(tilenr).unwrap().blit_to_sdl_surface(
-                None,
-                &mut messagebox,
-                Some(r),
-            );
+            renderer.place_tile(tilenr, r);
         }
     }
 
-    let mut renderer = SurfaceRenderer {
-        target: &mut messagebox,
-        tilecache,
-    };
     let mut move_renderer = MovePositionRenderer {
         offset_x: FONT_WIDTH as i32,
         offset_y: FONT_HEIGHT as i32,

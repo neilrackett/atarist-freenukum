@@ -109,11 +109,8 @@ impl Shot {
             destrect.x += destrect.w as i16 / 2 - HALFTILE_WIDTH as i16;
             destrect.w = TILE_WIDTH as u16;
 
-            tilecache
-                .get_tile(OBJECT_SHOT + self.counter)
-                .unwrap()
-                .blit_to_sdl_surface(None, target, Some(destrect));
             let mut renderer = SurfaceRenderer { target, tilecache };
+            renderer.place_tile(OBJECT_SHOT + self.counter, destrect);
             if draw_collision_bounds {
                 let color = crate::collision_bounds_color();
                 renderer.draw_rect(self.position, &color);

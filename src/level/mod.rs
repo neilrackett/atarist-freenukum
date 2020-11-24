@@ -854,14 +854,7 @@ impl LevelData {
                         w: TILE_WIDTH as u16,
                         h: TILE_HEIGHT as u16,
                     };
-                    tilecache
-                        .get_tile(tilenr as usize)
-                        .unwrap()
-                        .blit_to_sdl_surface(
-                            None,
-                            &mut surface_fixed,
-                            Some(destrect),
-                        );
+                    surface_renderer.place_tile(tilenr as usize, destrect);
                 }
             }
         }

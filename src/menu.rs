@@ -1,9 +1,12 @@
 use super::geometry::Geometry;
 use super::messagebox;
-use super::texture::{CloneToTexture, Texture, TextureCreationParams};
+use super::texture::{
+    CloneToTexture, Texture, TextureCreationParams, TextureRenderer,
+};
 use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
 use crate::graphics::SurfaceCreatorProvider;
+use crate::rendering::Renderer;
 use crate::UserEvent;
 use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
 use anyhow::Result;
@@ -99,10 +102,6 @@ impl Menu {
             if changed || true {
                 msgbox.clone_to_texture(None, &mut target, None);
 
-                let marker = tilecache
-                    .get_tile(OBJECT_POINT + animationframe)
-                    .unwrap();
-
                 let targetrect = Geometry {
                     x: (FONT_WIDTH * 3) as i16 / 2,
                     y: (FONT_HEIGHT * (self.current + headerrows + 2))
@@ -111,11 +110,16 @@ impl Menu {
                     h: FONT_HEIGHT as u16,
                 };
 
-                marker.clone_to_texture(
-                    None,
-                    &mut target,
-                    Some(targetrect),
-                );
+                {
+                    let mut renderer = TextureRenderer {
+                        target: &mut target,
+                        tilecache,
+                    };
+                    renderer.place_tile(
+                        OBJECT_POINT + animationframe,
+                        targetrect,
+                    );
+                }
 
                 target.blit_to_sdl_surface(
                     None,

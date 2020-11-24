@@ -167,26 +167,15 @@ impl HeroData {
             self.base_tile_number
         };
 
-        tilecache
-            .get_tile(base_tile_number)
-            .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+        let mut renderer = SurfaceRenderer { target, tilecache };
+        renderer.place_tile(base_tile_number, destrect);
         destrect.x += destrect.w as i16;
-        tilecache
-            .get_tile(base_tile_number + 1)
-            .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+        renderer.place_tile(base_tile_number + 1, destrect);
         destrect.x -= destrect.w as i16;
         destrect.y += destrect.h as i16 / 2;
-        tilecache
-            .get_tile(base_tile_number + 2)
-            .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+        renderer.place_tile(base_tile_number + 2, destrect);
         destrect.x += destrect.w as i16;
-        tilecache
-            .get_tile(base_tile_number + 3)
-            .unwrap()
-            .blit_to_sdl_surface(None, target, Some(destrect));
+        renderer.place_tile(base_tile_number + 3, destrect);
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color();
