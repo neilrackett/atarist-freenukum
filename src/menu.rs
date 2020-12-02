@@ -1,12 +1,9 @@
 use super::geometry::Geometry;
 use super::messagebox;
-use super::texture::{
-    CloneToTexture, Texture, TextureCreationParams, TextureRenderer,
-};
 use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
-use crate::graphics::SurfaceCreatorProvider;
-use crate::rendering::Renderer;
+use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
+use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::UserEvent;
 use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
 use anyhow::Result;
@@ -43,7 +40,6 @@ impl Menu {
         &mut self,
         screen: &mut Surface,
         tilecache: &TileCache,
-        texture_creation_paramns: TextureCreationParams,
     ) -> Result<char> {
         let (headercols, headerrows) =
             messagebox::get_information(&self.header);
@@ -67,11 +63,9 @@ impl Menu {
             &mut screen.surface_creator(),
         );
 
-        let mut target = Texture::create_with_params(
-            msgbox.width() as u16,
-            msgbox.height() as u16,
-            texture_creation_paramns,
-        );
+        let mut target = screen
+            .surface_creator()
+            .create(msgbox.width() as u32, msgbox.height() as u32);
 
         let destrect = Geometry {
             x: (screen.width() - msgbox.width() as usize) as i16 / 2,
@@ -100,7 +94,7 @@ impl Menu {
 
         loop {
             if changed || true {
-                msgbox.clone_to_texture(None, &mut target, None);
+                msgbox.blit(None, &mut target, None);
 
                 let targetrect = Geometry {
                     x: (FONT_WIDTH * 3) as i16 / 2,
@@ -111,7 +105,7 @@ impl Menu {
                 };
 
                 {
-                    let mut renderer = TextureRenderer {
+                    let mut renderer = SurfaceRenderer {
                         target: &mut target,
                         tilecache,
                     };
@@ -121,11 +115,7 @@ impl Menu {
                     );
                 }
 
-                target.blit_to_sdl_surface(
-                    None,
-                    screen,
-                    Some(destrect.clone()),
-                );
+                target.blit(None, screen, Some(destrect.as_sdl_rect()));
 
                 if update_whole_screen {
                     screen.update_rect(0, 0, 0, 0);

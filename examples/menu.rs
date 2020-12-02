@@ -1,11 +1,10 @@
 use anyhow::Result;
 use freenukum::data::original_data_dir;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::menu::{Menu, MenuEntry};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
-use freenukum::{
-    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
-};
+use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
 
 fn main() -> Result<()> {
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -19,10 +18,9 @@ fn main() -> Result<()> {
     )?;
 
     game::check_episodes(&mut screen)?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let mut menu = Menu::new("Testmenu\nTest\nTest".to_string());
@@ -41,7 +39,7 @@ fn main() -> Result<()> {
 
     println!(
         "Menu choice: {:?}",
-        menu.get_choice(&mut screen, &tilecache, texture_creation_params)
+        menu.get_choice(&mut screen, &tilecache,)
     );
 
     Ok(())

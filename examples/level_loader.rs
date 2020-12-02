@@ -1,14 +1,15 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
 use freenukum::geometry::Geometry;
+use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use freenukum::hero::HeroData;
 use freenukum::level::raw::LevelRaw;
 use freenukum::level::LevelData;
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
 use freenukum::{
-    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
-    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::File;
 use std::num::NonZeroUsize;
@@ -46,10 +47,9 @@ fn main() -> Result<()> {
         format!("Freenukum {} level loader example", VERSION),
         format!("Freenukum {} level loader example", VERSION),
     )?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let mut episodes = game::check_episodes(&mut screen)?;
@@ -69,13 +69,13 @@ fn main() -> Result<()> {
         &mut file,
         &mut hero,
         &tilecache,
-        texture_creation_params,
+        &screen.surface_creator(),
         &mut Some(&mut level_raw),
     )?;
 
-    let mut level_surface = texture_creation_params.create_surface(
-        (TILE_WIDTH * LEVEL_WIDTH) as u16,
-        (TILE_HEIGHT * LEVEL_HEIGHT) as u16,
+    let mut level_surface = screen.surface_creator().create(
+        (TILE_WIDTH * LEVEL_WIDTH) as u32,
+        (TILE_HEIGHT * LEVEL_HEIGHT) as u32,
     );
     let mut r = Geometry {
         x: 0,

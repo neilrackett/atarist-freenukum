@@ -1,14 +1,13 @@
 use anyhow::Result;
 use freenukum::data::original_data_dir;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::hero::HeroData;
 use freenukum::infobox;
 use freenukum::mainmenu::{mainmenu, MainMenuEntry};
 use freenukum::picture::show_splash;
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
-use freenukum::{
-    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
-};
+use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
 use std::fs::File;
 
 fn main() -> Result<()> {
@@ -22,60 +21,45 @@ fn main() -> Result<()> {
         format!("Freenukum {}", VERSION),
     )?;
     let mut episodes = game::check_episodes(&mut screen)?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let mut bg_filepath = original_data_dir().join("dn.dn1");
     {
         let mut file = File::open(&bg_filepath)?;
-        show_splash(
-            &tilecache,
-            texture_creation_params,
-            &mut screen,
-            &mut file,
-        )?;
+        show_splash(&tilecache, &mut screen, &mut file)?;
     }
 
     let mut hero = HeroData::new();
 
     'menu_loop: loop {
-        match mainmenu(&mut screen, &tilecache, texture_creation_params)? {
+        match mainmenu(&mut screen, &tilecache)? {
             MainMenuEntry::Start => {
                 game::start(
                     &tilecache,
                     &mut hero,
-                    texture_creation_params,
                     &mut screen,
                     &mut settings,
                     &episodes,
                 )?;
                 let mut file = File::open(&bg_filepath)?;
-                show_splash(
-                    &tilecache,
-                    texture_creation_params,
-                    &mut screen,
-                    &mut file,
-                )?;
+                show_splash(&tilecache, &mut screen, &mut file)?;
             }
             MainMenuEntry::Restore => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Restore not implemented yet",
             )?,
             MainMenuEntry::Instructions => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Instructions not implemented yet",
             )?,
             MainMenuEntry::OrderingInfo => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Ordering info not implemented yet",
             )?,
             MainMenuEntry::FullScreenToggle => {
@@ -94,7 +78,6 @@ fn main() -> Result<()> {
                     infobox::show(
                         &mut screen,
                         &tilecache,
-                        texture_creation_params,
                         "\
                         You don't have another\n\
                         episode installed.\n\
@@ -103,44 +86,30 @@ fn main() -> Result<()> {
                     )?;
                 }
                 let mut file = File::open(&bg_filepath)?;
-                show_splash(
-                    &tilecache,
-                    texture_creation_params,
-                    &mut screen,
-                    &mut file,
-                )?;
+                show_splash(&tilecache, &mut screen, &mut file)?;
             }
             MainMenuEntry::HighScores => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Highscores not implemented yet",
             )?,
             MainMenuEntry::Previews => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Previews not implemented yet",
             )?,
             MainMenuEntry::ViewUserDemo => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Userdemo not implemented yet",
             )?,
             MainMenuEntry::TitleScreen => {
                 let mut file = File::open(&bg_filepath)?;
-                show_splash(
-                    &tilecache,
-                    texture_creation_params,
-                    &mut screen,
-                    &mut file,
-                )?;
+                show_splash(&tilecache, &mut screen, &mut file)?;
             }
             MainMenuEntry::Credits => infobox::show(
                 &mut screen,
                 &tilecache,
-                texture_creation_params,
                 "Credits not implemented yet",
             )?,
             MainMenuEntry::Quit => {

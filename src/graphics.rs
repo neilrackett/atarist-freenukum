@@ -1,4 +1,4 @@
-use transdl::video::Surface;
+use transdl::video::{map_rgb, Rect, Surface};
 
 pub trait SurfaceCreatorProvider {
     type Creator: SurfaceCreator;
@@ -44,5 +44,42 @@ impl SurfaceCreator for SurfaceParams {
             crate::sdl_surface_transparent(&surface.format()),
         );
         surface
+    }
+}
+
+pub trait SurfaceExt {
+    fn set_data(&mut self, data: &[u8]);
+}
+
+impl SurfaceExt for Surface {
+    fn set_data(&mut self, data: &[u8]) {
+        let mut iter = data.into_iter();
+        let mut r = Rect {
+            x: 0,
+            y: 0,
+            w: 1,
+            h: 1,
+        };
+        let format = self.format();
+
+        for i in 0..self.height() {
+            for j in 0..self.width() {
+                let red = *iter.next().unwrap();
+                let green = *iter.next().unwrap();
+                let blue = *iter.next().unwrap();
+                let opaque = *iter.next().unwrap();
+
+                let color = if opaque == 0 {
+                    crate::sdl_surface_transparent(&self.format())
+                } else {
+                    map_rgb(&format, red, green, blue)
+                };
+
+                r.x = j as i16;
+                r.y = i as i16;
+
+                self.fill_rect(r, color);
+            }
+        }
     }
 }

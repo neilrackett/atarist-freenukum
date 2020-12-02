@@ -1,9 +1,8 @@
 use anyhow::{anyhow, Result};
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::picture;
 use freenukum::settings::Settings;
-use freenukum::{
-    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
-};
+use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -33,10 +32,9 @@ fn main() -> Result<()> {
         format!("Freenukum {} picture example", VERSION),
     )?;
 
-    let texture_creation_params = sdl_surface_creation_params(&screen);
-    let picture = picture::load(&mut file, texture_creation_params)?;
+    let picture = picture::load(&mut file, &screen.surface_creator())?;
 
-    picture.blit_to_sdl_surface(None, &mut screen, None);
+    picture.blit(None, &mut screen, None);
     screen.update();
 
     'event_loop: loop {

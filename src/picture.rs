@@ -1,9 +1,10 @@
 use super::geometry::Geometry;
 use super::messagebox::messagebox;
-use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
-use crate::graphics::SurfaceCreatorProvider;
+use crate::graphics::{
+    SurfaceCreator, SurfaceCreatorProvider, SurfaceExt,
+};
 use crate::{
     Result, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
@@ -13,13 +14,10 @@ use transdl::video::Surface;
 
 pub fn load(
     input: &mut File,
-    params: TextureCreationParams,
-) -> Result<Texture> {
-    let mut picture = Texture::create_with_params(
-        WINDOW_WIDTH as u16,
-        WINDOW_HEIGHT as u16,
-        params,
-    );
+    surface_creator: &dyn SurfaceCreator,
+) -> Result<Surface> {
+    let mut picture =
+        surface_creator.create(WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32);
     const NUM_LOADS: usize = PICTURE_WIDTH * PICTURE_HEIGHT;
     let mut buffer = [0u8; NUM_LOADS];
 
@@ -84,39 +82,29 @@ pub fn load(
         }
     }
 
-    picture.set_data(&data, params.transparent);
+    picture.set_data(&data);
 
     Ok(picture)
 }
 
 pub fn show_splash(
     tilecache: &TileCache,
-    texture_creation_params: TextureCreationParams,
     target: &mut Surface,
     file: &mut File,
 ) -> Result<()> {
-    show_splash_with_message(
-        tilecache,
-        texture_creation_params,
-        target,
-        file,
-        None,
-        0,
-        0,
-    )
+    show_splash_with_message(tilecache, target, file, None, 0, 0)
 }
 
 pub fn show_splash_with_message(
     tilecache: &TileCache,
-    texture_creation_params: TextureCreationParams,
     target: &mut Surface,
     file: &mut File,
     message: Option<&str>,
     x: i16,
     y: i16,
 ) -> Result<()> {
-    let picture = load(file, texture_creation_params)?;
-    picture.blit_to_sdl_surface(None, target, None);
+    let picture = load(file, &target.surface_creator())?;
+    picture.blit(None, target, None);
 
     if let Some(message) = message {
         let messagebox =

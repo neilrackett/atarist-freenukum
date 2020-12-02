@@ -1,16 +1,14 @@
 use super::geometry::Geometry;
 use super::messagebox::messagebox;
-use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
-use crate::graphics::SurfaceCreatorProvider;
+use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use anyhow::Result;
 use transdl::video::Surface;
 
 pub fn show(
     screen: &mut Surface,
     tilecache: &TileCache,
-    texture_creation_params: TextureCreationParams,
     text: &str,
 ) -> Result<()> {
     let messagebox =
@@ -26,8 +24,9 @@ pub fn show(
     };
 
     // backup the background
-    let mut background_backup =
-        texture_creation_params.create_surface(destrect.w, destrect.h);
+    let mut background_backup = screen
+        .surface_creator()
+        .create(destrect.w as u32, destrect.h as u32);
 
     screen.blit(
         Some(destrect.as_sdl_rect()),
@@ -71,10 +70,9 @@ impl InfoMessageQueue {
         &mut self,
         screen: &mut Surface,
         tilecache: &TileCache,
-        params: TextureCreationParams,
     ) -> Result<()> {
         for message in self.messages.drain(..) {
-            show(screen, tilecache, params, &message)?;
+            show(screen, tilecache, &message)?;
         }
         Ok(())
     }

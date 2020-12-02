@@ -1,10 +1,9 @@
 use super::geometry::Geometry;
 use super::inputfield::InputField;
 use super::messagebox::messagebox;
-use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use crate::event::{InputEvent, WaitEvent};
-use crate::graphics::SurfaceCreatorProvider;
+use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 use anyhow::Result;
@@ -18,7 +17,6 @@ pub enum Answer {
 pub fn show(
     screen: &mut Surface,
     tilecache: &TileCache,
-    texture_creation_params: TextureCreationParams,
     msg: &str,
     max_length: usize,
 ) -> Result<Answer> {
@@ -41,8 +39,9 @@ pub fn show(
     );
 
     // backup the background
-    let mut background_backup =
-        texture_creation_params.create_surface(destrect.w, destrect.h);
+    let mut background_backup = screen
+        .surface_creator()
+        .create(destrect.w as u32, destrect.h as u32);
     screen.blit(
         Some(destrect.as_sdl_rect()),
         &mut background_backup,

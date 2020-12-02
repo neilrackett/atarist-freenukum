@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::hero::{HeroData, Motion};
 use freenukum::level::solids::LevelSolids;
 use freenukum::settings::Settings;
@@ -7,8 +8,7 @@ use freenukum::tilecache::TileCache;
 use freenukum::HorizontalDirection;
 use freenukum::UserEvent;
 use freenukum::{
-    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::collections::HashSet;
 use transdl::event::{Event, KeyCode, MouseButton};
@@ -26,10 +26,9 @@ fn main() -> Result<()> {
         format!("Freenukum {} hero example", VERSION),
     )?;
 
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let mut hero = HeroData::new();

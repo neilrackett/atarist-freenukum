@@ -1,10 +1,10 @@
 use anyhow::{anyhow, Result};
 use freenukum::backdrop;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::settings::Settings;
 use freenukum::tile::TileHeader;
 use freenukum::{
-    game, sdl_surface_creation_params, BACKDROP_HEIGHT, BACKDROP_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::fs::File;
 use std::path::PathBuf;
@@ -35,9 +35,8 @@ fn main() -> Result<()> {
     )?;
 
     TileHeader::load_from(&mut file)?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
-    let backdrop = backdrop::load(&mut file, texture_creation_params)?;
-    backdrop.blit_to_sdl_surface(None, &mut screen, None);
+    let backdrop = backdrop::load(&mut file, &screen.surface_creator())?;
+    backdrop.blit(None, &mut screen, None);
     screen.update();
 
     'event_loop: loop {

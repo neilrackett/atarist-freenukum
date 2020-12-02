@@ -89,10 +89,10 @@ pub struct SurfaceRenderer<'a> {
 
 impl<'a> Renderer for SurfaceRenderer<'a> {
     fn place_tile(&mut self, tile: TileIndex, destination: Geometry) {
-        self.tilecache.get_tile(tile).unwrap().blit_to_sdl_surface(
+        self.tilecache.get_tile(tile).unwrap().blit(
             None,
             self.target,
-            Some(destination),
+            Some(destination.as_sdl_rect()),
         );
     }
 

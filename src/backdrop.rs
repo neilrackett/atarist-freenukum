@@ -1,19 +1,19 @@
 use super::geometry::Geometry;
-use super::texture::{Texture, TextureCreationParams};
 use super::tile::{self, TileHeader};
+use crate::graphics::SurfaceCreator;
 use crate::{
     Result, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::io::Read;
+use transdl::video::Surface;
 
 pub fn load<R: Read>(
     r: &mut R,
-    params: TextureCreationParams,
-) -> Result<Texture> {
-    let mut backdrop = Texture::create_with_params(
-        BACKDROP_WIDTH as u16 * TILE_WIDTH as u16,
-        BACKDROP_HEIGHT as u16 * TILE_HEIGHT as u16,
-        params,
+    surface_creator: &dyn SurfaceCreator,
+) -> Result<Surface> {
+    let mut backdrop = surface_creator.create(
+        BACKDROP_WIDTH as u32 * TILE_WIDTH as u32,
+        BACKDROP_HEIGHT as u32 * TILE_HEIGHT as u32,
     );
 
     let mut geometry = Geometry {
@@ -30,8 +30,8 @@ pub fn load<R: Read>(
     };
 
     for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
-        let tile = tile::load(r, params, header.clone(), false)?;
-        tile.clone_to_texture(None, &mut backdrop, Some(geometry.clone()));
+        let tile = tile::load(r, surface_creator, header.clone(), false)?;
+        tile.blit(None, &mut backdrop, Some(geometry.as_sdl_rect()));
 
         geometry.x += 16;
         if geometry.x == 16 * BACKDROP_WIDTH as i16 {

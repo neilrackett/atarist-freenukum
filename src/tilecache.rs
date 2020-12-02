@@ -1,12 +1,13 @@
-use super::texture::{Texture, TextureCreationParams};
 use super::tile::{self, TileHeader};
+use crate::graphics::SurfaceCreator;
 use crate::Result;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use transdl::video::Surface;
 
 pub struct TileCache {
-    tiles: Vec<Texture>,
+    tiles: Vec<Surface>,
 }
 
 pub struct FileProperties {
@@ -64,7 +65,7 @@ impl FileProperties {
 impl TileCache {
     pub fn load_from_path(
         path: &Path,
-        params: TextureCreationParams,
+        surface_creator: &dyn SurfaceCreator,
     ) -> Result<Self> {
         let mut tiles = Vec::new();
 
@@ -81,7 +82,7 @@ impl TileCache {
                 std::cmp::min(num_tiles, header.tiles as usize);
             tiles.append(&mut Self::load_file(
                 &mut file,
-                params,
+                surface_creator,
                 header,
                 num_tiles,
                 transparent,
@@ -93,16 +94,16 @@ impl TileCache {
 
     fn load_file<R: Read>(
         r: &mut R,
-        params: TextureCreationParams,
+        surface_creator: &dyn SurfaceCreator,
         header: TileHeader,
         num_tiles: usize,
         has_transparency: bool,
-    ) -> Result<Vec<Texture>> {
+    ) -> Result<Vec<Surface>> {
         let mut tiles = Vec::new();
         for _ in 0..num_tiles {
             tiles.push(tile::load(
                 r,
-                params,
+                surface_creator,
                 header.clone(),
                 has_transparency,
             )?);
@@ -110,7 +111,7 @@ impl TileCache {
         Ok(tiles)
     }
 
-    pub fn get_tile(&self, index: usize) -> Option<&Texture> {
+    pub fn get_tile(&self, index: usize) -> Option<&Surface> {
         self.tiles.get(index)
     }
 }

@@ -1,8 +1,9 @@
 use anyhow::{anyhow, Result};
+use freenukum::game;
 use freenukum::geometry::Geometry;
+use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::settings::Settings;
 use freenukum::tile::{self, TileHeader};
-use freenukum::{game, sdl_surface_creation_params};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -41,12 +42,15 @@ fn main() -> Result<()> {
         format!("Freenukum {} tile example", VERSION),
         format!("Freenukum {} tile example", VERSION),
     )?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
 
     for _ in 0..header.tiles {
-        let tile =
-            tile::load(&mut file, texture_creation_params, header, false)?;
-        tile.blit_to_sdl_surface(None, &mut screen, Some(r));
+        let tile = tile::load(
+            &mut file,
+            &screen.surface_creator(),
+            header,
+            false,
+        )?;
+        tile.blit(None, &mut screen, Some(r.as_sdl_rect()));
         r.x += header.width as i16 * 8;
     }
     screen.update();

@@ -13,9 +13,9 @@ use super::level::raw::LevelRaw;
 use super::level::solids::LevelSolids;
 use super::level::tiles::LevelTiles;
 use super::shot::{Shot, ShotList};
-use super::texture::{Texture, TextureCreationParams};
 use super::tilecache::TileCache;
 use super::HorizontalDirection;
+use crate::graphics::SurfaceCreator;
 use crate::rendering::{Renderer, SurfaceRenderer, Transparent};
 use crate::{
     Result, ANIMATION_START, HALFTILE_WIDTH, LEVELWINDOW_HEIGHT,
@@ -44,7 +44,7 @@ impl LevelData {
         reader: &mut R,
         hero: &mut HeroData,
         tilecache: &TileCache,
-        texture_creation_params: TextureCreationParams,
+        surface_creator: &dyn SurfaceCreator,
         raw: &mut Option<&mut LevelRaw>,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
@@ -828,13 +828,13 @@ impl LevelData {
         };
         actor_queue.process(&mut actor_adder);
 
-        let mut surface_fixed = texture_creation_params.create_surface(
-            TILE_WIDTH as u16 * LEVEL_WIDTH as u16,
-            TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
+        let mut surface_fixed = surface_creator.create(
+            TILE_WIDTH as u32 * LEVEL_WIDTH as u32,
+            TILE_HEIGHT as u32 * LEVEL_HEIGHT as u32,
         );
-        let surface = texture_creation_params.create_surface(
-            TILE_WIDTH as u16 * LEVEL_WIDTH as u16,
-            TILE_HEIGHT as u16 * LEVEL_HEIGHT as u16,
+        let surface = surface_creator.create(
+            TILE_WIDTH as u32 * LEVEL_WIDTH as u32,
+            TILE_HEIGHT as u32 * LEVEL_HEIGHT as u32,
         );
 
         let mut surface_renderer = SurfaceRenderer {
@@ -904,14 +904,14 @@ impl LevelData {
         draw_collision_bounds: bool,
         targetrect: Geometry,
         sourcerect: Geometry,
-        backdrop1: Option<&Texture>,
-        _backdrop2: Option<&Texture>,
+        backdrop1: Option<&Surface>,
+        _backdrop2: Option<&Surface>,
     ) {
         if let Some(backdrop) = backdrop1 {
-            backdrop.blit_to_sdl_surface(
+            backdrop.blit(
                 None,
                 &mut self.surface,
-                Some(sourcerect),
+                Some(sourcerect.as_sdl_rect()),
             )
         } else {
             self.surface.fill_rect(sourcerect.as_sdl_rect(), 0);

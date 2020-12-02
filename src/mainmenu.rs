@@ -1,5 +1,4 @@
 use super::menu::{Menu, MenuEntry};
-use super::texture::TextureCreationParams;
 use super::tilecache::TileCache;
 use anyhow::Result;
 use std::convert::Into;
@@ -91,7 +90,6 @@ impl Into<MenuEntry> for MainMenuEntry {
 pub fn mainmenu(
     screen: &mut Surface,
     tilecache: &TileCache,
-    texture_creation_paramns: TextureCreationParams,
 ) -> Result<MainMenuEntry> {
     use MainMenuEntry as M;
     let msg = r"
@@ -112,9 +110,5 @@ pub fn mainmenu(
     menu.append(M::Credits.into());
     menu.append(M::Quit.into());
 
-    Ok(MainMenuEntry::from(menu.get_choice(
-        screen,
-        tilecache,
-        texture_creation_paramns,
-    )?))
+    Ok(MainMenuEntry::from(menu.get_choice(screen, tilecache)?))
 }

@@ -1,13 +1,12 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
 use freenukum::geometry::Geometry;
+use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
+use freenukum::rendering::SurfaceRenderer;
 use freenukum::settings::Settings;
 use freenukum::text;
-use freenukum::texture::{Texture, TextureRenderer};
 use freenukum::tilecache::{FileProperties, TileCache};
-use freenukum::{
-    game, sdl_surface_creation_params, TILE_HEIGHT, TILE_WIDTH,
-};
+use freenukum::{game, TILE_HEIGHT, TILE_WIDTH};
 use transdl::event::{Event, KeyCode};
 use transdl::video::Surface;
 
@@ -28,10 +27,9 @@ fn main() -> Result<()> {
     )?;
 
     game::check_episodes(&mut screen)?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let mut destrect = Geometry {
@@ -43,17 +41,15 @@ fn main() -> Result<()> {
 
     let blithex =
         |value: usize, destrect: Geometry, target: &mut Surface| {
-            let mut text = Texture::create_with_params(
-                TILE_WIDTH as u16,
-                TILE_HEIGHT as u16,
-                texture_creation_params,
-            );
-            let mut renderer = TextureRenderer {
+            let mut text = target
+                .surface_creator()
+                .create(TILE_WIDTH as u32, TILE_HEIGHT as u32);
+            let mut renderer = SurfaceRenderer {
                 target: &mut text,
                 tilecache: &tilecache,
             };
             text::render(&mut renderer, &format!("{:02X}", value));
-            text.blit_to_sdl_surface(None, target, Some(destrect));
+            text.blit(None, target, Some(destrect.as_sdl_rect()));
         };
 
     for x in 0..max_tiles {
@@ -68,10 +64,10 @@ fn main() -> Result<()> {
         blithex(row, destrect, &mut screen);
         destrect.x += TILE_WIDTH as i16;
         for _ in 0..file.num_tiles {
-            tilecache.get_tile(i).unwrap().blit_to_sdl_surface(
+            tilecache.get_tile(i).unwrap().blit(
                 None,
                 &mut screen,
-                Some(destrect),
+                Some(destrect.as_sdl_rect()),
             );
             destrect.x += TILE_WIDTH as i16;
             i += 1;

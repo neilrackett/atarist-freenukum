@@ -1,6 +1,7 @@
-use super::texture::{Texture, TextureCreationParams};
+use crate::graphics::SurfaceCreator;
 use crate::Result;
 use std::io::Read;
+use transdl::video::Surface;
 
 #[derive(Clone, Copy)]
 pub struct TileHeader {
@@ -23,14 +24,14 @@ impl TileHeader {
 
 pub fn load<R: Read>(
     r: &mut R,
-    params: TextureCreationParams,
+    surface_creator: &dyn SurfaceCreator,
     header: TileHeader,
     has_transparency: bool,
-) -> Result<Texture> {
-    let width: u16 = header.width as u16 * 8;
-    let height: u16 = header.height as u16;
+) -> Result<Surface> {
+    let width: u32 = header.width as u32 * 8;
+    let height: u32 = header.height as u32;
 
-    let mut tile = Texture::create_with_params(width, height, params);
+    let mut tile = surface_creator.create(width, height);
     let mut data: Vec<u8> =
         Vec::with_capacity(width as usize * height as usize * 4);
 
@@ -76,7 +77,8 @@ pub fn load<R: Read>(
         }
     }
 
-    tile.set_data(&data, params.transparent);
+    use crate::graphics::SurfaceExt;
+    tile.set_data(&data);
 
     Ok(tile)
 }

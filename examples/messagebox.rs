@@ -4,9 +4,7 @@ use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::messagebox::messagebox;
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
-use freenukum::{
-    game, sdl_surface_creation_params, WINDOW_HEIGHT, WINDOW_WIDTH,
-};
+use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
 use transdl::event::{Event, KeyCode};
 
 fn main() -> Result<()> {
@@ -21,10 +19,9 @@ fn main() -> Result<()> {
     )?;
 
     game::check_episodes(&mut screen)?;
-    let texture_creation_params = sdl_surface_creation_params(&screen);
     let tilecache = TileCache::load_from_path(
         &original_data_dir(),
-        texture_creation_params,
+        &screen.surface_creator(),
     )?;
 
     let msg = r" FREENUKUM MAIN MENU

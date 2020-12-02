@@ -4,13 +4,13 @@ use crate::data::original_data_dir;
 use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, WaitEvent};
 use crate::geometry::Geometry;
+use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
 use crate::picture::show_splash_with_message;
 use crate::rendering::SurfaceRenderer;
 use crate::settings::Settings;
-use crate::texture::TextureCreationParams;
 use crate::tile::TileHeader;
 use crate::tilecache::TileCache;
 use crate::{backdrop, HorizontalDirection, UserEvent};
@@ -36,15 +36,15 @@ fn start_in_level(
     level_number: usize,
     tilecache: &TileCache,
     hero: &mut HeroData,
-    texture_creation_params: TextureCreationParams,
     target: &mut Surface,
     settings: &mut Settings,
     episodes: &Episodes,
     borders: &Borders,
 ) -> Result<Ending> {
-    let mut level_surface = texture_creation_params.create_surface(
-        (TILE_WIDTH * LEVEL_WIDTH) as u16,
-        (TILE_HEIGHT * LEVEL_HEIGHT) as u16,
+    let surface_creator = target.surface_creator();
+    let mut level_surface = surface_creator.create(
+        (TILE_WIDTH * LEVEL_WIDTH) as u32,
+        (TILE_HEIGHT * LEVEL_HEIGHT) as u32,
     );
 
     let backdrop = {
@@ -66,7 +66,7 @@ fn start_in_level(
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
         TileHeader::load_from(&mut file)?;
-        backdrop::load(&mut file, texture_creation_params)?
+        backdrop::load(&mut file, &target.surface_creator())?
     };
 
     let mut level_data = {
@@ -81,7 +81,7 @@ fn start_in_level(
             &mut file,
             hero,
             tilecache,
-            texture_creation_params,
+            &surface_creator,
             &mut None,
         )?
     };
@@ -149,11 +149,7 @@ fn start_in_level(
             do_update = false;
         }
 
-        info_message_queue.process(
-            target,
-            tilecache,
-            texture_creation_params,
-        )?;
+        info_message_queue.process(target, tilecache)?;
 
         let mut border_renderer = SurfaceRenderer { target, tilecache };
 
@@ -326,7 +322,6 @@ fn start_in_level(
 pub fn start(
     tilecache: &TileCache,
     hero: &mut HeroData,
-    texture_creation_params: TextureCreationParams,
     target: &mut Surface,
     settings: &mut Settings,
     episodes: &Episodes,
@@ -342,7 +337,6 @@ pub fn start(
             soon rule the world!";
         show_splash_with_message(
             tilecache,
-            texture_creation_params,
             target,
             &mut file,
             Some(message),
@@ -361,7 +355,6 @@ pub fn start(
             time to watch Oprah!";
         show_splash_with_message(
             tilecache,
-            texture_creation_params,
             target,
             &mut file,
             Some(message),
@@ -393,33 +386,19 @@ pub fn start(
     infobox::show(
         target,
         tilecache,
-        texture_creation_params,
         "Get ready FreeNukum,\nyou are going in.\n",
     )?;
 
     while success == Ending::Passed && level < 13 {
         if interlevel {
             success = start_in_level(
-                2,
-                tilecache,
-                hero,
-                texture_creation_params,
-                target,
-                settings,
-                episodes,
-                &borders,
+                2, tilecache, hero, target, settings, episodes, &borders,
             )?;
             level = if level == 1 { level + 2 } else { level + 1 };
             interlevel = false;
         } else {
             success = start_in_level(
-                level,
-                tilecache,
-                hero,
-                texture_creation_params,
-                target,
-                settings,
-                episodes,
+                level, tilecache, hero, target, settings, episodes,
                 &borders,
             )?;
             interlevel = true;

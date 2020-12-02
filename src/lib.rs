@@ -24,7 +24,6 @@ pub mod rendering;
 pub mod settings;
 pub mod shot;
 pub mod text;
-pub mod texture;
 pub mod tile;
 pub mod tilecache;
 
@@ -211,7 +210,6 @@ const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
 pub use geometry::Geometry;
-pub use texture::Texture;
 
 fn directories() -> directories::ProjectDirs {
     directories::ProjectDirs::from("", "", "freenukum").unwrap()
@@ -258,14 +256,4 @@ pub fn sdl_surface_transparent(
     format: &transdl::video::PixelFormat,
 ) -> u32 {
     transdl::video::map_rgb(format, 100, 1, 1)
-}
-
-pub fn sdl_surface_creation_params(
-    surface: &transdl::video::Surface,
-) -> texture::TextureCreationParams {
-    texture::TextureCreationParams {
-        flags: surface.flags(),
-        bits_per_pixel: surface.format().bits_per_pixel(),
-        transparent: sdl_surface_transparent(&surface.format()),
-    }
 }
