@@ -1,14 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::HorizontalDirection;
 use crate::{
-    HALFTILE_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_CENTER,
-    SOLID_CONVEYORBELT_LEFTEND, SOLID_CONVEYORBELT_RIGHTEND, TILE_HEIGHT,
-    TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, HALFTILE_WIDTH, SOLID_BLACK,
+    SOLID_CONVEYORBELT_CENTER, SOLID_CONVEYORBELT_LEFTEND,
+    SOLID_CONVEYORBELT_RIGHTEND, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -24,8 +22,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         let direction = match general.actor_type {
             ActorType::ConveyorLeftMovingRightEnd => {
@@ -41,20 +38,22 @@ impl ActorCreateInterface for Specific {
         let mut found_begin = false;
         let mut tile;
         while !found_begin {
-            general.position.x -= TILE_WIDTH as i16;
-            general.position.w += TILE_WIDTH as u16;
+            general.position.offset(-(TILE_WIDTH as i32), 0);
+            general
+                .position
+                .set_width(general.position.width() + TILE_WIDTH);
             tile = tiles.get(
-                general.position.x as usize / TILE_WIDTH,
-                general.position.y as usize / TILE_HEIGHT,
+                general.position.x() as u32 / TILE_WIDTH,
+                general.position.y() as u32 / TILE_HEIGHT,
             );
             if tile as usize == SOLID_CONVEYORBELT_LEFTEND
-                || general.position.x == 0
+                || general.position.x() <= 0
                 || tile == 0
             {
                 found_begin = true;
                 tiles.set(
-                    general.position.x as usize / TILE_WIDTH,
-                    general.position.y as usize / TILE_HEIGHT,
+                    general.position.x() as u32 / TILE_WIDTH,
+                    general.position.y() as u32 / TILE_HEIGHT,
                     SOLID_BLACK as u16,
                 );
             }
@@ -76,23 +75,21 @@ impl ActorInterface for Specific {
                     self.current_frame = self.num_frames;
                 }
                 self.current_frame -= 1;
-                -1 * HALFTILE_WIDTH as i16
+                -(HALFTILE_WIDTH as i32)
             }
             HorizontalDirection::Right => {
                 self.current_frame += 1;
                 self.current_frame %= self.num_frames;
-                HALFTILE_WIDTH as i16
+                HALFTILE_WIDTH as i32
             }
             _ => unreachable!(),
         };
 
         let hero_geometry = p.hero_data.position.geometry;
 
-        if hero_geometry.x + hero_geometry.w as i16 > p.general.position.x
-            && hero_geometry.x
-                < p.general.position.x + p.general.position.w as i16
-            && hero_geometry.y + hero_geometry.h as i16
-                == p.general.position.y
+        if hero_geometry.right() > p.general.position.left()
+            && hero_geometry.left() < p.general.position.right()
+            && hero_geometry.bottom() == p.general.position.top()
         {
             p.hero_data
                 .position
@@ -100,11 +97,11 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut tile = SOLID_CONVEYORBELT_LEFTEND + self.current_frame;
-        let mut destrect = p.general.position;
+        let mut pos = p.general.position.top_left();
 
-        let num_elements = p.general.position.w as usize / TILE_WIDTH;
+        let num_elements = p.general.position.width() / TILE_WIDTH;
         for i in 0..num_elements {
             if i == num_elements - 1 {
                 // right end of the conveyor
@@ -113,8 +110,9 @@ impl ActorInterface for Specific {
                 // center parts of the conveyor
                 tile = SOLID_CONVEYORBELT_CENTER + self.current_frame % 2;
             }
-            p.renderer.place_tile(tile, destrect);
-            destrect.x += TILE_WIDTH as i16;
+            p.renderer.place_tile(tile, pos)?;
+            pos.x += TILE_WIDTH as i32;
         }
+        Ok(())
     }
 }

@@ -2,11 +2,16 @@ use super::inputfield::InputField;
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{InputEvent, WaitEvent};
-use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
-use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
+use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::{FONT_HEIGHT, FONT_WIDTH};
+use anyhow::anyhow;
 use anyhow::Result;
-use transdl::video::{Rect, Surface};
+use sdl2::{
+    rect::{Point, Rect},
+    render::WindowCanvas,
+    surface::Surface,
+    EventPump,
+};
 
 pub enum Answer {
     Ok(String),
@@ -14,56 +19,69 @@ pub enum Answer {
 }
 
 pub fn show(
-    screen: &mut Surface,
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
     msg: &str,
     max_length: usize,
+    event_pump: &mut EventPump,
 ) -> Result<Answer> {
     let placeholder_msg = format!(
         "{}\n{}\n\nOk (Enter)   Abort (Esc)\n",
         msg,
         " ".repeat(max_length)
     );
-    let mut msgbox = messagebox(
-        &placeholder_msg,
-        tilecache,
-        &mut screen.surface_creator(),
+    let texture_creator = canvas.texture_creator();
+    let messagebox =
+        messagebox(&placeholder_msg, tilecache, &texture_creator)?;
+    let surface = canvas
+        .window()
+        .surface(event_pump)
+        .map_err(|s| anyhow!(s))?;
+
+    let destrect = Rect::from_center(
+        Point::new(
+            surface.width() as i32 / 2,
+            surface.height() as i32 / 2,
+        ),
+        messagebox.width(),
+        messagebox.height(),
     );
 
-    let destrect = Rect {
-        x: (screen.width() as isize - msgbox.width() as isize) as i16 / 2,
-        y: (screen.height() as isize - msgbox.height() as isize) as i16
-            / 2,
-        w: msgbox.width() as u16,
-        h: msgbox.height() as u16,
-    };
+    let mut background_backup = Surface::new(
+        destrect.width(),
+        destrect.height(),
+        surface.pixel_format_enum(),
+    )
+    .map_err(|s| anyhow!(s))?;
+    surface
+        .blit(destrect, &mut background_backup, None)
+        .map_err(|s| anyhow!(s))?;
 
-    // backup the background
-    let mut background_backup = screen
-        .surface_creator()
-        .create(destrect.w as u32, destrect.h as u32);
-    screen.blit(Some(destrect), &mut background_backup, None);
+    canvas
+        .copy(&messagebox.as_texture(&texture_creator)?, None, destrect)
+        .map_err(|s| anyhow!(s))?;
 
+    let offset_x = destrect.left() + FONT_WIDTH as i32;
+    let offset_y = destrect.bottom() - FONT_HEIGHT as i32 * 4;
     let mut input_field = InputField::new(max_length);
     {
-        let offset_y = msgbox.height() as i32 - FONT_HEIGHT as i32 * 4;
-        let mut input_field_renderer = SurfaceRenderer {
-            target: &mut msgbox,
+        let mut input_field_renderer = CanvasRenderer {
+            canvas,
+            texture_creator: &texture_creator,
             tilecache,
         };
         let mut input_field_renderer = MovePositionRenderer {
-            offset_x: FONT_WIDTH as i32,
+            offset_x,
             offset_y,
             upstream: &mut input_field_renderer,
         };
 
-        input_field.render(&mut input_field_renderer);
+        input_field.render(&mut input_field_renderer)?;
     }
-    msgbox.blit(None, screen, Some(destrect));
-    screen.update_rect(0, 0, 0, 0);
+    canvas.present();
 
     loop {
-        match InputEvent::wait()? {
+        match InputEvent::wait(event_pump)? {
             InputEvent::DeleteLeft => {
                 input_field.backspace_pressed();
             }
@@ -77,12 +95,26 @@ pub fn show(
                 input_field.right_pressed();
             }
             InputEvent::Confirm => {
-                background_backup.blit(None, screen, Some(destrect));
+                canvas
+                    .copy(
+                        &background_backup.as_texture(&texture_creator)?,
+                        None,
+                        destrect,
+                    )
+                    .map_err(|s| anyhow!(s))?;
+                canvas.present();
                 let text = input_field.get_text();
                 return Ok(Answer::Ok(text.to_string()));
             }
             InputEvent::Abort => {
-                background_backup.blit(None, screen, Some(destrect));
+                canvas
+                    .copy(
+                        &background_backup.as_texture(&texture_creator)?,
+                        None,
+                        destrect,
+                    )
+                    .map_err(|s| anyhow!(s))?;
+                canvas.present();
                 return Ok(Answer::Quit);
             }
             InputEvent::Letter(c) => {
@@ -92,19 +124,18 @@ pub fn show(
         }
 
         {
-            let offset_y = msgbox.height() as i32 - FONT_HEIGHT as i32 * 4;
-            let mut input_field_renderer = SurfaceRenderer {
-                target: &mut msgbox,
+            let mut input_field_renderer = CanvasRenderer {
+                canvas,
+                texture_creator: &texture_creator,
                 tilecache,
             };
             let mut input_field_renderer = MovePositionRenderer {
-                offset_x: FONT_WIDTH as i32,
+                offset_x,
                 offset_y,
                 upstream: &mut input_field_renderer,
             };
-            input_field.render(&mut input_field_renderer);
+            input_field.render(&mut input_field_renderer)?;
         }
-        msgbox.blit(None, screen, Some(destrect));
-        screen.update_rect(0, 0, 0, 0);
+        canvas.present();
     }
 }

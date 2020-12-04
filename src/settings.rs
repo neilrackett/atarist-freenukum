@@ -75,7 +75,6 @@ impl Settings {
                     savepath.to_string_lossy(),
                     e
                 );
-                return;
             }
         }
     }

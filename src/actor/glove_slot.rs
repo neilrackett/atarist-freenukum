@@ -1,12 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType, ActorType, HeroInteractStartParameters,
-    RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorMessageType, ActorType, HeroInteractStartParameters,
+        RenderParameters,
+    },
+    hero::InventoryItem,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::hero::InventoryItem;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 enum State {
@@ -30,8 +31,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
@@ -81,14 +81,12 @@ impl ActorInterface for Specific {
                 if self.countdown % 4 == 0 {
                     p.actor_adder.add_actor(
                         ActorType::HostileShotRight,
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                     );
                 } else if self.countdown % 4 == 2 {
                     p.actor_adder.add_actor(
                         ActorType::HostileShotLeft,
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                     );
                 }
                 if self.countdown == 0 {
@@ -99,15 +97,16 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let adder = if self.current_frame == 0 { 0 } else { 1 };
-        let mut destrect = p.general.position;
-        p.renderer.place_tile(self.tile + adder, destrect);
+        let mut pos = p.general.position.top_left();
+        p.renderer.place_tile(self.tile + adder, pos)?;
 
-        destrect.x -= TILE_WIDTH as i16;
-        p.renderer.place_tile(self.tile + 2, destrect);
+        pos.x -= TILE_WIDTH as i32;
+        p.renderer.place_tile(self.tile + 2, pos)?;
 
-        destrect.x += 2 * TILE_WIDTH as i16;
-        p.renderer.place_tile(self.tile + 3, destrect);
+        pos.x += 2 * TILE_WIDTH as i32;
+        p.renderer.place_tile(self.tile + 3, pos)?;
+        Ok(())
     }
 }

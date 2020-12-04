@@ -1,12 +1,17 @@
 use super::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
-use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
-use crate::rendering::{Renderer, SurfaceRenderer};
-use crate::UserEvent;
-use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
-use anyhow::Result;
-use transdl::video::{Rect, Surface};
+use crate::rendering::{CanvasRenderer, Renderer};
+use crate::{
+    UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL, OBJECT_POINT,
+};
+use anyhow::{anyhow, Result};
+use sdl2::{
+    event::EventSender,
+    rect::{Point, Rect},
+    render::WindowCanvas,
+    EventPump, TimerSubsystem,
+};
 
 pub struct MenuEntry {
     pub shortcut: char,
@@ -37,9 +42,13 @@ impl Menu {
 
     pub fn get_choice(
         &mut self,
-        screen: &mut Surface,
+        canvas: &mut WindowCanvas,
         tilecache: &TileCache,
+        event_pump: &mut EventPump,
+        event_sender: &EventSender,
+        timer_subsystem: &TimerSubsystem,
     ) -> Result<char> {
+        let texture_creator = canvas.texture_creator();
         let (headercols, headerrows) =
             messagebox::get_information(&self.header);
 
@@ -56,90 +65,70 @@ impl Menu {
                 .join("\n  "),
         );
 
-        let msgbox = messagebox::messagebox(
+        let messagebox = messagebox::messagebox(
             &contents,
             tilecache,
-            &mut screen.surface_creator(),
+            &texture_creator,
+        )?;
+
+        let surface = canvas
+            .window()
+            .surface(event_pump)
+            .map_err(|s| anyhow!(s))?;
+        let destrect = Rect::from_center(
+            Point::new(
+                surface.width() as i32 / 2,
+                surface.height() as i32 / 2,
+            ),
+            messagebox.width(),
+            messagebox.height(),
         );
 
-        let mut target = screen
-            .surface_creator()
-            .create(msgbox.width() as u32, msgbox.height() as u32);
-
-        let destrect = Rect {
-            x: (screen.width() - msgbox.width() as usize) as i16 / 2,
-            y: (screen.height() - msgbox.height() as usize) as i16 / 2,
-            w: msgbox.width() as u16,
-            h: msgbox.height() as u16,
-        };
-
-        transdl::event::enable_key_repeat();
-
-        let timer = transdl::timer::Timer::add(80, || {
-            transdl::event::push_user_event(UserEvent::Timer as i32)
-        });
-
-        let pointrect = Rect {
-            x: (FONT_WIDTH * 2 + destrect.x as usize) as i16,
-            y: (FONT_HEIGHT + destrect.y as usize) as i16,
-            w: FONT_WIDTH as u16,
-            h: FONT_HEIGHT as u16,
-        };
+        let timer = timer_subsystem.add_timer(
+            GAME_INTERVAL,
+            Box::new(move || {
+                event_sender.push_custom_event(UserEvent::Timer).unwrap();
+                GAME_INTERVAL
+            }),
+        );
 
         let mut changed = true;
         let mut animationframe = 0;
-        let mut update_whole_screen = true;
-        let mut update_whole_menu = false;
 
         loop {
-            if changed || true {
-                msgbox.blit(None, &mut target, None);
+            if changed {
+                canvas
+                    .copy(
+                        &messagebox.as_texture(&texture_creator)?,
+                        None,
+                        destrect,
+                    )
+                    .map_err(|s| anyhow!(s))?;
 
-                let targetrect = Rect {
-                    x: (FONT_WIDTH * 3) as i16 / 2,
-                    y: (FONT_HEIGHT * (self.current + headerrows + 2))
-                        as i16,
-                    w: FONT_WIDTH as u16,
-                    h: FONT_HEIGHT as u16,
+                let mut renderer = CanvasRenderer {
+                    canvas,
+                    texture_creator: &texture_creator,
+                    tilecache,
                 };
 
-                {
-                    let mut renderer = SurfaceRenderer {
-                        target: &mut target,
-                        tilecache,
-                    };
-                    renderer.place_tile(
-                        OBJECT_POINT + animationframe,
-                        targetrect,
-                    );
-                }
+                let point_pos = Point::new(
+                    destrect.left() + (FONT_WIDTH as i32 / 2) * 3,
+                    destrect.top()
+                        + FONT_HEIGHT as i32
+                            * (self.current as i32
+                                + headerrows as i32
+                                + 2),
+                );
 
-                target.blit(None, screen, Some(destrect));
-
-                if update_whole_screen {
-                    screen.update_rect(0, 0, 0, 0);
-                    update_whole_screen = false;
-                    update_whole_menu = false;
-                } else if update_whole_menu {
-                    screen.update_rect(
-                        destrect.x as i32,
-                        destrect.y as i32,
-                        destrect.w as u32,
-                        destrect.h as u32,
-                    );
-                    update_whole_menu = false;
-                } else {
-                    screen.update_rect(
-                        pointrect.x as i32,
-                        pointrect.y as i32,
-                        pointrect.w as u32,
-                        pointrect.h as u32,
-                    );
-                }
+                renderer.place_tile(
+                    OBJECT_POINT + animationframe,
+                    point_pos,
+                )?;
+                canvas.present();
                 changed = false;
             }
 
-            let choice: Option<char> = match MenuEvent::wait()? {
+            let choice: Option<char> = match MenuEvent::wait(event_pump)? {
                 MenuEvent::ChooseCurrentEntry | MenuEvent::ClickMouse => {
                     Some(self.entries[self.current].shortcut)
                 }
@@ -147,7 +136,6 @@ impl Menu {
                 MenuEvent::NextEntry => {
                     self.current += 1;
                     self.current %= self.entries.len();
-                    update_whole_menu = true;
                     None
                 }
                 MenuEvent::PreviousEntry => {
@@ -155,7 +143,6 @@ impl Menu {
                         self.current = self.entries.len();
                     }
                     self.current -= 1;
-                    update_whole_menu = true;
                     None
                 }
                 MenuEvent::ChooseShortcutEntry(key) => {
@@ -168,40 +155,37 @@ impl Menu {
                     choice
                 }
                 MenuEvent::MoveMouse { x, y } => {
-                    let x = x as i16 - destrect.x - FONT_WIDTH as i16 * 3;
-                    let y = y as i16
-                        - destrect.y
-                        - FONT_HEIGHT as i16 * (headerrows as i16 + 2);
+                    let x = x - destrect.x() - FONT_WIDTH as i32 * 3;
+                    let y = y
+                        - destrect.y()
+                        - FONT_HEIGHT as i32 * (headerrows as i32 + 2);
 
                     if x > 0
-                        && x < FONT_WIDTH as i16 * msgbox.width() as i16
+                        && x < (FONT_WIDTH * messagebox.width()) as i32
                     {
-                        let menuitem = y / FONT_HEIGHT as i16;
+                        let menuitem = y / FONT_HEIGHT as i32;
                         if menuitem >= 0
-                            && menuitem < self.entries.len() as i16
+                            && menuitem < self.entries.len() as i32
                         {
                             self.current = menuitem as usize;
-                            update_whole_menu = true;
                         }
                     }
 
                     None
                 }
                 MenuEvent::RefreshScreen => {
-                    screen.update_rect(0, 0, 0, 0);
+                    canvas.present();
                     None
                 }
                 MenuEvent::TimerTriggered => {
                     animationframe += 1;
                     animationframe %= 4;
                     changed = true;
-                    update_whole_menu = true;
                     None
                 }
             };
             if let Some(choice) = choice {
-                timer.remove();
-                transdl::event::disable_key_repeat();
+                drop(timer);
                 return Ok(choice);
             }
         }

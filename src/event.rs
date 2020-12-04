@@ -3,6 +3,12 @@ use crate::HorizontalDirection;
 use crate::UserEvent;
 use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH};
 use anyhow::{anyhow, Error, Result};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::{Keycode, Mod},
+    mouse::MouseButton,
+    EventPump,
+};
 use std::convert::TryFrom;
 
 #[must_use]
@@ -21,12 +27,6 @@ pub enum GameEvent {
     HeroStartFiring,
     HeroStopFiring,
     TimerTriggered,
-    HeroMoved,
-    HeroScored,
-    HeroFirepowerChanged,
-    HeroInventoryChanged,
-    HeroHealthChanged,
-    HeroLanded,
 }
 
 #[must_use]
@@ -55,21 +55,20 @@ pub enum MenuEvent {
     NextEntry,
     PreviousEntry,
     ChooseShortcutEntry(char),
-    MoveMouse { x: i16, y: i16 },
+    MoveMouse { x: i32, y: i32 },
     ClickMouse,
     RefreshScreen,
     TimerTriggered,
 }
 
 pub trait WaitEvent: Sized {
-    fn wait() -> Result<Self>;
+    fn wait(event_pump: &mut EventPump) -> Result<Self>;
 }
 
-impl<T: TryFrom<transdl::event::Event>> WaitEvent for T {
-    fn wait() -> Result<Self> {
+impl<T: TryFrom<Event>> WaitEvent for T {
+    fn wait(event_pump: &mut EventPump) -> Result<Self> {
         loop {
-            let event = transdl::event::Event::wait()
-                .map_err(|e| anyhow!("{}", e))?;
+            let event = event_pump.wait_event();
             if let Ok(e) = T::try_from(event) {
                 return Ok(e);
             }
@@ -77,65 +76,79 @@ impl<T: TryFrom<transdl::event::Event>> WaitEvent for T {
     }
 }
 
-impl TryFrom<transdl::event::Event> for GameEvent {
+impl TryFrom<Event> for GameEvent {
     type Error = Error;
 
-    fn try_from(e: transdl::event::Event) -> Result<GameEvent> {
-        use transdl::event::{
-            Event as E, KeyCode as K, Modifier as M, MouseButton,
-        };
+    fn try_from(e: Event) -> Result<GameEvent> {
+        use Event as E;
+        use Keycode as K;
+        use WindowEvent as W;
         match e {
-            E::Quit
+            E::Quit { .. }
             | E::KeyDown {
-                key: Some(K::Escape),
+                keycode: Some(K::Escape),
                 ..
             }
             | E::KeyDown {
-                key: Some(K::Q), ..
+                keycode: Some(K::Q),
+                ..
             } => Ok(GameEvent::Escape),
             E::KeyDown {
-                key: Some(K::Num1), ..
+                keycode: Some(K::Num1),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyRed)),
             E::KeyDown {
-                key: Some(K::Num2), ..
+                keycode: Some(K::Num2),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyGreen)),
             E::KeyDown {
-                key: Some(K::Num3), ..
+                keycode: Some(K::Num3),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyBlue)),
             E::KeyDown {
-                key: Some(K::Num4), ..
+                keycode: Some(K::Num4),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyPink)),
             E::KeyDown {
-                key: Some(K::Num5), ..
+                keycode: Some(K::Num5),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::Boot)),
             E::KeyDown {
-                key: Some(K::Num6), ..
+                keycode: Some(K::Num6),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::Glove)),
             E::KeyDown {
-                key: Some(K::Num7), ..
+                keycode: Some(K::Num7),
+                ..
             } => Ok(GameEvent::GetInventoryItem(InventoryItem::Clamp)),
             E::KeyDown {
-                key: Some(K::Num8), ..
+                keycode: Some(K::Num8),
+                ..
             } => {
                 Ok(GameEvent::GetInventoryItem(InventoryItem::AccessCard))
             }
             E::KeyDown {
-                key: Some(K::Num9), ..
+                keycode: Some(K::Num9),
+                ..
             } => Ok(GameEvent::IncreaseLife),
             E::KeyDown {
-                key: Some(K::Num0), ..
+                keycode: Some(K::Num0),
+                ..
             } => Ok(GameEvent::FinishLevel),
             E::KeyDown {
-                key: Some(K::F), ..
+                keycode: Some(K::F),
+                ..
             }
             | E::KeyDown {
-                key: Some(K::F11), ..
+                keycode: Some(K::F11),
+                ..
             } => Ok(GameEvent::ToggleFullscreen),
             E::KeyDown {
-                key: Some(K::Down),
-                modifiers,
-            } if modifiers.contains(&M::LeftShift)
-                || modifiers.contains(&M::RightShift) =>
+                keycode: Some(K::Down),
+                keymod,
+                ..
+            } if keymod.contains(Mod::LSHIFTMOD)
+                || keymod.contains(Mod::RSHIFTMOD) =>
             {
                 Ok(GameEvent::MoveViewPoint {
                     x: HALFTILE_HEIGHT as i32,
@@ -143,10 +156,11 @@ impl TryFrom<transdl::event::Event> for GameEvent {
                 })
             }
             E::KeyDown {
-                key: Some(K::Up),
-                modifiers,
-            } if modifiers.contains(&M::LeftShift)
-                || modifiers.contains(&M::RightShift) =>
+                keycode: Some(K::Up),
+                keymod,
+                ..
+            } if keymod.contains(Mod::LSHIFTMOD)
+                || keymod.contains(Mod::RSHIFTMOD) =>
             {
                 Ok(GameEvent::MoveViewPoint {
                     x: -(HALFTILE_HEIGHT as i32),
@@ -154,10 +168,11 @@ impl TryFrom<transdl::event::Event> for GameEvent {
                 })
             }
             E::KeyDown {
-                key: Some(K::Right),
-                modifiers,
-            } if modifiers.contains(&M::LeftShift)
-                || modifiers.contains(&M::RightShift) =>
+                keycode: Some(K::Right),
+                keymod,
+                ..
+            } if keymod.contains(Mod::LSHIFTMOD)
+                || keymod.contains(Mod::RSHIFTMOD) =>
             {
                 Ok(GameEvent::MoveViewPoint {
                     x: 0,
@@ -165,10 +180,11 @@ impl TryFrom<transdl::event::Event> for GameEvent {
                 })
             }
             E::KeyDown {
-                key: Some(K::Left),
-                modifiers,
-            } if modifiers.contains(&M::LeftShift)
-                || modifiers.contains(&M::RightShift) =>
+                keycode: Some(K::Left),
+                keymod,
+                ..
+            } if keymod.contains(Mod::LSHIFTMOD)
+                || keymod.contains(Mod::RSHIFTMOD) =>
             {
                 Ok(GameEvent::MoveViewPoint {
                     x: 0,
@@ -176,141 +192,145 @@ impl TryFrom<transdl::event::Event> for GameEvent {
                 })
             }
             E::KeyDown {
-                key: Some(K::Up), ..
+                keycode: Some(K::Up),
+                ..
             }
             | E::MouseButtonDown {
-                button: Some(MouseButton::Middle),
+                mouse_btn: MouseButton::Middle,
                 ..
             } => Ok(GameEvent::HeroInteractionStart),
             E::KeyDown {
-                key: Some(K::Right),
+                keycode: Some(K::Right),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
                 true,
             ))),
             E::KeyDown {
-                key: Some(K::Left), ..
+                keycode: Some(K::Left),
+                ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
                 true,
             ))),
             E::KeyDown {
-                key: Some(K::LeftCtrl),
+                keycode: Some(K::LCtrl),
                 ..
             }
             | E::MouseButtonDown {
-                button: Some(MouseButton::Right),
+                mouse_btn: MouseButton::Right,
                 ..
             } => Ok(GameEvent::HeroJump),
             E::KeyDown {
-                key: Some(K::LeftAlt),
+                keycode: Some(K::LAlt),
                 ..
             }
             | E::MouseButtonDown {
-                button: Some(MouseButton::Left),
+                mouse_btn: MouseButton::Left,
                 ..
             } => Ok(GameEvent::HeroStartFiring),
             E::KeyUp {
-                key: Some(K::Up), ..
+                keycode: Some(K::Up),
+                ..
             }
             | E::MouseButtonUp {
-                button: Some(MouseButton::Middle),
+                mouse_btn: MouseButton::Middle,
                 ..
             } => Ok(GameEvent::HeroInteractionEnd),
             E::KeyUp {
-                key: Some(K::Right),
+                keycode: Some(K::Right),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
                 false,
             ))),
             E::KeyUp {
-                key: Some(K::Left), ..
+                keycode: Some(K::Left),
+                ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
                 false,
             ))),
             E::KeyUp {
-                key: Some(K::LeftAlt),
+                keycode: Some(K::LAlt),
                 ..
             }
             | E::MouseButtonUp {
-                button: Some(MouseButton::Left),
+                mouse_btn: MouseButton::Left,
                 ..
             } => Ok(GameEvent::HeroStopFiring),
-            E::VideoExpose => Ok(GameEvent::RefreshScreen),
-            E::UserEvent { code } if code == UserEvent::Timer as i32 => {
-                Ok(GameEvent::TimerTriggered)
+            E::Window {
+                win_event: W::Exposed,
+                ..
             }
-            E::UserEvent { code }
-                if code == UserEvent::HeroMoved as i32 =>
-            {
-                Ok(GameEvent::HeroMoved)
+            | E::Window {
+                win_event: W::Shown,
+                ..
+            } => Ok(GameEvent::RefreshScreen),
+            e if e.is_user_event() => {
+                match e.as_user_event_type::<UserEvent>() {
+                    Some(UserEvent::Timer) => {
+                        Ok(GameEvent::TimerTriggered)
+                    }
+                    Some(UserEvent::Redraw) => {
+                        Ok(GameEvent::RefreshScreen)
+                    }
+                    None => unreachable!("Unknown user event"),
+                }
             }
-            E::UserEvent { code }
-                if code == UserEvent::HeroScored as i32 =>
-            {
-                Ok(GameEvent::HeroScored)
-            }
-            E::UserEvent { code }
-                if code == UserEvent::HeroFirepowerChanged as i32 =>
-            {
-                Ok(GameEvent::HeroFirepowerChanged)
-            }
-            E::UserEvent { code }
-                if code == UserEvent::HeroInventoryChanged as i32 =>
-            {
-                Ok(GameEvent::HeroInventoryChanged)
-            }
-            E::UserEvent { code }
-                if code == UserEvent::HeroHealthChanged as i32 =>
-            {
-                Ok(GameEvent::HeroHealthChanged)
-            }
-            E::UserEvent { code }
-                if code == UserEvent::HeroLanded as i32 =>
-            {
-                Ok(GameEvent::HeroLanded)
-            }
+
             _ => Err(anyhow!("Event not handled")),
         }
     }
 }
 
-impl TryFrom<transdl::event::Event> for ConfirmEvent {
+impl TryFrom<Event> for ConfirmEvent {
     type Error = Error;
 
-    fn try_from(e: transdl::event::Event) -> Result<ConfirmEvent> {
-        use transdl::event::{Event as E, KeyCode as K};
+    fn try_from(e: Event) -> Result<ConfirmEvent> {
+        use Event as E;
+        use Keycode as K;
+        use WindowEvent as W;
         match e {
             E::KeyDown {
-                key: Some(K::Return),
+                keycode: Some(K::Return),
                 ..
-            } => return Ok(ConfirmEvent::Confirmed),
+            } => Ok(ConfirmEvent::Confirmed),
             E::KeyDown {
-                key: Some(K::Escape),
+                keycode: Some(K::Escape),
                 ..
             }
-            | E::Quit => {
-                return Ok(ConfirmEvent::Aborted);
+            | E::Quit { .. }
+            | E::Window {
+                win_event: W::Close,
+                ..
+            } => Ok(ConfirmEvent::Aborted),
+            E::Window {
+                win_event: W::Exposed,
+                ..
             }
-            E::VideoExpose => {
-                return Ok(ConfirmEvent::RefreshScreen);
-            }
+            | E::Window {
+                win_event: W::Shown,
+                ..
+            } => Ok(ConfirmEvent::RefreshScreen),
             _ => Err(anyhow!("Event not handled")),
         }
     }
 }
 
-impl TryFrom<transdl::event::Event> for InputEvent {
+impl TryFrom<Event> for InputEvent {
     type Error = Error;
 
-    fn try_from(e: transdl::event::Event) -> Result<InputEvent> {
-        use transdl::event::{Event as E, KeyCode as K, Modifier as M};
+    fn try_from(e: Event) -> Result<InputEvent> {
+        use Event as E;
+        use Keycode as K;
+        use Mod as M;
+        use WindowEvent as W;
         match e {
-            E::KeyDown { key, modifiers } => match key {
-                Some(K::BackSpace) => Ok(InputEvent::DeleteLeft),
+            E::KeyDown {
+                keycode, keymod, ..
+            } => match keycode {
+                Some(K::Backspace) => Ok(InputEvent::DeleteLeft),
                 Some(K::Delete) => Ok(InputEvent::DeleteRight),
                 Some(K::Left) => Ok(InputEvent::MoveCursorLeft),
                 Some(K::Right) => Ok(InputEvent::MoveCursorRight),
@@ -319,7 +339,7 @@ impl TryFrom<transdl::event::Event> for InputEvent {
                 Some(code)
                     if code == K::Space
                         || code == K::Exclaim
-                        || code == K::QuoteDouble
+                        || code == K::Quotedbl
                         || code == K::Hash
                         || code == K::Dollar
                         || code == K::Ampersand
@@ -377,8 +397,8 @@ impl TryFrom<transdl::event::Event> for InputEvent {
                         || code == K::Z =>
                 {
                     let mut c = code as u8 as char;
-                    if modifiers.contains(&M::LeftShift)
-                        || modifiers.contains(&M::RightShift)
+                    if keymod.contains(M::LSHIFTMOD)
+                        || keymod.contains(M::RSHIFTMOD)
                     {
                         c.make_ascii_uppercase();
                     }
@@ -386,50 +406,77 @@ impl TryFrom<transdl::event::Event> for InputEvent {
                 }
                 _ => Err(anyhow!("Event not handled")),
             },
-            E::VideoExpose => Ok(InputEvent::RefreshScreen),
+            E::Window {
+                win_event: W::Exposed,
+                ..
+            }
+            | E::Window {
+                win_event: W::Shown,
+                ..
+            } => Ok(InputEvent::RefreshScreen),
             _ => Err(anyhow!("Event not handled")),
         }
     }
 }
 
-impl TryFrom<transdl::event::Event> for MenuEvent {
+impl TryFrom<Event> for MenuEvent {
     type Error = Error;
 
-    fn try_from(e: transdl::event::Event) -> Result<MenuEvent> {
-        use transdl::event::{Event as E, KeyCode as K, MouseButton};
+    fn try_from(e: Event) -> Result<MenuEvent> {
+        use Event as E;
+        use Keycode as K;
+        use MouseButton as M;
+        use WindowEvent as W;
         match e {
             E::KeyDown {
-                key: Some(K::Return),
+                keycode: Some(K::Return),
                 ..
             } => Ok(MenuEvent::ChooseCurrentEntry),
             E::KeyDown {
-                key: Some(K::Escape),
+                keycode: Some(K::Escape),
                 ..
             } => Ok(MenuEvent::Abort),
             E::KeyDown {
-                key: Some(K::Down), ..
+                keycode: Some(K::Down),
+                ..
             } => Ok(MenuEvent::NextEntry),
             E::KeyDown {
-                key: Some(K::Up), ..
+                keycode: Some(K::Up),
+                ..
             } => Ok(MenuEvent::PreviousEntry),
-            E::KeyDown { key: Some(key), .. } => {
+            E::KeyDown {
+                keycode: Some(key), ..
+            } => {
                 let c = key as u8 as char;
                 Ok(MenuEvent::ChooseShortcutEntry(c))
             }
-            E::MouseMotion { x, y, .. } => Ok(MenuEvent::MoveMouse {
-                x: x as i16,
-                y: y as i16,
-            }),
-            E::MouseButtonDown { button, .. } => {
-                if button == Some(MouseButton::Left) {
+            E::MouseMotion { x, y, .. } => {
+                Ok(MenuEvent::MoveMouse { x, y })
+            }
+            E::MouseButtonDown { mouse_btn, .. } => {
+                if mouse_btn == M::Left {
                     Ok(MenuEvent::ClickMouse)
                 } else {
                     Err(anyhow!("Event not handled"))
                 }
             }
-            E::VideoExpose => Ok(MenuEvent::RefreshScreen),
-            E::UserEvent { code } if code == UserEvent::Timer as i32 => {
-                Ok(MenuEvent::TimerTriggered)
+            E::Window {
+                win_event: W::Exposed,
+                ..
+            }
+            | E::Window {
+                win_event: W::Shown,
+                ..
+            } => Ok(MenuEvent::RefreshScreen),
+            e if e.is_user_event() => {
+                if e.as_user_event_type::<UserEvent>()
+                    == Some(UserEvent::Timer)
+                {
+                    Ok(MenuEvent::TimerTriggered)
+                } else {
+                    // Ignore other events
+                    Err(anyhow!("Event not handled"))
+                }
             }
             _ => {
                 // Ignore other events

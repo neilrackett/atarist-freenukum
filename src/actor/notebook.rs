@@ -1,10 +1,11 @@
-use super::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    HeroInteractStartParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        HeroInteractStartParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -15,8 +16,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
         Specific {}
     }
@@ -35,7 +35,9 @@ impl ActorInterface for Specific {
             .push_back("Not implemented yet.".to_string());
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(OBJECT_NOTEBOOK, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(OBJECT_NOTEBOOK, p.general.position.top_left())?;
+        Ok(())
     }
 }

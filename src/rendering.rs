@@ -1,56 +1,30 @@
 use crate::tilecache::TileCache;
-use transdl::video::{PixelFormat, Rect, Surface};
+use crate::Result;
+use anyhow::anyhow;
+use sdl2::{
+    pixels::Color,
+    rect::{Point, Rect},
+    render::{Canvas, RenderTarget, TextureCreator},
+    surface::Surface,
+};
 
 pub type TileIndex = usize;
 
-pub trait Color {
-    fn transdl_map_rgb(&self, format: &PixelFormat) -> u32;
-}
-
-impl Color for (u8, u8, u8) {
-    fn transdl_map_rgb(&self, format: &PixelFormat) -> u32 {
-        let &(r, g, b) = self;
-        transdl::video::map_rgb(format, r, g, b)
-    }
-}
-
-pub struct Transparent;
-
-impl Color for Transparent {
-    fn transdl_map_rgb(&self, format: &PixelFormat) -> u32 {
-        crate::sdl_surface_transparent(format)
-    }
-}
-
 pub trait Renderer {
-    fn place_tile(&mut self, tile: TileIndex, destination: Rect);
-    fn fill_rect(&mut self, rect: Rect, color: &dyn Color);
-    fn fill(&mut self, color: &dyn Color);
+    fn place_surface(
+        &mut self,
+        surface: &Surface,
+        rect: Rect,
+    ) -> Result<()>;
 
-    fn draw_rect(&mut self, rect: Rect, color: &dyn Color) {
-        {
-            let mut r = rect.clone();
-            r.w = 1;
-            self.fill_rect(rect, color);
-        }
-        {
-            let mut r = rect.clone();
-            r.x += r.w as i16 - 1;
-            r.w = 1;
-            self.fill_rect(rect, color);
-        }
-        {
-            let mut r = rect.clone();
-            r.h = 1;
-            self.fill_rect(rect, color);
-        }
-        {
-            let mut r = rect.clone();
-            r.y += r.h as i16 - 1;
-            r.h = 1;
-            self.fill_rect(rect, color);
-        }
-    }
+    fn place_tile(
+        &mut self,
+        tile: TileIndex,
+        destination: Point,
+    ) -> Result<()>;
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
+    fn fill(&mut self, color: Color) -> Result<()>;
+    fn draw_rect(&mut self, rect: Rect, color: Color) -> Result<()>;
 }
 
 pub struct MovePositionRenderer<'a> {
@@ -60,48 +34,92 @@ pub struct MovePositionRenderer<'a> {
 }
 
 impl<'a> Renderer for MovePositionRenderer<'a> {
-    fn place_tile(&mut self, tile: TileIndex, destination: Rect) {
-        let new_destination = Rect {
-            x: destination.x + self.offset_x as i16,
-            y: destination.y + self.offset_y as i16,
-            w: destination.w,
-            h: destination.h,
-        };
-        self.upstream.place_tile(tile, new_destination);
+    fn place_surface(
+        &mut self,
+        surface: &Surface,
+        mut rect: Rect,
+    ) -> Result<()> {
+        rect.offset(self.offset_x, self.offset_y);
+        self.upstream.place_surface(surface, rect)
     }
 
-    fn fill_rect(&mut self, mut rect: Rect, color: &dyn Color) {
-        rect.x += self.offset_x as i16;
-        rect.y += self.offset_y as i16;
-        self.upstream.fill_rect(rect, color);
+    fn place_tile(
+        &mut self,
+        tile: TileIndex,
+        destination: Point,
+    ) -> Result<()> {
+        self.upstream.place_tile(
+            tile,
+            destination.offset(self.offset_x, self.offset_y),
+        )
     }
 
-    fn fill(&mut self, color: &dyn Color) {
-        self.upstream.fill(color);
+    fn fill_rect(&mut self, mut rect: Rect, color: Color) -> Result<()> {
+        rect.offset(self.offset_x, self.offset_y);
+        self.upstream.fill_rect(rect, color)
+    }
+
+    fn fill(&mut self, color: Color) -> Result<()> {
+        self.upstream.fill(color)
+    }
+
+    fn draw_rect(&mut self, mut rect: Rect, color: Color) -> Result<()> {
+        rect.offset(self.offset_x, self.offset_y);
+        self.upstream.draw_rect(rect, color)
     }
 }
 
-pub struct SurfaceRenderer<'a> {
-    pub target: &'a mut Surface,
-    pub tilecache: &'a TileCache,
+pub struct CanvasRenderer<'a, RT: RenderTarget, T> {
+    pub canvas: &'a mut Canvas<RT>,
+    pub texture_creator: &'a TextureCreator<T>,
+    pub tilecache: &'a TileCache<'a>,
 }
 
-impl<'a> Renderer for SurfaceRenderer<'a> {
-    fn place_tile(&mut self, tile: TileIndex, destination: Rect) {
-        self.tilecache.get_tile(tile).unwrap().blit(
-            None,
-            self.target,
-            Some(destination),
+impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
+    fn place_surface(
+        &mut self,
+        surface: &Surface,
+        rect: Rect,
+    ) -> Result<()> {
+        self.canvas
+            .copy(&surface.as_texture(&self.texture_creator)?, None, rect)
+            .map_err(|s| anyhow!(s))?;
+        Ok(())
+    }
+
+    fn place_tile(
+        &mut self,
+        tile: TileIndex,
+        destination: Point,
+    ) -> Result<()> {
+        let tile = self.tilecache.get_tile(tile).unwrap();
+        let rect = Rect::new(
+            destination.x,
+            destination.y,
+            tile.width(),
+            tile.height(),
         );
+        self.canvas
+            .copy(&tile.as_texture(&self.texture_creator)?, None, rect)
+            .map_err(|s| anyhow!(s))?;
+        Ok(())
     }
 
-    fn fill_rect(&mut self, rect: Rect, color: &dyn Color) {
-        self.target
-            .fill_rect(rect, color.transdl_map_rgb(&self.target.format()));
+    fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+        self.canvas.set_draw_color(color);
+        self.canvas.fill_rect(rect).map_err(|s| anyhow!(s))?;
+        Ok(())
     }
 
-    fn fill(&mut self, color: &dyn Color) {
-        self.target
-            .fill(color.transdl_map_rgb(&self.target.format()));
+    fn fill(&mut self, color: Color) -> Result<()> {
+        self.canvas.set_draw_color(color);
+        self.canvas.clear();
+        Ok(())
+    }
+
+    fn draw_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
+        self.canvas.set_draw_color(color);
+        self.canvas.draw_rect(rect).map_err(|s| anyhow!(s))?;
+        Ok(())
     }
 }

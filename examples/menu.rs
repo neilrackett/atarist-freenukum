@@ -1,27 +1,49 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
-use freenukum::graphics::SurfaceCreatorProvider;
+use freenukum::graphics::load_default_font;
 use freenukum::menu::{Menu, MenuEntry};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
-use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::{game, UserEvent, WINDOW_HEIGHT, WINDOW_WIDTH};
+use sdl2::pixels::Color;
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        WINDOW_WIDTH as i32,
-        WINDOW_HEIGHT as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let ttf_context = sdl2::ttf::init()?;
+    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
+    let timer_subsystem = sdl_context.timer().map_err(|s| anyhow!(s))?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+
+    event_subsystem
+        .register_custom_event::<UserEvent>()
+        .map_err(|s| anyhow!(s))?;
+
+    let window = game::create_window(
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
         settings.fullscreen,
-        format!("Freenukum {} menu example", VERSION),
-        format!("Freenukum {} menu example", VERSION),
+        &format!("Freenukum {} menu example", VERSION),
+        &video_subsystem,
     )?;
 
-    game::check_episodes(&mut screen)?;
-    let tilecache = TileCache::load_from_path(
-        &original_data_dir(),
-        &screen.surface_creator(),
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
+
+    game::check_episodes(
+        &mut canvas,
+        &load_default_font(&ttf_context)?,
+        &texture_creator,
+        &mut event_pump,
     )?;
+    let tilecache = TileCache::load_from_path(&original_data_dir())?;
 
     let mut menu = Menu::new("Testmenu\nTest\nTest".to_string());
     menu.append(MenuEntry {
@@ -39,7 +61,13 @@ fn main() -> Result<()> {
 
     println!(
         "Menu choice: {:?}",
-        menu.get_choice(&mut screen, &tilecache,)
+        menu.get_choice(
+            &mut canvas,
+            &tilecache,
+            &mut event_pump,
+            &event_subsystem.event_sender(),
+            &timer_subsystem
+        )
     );
 
     Ok(())

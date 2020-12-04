@@ -1,21 +1,28 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
-use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
+use freenukum::graphics::load_default_font;
 use freenukum::hero::HeroData;
 use freenukum::level::raw::LevelRaw;
 use freenukum::level::LevelData;
+use freenukum::rendering::{CanvasRenderer, MovePositionRenderer};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
+use freenukum::UserEvent;
 use freenukum::{
-    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    game, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    WINDOW_HEIGHT, WINDOW_WIDTH,
+};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    mouse::MouseButton,
+    pixels::Color,
+    rect::Rect,
 };
 use std::fs::File;
 use std::num::NonZeroUsize;
 use std::num::ParseIntError;
 use structopt::StructOpt;
-use transdl::event::{Event, KeyCode, MouseButton};
-use transdl::video::{Rect, Surface};
 
 /// Show an original Duke Nukem 1 level.
 #[derive(StructOpt, Debug)]
@@ -35,23 +42,45 @@ fn parse_hex(src: &str) -> Result<usize, ParseIntError> {
 }
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
     let args = Arguments::from_args();
 
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        (BACKDROP_WIDTH * TILE_WIDTH) as i32,
-        (BACKDROP_HEIGHT * TILE_HEIGHT) as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let ttf_context = sdl2::ttf::init()?;
+    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    event_subsystem
+        .register_custom_event::<UserEvent>()
+        .map_err(|s| anyhow!(s))?;
+
+    let event_sender = event_subsystem.event_sender();
+
+    let window = game::create_window(
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
         settings.fullscreen,
-        format!("Freenukum {} level loader example", VERSION),
-        format!("Freenukum {} level loader example", VERSION),
+        &format!("Freenukum {} level loader example", VERSION),
+        &video_subsystem,
     )?;
-    let tilecache = TileCache::load_from_path(
-        &original_data_dir(),
-        &screen.surface_creator(),
+    let (win_w, win_h) = window.size();
+
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
+
+    let mut episodes = game::check_episodes(
+        &mut canvas,
+        &load_default_font(&ttf_context)?,
+        &texture_creator,
+        &mut event_pump,
     )?;
 
-    let mut episodes = game::check_episodes(&mut screen)?;
+    let tilecache = TileCache::load_from_path(&original_data_dir())?;
     episodes.switch_to(args.episode.get() - 1)?;
 
     let level_file = format!(
@@ -64,114 +93,86 @@ fn main() -> Result<()> {
 
     let mut level_raw = LevelRaw::new();
     let mut hero = HeroData::new();
-    let mut level_data = LevelData::load(
-        &mut file,
-        &mut hero,
-        &tilecache,
-        &screen.surface_creator(),
-        &mut Some(&mut level_raw),
-    )?;
+    let mut level_data =
+        LevelData::load(&mut file, &mut hero, &mut Some(&mut level_raw))?;
 
-    let mut level_surface = screen.surface_creator().create(
-        (TILE_WIDTH * LEVEL_WIDTH) as u32,
-        (TILE_HEIGHT * LEVEL_HEIGHT) as u32,
+    let mut r = Rect::new(0, 0, win_w, win_h);
+    let level_rect = Rect::new(
+        0,
+        0,
+        TILE_WIDTH * LEVEL_WIDTH,
+        TILE_HEIGHT * LEVEL_HEIGHT,
     );
-    let mut r = Rect {
-        x: 0,
-        y: 0,
-        w: (TILE_WIDTH * LEVEL_WIDTH) as u16,
-        h: (TILE_HEIGHT * LEVEL_HEIGHT) as u16,
-    };
 
-    level_data.blit(
-        &mut level_surface,
-        &tilecache,
-        &mut hero,
-        settings.draw_collision_bounds,
-        r,
-        r,
-        None,
-        None,
-    );
-    level_surface.blit(Some(r), &mut screen, None);
-    screen.update();
+    event_sender
+        .push_custom_event(UserEvent::Redraw)
+        .map_err(|s| anyhow!(s))?;
 
     let mut multiply = 10;
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
+        match event_pump.wait_event() {
             Event::KeyDown {
-                key: Some(KeyCode::Up),
+                keycode: Some(Keycode::Up),
                 ..
             } => {
                 let (x, y) = (0, -1);
-                scroll(
-                    x * multiply,
-                    y * multiply,
-                    &mut r,
-                    &mut level_surface,
-                    &mut screen,
-                );
+                scroll(x * multiply, y * multiply, &mut r, level_rect);
+                event_sender
+                    .push_custom_event(UserEvent::Redraw)
+                    .map_err(|s| anyhow!(s))?;
             }
             Event::KeyDown {
-                key: Some(KeyCode::Down),
+                keycode: Some(Keycode::Down),
                 ..
             } => {
                 let (x, y) = (0, 1);
-                scroll(
-                    x * multiply,
-                    y * multiply,
-                    &mut r,
-                    &mut level_surface,
-                    &mut screen,
-                );
+                scroll(x * multiply, y * multiply, &mut r, level_rect);
+                event_sender
+                    .push_custom_event(UserEvent::Redraw)
+                    .map_err(|s| anyhow!(s))?;
             }
             Event::KeyDown {
-                key: Some(KeyCode::Left),
+                keycode: Some(Keycode::Left),
                 ..
             } => {
                 let (x, y) = (-1, 0);
-                scroll(
-                    x * multiply,
-                    y * multiply,
-                    &mut r,
-                    &mut level_surface,
-                    &mut screen,
-                );
+                scroll(x * multiply, y * multiply, &mut r, level_rect);
+                event_sender
+                    .push_custom_event(UserEvent::Redraw)
+                    .map_err(|s| anyhow!(s))?;
             }
             Event::KeyDown {
-                key: Some(KeyCode::Right),
+                keycode: Some(Keycode::Right),
                 ..
             } => {
                 let (x, y) = (1, 0);
-                scroll(
-                    x * multiply,
-                    y * multiply,
-                    &mut r,
-                    &mut level_surface,
-                    &mut screen,
-                );
+                scroll(x * multiply, y * multiply, &mut r, level_rect);
+                event_sender
+                    .push_custom_event(UserEvent::Redraw)
+                    .map_err(|s| anyhow!(s))?;
             }
             Event::KeyDown {
-                key: Some(KeyCode::LeftShift),
+                keycode: Some(Keycode::LShift),
                 ..
             } => {
                 multiply = 50;
             }
             Event::KeyUp {
-                key: Some(KeyCode::LeftShift),
+                keycode: Some(Keycode::LShift),
                 ..
             } => {
                 multiply = 10;
             }
             Event::MouseButtonDown {
-                button: Some(MouseButton::Left),
+                mouse_btn: MouseButton::Left,
                 x,
                 y,
+                ..
             } => {
-                let global_x = r.x as usize + x as usize;
-                let global_y = r.y as usize + y as usize;
-                let tile_x = global_x / TILE_WIDTH;
-                let tile_y = global_y / TILE_HEIGHT;
+                let global_x = r.x() + x;
+                let global_y = r.y() + y;
+                let tile_x = global_x as u32 / TILE_WIDTH;
+                let tile_y = global_y as u32 / TILE_HEIGHT;
 
                 let tilenr = level_raw.get(tile_x, tile_y);
                 let is_solid = level_data.solids.get(tile_x, tile_y);
@@ -181,46 +182,68 @@ fn main() -> Result<()> {
                     tile_x, tile_y, tilenr, is_solid
                 );
             }
-            Event::Quit
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
-            Event::VideoExpose => screen.update(),
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => canvas.present(),
+            e if e.is_user_event() => {
+                if e.as_user_event_type::<UserEvent>()
+                    == Some(UserEvent::Redraw)
+                {
+                    let mut renderer = CanvasRenderer {
+                        canvas: &mut canvas,
+                        texture_creator: &texture_creator,
+                        tilecache: &tilecache,
+                    };
+                    let mut renderer = MovePositionRenderer {
+                        offset_x: -r.x(),
+                        offset_y: -r.y(),
+                        upstream: &mut renderer,
+                    };
+                    level_data.render(
+                        &mut renderer,
+                        &mut hero,
+                        settings.draw_collision_bounds,
+                        r,
+                        None,
+                        None,
+                    )?;
+                }
+                canvas.present()
+            }
             _ => {}
         }
     }
     Ok(())
 }
 
-fn scroll(
-    x_dist: i16,
-    y_dist: i16,
-    r: &mut Rect,
-    level_surface: &mut Surface,
-    screen: &mut Surface,
-) {
-    r.x += x_dist;
-    r.y += y_dist;
+fn scroll(x_dist: i32, y_dist: i32, r: &mut Rect, level_rect: Rect) {
+    r.offset(x_dist, y_dist);
 
-    if r.x < 0 {
-        r.x = 0;
+    if r.left() < 0 {
+        r.set_x(0);
     }
-    if r.x as usize + screen.width() as usize > level_surface.width() {
-        r.x = level_surface.width() as i16 - screen.width() as i16;
+    if r.right() > level_rect.right() {
+        r.set_right(level_rect.right());
     }
 
-    if r.y < 0 {
-        r.y = 0;
+    if r.top() < 0 {
+        r.set_y(0);
     }
-    if r.y as usize + screen.height() as usize > level_surface.height() {
-        r.y = level_surface.height() as i16 - screen.height() as i16;
+    if r.bottom() > level_rect.bottom() {
+        r.set_bottom(level_rect.bottom());
     }
-
-    level_surface.blit(Some(*r), screen, None);
-    screen.update();
 }

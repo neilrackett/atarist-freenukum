@@ -1,12 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS, TILE_HEIGHT,
-    TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -18,8 +17,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {}
@@ -37,21 +35,25 @@ impl ActorInterface for Specific {
         p.hero_data.score.add(10);
         p.actor_adder.add_actor(
             ActorType::Explosion,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
+            p.general.position.top_left(),
         );
         p.general.is_alive = false;
         p.solids.set(
-            p.general.position.x as usize / TILE_WIDTH,
-            p.general.position.y as usize / TILE_HEIGHT,
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT,
             false,
         );
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer
-            .place_tile(BACKGROUND_LIGHT_GREY, p.general.position);
-        p.renderer
-            .place_tile(SOLID_SHOOTABLE_WALL_BRICKS, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer.place_tile(
+            BACKGROUND_LIGHT_GREY,
+            p.general.position.top_left(),
+        )?;
+        p.renderer.place_tile(
+            SOLID_SHOOTABLE_WALL_BRICKS,
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 }

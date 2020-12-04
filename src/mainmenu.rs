@@ -1,8 +1,10 @@
 use super::menu::{Menu, MenuEntry};
 use super::tilecache::TileCache;
 use anyhow::Result;
+use sdl2::{
+    event::EventSender, render::WindowCanvas, EventPump, TimerSubsystem,
+};
 use std::convert::Into;
-use transdl::video::Surface;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum MainMenuEntry {
@@ -88,8 +90,11 @@ impl Into<MenuEntry> for MainMenuEntry {
 }
 
 pub fn mainmenu(
-    screen: &mut Surface,
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
+    event_pump: &mut EventPump,
+    event_sender: &EventSender,
+    timer_subsystem: &TimerSubsystem,
 ) -> Result<MainMenuEntry> {
     use MainMenuEntry as M;
     let msg = r"
@@ -110,5 +115,11 @@ pub fn mainmenu(
     menu.append(M::Credits.into());
     menu.append(M::Quit.into());
 
-    Ok(MainMenuEntry::from(menu.get_choice(screen, tilecache)?))
+    Ok(MainMenuEntry::from(menu.get_choice(
+        canvas,
+        tilecache,
+        event_pump,
+        event_sender,
+        timer_subsystem,
+    )?))
 }

@@ -1,21 +1,22 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
-    counter: usize,
+    counter: u32,
     explode_left: bool,
     explode_right: bool,
-    explode_threshold: usize,
-    num_flames: usize,
+    explode_threshold: u32,
+    num_flames: u32,
 }
 
 impl ActorCreateInterface for Specific {
@@ -24,8 +25,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         Specific {
             tile: ANIMATION_BOMB,
@@ -53,19 +53,20 @@ impl ActorInterface for Specific {
             if self.explode_left {
                 // explode to the left if possible
                 let space_is_free = !p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH - distance,
-                    p.general.position.y as usize / TILE_HEIGHT,
+                    p.general.position.x() as u32 / TILE_WIDTH - distance,
+                    p.general.position.y() as u32 / TILE_HEIGHT,
                 );
                 let space_has_solid_below = p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH - distance,
-                    p.general.position.y as usize / TILE_HEIGHT + 1,
+                    p.general.position.x() as u32 / TILE_WIDTH - distance,
+                    p.general.position.y() as u32 / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::BombFire,
-                        p.general.position.x as u16
-                            - distance as u16 * TILE_WIDTH as u16,
-                        p.general.position.y as u16,
+                        p.general
+                            .position
+                            .top_left()
+                            .offset(-((distance * TILE_WIDTH) as i32), 0),
                     );
                 } else {
                     self.explode_left = false;
@@ -74,19 +75,20 @@ impl ActorInterface for Specific {
             if self.explode_right {
                 // explode to the right if possible
                 let space_is_free = !p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH + distance,
-                    p.general.position.y as usize / TILE_HEIGHT,
+                    p.general.position.x() as u32 / TILE_WIDTH + distance,
+                    p.general.position.y() as u32 / TILE_HEIGHT,
                 );
                 let space_has_solid_below = p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH + distance,
-                    p.general.position.y as usize / TILE_HEIGHT + 1,
+                    p.general.position.x() as u32 / TILE_WIDTH + distance,
+                    p.general.position.y() as u32 / TILE_HEIGHT + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::BombFire,
-                        p.general.position.x as u16
-                            + distance as u16 * TILE_WIDTH as u16,
-                        p.general.position.y as u16,
+                        p.general
+                            .position
+                            .top_left()
+                            .offset((distance * TILE_WIDTH) as i32, 0),
                     );
                 } else {
                     self.explode_right = false;
@@ -97,12 +99,13 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         if self.counter < self.explode_threshold {
             p.renderer.place_tile(
                 self.tile + self.current_frame,
-                p.general.position,
-            );
+                p.general.position.top_left(),
+            )?;
         }
+        Ok(())
     }
 }

@@ -1,16 +1,18 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    HeroTouchEndParameters, HeroTouchStartParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     counter: u16,
-    base_y: u16,
+    base_y: i32,
 }
 
 impl ActorCreateInterface for Specific {
@@ -19,13 +21,12 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         Specific {
             tile: ANIMATION_MINE,
             counter: 0,
-            base_y: general.position.y as u16,
+            base_y: general.position.y(),
         }
     }
 }
@@ -50,14 +51,16 @@ impl ActorInterface for Specific {
             6 => 42,
             _ => unreachable!(),
         };
-        p.general.position.y = self.base_y as i16 - distance as i16;
+        p.general.position.set_y(self.base_y - distance);
 
         self.counter += 1;
         self.counter %= 12;
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

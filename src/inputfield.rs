@@ -1,7 +1,8 @@
 use super::text;
 use crate::rendering::Renderer;
+use crate::Result;
 use crate::{FONT_HEIGHT, FONT_WIDTH};
-use transdl::video::Rect;
+use sdl2::{pixels::Color, rect::Rect};
 
 pub struct InputField {
     text: String,
@@ -28,7 +29,7 @@ impl InputField {
     }
 
     pub fn delete_pressed(&mut self) {
-        if self.text.len() > 0
+        if !self.text.is_empty()
             && self.cursor_position < self.text.len() - 1
         {
             self.text.remove(self.cursor_position);
@@ -58,22 +59,23 @@ impl InputField {
         }
     }
 
-    pub fn render(&self, renderer: &mut dyn Renderer) {
-        let bgrect = Rect {
-            x: 0,
-            y: 0,
-            w: (FONT_WIDTH * self.max_length) as u16,
-            h: FONT_HEIGHT as u16,
-        };
-        renderer.fill_rect(bgrect, &(0, 0, 0));
-        text::render(renderer, &self.text);
-        let cursorrect = Rect {
-            x: (self.cursor_position * FONT_WIDTH) as i16,
-            y: 1,
-            w: 1,
-            h: FONT_HEIGHT as u16 - 2,
-        };
-        renderer.fill_rect(cursorrect, &(0x88, 0x88, 0x88));
+    pub fn render(&self, renderer: &mut dyn Renderer) -> Result<()> {
+        let bgrect = Rect::new(
+            0,
+            0,
+            FONT_WIDTH * self.max_length as u32,
+            FONT_HEIGHT,
+        );
+        renderer.fill_rect(bgrect, Color::RGB(0, 0, 0))?;
+        text::render(renderer, &self.text)?;
+        let cursorrect = Rect::new(
+            self.cursor_position as i32 * FONT_WIDTH as i32,
+            1,
+            1,
+            FONT_HEIGHT,
+        );
+        renderer.fill_rect(cursorrect, Color::RGB(0x88, 0x88, 0x88))?;
+        Ok(())
     }
 
     pub fn get_text(&self) -> &str {

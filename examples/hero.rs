@@ -1,87 +1,107 @@
 use anyhow::{anyhow, Result};
-use freenukum::data::original_data_dir;
-use freenukum::graphics::SurfaceCreatorProvider;
-use freenukum::hero::{HeroData, Motion};
-use freenukum::level::solids::LevelSolids;
-use freenukum::settings::Settings;
-use freenukum::tilecache::TileCache;
-use freenukum::HorizontalDirection;
-use freenukum::UserEvent;
 use freenukum::{
-    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    actor::ActorQueue,
+    data::original_data_dir,
+    game,
+    graphics::load_default_font,
+    hero::{HeroData, Motion},
+    level::solids::LevelSolids,
+    rendering::{CanvasRenderer, Renderer},
+    settings::Settings,
+    tilecache::TileCache,
+    HorizontalDirection, UserEvent, BACKDROP_HEIGHT, BACKDROP_WIDTH,
+    GAME_INTERVAL, TILE_HEIGHT, TILE_WIDTH,
+};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    mouse::MouseButton,
+    pixels::Color,
 };
 use std::collections::HashSet;
-use transdl::event::{Event, KeyCode, MouseButton};
-use transdl::timer::Timer;
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        (BACKDROP_WIDTH * TILE_WIDTH) as i32,
-        (BACKDROP_HEIGHT * TILE_HEIGHT) as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let ttf_context = sdl2::ttf::init()?;
+    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
+    let timer_subsystem = sdl_context.timer().map_err(|s| anyhow!(s))?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+
+    event_subsystem
+        .register_custom_event::<UserEvent>()
+        .map_err(|s| anyhow!(s))?;
+
+    let win_width = BACKDROP_WIDTH * TILE_WIDTH;
+    let win_height = BACKDROP_HEIGHT * TILE_HEIGHT;
+    let window = game::create_window(
+        win_width,
+        win_height,
         settings.fullscreen,
-        format!("Freenukum {} hero example", VERSION),
-        format!("Freenukum {} hero example", VERSION),
+        &format!("Freenukum {} hero example", VERSION),
+        &video_subsystem,
     )?;
 
-    let tilecache = TileCache::load_from_path(
-        &original_data_dir(),
-        &screen.surface_creator(),
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
+
+    game::check_episodes(
+        &mut canvas,
+        &load_default_font(&ttf_context)?,
+        &texture_creator,
+        &mut event_pump,
     )?;
+    let tilecache = TileCache::load_from_path(&original_data_dir())?;
 
     let mut hero = HeroData::new();
 
     hero.position.geometry.x =
-        (screen.width() as i16 - hero.position.geometry.w as i16) / 2;
+        (win_width as i32 - hero.position.geometry.width() as i32) / 2;
     hero.position.geometry.y =
-        (screen.height() as i16 - hero.position.geometry.h as i16) / 2;
+        (win_height as i32 - hero.position.geometry.height() as i32) / 2;
+
+    let mut renderer = CanvasRenderer {
+        canvas: &mut canvas,
+        texture_creator: &texture_creator,
+        tilecache: &tilecache,
+    };
 
     let solids = LevelSolids::new_all_solid();
-    hero.blit(
-        &mut screen,
-        &tilecache,
-        &solids,
-        settings.draw_collision_bounds,
-    );
-    screen.update();
+    hero.render(&mut renderer, &solids, settings.draw_collision_bounds)?;
+    renderer.canvas.present();
 
     let mut directions = HashSet::new();
 
-    const GAME_INTERVAL: u32 = 80;
-    let timer = Timer::add(GAME_INTERVAL, || {
-        transdl::event::push_user_event(UserEvent::Timer as i32);
-    });
+    let event_sender = event_subsystem.event_sender();
+
+    let timer = timer_subsystem.add_timer(
+        GAME_INTERVAL,
+        Box::new(move || {
+            event_sender.push_custom_event(UserEvent::Timer).unwrap();
+            GAME_INTERVAL
+        }),
+    );
 
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::UserEvent { code }
-                if code == UserEvent::Timer as i32 =>
-            {
-                screen.fill(0);
-                hero.next_frame();
-                hero.update_animation();
-                hero.act(&solids);
-                hero.blit(
-                    &mut screen,
-                    &tilecache,
-                    &solids,
-                    settings.draw_collision_bounds,
-                );
-                screen.update();
-            }
-            Event::Quit
+        match event_pump.wait_event() {
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
             Event::KeyDown {
-                key: Some(KeyCode::Right),
+                keycode: Some(Keycode::Right),
                 ..
             } => {
                 directions.insert(HorizontalDirection::Right);
@@ -94,7 +114,7 @@ fn main() -> Result<()> {
                 hero.update_animation();
             }
             Event::KeyDown {
-                key: Some(KeyCode::Left),
+                keycode: Some(Keycode::Left),
                 ..
             } => {
                 directions.insert(HorizontalDirection::Left);
@@ -107,51 +127,51 @@ fn main() -> Result<()> {
                 hero.update_animation();
             }
             Event::KeyDown {
-                key: Some(KeyCode::LeftAlt),
+                keycode: Some(Keycode::LAlt),
                 ..
             }
             | Event::MouseButtonDown {
-                button: Some(MouseButton::Left),
+                mouse_btn: MouseButton::Left,
                 ..
             } => {
                 hero.is_shooting = true;
                 hero.update_animation();
             }
             Event::KeyUp {
-                key: Some(KeyCode::LeftAlt),
+                keycode: Some(Keycode::LAlt),
                 ..
             }
             | Event::MouseButtonUp {
-                button: Some(MouseButton::Left),
+                mouse_btn: MouseButton::Left,
                 ..
             } => {
                 hero.is_shooting = false;
                 hero.update_animation();
             }
             Event::KeyDown {
-                key: Some(KeyCode::LeftCtrl),
+                keycode: Some(Keycode::LCtrl),
                 ..
             }
             | Event::MouseButtonDown {
-                button: Some(MouseButton::Right),
+                mouse_btn: MouseButton::Right,
                 ..
             } => {
                 hero.jump();
                 hero.update_animation();
             }
             Event::KeyUp {
-                key: Some(KeyCode::LeftCtrl),
+                keycode: Some(Keycode::LCtrl),
                 ..
             }
             | Event::MouseButtonUp {
-                button: Some(MouseButton::Right),
+                mouse_btn: MouseButton::Right,
                 ..
             } => {
                 hero.land();
                 hero.update_animation();
             }
             Event::KeyUp {
-                key: Some(KeyCode::Right),
+                keycode: Some(Keycode::Right),
                 ..
             } => {
                 directions.remove(&HorizontalDirection::Right);
@@ -164,7 +184,7 @@ fn main() -> Result<()> {
                 hero.update_animation();
             }
             Event::KeyUp {
-                key: Some(KeyCode::Left),
+                keycode: Some(Keycode::Left),
                 ..
             } => {
                 directions.remove(&HorizontalDirection::Left);
@@ -176,10 +196,36 @@ fn main() -> Result<()> {
                 }
                 hero.update_animation();
             }
-            Event::VideoExpose => screen.update(),
+            e if e.is_user_event() => {
+                if e.as_user_event_type::<UserEvent>()
+                    == Some(UserEvent::Timer)
+                {
+                    let mut actor_adder = ActorQueue::new();
+                    renderer.fill(Color::RGB(0, 0, 0))?;
+                    hero.next_frame();
+                    hero.update_animation();
+                    hero.act(&solids, &mut actor_adder)?;
+                    hero.render(
+                        &mut renderer,
+                        &solids,
+                        settings.draw_collision_bounds,
+                    )?;
+                    renderer.canvas.present();
+                }
+            }
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => {
+                renderer.canvas.present();
+            }
             _ => {}
         }
     }
-    timer.remove();
+    drop(timer);
     Ok(())
 }

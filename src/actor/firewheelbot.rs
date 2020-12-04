@@ -1,13 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HorizontalDirection, ANIMATION_FIREWHEEL_OFF, ANIMATION_FIREWHEEL_ON,
-    HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
+    ANIMATION_FIREWHEEL_ON, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
+    TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -28,8 +28,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         Specific {
             direction: HorizontalDirection::Left,
@@ -62,14 +61,13 @@ impl ActorInterface for Specific {
             p.general.is_alive = false;
             p.actor_adder.add_actor(
                 ActorType::Explosion,
-                p.general.position.x as u16 + HALFTILE_WIDTH as u16,
-                p.general.position.y as u16,
+                p.general
+                    .position
+                    .top_left()
+                    .offset(HALFTILE_WIDTH as i32, 0),
             );
-            p.actor_adder.add_particle_firework(
-                p.general.position.x as u16,
-                p.general.position.y as u16,
-                8,
-            );
+            p.actor_adder
+                .add_particle_firework(p.general.position.top_left(), 8);
             p.hero_data.score.add(2500);
         } else {
             self.counter += 1;
@@ -96,7 +94,7 @@ impl ActorInterface for Specific {
 
             if !p.solids.push_rect_standing_on_ground(
                 &mut p.general.position,
-                direction * HALFTILE_WIDTH as i16 / 2,
+                direction * HALFTILE_WIDTH as i32 / 2,
                 HALFTILE_HEIGHT as u8,
             ) {
                 // push was not successful, so we reverse the direction
@@ -116,34 +114,35 @@ impl ActorInterface for Specific {
                 if self.current_frame == 0 {
                     p.actor_adder.add_actor(
                         ActorType::Steam,
-                        p.general.position.x as u16
-                            + HALFTILE_WIDTH as u16,
-                        p.general.position.y as u16 - TILE_HEIGHT as u16,
+                        p.general.position.top_left().offset(
+                            HALFTILE_WIDTH as i32,
+                            -(TILE_HEIGHT as i32),
+                        ),
                     );
                 }
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
-        destrect.x =
-            destrect.x + destrect.w as i16 / 2 - TILE_WIDTH as i16;
-        destrect.y -= TILE_HEIGHT as i16;
-        destrect.w = TILE_WIDTH as u16 * 2;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let r = p.general.position;
+        let mut pos = r.top_left();
+        pos.x = pos.x + r.width() as i32 / 2 - TILE_WIDTH as i32;
+        pos.y -= TILE_HEIGHT as i32;
 
         p.renderer
-            .place_tile(self.tile + self.current_frame * 4, destrect);
-        destrect.x += TILE_WIDTH as i16;
+            .place_tile(self.tile + self.current_frame * 4, pos)?;
+        pos.x += TILE_WIDTH as i32;
         p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 1, destrect);
-        destrect.x -= TILE_WIDTH as i16;
-        destrect.y += TILE_HEIGHT as i16;
+            .place_tile(self.tile + self.current_frame * 4 + 1, pos)?;
+        pos.x -= TILE_WIDTH as i32;
+        pos.y += TILE_HEIGHT as i32;
         p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 2, destrect);
-        destrect.x += TILE_WIDTH as i16;
+            .place_tile(self.tile + self.current_frame * 4 + 2, pos)?;
+        pos.x += TILE_WIDTH as i32;
         p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 3, destrect);
+            .place_tile(self.tile + self.current_frame * 4 + 3, pos)?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {

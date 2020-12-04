@@ -1,12 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, OBJECT_FIRELEFT, OBJECT_FIRERIGHT,
+    TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::HorizontalDirection;
-use crate::{OBJECT_FIRELEFT, OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -30,8 +31,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16 * 3;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         let (tile, direction) = match general.actor_type {
@@ -39,7 +39,7 @@ impl ActorCreateInterface for Specific {
                 (OBJECT_FIRERIGHT, HorizontalDirection::Right)
             }
             ActorType::FireLeft => {
-                general.position.x -= 2 * TILE_WIDTH as i16;
+                general.position.offset(-2 * TILE_WIDTH as i32, 0);
                 (OBJECT_FIRELEFT, HorizontalDirection::Left)
             }
             _ => unreachable!(),
@@ -97,7 +97,7 @@ impl ActorInterface for Specific {
         self.counter += 1;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let (tile0, tile1, tile2) = match self.state {
             State::Off => (None, None, None),
             State::Ignition => {
@@ -133,17 +133,18 @@ impl ActorInterface for Specific {
             }
         };
 
-        let mut destrect = p.general.position;
+        let mut pos = p.general.position.top_left();
         if let Some(tile) = tile0 {
-            p.renderer.place_tile(tile, destrect);
+            p.renderer.place_tile(tile, pos)?;
         }
-        destrect.x += TILE_WIDTH as i16;
+        pos.x += TILE_WIDTH as i32;
         if let Some(tile) = tile1 {
-            p.renderer.place_tile(tile, destrect);
+            p.renderer.place_tile(tile, pos)?;
         }
-        destrect.x += TILE_WIDTH as i16;
+        pos.x += TILE_WIDTH as i32;
         if let Some(tile) = tile2 {
-            p.renderer.place_tile(tile, destrect);
+            p.renderer.place_tile(tile, pos)?;
         }
+        Ok(())
     }
 }

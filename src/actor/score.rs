@@ -1,17 +1,16 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200, NUMBER_2000,
-    NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT, NUMBER_BONUS_1_RIGHT,
-    NUMBER_BONUS_2_LEFT, NUMBER_BONUS_2_RIGHT, NUMBER_BONUS_3_LEFT,
-    NUMBER_BONUS_3_RIGHT, NUMBER_BONUS_4_LEFT, NUMBER_BONUS_4_RIGHT,
-    NUMBER_BONUS_5_LEFT, NUMBER_BONUS_5_RIGHT, NUMBER_BONUS_6_LEFT,
-    NUMBER_BONUS_6_RIGHT, NUMBER_BONUS_7_LEFT, NUMBER_BONUS_7_RIGHT,
-    TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
+    NUMBER_2000, NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT,
+    NUMBER_BONUS_1_RIGHT, NUMBER_BONUS_2_LEFT, NUMBER_BONUS_2_RIGHT,
+    NUMBER_BONUS_3_LEFT, NUMBER_BONUS_3_RIGHT, NUMBER_BONUS_4_LEFT,
+    NUMBER_BONUS_4_RIGHT, NUMBER_BONUS_5_LEFT, NUMBER_BONUS_5_RIGHT,
+    NUMBER_BONUS_6_LEFT, NUMBER_BONUS_6_RIGHT, NUMBER_BONUS_7_LEFT,
+    NUMBER_BONUS_7_RIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -27,8 +26,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = true;
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         let tile = match general.actor_type {
             ActorType::Score100 => NUMBER_100,
@@ -73,13 +71,15 @@ impl ActorInterface for Specific {
         self.countdown -= 1;
         p.general.position.y -= 1;
         if self.countdown == 0
-            || p.general.position.y == -(TILE_HEIGHT as i16)
+            || p.general.position.y() == -(TILE_HEIGHT as i32)
         {
             p.general.is_alive = false;
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 }

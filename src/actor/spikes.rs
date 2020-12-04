@@ -1,13 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP, TILE_HEIGHT,
-    TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -21,8 +20,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         Specific {
@@ -44,7 +42,7 @@ impl ActorInterface for Specific {
         self.touching_hero = false;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = match p.general.actor_type {
             ActorType::SpikesUp => OBJECT_SPIKES_UP,
             ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
@@ -53,6 +51,7 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.renderer.place_tile(tile, p.general.position);
+        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        Ok(())
     }
 }

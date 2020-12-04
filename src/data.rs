@@ -1,8 +1,12 @@
 use crate::data_dir;
+use anyhow::anyhow;
+use sdl2::{
+    pixels::Color,
+    rect::Rect,
+    render::{Canvas, RenderTarget, TextureCreator, TextureQuery},
+    ttf::Font,
+};
 use std::path::PathBuf;
-use transdl::ll::{SDL_Color, SDL_Rect};
-use transdl::ttf::Font;
-use transdl::video::Surface;
 
 pub fn required_file_names() -> Vec<&'static str> {
     vec![
@@ -21,31 +25,27 @@ pub fn original_data_dir() -> PathBuf {
     data_dir().join("data").join("original")
 }
 
-pub fn display_text(
-    target: &mut Surface,
-    x: i16,
-    y: i16,
+pub fn display_text<RT: RenderTarget, T>(
+    canvas: &mut Canvas<RT>,
+    x: i32,
+    y: i32,
     font: &Font,
     message: &str,
-) {
-    let mut destrect = SDL_Rect { x, y, w: 0, h: 0 };
-    let fgcolor = SDL_Color {
-        r: 255,
-        g: 255,
-        b: 255,
-        unused: 0,
-    };
-    let bgcolor = SDL_Color {
-        r: 0,
-        g: 0,
-        b: 0,
-        unused: 0,
-    };
+    texture_creator: &TextureCreator<T>,
+) -> crate::Result<()> {
+    let mut destrect = Rect::new(x, y, 0, 0);
+    let color = Color::RGB(255, 255, 255);
 
+    canvas.set_draw_color(color);
     for line in message.lines() {
-        let text = font.render_utf8_shaded(line, fgcolor, bgcolor);
-        destrect.y += text.height() as i16;
-        text.blit(None, target, Some(destrect));
+        let text = font.render(line).blended(color)?;
+        let text = texture_creator.create_texture_from_surface(&text)?;
+        let TextureQuery { width, height, .. } = text.query();
+        destrect.set_y(destrect.y() + height as i32);
+        destrect.set_width(width);
+        destrect.set_height(height);
+        canvas.copy(&text, None, destrect).map_err(|s| anyhow!(s))?;
     }
-    target.update_rect(0, 0, 0, 0);
+    canvas.present();
+    Ok(())
 }

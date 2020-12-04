@@ -1,11 +1,10 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
     ANIMATION_CAMERA_RIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
 
@@ -21,11 +20,10 @@ impl ActorCreateInterface for Specific {
         tiles: &mut LevelTiles,
     ) -> Self {
         general.is_in_foreground = false;
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
-        let x = general.position.x as usize / TILE_WIDTH;
-        let y = general.position.y as usize / TILE_HEIGHT;
+        let x = general.position.x() as u32 / TILE_WIDTH;
+        let y = general.position.y() as u32 / TILE_HEIGHT;
         tiles.copy_from_to(x, y + 1, x, y);
 
         Specific {
@@ -46,8 +44,10 @@ impl ActorInterface for Specific {
         };
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -57,15 +57,11 @@ impl ActorInterface for Specific {
     fn shot(&mut self, p: ShotParameters) {
         p.general.is_alive = false;
         p.hero_data.score.add(100);
-        p.actor_adder.add_actor(
-            ActorType::Score100,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
-        );
+        p.actor_adder
+            .add_actor(ActorType::Score100, p.general.position.top_left());
         p.actor_adder.add_actor(
             ActorType::Explosion,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
+            p.general.position.top_left(),
         );
     }
 }

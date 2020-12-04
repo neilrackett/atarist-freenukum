@@ -1,13 +1,12 @@
 use super::tile::{self, TileHeader};
-use crate::graphics::SurfaceCreator;
 use crate::Result;
+use sdl2::surface::Surface;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use transdl::video::Surface;
 
-pub struct TileCache {
-    tiles: Vec<Surface>,
+pub struct TileCache<'t> {
+    tiles: Vec<Surface<'t>>,
 }
 
 pub struct FileProperties {
@@ -62,11 +61,8 @@ impl FileProperties {
     }
 }
 
-impl TileCache {
-    pub fn load_from_path(
-        path: &Path,
-        surface_creator: &dyn SurfaceCreator,
-    ) -> Result<Self> {
+impl<'t> TileCache<'t> {
+    pub fn load_from_path(path: &Path) -> Result<Self> {
         let mut tiles = Vec::new();
 
         for FileProperties {
@@ -82,7 +78,6 @@ impl TileCache {
                 std::cmp::min(num_tiles, header.tiles as usize);
             tiles.append(&mut Self::load_file(
                 &mut file,
-                surface_creator,
                 header,
                 num_tiles,
                 transparent,
@@ -94,19 +89,13 @@ impl TileCache {
 
     fn load_file<R: Read>(
         r: &mut R,
-        surface_creator: &dyn SurfaceCreator,
         header: TileHeader,
         num_tiles: usize,
         has_transparency: bool,
-    ) -> Result<Vec<Surface>> {
+    ) -> Result<Vec<Surface<'t>>> {
         let mut tiles = Vec::new();
         for _ in 0..num_tiles {
-            tiles.push(tile::load(
-                r,
-                surface_creator,
-                header.clone(),
-                has_transparency,
-            )?);
+            tiles.push(tile::load(r, header, has_transparency)?);
         }
         Ok(tiles)
     }

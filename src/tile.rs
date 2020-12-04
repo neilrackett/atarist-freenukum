@@ -1,7 +1,11 @@
-use crate::graphics::SurfaceCreator;
 use crate::Result;
+use anyhow::anyhow;
+use sdl2::{
+    pixels::{Color, PixelFormatEnum},
+    render::Canvas,
+    surface::Surface,
+};
 use std::io::Read;
-use transdl::video::Surface;
 
 #[derive(Clone, Copy)]
 pub struct TileHeader {
@@ -22,16 +26,16 @@ impl TileHeader {
     }
 }
 
-pub fn load<R: Read>(
+pub fn load<'t, R: Read>(
     r: &mut R,
-    surface_creator: &dyn SurfaceCreator,
     header: TileHeader,
     has_transparency: bool,
-) -> Result<Surface> {
+) -> Result<Surface<'t>> {
     let width: u32 = header.width as u32 * 8;
     let height: u32 = header.height as u32;
 
-    let mut tile = surface_creator.create(width, height);
+    let surface = Surface::new(width, height, PixelFormatEnum::RGBA8888)
+        .map_err(|s| anyhow!(s))?;
     let mut data: Vec<u8> =
         Vec::with_capacity(width as usize * height as usize * 4);
 
@@ -78,7 +82,12 @@ pub fn load<R: Read>(
     }
 
     use crate::graphics::SurfaceExt;
-    tile.set_data(&data);
+    let mut canvas =
+        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
+    canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
+    canvas.clear();
+    canvas.set_data(&data, width, height)?;
+    let surface = canvas.into_surface();
 
-    Ok(tile)
+    Ok(surface)
 }

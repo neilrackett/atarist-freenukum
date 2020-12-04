@@ -1,22 +1,27 @@
-use crate::geometry::RectExt;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Rect;
+use sdl2::rect::Rect;
 
 #[derive(Debug)]
 pub struct LevelSolids {
-    solids: [[bool; LEVEL_WIDTH]; LEVEL_HEIGHT],
+    solids: [[bool; LEVEL_WIDTH as usize]; LEVEL_HEIGHT as usize],
+}
+
+impl Default for LevelSolids {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl LevelSolids {
     pub fn new() -> Self {
         LevelSolids {
-            solids: [[false; LEVEL_WIDTH]; LEVEL_HEIGHT],
+            solids: [[false; LEVEL_WIDTH as usize]; LEVEL_HEIGHT as usize],
         }
     }
 
     pub fn new_all_solid() -> Self {
         LevelSolids {
-            solids: [[true; LEVEL_WIDTH]; LEVEL_HEIGHT],
+            solids: [[true; LEVEL_WIDTH as usize]; LEVEL_HEIGHT as usize],
         }
     }
 
@@ -66,52 +71,45 @@ impl LevelSolids {
         println!();
     }
 
-    pub fn set(&mut self, x: usize, y: usize, value: bool) {
+    pub fn set(&mut self, x: u32, y: u32, value: bool) {
         assert!(x < LEVEL_WIDTH);
         assert!(y < LEVEL_HEIGHT);
 
-        self.solids[y][x] = value;
+        self.solids[y as usize][x as usize] = value;
     }
 
-    pub fn get(&self, x: usize, y: usize) -> bool {
+    pub fn get(&self, x: u32, y: u32) -> bool {
         assert!(x < LEVEL_WIDTH);
         assert!(y < LEVEL_HEIGHT);
 
-        self.solids[y][x]
+        self.solids[y as usize][x as usize]
     }
 
     pub fn collides(&self, rect: Rect) -> bool {
-        let mut solidrect = Rect {
-            x: 0,
-            y: 0,
-            w: TILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16,
-        };
-        let left_edge = rect.x as usize / TILE_WIDTH;
-        let right_edge =
-            (rect.x as usize + rect.w as usize) / TILE_WIDTH + 1;
-        let top_edge = rect.y as usize / TILE_HEIGHT;
-        let bottom_edge =
-            (rect.y as usize + rect.h as usize) / TILE_HEIGHT + 1;
+        let mut solidrect = Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT);
+        let left_edge = rect.left() as u32 / TILE_WIDTH;
+        let right_edge = rect.right() as u32 / TILE_WIDTH + 1;
+        let top_edge = rect.top() as u32 / TILE_HEIGHT;
+        let bottom_edge = rect.bottom() as u32 / TILE_HEIGHT + 1;
 
         for i in left_edge..right_edge {
             for j in top_edge..bottom_edge {
                 if self.get(i, j) {
-                    solidrect.x = (i * TILE_WIDTH) as i16;
-                    solidrect.y = (j * TILE_HEIGHT) as i16;
-                    if rect.overlaps(solidrect) {
+                    solidrect.x = (i * TILE_WIDTH) as i32;
+                    solidrect.y = (j * TILE_HEIGHT) as i32;
+                    if rect.has_intersection(solidrect) {
                         return true;
                     }
                 }
             }
         }
-        return false;
+        false
     }
 
     pub fn push_rect_standing_on_ground(
         &self,
         rect: &mut Rect,
-        offset: i16,
+        offset: i32,
         gravity: u8,
     ) -> bool {
         if self.collides(*rect) {
@@ -124,23 +122,23 @@ impl LevelSolids {
         // check if we stand on solid ground before movement
         let stood_solid = self.rect_stands_on_ground_completely(*rect);
 
-        rect.x += offset;
+        rect.offset(offset, 0);
 
         if self.collides(*rect) {
-            rect.x -= offset;
-            return false;
-        }
-
-        if stood_solid && self.rect_stands_on_ground_completely(*rect) {
+            rect.offset(-offset, 0);
+            false
+        } else if stood_solid
+            && self.rect_stands_on_ground_completely(*rect)
+        {
             // stood on solid ground before, still does.
-            return true;
+            true
         } else if stood_solid {
             // stood on solid ground before, doesn't anymore.
-            rect.x -= offset;
-            return false;
+            rect.offset(-offset, 0);
+            false
         } else {
             // walk on partial solid ground as long as possible.
-            return true;
+            true
         }
     }
 
@@ -160,36 +158,36 @@ impl LevelSolids {
                 return i;
             }
         }
-        return distance;
+        distance
     }
 
     fn rect_stands_on_ground_partially(&self, rect: Rect) -> bool {
-        if ((rect.y as usize + rect.h as usize) % TILE_HEIGHT) > 0 {
+        if (rect.bottom() as u32 % TILE_HEIGHT) > 0 {
             return false;
         }
-        let j = (rect.y as usize + rect.h as usize) / TILE_HEIGHT;
-        for i in (rect.x as usize / TILE_WIDTH)
-            ..(rect.x as usize + rect.w as usize + 1) / TILE_WIDTH + 1
+        let j = rect.bottom() as u32 / TILE_HEIGHT;
+        for i in (rect.left() as u32 / TILE_WIDTH)
+            ..(rect.right() as u32 + 1) / TILE_WIDTH + 1
         {
             if self.get(i, j) {
                 return true;
             }
         }
-        return false;
+        false
     }
 
     fn rect_stands_on_ground_completely(&self, rect: Rect) -> bool {
-        if ((rect.y as usize + rect.h as usize) % TILE_HEIGHT) > 0 {
+        if (rect.bottom() % TILE_HEIGHT as i32) > 0 {
             return false;
         }
-        let j = (rect.y as usize + rect.h as usize) / TILE_HEIGHT;
-        for i in (rect.x as usize / TILE_WIDTH)
-            ..(rect.x as usize + rect.w as usize + 1) / TILE_WIDTH + 1
+        let j = rect.bottom() as u32 / TILE_HEIGHT;
+        for i in (rect.left() as u32 / TILE_WIDTH)
+            ..(rect.right() as u32 + 1) / TILE_WIDTH + 1
         {
             if !self.get(i, j) {
                 return false;
             }
         }
-        return true;
+        true
     }
 }

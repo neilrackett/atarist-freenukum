@@ -1,29 +1,35 @@
-use crate::actor::{ActorMessageQueue, ActorQueue, ActorType};
+use crate::actor::{ActorMessageQueue, ActorQueue};
 use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
-use crate::event::{ConfirmEvent, GameEvent, WaitEvent};
-use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
+use crate::event::GameEvent;
+use crate::event::{ConfirmEvent, WaitEvent};
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
 use crate::picture::show_splash_with_message;
-use crate::rendering::SurfaceRenderer;
+use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::settings::Settings;
 use crate::tile::TileHeader;
 use crate::tilecache::TileCache;
 use crate::{backdrop, HorizontalDirection, UserEvent};
 use crate::{
-    Result, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH, LEVEL_HEIGHT,
-    LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    Result, GAME_INTERVAL, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH,
+    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 
 use anyhow::anyhow;
+use sdl2::{
+    event::EventSender,
+    pixels::Color,
+    rect::Rect,
+    render::{Canvas, RenderTarget, TextureCreator, WindowCanvas},
+    ttf::Font,
+    video::Window,
+    EventPump, TimerSubsystem, VideoSubsystem,
+};
 use std::collections::HashSet;
 use std::fs::File;
-use transdl::timer::Timer;
-use transdl::ttf::Font;
-use transdl::video::{Rect, Surface};
 
 #[derive(PartialEq, Eq)]
 enum Ending {
@@ -31,21 +37,19 @@ enum Ending {
     Failed,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn start_in_level(
     level_number: usize,
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
     hero: &mut HeroData,
-    target: &mut Surface,
     settings: &mut Settings,
     episodes: &Episodes,
     borders: &Borders,
+    event_pump: &mut EventPump,
+    event_sender: &EventSender,
+    timer_subsystem: &TimerSubsystem,
 ) -> Result<Ending> {
-    let surface_creator = target.surface_creator();
-    let mut level_surface = surface_creator.create(
-        (TILE_WIDTH * LEVEL_WIDTH) as u32,
-        (TILE_HEIGHT * LEVEL_HEIGHT) as u32,
-    );
-
     let backdrop = {
         let backdrop_number = match level_number {
             1 | 3 => 0,
@@ -65,7 +69,7 @@ fn start_in_level(
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
         TileHeader::load_from(&mut file)?;
-        backdrop::load(&mut file, &target.surface_creator())?
+        backdrop::load(&mut file)?
     };
 
     let mut level_data = {
@@ -76,119 +80,137 @@ fn start_in_level(
         );
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
-        LevelData::load(
-            &mut file,
-            hero,
-            tilecache,
-            &surface_creator,
-            &mut None,
-        )?
+        LevelData::load(&mut file, hero, &mut None)?
     };
 
-    let destrect = Rect {
-        x: TILE_WIDTH as i16,
-        y: TILE_HEIGHT as i16,
-        w: ((LEVELWINDOW_WIDTH + 2) * TILE_WIDTH) as u16,
-        h: ((LEVELWINDOW_HEIGHT + 2) * TILE_HEIGHT) as u16,
-    };
+    let destrect = Rect::new(
+        TILE_WIDTH as i32,
+        TILE_HEIGHT as i32,
+        (LEVELWINDOW_WIDTH) * TILE_WIDTH,
+        (LEVELWINDOW_HEIGHT) * TILE_HEIGHT,
+    );
     let heropos = hero.position.geometry;
-    let mut srcrect = Rect {
-        x: (heropos.x as usize + TILE_WIDTH)
-            .saturating_sub(destrect.w as usize / 2) as i16,
-        y: (heropos.y as usize).saturating_sub(destrect.h as usize / 2)
-            as i16,
-        w: (LEVELWINDOW_WIDTH * TILE_WIDTH) as u16,
-        h: (LEVELWINDOW_HEIGHT * TILE_HEIGHT) as u16,
-    };
+    let mut srcrect = Rect::new(
+        (heropos.x() as u32 + TILE_WIDTH)
+            .saturating_sub(destrect.width() / 2) as i32,
+        (heropos.y() as u32).saturating_sub(destrect.height() / 2) as i32,
+        LEVELWINDOW_WIDTH * TILE_WIDTH,
+        LEVELWINDOW_HEIGHT * TILE_HEIGHT,
+    );
 
-    const GAME_INTERVAL: u32 = 80;
-    let timer = Timer::add(GAME_INTERVAL, || {
-        transdl::event::push_user_event(UserEvent::Timer as i32);
-    });
-
-    // Make the first frame appear
-    transdl::event::push_user_event(UserEvent::HeroMoved as i32);
+    let timer = timer_subsystem.add_timer(
+        GAME_INTERVAL,
+        Box::new(move || {
+            event_sender.push_custom_event(UserEvent::Timer).unwrap();
+            GAME_INTERVAL
+        }),
+    );
 
     let mut actor_queue = ActorQueue::new();
     let mut info_message_queue = InfoMessageQueue::new();
     let mut actor_message_queue = ActorMessageQueue::new();
 
     let mut do_update = true;
-    let mut update_whole_screen = true;
     let mut directions = HashSet::new();
 
     'game_loop: while level_data.do_play {
+        let texture_creator = canvas.texture_creator();
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
+        canvas.clear();
+        let mut renderer = CanvasRenderer {
+            canvas,
+            texture_creator: &texture_creator,
+            tilecache: &tilecache,
+        };
+
         if do_update {
-            level_data.blit(
-                &mut level_surface,
-                tilecache,
+            let heropos = hero.position.geometry;
+            srcrect.x = std::cmp::min(
+                (heropos.center().x as u32)
+                    .saturating_sub(LEVELWINDOW_WIDTH * TILE_WIDTH / 2),
+                LEVEL_WIDTH * TILE_WIDTH - srcrect.width(),
+            ) as i32;
+            srcrect.y = std::cmp::min(
+                (heropos.y() as u32)
+                    .saturating_sub(LEVELWINDOW_HEIGHT * TILE_HEIGHT / 2),
+                LEVEL_HEIGHT * TILE_HEIGHT - srcrect.height(),
+            ) as i32;
+
+            borders.render(&mut renderer)?;
+            borders.render_life(hero.health.life(), &mut renderer)?;
+            borders.render_firepower(&hero.firepower, &mut renderer)?;
+            borders.render_inventory(&hero.inventory, &mut renderer)?;
+            borders.render_score(hero.score.value(), &mut renderer)?;
+
+            renderer.canvas.set_clip_rect(destrect);
+            let mut level_renderer = MovePositionRenderer {
+                offset_x: -srcrect.x() + TILE_WIDTH as i32,
+                offset_y: -srcrect.y() + TILE_HEIGHT as i32,
+                upstream: &mut renderer,
+            };
+
+            level_data.render(
+                &mut level_renderer,
                 hero,
                 settings.draw_collision_bounds,
                 srcrect,
-                srcrect,
                 Some(&backdrop),
                 None,
-            );
-            level_surface.blit(Some(srcrect), target, Some(destrect));
-
-            if update_whole_screen {
-                target.update();
-            } else {
-                target.update_rect(
-                    destrect.x as i32,
-                    destrect.y as i32,
-                    destrect.w as u32,
-                    destrect.h as u32,
-                );
-            }
+            )?;
+            canvas.set_clip_rect(None);
+            canvas.present();
             do_update = false;
         }
 
-        info_message_queue.process(target, tilecache)?;
+        info_message_queue.process(canvas, tilecache, event_pump)?;
 
-        let mut border_renderer = SurfaceRenderer { target, tilecache };
-
-        match GameEvent::wait()? {
+        match GameEvent::wait(event_pump)? {
             GameEvent::Escape => break 'game_loop,
             GameEvent::GetInventoryItem(item) => {
                 hero.inventory.set(item);
-                update_whole_screen = true;
             }
             GameEvent::IncreaseLife => {
                 hero.firepower.increase(1);
-                update_whole_screen = true;
             }
             GameEvent::FinishLevel => {
                 level_data.level_passed = true;
                 level_data.do_play = false;
             }
             GameEvent::ToggleFullscreen => {
-                if target.toggle_fullscreen() {
-                    settings.fullscreen = !settings.fullscreen;
-                    settings.save();
+                use sdl2::video::FullscreenType;
+                match canvas.window().fullscreen_state() {
+                    FullscreenType::Off => {
+                        settings.fullscreen = true;
+                        canvas
+                            .window_mut()
+                            .set_fullscreen(FullscreenType::Desktop)
+                            .map_err(|s| anyhow!(s))?;
+                    }
+                    FullscreenType::True | FullscreenType::Desktop => {
+                        settings.fullscreen = false;
+                        canvas
+                            .window_mut()
+                            .set_fullscreen(FullscreenType::Off)
+                            .map_err(|s| anyhow!(s))?;
+                    }
                 }
+                settings.save();
             }
             GameEvent::MoveViewPoint { x, y } => {
-                srcrect.x += x as i16;
-                srcrect.y += y as i16;
+                srcrect.offset(x, y);
 
-                if srcrect.x < 0 {
-                    srcrect.x = 0;
+                if srcrect.x() < 0 {
+                    srcrect.set_x(0);
                 }
-                if srcrect.y < 0 {
-                    srcrect.y = 0;
+                if srcrect.y() < 0 {
+                    srcrect.set_y(0);
                 }
-                if srcrect.x + srcrect.w as i16
-                    > (LEVEL_WIDTH * TILE_WIDTH) as i16
-                {
-                    srcrect.x = (LEVEL_WIDTH * TILE_WIDTH) as i16
-                        - srcrect.w as i16;
+                if srcrect.right() > (LEVEL_WIDTH * TILE_WIDTH) as i32 {
+                    srcrect.set_right((LEVEL_WIDTH * TILE_WIDTH) as i32);
                 }
-                if srcrect.y + srcrect.h as i16
-                    > (LEVEL_HEIGHT * TILE_HEIGHT) as i16
-                {
-                    srcrect.y = (LEVEL_HEIGHT * TILE_HEIGHT) as i16
-                        - srcrect.h as i16;
+                if srcrect.bottom() > (LEVEL_HEIGHT * TILE_HEIGHT) as i32 {
+                    srcrect
+                        .set_bottom((LEVEL_HEIGHT * TILE_HEIGHT) as i32);
                 }
                 do_update = true;
             }
@@ -232,7 +254,7 @@ fn start_in_level(
                 hero.update_animation();
             }
             GameEvent::RefreshScreen => {
-                target.update();
+                canvas.present();
             }
             GameEvent::HeroJump => {
                 hero.jump();
@@ -252,59 +274,12 @@ fn start_in_level(
                     hero,
                     &mut actor_queue,
                     &mut actor_message_queue,
-                );
+                )?;
                 do_update = true;
-            }
-            GameEvent::HeroMoved => {
-                let heropos = hero.position.geometry;
-                srcrect.x = std::cmp::min(
-                    (heropos.x as usize + heropos.w as usize / 2)
-                        .saturating_sub(
-                            LEVELWINDOW_WIDTH * TILE_WIDTH / 2,
-                        ),
-                    LEVEL_WIDTH * TILE_WIDTH - srcrect.w as usize,
-                ) as i16;
-                srcrect.y = std::cmp::min(
-                    (heropos.y as usize).saturating_sub(
-                        LEVELWINDOW_HEIGHT * TILE_HEIGHT / 2,
-                    ),
-                    LEVEL_HEIGHT * TILE_HEIGHT - srcrect.h as usize,
-                ) as i16;
-            }
-            GameEvent::HeroScored => {
-                borders.blit_score(target, tilecache, hero.score.value());
-                update_whole_screen = true;
-            }
-            GameEvent::HeroFirepowerChanged => {
-                borders.render_firepower(
-                    &hero.firepower,
-                    &mut border_renderer,
-                );
-                update_whole_screen = true;
-            }
-            GameEvent::HeroInventoryChanged => {
-                borders.render_inventory(
-                    &hero.inventory,
-                    &mut border_renderer,
-                );
-                update_whole_screen = true;
-            }
-            GameEvent::HeroHealthChanged => {
-                borders
-                    .render_life(hero.health.life(), &mut border_renderer);
-                update_whole_screen = true;
-            }
-            GameEvent::HeroLanded => {
-                actor_queue.push_back(
-                    ActorType::DustCloud,
-                    hero.position.geometry.x as u16,
-                    (hero.position.geometry.y as usize + TILE_HEIGHT)
-                        as u16,
-                );
             }
         }
     }
-    timer.remove();
+    drop(timer);
 
     let ending = if level_data.level_passed {
         Ending::Passed
@@ -314,12 +289,16 @@ fn start_in_level(
     Ok(ending)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn start(
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
     hero: &mut HeroData,
-    target: &mut Surface,
     settings: &mut Settings,
     episodes: &Episodes,
+    event_pump: &mut EventPump,
+    event_sender: &EventSender,
+    timer_subsystem: &TimerSubsystem,
 ) -> Result<()> {
     {
         let filename = format!("badguy.{}", episodes.file_extension());
@@ -331,9 +310,10 @@ pub fn start(
             me. I, Dr. Proton, will\n\
             soon rule the world!";
         show_splash_with_message(
+            canvas,
             tilecache,
-            target,
             &mut file,
+            event_pump,
             Some(message),
             0,
             144,
@@ -349,9 +329,10 @@ pub fn start(
             with you and still have\n\
             time to watch Oprah!";
         show_splash_with_message(
+            canvas,
             tilecache,
-            target,
             &mut file,
+            event_pump,
             Some(message),
             79,
             144,
@@ -360,18 +341,10 @@ pub fn start(
 
     hero.reset();
 
-    target.fill(0);
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
 
     let borders = Borders {};
-    {
-        let mut border_renderer = SurfaceRenderer { target, tilecache };
-        borders.render(&mut border_renderer);
-        borders.render_life(hero.health.life(), &mut border_renderer);
-        borders.render_firepower(&hero.firepower, &mut border_renderer);
-        borders.render_inventory(&hero.inventory, &mut border_renderer);
-    }
-    borders.blit_score(target, tilecache, hero.score.value());
-    target.update();
 
     // start the game itself
     let mut level = 1;
@@ -379,22 +352,40 @@ pub fn start(
     let mut success = Ending::Passed;
 
     infobox::show(
-        target,
+        canvas,
         tilecache,
         "Get ready FreeNukum,\nyou are going in.\n",
+        event_pump,
     )?;
 
     while success == Ending::Passed && level < 13 {
         if interlevel {
             success = start_in_level(
-                2, tilecache, hero, target, settings, episodes, &borders,
+                2,
+                canvas,
+                tilecache,
+                hero,
+                settings,
+                episodes,
+                &borders,
+                event_pump,
+                event_sender,
+                timer_subsystem,
             )?;
             level = if level == 1 { level + 2 } else { level + 1 };
             interlevel = false;
         } else {
             success = start_in_level(
-                level, tilecache, hero, target, settings, episodes,
+                level,
+                canvas,
+                tilecache,
+                hero,
+                settings,
+                episodes,
                 &borders,
+                event_pump,
+                event_sender,
+                timer_subsystem,
             )?;
             interlevel = true;
         }
@@ -407,94 +398,59 @@ pub fn start(
     Ok(())
 }
 
-pub fn check_episodes(target: &mut Surface) -> Result<Episodes> {
+pub fn check_episodes<RT: RenderTarget, T>(
+    target: &mut Canvas<RT>,
+    font: &Font,
+    texture_creator: &TextureCreator<T>,
+    event_pump: &mut EventPump,
+) -> Result<Episodes> {
     let episodes = Episodes::find_installed();
     if episodes.count() == 0 {
-        show_missing_data_information(target)?;
+        show_missing_data_information(
+            target,
+            font,
+            texture_creator,
+            event_pump,
+        )?;
     }
     Ok(episodes)
 }
 
-fn show_missing_data_information(target: &mut Surface) -> Result<()> {
+fn show_missing_data_information<RT: RenderTarget, T>(
+    target: &mut Canvas<RT>,
+    font: &Font,
+    texture_creator: &TextureCreator<T>,
+    event_pump: &mut EventPump,
+) -> Result<()> {
     let msg = "Could not load data level and graphics files.\n\
     Please use the accompanied freenukum-data-tool\n\
     for installing the game data files";
     println!("{}", msg);
 
-    let mut font = Font::load(10).unwrap();
-
-    super::data::display_text(target, 0, 0, &mut font, msg);
+    super::data::display_text(target, 0, 0, font, msg, texture_creator)?;
 
     loop {
-        match ConfirmEvent::wait()? {
+        match ConfirmEvent::wait(event_pump)? {
             ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
                 return Ok(())
             }
             ConfirmEvent::RefreshScreen => {
-                target.update();
+                target.present();
             }
         }
     }
 }
 
-fn initialize_sdl() -> Result<()> {
-    if unsafe {
-        transdl::ll::SDL_Init(
-            transdl::ll::SDL_INIT_VIDEO | transdl::ll::SDL_INIT_TIMER,
-        )
-    } < 0
-    {
-        use std::ffi::CString;
-        let s = unsafe { CString::from_raw(transdl::ll::SDL_GetError()) };
-        Err(anyhow!(
-            "Can't initialize SDL: {}",
-            s.into_string().unwrap()
-        ))
-    } else {
-        Ok(())
+pub fn create_window(
+    w: u32,
+    h: u32,
+    fullscreen: bool,
+    title: &str,
+    video_subsystem: &VideoSubsystem,
+) -> Result<Window> {
+    let mut builder = video_subsystem.window(title, w, h);
+    if fullscreen {
+        builder.fullscreen();
     }
-}
-
-pub fn sdl_surface_flags(fullscreen: bool) -> u32 {
-    let init = if fullscreen {
-        transdl::ll::SDL_FULLSCREEN
-    } else {
-        0u32
-    };
-    init | transdl::ll::SDL_HWSURFACE
-        | transdl::ll::SDL_HWACCEL
-        | transdl::ll::SDL_ANYFORMAT
-}
-
-pub fn create_screen(
-    w: i32,
-    h: i32,
-    fullscreen: bool,
-) -> transdl::video::Surface {
-    let depth = 0;
-    transdl::video::Surface::set_video_mode(
-        w,
-        h,
-        depth,
-        sdl_surface_flags(fullscreen),
-    )
-}
-
-pub fn initialize_and_get_window(
-    width: i32,
-    height: i32,
-    fullscreen: bool,
-    title: String,
-    icon: String,
-) -> Result<Surface> {
-    initialize_sdl()?;
-
-    use std::ffi::CString;
-    let title = CString::new(title).unwrap();
-    let icon = CString::new(icon).unwrap();
-    unsafe {
-        transdl::ll::SDL_WM_SetCaption(title.as_ptr(), icon.as_ptr())
-    };
-
-    Ok(create_screen(width, height, fullscreen))
+    Ok(builder.build()?)
 }

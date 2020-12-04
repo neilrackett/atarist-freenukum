@@ -1,13 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HorizontalDirection, VerticalDirection, ANIMATION_WALLCRAWLERBOT_LEFT,
-    ANIMATION_WALLCRAWLERBOT_RIGHT, TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, VerticalDirection,
+    ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -27,8 +27,8 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.set_width(TILE_WIDTH);
+        general.position.set_height(TILE_HEIGHT);
         general.is_in_foreground = true;
 
         let (tile, orientation) = match general.actor_type {
@@ -72,8 +72,8 @@ impl ActorInterface for Specific {
             VerticalDirection::Center => unreachable!(),
         };
         let orientation = match self.orientation {
-            HorizontalDirection::Left => -1,
-            HorizontalDirection::Right => 1,
+            HorizontalDirection::Left => -1i32,
+            HorizontalDirection::Right => 1i32,
             HorizontalDirection::Center => unreachable!(),
         };
 
@@ -85,16 +85,16 @@ impl ActorInterface for Specific {
             if
             // bot collides with solid tile
             p.solids.get(
-                p.general.position.x as usize / TILE_WIDTH,
-                (p.general.position.y as usize - 1) / TILE_WIDTH) ||
+                p.general.position.x as u32 / TILE_WIDTH,
+                (p.general.position.y as u32 - 1) / TILE_WIDTH) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
-                    p.general.position.x as isize +
-                    orientation as isize *
-                    TILE_WIDTH as isize
-                ) as usize / TILE_WIDTH,
-                (p.general.position.y as usize - 1) / TILE_HEIGHT)
+                    p.general.position.x +
+                    orientation *
+                    TILE_WIDTH as i32
+                ) as u32 / TILE_WIDTH,
+                (p.general.position.y - 1) as u32 / TILE_HEIGHT)
             {
                 p.general.position.y += 1;
                 self.direction = VerticalDirection::Down;
@@ -111,18 +111,18 @@ impl ActorInterface for Specific {
             if
             // bot collides with solid tile
             p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH,
+                    p.general.position.x as u32 / TILE_WIDTH,
                     (
-                        p.general.position.y as usize + TILE_HEIGHT
+                        p.general.position.y as u32 + TILE_HEIGHT
                     ) / TILE_HEIGHT) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
-                    p.general.position.x as isize +
-                    orientation as isize *
-                    TILE_WIDTH as isize) as usize /
+                    p.general.position.x +
+                    orientation *
+                    TILE_WIDTH as i32) as u32 /
                 TILE_WIDTH,
-                (p.general.position.y as usize + TILE_HEIGHT) / TILE_HEIGHT)
+                (p.general.position.y as u32 + TILE_HEIGHT) / TILE_HEIGHT)
             {
                 p.general.position.y -= 1;
                 self.direction = VerticalDirection::Up;
@@ -132,11 +132,12 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -155,13 +156,11 @@ impl ActorInterface for Specific {
             p.hero_data.score.add(100);
             p.actor_adder.add_actor(
                 ActorType::Steam,
-                p.general.position.x as u16,
-                p.general.position.y as u16,
+                p.general.position.top_left(),
             );
             p.actor_adder.add_actor(
                 ActorType::Explosion,
-                p.general.position.x as u16,
-                p.general.position.y as u16,
+                p.general.position.top_left(),
             );
         }
     }

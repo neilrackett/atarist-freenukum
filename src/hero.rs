@@ -1,18 +1,17 @@
-use super::level::solids::LevelSolids;
-use super::tilecache::TileCache;
-use super::{HorizontalDirection, UserEvent};
-use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::{
-    HALFTILE_HEIGHT, HALFTILE_WIDTH, HERO_FALLING_LEFT,
-    HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT,
-    HERO_NUM_FALLING, HERO_NUM_JUMPING, HERO_NUM_STANDING,
-    HERO_NUM_WALKING, HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT,
-    HERO_STANDING_LEFT, HERO_STANDING_RIGHT, HERO_WALKING_LEFT,
-    HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT,
-    TILE_WIDTH,
+    actor::{ActorAdder, ActorType},
+    level::solids::LevelSolids,
+    rendering::Renderer,
+    HorizontalDirection, Result, HALFTILE_HEIGHT, HALFTILE_WIDTH,
+    HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
+    HERO_JUMPING_RIGHT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
+    HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
+    HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
+    HERO_WALKING_LEFT, HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 use std::convert::TryFrom;
-use transdl::video::{Rect, Surface};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Motion {
@@ -41,6 +40,12 @@ pub struct HeroData {
     num_frames: usize,
     vertical_speed: usize,
     pub gets_hurt: bool,
+}
+
+impl Default for HeroData {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl HeroData {
@@ -111,51 +116,24 @@ impl HeroData {
         self.gets_hurt = false;
     }
 
-    pub fn set_direction(&mut self, direction: HorizontalDirection) {
-        if self.direction != direction {
-            self.just_turned_around = true;
-            self.direction = direction;
-        }
-    }
-
-    pub fn get_direction(&self) -> HorizontalDirection {
-        self.direction
-    }
-
-    pub fn reset_just_tured_around(&mut self) {
-        self.just_turned_around = false;
-    }
-
-    pub fn get_just_turned_around(&self) -> bool {
-        self.just_turned_around
-    }
-
     pub fn next_frame(&mut self) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
     }
 
-    pub fn set_num_frames(&mut self, num_frames: usize) {
-        self.num_frames = num_frames;
-        self.current_frame %= self.num_frames;
-    }
-
-    pub fn blit(
+    pub fn render(
         &self,
-        target: &mut Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         solids: &LevelSolids,
         draw_collision_bounds: bool,
-    ) {
-        if self.hidden {
-            return;
-        }
-        if self.immunity.hero_invisible() {
-            return;
+    ) -> Result<()> {
+        if self.hidden || self.immunity.hero_invisible() {
+            return Ok(());
         }
 
-        let mut destrect = self.position.geometry;
-        destrect.x -= HALFTILE_WIDTH as i16;
+        let mut point = self.position.geometry.top_left();
+        point.x -= HALFTILE_WIDTH as i32;
+
         let base_tile_number = if self.immunity.hero_skeleton() {
             match self.direction {
                 HorizontalDirection::Left => HERO_SKELETON_LEFT,
@@ -166,45 +144,43 @@ impl HeroData {
             self.base_tile_number
         };
 
-        let mut renderer = SurfaceRenderer { target, tilecache };
-        renderer.place_tile(base_tile_number, destrect);
-        destrect.x += destrect.w as i16;
-        renderer.place_tile(base_tile_number + 1, destrect);
-        destrect.x -= destrect.w as i16;
-        destrect.y += destrect.h as i16 / 2;
-        renderer.place_tile(base_tile_number + 2, destrect);
-        destrect.x += destrect.w as i16;
-        renderer.place_tile(base_tile_number + 3, destrect);
+        renderer.place_tile(base_tile_number, point)?;
+        point.x += TILE_WIDTH as i32;
+        renderer.place_tile(base_tile_number + 1, point)?;
+        point.x -= TILE_WIDTH as i32;
+        point.y += TILE_HEIGHT as i32;
+        renderer.place_tile(base_tile_number + 2, point)?;
+        point.x += TILE_WIDTH as i32;
+        renderer.place_tile(base_tile_number + 3, point)?;
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color();
             let g = self.position.geometry;
-            let mut renderer = SurfaceRenderer { target, tilecache };
 
-            renderer.draw_rect(g, &color);
+            renderer.draw_rect(g, color)?;
 
-            for i in (g.x / TILE_WIDTH as i16) - 1
-                ..(g.x / TILE_WIDTH as i16) + 2
+            for i in (g.x / TILE_WIDTH as i32) - 1
+                ..(g.x / TILE_WIDTH as i32) + 2
             {
-                for j in (g.y / TILE_HEIGHT as i16) - 1
-                    ..(g.y / TILE_HEIGHT as i16) + 3
+                for j in (g.y / TILE_HEIGHT as i32) - 1
+                    ..(g.y / TILE_HEIGHT as i32) + 3
                 {
-                    if i > 0 && j > 0 && solids.get(i as usize, j as usize)
-                    {
-                        let obstacle = Rect {
-                            x: (i as i16 * TILE_WIDTH as i16),
-                            y: (j as i16 * TILE_HEIGHT as i16),
-                            w: TILE_WIDTH as u16,
-                            h: TILE_HEIGHT as u16,
-                        };
-                        renderer.draw_rect(obstacle, &color);
+                    if i > 0 && j > 0 && solids.get(i as u32, j as u32) {
+                        let obstacle = Rect::new(
+                            i * TILE_WIDTH as i32,
+                            j * TILE_HEIGHT as i32,
+                            TILE_WIDTH,
+                            TILE_HEIGHT,
+                        );
+                        renderer.draw_rect(obstacle, color)?;
                     }
                 }
             }
         }
+        Ok(())
     }
 
-    pub fn enter_level(&mut self, x: i16, y: i16) {
+    pub fn enter_level(&mut self, x: i32, y: i32) {
         self.position.geometry.x = x;
         self.position.geometry.y = y;
         self.reset_for_level();
@@ -213,8 +189,8 @@ impl HeroData {
     pub fn would_collide(
         &self,
         solids: &LevelSolids,
-        x: i16,
-        y: i16,
+        x: i32,
+        y: i32,
     ) -> bool {
         let mut destination = self.position.geometry;
         destination.x = x;
@@ -253,12 +229,10 @@ impl HeroData {
                     } else {
                         HERO_STANDING_LEFT
                     }
+                } else if self.is_shooting {
+                    HERO_WALKING_RIGHT + 12
                 } else {
-                    if self.is_shooting {
-                        HERO_WALKING_RIGHT + 12
-                    } else {
-                        HERO_STANDING_RIGHT
-                    }
+                    HERO_STANDING_RIGHT
                 }
             } else {
                 // hero is walking
@@ -296,9 +270,11 @@ impl HeroData {
     }
 
     /// Returns the remaining health
-    pub fn act(&mut self, solids: &LevelSolids) -> u8 {
-        let mut hero_moved = false;
-
+    pub fn act(
+        &mut self,
+        solids: &LevelSolids,
+        actor_adder: &mut dyn ActorAdder,
+    ) -> Result<u8> {
         self.immunity.count_down();
         if !self.immunity.hero_is_protected() && self.gets_hurt {
             self.immunity.enable();
@@ -313,10 +289,10 @@ impl HeroData {
                 let mut new_position = self.position.geometry;
                 match self.direction {
                     HorizontalDirection::Left => {
-                        new_position.x -= HALFTILE_WIDTH as i16;
+                        new_position.x -= HALFTILE_WIDTH as i32;
                     }
                     HorizontalDirection::Right => {
-                        new_position.x += HALFTILE_WIDTH as i16;
+                        new_position.x += HALFTILE_WIDTH as i32;
                     }
                     HorizontalDirection::Center => unreachable!(),
                 }
@@ -325,11 +301,8 @@ impl HeroData {
                     new_position.x,
                     new_position.y,
                 ) {
-                    self.position.move_to(
-                        new_position.x as u16,
-                        new_position.y as u16,
-                    );
-                    hero_moved = true;
+                    self.position
+                        .move_to(new_position.x(), new_position.y());
                 }
             }
         }
@@ -353,12 +326,11 @@ impl HeroData {
                     if !self.would_collide(
                         solids,
                         geometry.x,
-                        geometry.y - HALFTILE_HEIGHT as i16,
+                        geometry.y - HALFTILE_HEIGHT as i32,
                     ) {
                         self.position.move_y_to(
-                            (geometry.y as usize - HALFTILE_HEIGHT) as u16,
+                            geometry.y() - HALFTILE_HEIGHT as i32,
                         );
-                        hero_moved = true;
                     } else {
                         // hero bumped against the ceiling
                         self.counter = 0;
@@ -374,12 +346,11 @@ impl HeroData {
                     if !self.would_collide(
                         solids,
                         geometry.x,
-                        geometry.y + HALFTILE_HEIGHT as i16,
+                        geometry.y + HALFTILE_HEIGHT as i32,
                     ) {
                         self.position.move_y_to(
-                            (geometry.y as usize + HALFTILE_HEIGHT) as u16,
+                            geometry.y() + HALFTILE_HEIGHT as i32,
                         );
-                        hero_moved = true;
                     }
                 }
             }
@@ -389,11 +360,15 @@ impl HeroData {
         if self.would_collide(
             solids,
             geometry.x,
-            geometry.y + HALFTILE_HEIGHT as i16,
+            geometry.y + HALFTILE_HEIGHT as i32,
         ) {
             if self.is_in_the_air {
-                transdl::event::push_user_event(
-                    UserEvent::HeroLanded as i32,
+                actor_adder.add_actor(
+                    ActorType::DustCloud,
+                    Point::new(
+                        self.position.geometry.x(),
+                        self.position.geometry.y() + TILE_HEIGHT as i32,
+                    ),
                 );
             }
             // the hero is standing on solid ground
@@ -406,11 +381,7 @@ impl HeroData {
             }
         }
 
-        if hero_moved {
-            transdl::event::push_user_event(UserEvent::HeroMoved as i32);
-        }
-
-        self.health.life
+        Ok(self.health.life)
     }
 }
 
@@ -437,47 +408,29 @@ impl Position {
     }
 
     fn default_geometry() -> Rect {
-        Rect {
-            x: 0,
-            y: 0,
-            w: TILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16 * 2,
-        }
+        Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT * 2)
     }
 
-    pub fn move_to(&mut self, x: u16, y: u16) {
-        self.geometry.x = std::cmp::min(
-            x as i16,
-            LEVEL_WIDTH as i16 * TILE_WIDTH as i16,
-        );
-        self.geometry.y = std::cmp::min(
-            y as i16,
-            LEVEL_HEIGHT as i16 * TILE_HEIGHT as i16,
-        );
-        self.emit_update()
+    pub fn move_to(&mut self, x: i32, y: i32) {
+        self.geometry.x =
+            std::cmp::min(x, LEVEL_WIDTH as i32 * TILE_WIDTH as i32);
+        self.geometry.y =
+            std::cmp::min(y, LEVEL_HEIGHT as i32 * TILE_HEIGHT as i32);
     }
 
-    pub fn move_x_to(&mut self, x: u16) {
-        self.move_to(x, self.geometry.y as u16);
+    pub fn move_x_to(&mut self, x: i32) {
+        self.move_to(x, self.geometry.y())
     }
 
-    pub fn move_y_to(&mut self, y: u16) {
-        self.move_to(self.geometry.x as u16, y);
-    }
-
-    pub fn move_x_by(&mut self, x: i16) {
-        self.move_x_to((self.geometry.x + x) as u16);
-    }
-
-    pub fn move_y_by(&mut self, y: i16) {
-        self.move_y_to((self.geometry.y + y) as u16);
+    pub fn move_y_to(&mut self, y: i32) {
+        self.move_to(self.geometry.x(), y)
     }
 
     pub fn push_vertically(
         &mut self,
         solids: &LevelSolids,
-        offset: i16,
-    ) -> i16 {
+        offset: i32,
+    ) -> i32 {
         if offset == 0 {
             return 0;
         }
@@ -485,7 +438,7 @@ impl Position {
         geometry.y += offset;
 
         if !solids.collides(geometry) {
-            self.move_y_to(geometry.y as u16);
+            self.move_y_to(geometry.y());
             return offset;
         }
 
@@ -493,28 +446,28 @@ impl Position {
         let direction = offset / offset_absolute;
 
         for i in 0..offset_absolute {
-            geometry.y -= direction as i16;
+            geometry.offset(0, -direction);
             if !solids.collides(geometry) {
-                self.move_y_to(geometry.y as u16);
+                self.move_y_to(geometry.y());
                 return i * direction;
             }
         }
-        return 0;
+        0
     }
 
     pub fn push_horizontally(
         &mut self,
         solids: &LevelSolids,
-        offset: i16,
-    ) -> i16 {
+        offset: i32,
+    ) -> i32 {
         if offset == 0 {
             return 0;
         }
         let mut geometry = self.geometry;
-        geometry.x += offset;
+        geometry.offset(offset, 0);
 
         if !solids.collides(geometry) {
-            self.move_x_to(geometry.x as u16);
+            self.move_x_to(geometry.x());
             return offset;
         }
 
@@ -522,17 +475,13 @@ impl Position {
         let direction = offset / offset_absolute;
 
         for i in 0..offset_absolute {
-            geometry.x -= direction as i16;
+            geometry.offset(-direction, 0);
             if !solids.collides(geometry) {
-                self.move_x_to(geometry.x as u16);
+                self.move_x_to(geometry.x());
                 return i * direction;
             }
         }
-        return 0;
-    }
-
-    fn emit_update(&self) {
-        transdl::event::push_user_event(UserEvent::HeroMoved as i32);
+        0
     }
 }
 
@@ -580,6 +529,12 @@ pub struct Score {
     count: u128,
 }
 
+impl Default for Score {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Score {
     pub fn new() -> Self {
         Score { count: 0 }
@@ -587,16 +542,10 @@ impl Score {
 
     pub fn add(&mut self, amount: u128) {
         self.count = self.count.saturating_add(amount);
-        self.emit_update();
     }
 
     pub fn reset(&mut self) {
         self.count = 0;
-        self.emit_update();
-    }
-
-    fn emit_update(&self) {
-        transdl::event::push_user_event(UserEvent::HeroScored as i32);
     }
 
     pub fn value(&self) -> u128 {
@@ -628,7 +577,6 @@ impl Health {
 
     pub fn increase(&mut self, count: u8) {
         self.life = std::cmp::min(Self::MAX, self.life + count);
-        self.emit_update();
     }
 
     pub fn decrease(&mut self, count: u8) {
@@ -637,23 +585,14 @@ impl Health {
         } else {
             self.life = 0;
         }
-        self.emit_update();
     }
 
     pub fn fill_max(&mut self) {
         self.life = Self::MAX;
-        self.emit_update();
     }
 
     pub fn kill(&mut self) {
         self.life = 0;
-        self.emit_update();
-    }
-
-    fn emit_update(&self) {
-        transdl::event::push_user_event(
-            UserEvent::HeroHealthChanged as i32,
-        );
     }
 
     pub fn life(&self) -> u8 {
@@ -681,22 +620,14 @@ impl Firepower {
 
     pub fn increase(&mut self, count: u8) {
         self.shots = std::cmp::min(Self::MAX, self.shots + count);
-        self.emit_update();
     }
 
     pub fn reset(&mut self) {
         self.shots = 1;
-        self.emit_update();
     }
 
     pub fn num_shots(&self) -> u8 {
         self.shots
-    }
-
-    fn emit_update(&self) {
-        transdl::event::push_user_event(
-            UserEvent::HeroFirepowerChanged as i32,
-        );
     }
 }
 
@@ -730,33 +661,30 @@ impl Inventory {
 
     pub fn clear(&mut self) {
         self.items.clear();
-        self.emit_update();
     }
 
     pub fn set(&mut self, item: InventoryItem) {
         self.items.insert(item);
-        self.emit_update();
     }
 
     pub fn unset(&mut self, item: InventoryItem) {
         self.items.remove(&item);
-        self.emit_update();
     }
 
     pub fn is_set(&self, item: InventoryItem) -> bool {
         self.items.contains(&item)
-    }
-
-    fn emit_update(&self) {
-        transdl::event::push_user_event(
-            UserEvent::HeroInventoryChanged as i32,
-        );
     }
 }
 
 #[derive(Debug)]
 pub struct FetchedLetterState {
     last_fetched: Option<FetchedLetter>,
+}
+
+impl Default for FetchedLetterState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl FetchedLetterState {

@@ -1,12 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HorizontalDirection, ANIMATION_CARBOT, HALFTILE_HEIGHT,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
     HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 
@@ -26,8 +25,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16 * 2;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         Specific {
@@ -60,88 +58,85 @@ impl ActorInterface for Specific {
             p.general.is_alive = false;
             p.actor_adder.add_actor(
                 ActorType::Explosion,
-                p.general.position.x as u16 + HALFTILE_WIDTH as u16,
-                p.general.position.y as u16,
+                p.general
+                    .position
+                    .top_left()
+                    .offset(HALFTILE_WIDTH as i32, 0),
             );
-            p.actor_adder.add_particle_firework(
-                p.general.position.x as u16,
-                p.general.position.y as u16,
-                4,
-            );
+            p.actor_adder
+                .add_particle_firework(p.general.position.top_left(), 4);
             p.hero_data.score.add(2500);
+        } else if p.solids.get(
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT + 1,
+        ) && !p.solids.get(
+            p.general.position.x() as u32 / TILE_WIDTH + 1,
+            p.general.position.y() as u32 / TILE_HEIGHT + 1,
+        ) {
+            // still in the air, falling down
+            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
         } else {
-            if p.solids.get(
-                p.general.position.x as usize / TILE_WIDTH,
-                p.general.position.y as usize / TILE_HEIGHT + 1,
-            ) && !p.solids.get(
-                p.general.position.x as usize / TILE_WIDTH + 1,
-                p.general.position.y as usize / TILE_HEIGHT + 1,
+            // on the floor, walking
+            let mut direction = match self.orientation {
+                HorizontalDirection::Left => -1,
+                HorizontalDirection::Right => 4,
+                HorizontalDirection::Center => unreachable!(),
+            };
+
+            if !p.solids.get(
+                // check if the place next ot the bot is free
+                (p.general.position.x()
+                    + direction * HALFTILE_WIDTH as i32)
+                    as u32
+                    / TILE_WIDTH,
+                p.general.position.y() as u32 / TILE_HEIGHT,
+            ) && p.solids.get(
+                // check if the tile below is solid
+                (p.general.position.x() as i32
+                    + direction * HALFTILE_WIDTH as i32)
+                    as u32
+                    / TILE_WIDTH,
+                (p.general.position.y() as u32 + TILE_HEIGHT)
+                    / TILE_HEIGHT,
             ) {
-                // still in the air, falling down
-                p.general.position.y += HALFTILE_HEIGHT as i16;
+                if direction > 0 {
+                    direction = 1;
+                }
+                p.general.position.offset(
+                    (direction as f64 * HALFTILE_WIDTH as f64 * 0.7)
+                        as i32,
+                    0,
+                );
             } else {
-                // on the floor, walking
-                let mut direction = match self.orientation {
-                    HorizontalDirection::Left => -1,
-                    HorizontalDirection::Right => 4,
+                // reached the end, turning around
+                self.orientation = match self.orientation {
+                    HorizontalDirection::Left => {
+                        HorizontalDirection::Right
+                    }
+                    HorizontalDirection::Right => {
+                        HorizontalDirection::Left
+                    }
                     HorizontalDirection::Center => unreachable!(),
                 };
+                if direction > 0 {
+                    direction = 1;
+                }
+                direction *= -1;
+                p.general
+                    .position
+                    .offset(direction * HALFTILE_WIDTH as i32, 0);
+                self.tile = (self.tile as i32 + 4 * direction) as usize;
 
-                if !p.solids.get(
-                    // check if the place next ot the bot is free
-                    (p.general.position.x as isize
-                        + direction * HALFTILE_WIDTH as isize)
-                        as usize
-                        / TILE_WIDTH,
-                    p.general.position.y as usize / TILE_HEIGHT,
-                ) && p.solids.get(
-                    // check if the tile below is solid
-                    (p.general.position.x as isize
-                        + direction * HALFTILE_WIDTH as isize)
-                        as usize
-                        / TILE_WIDTH,
-                    (p.general.position.y as usize + TILE_HEIGHT)
-                        / TILE_HEIGHT,
-                ) {
-                    if direction > 0 {
-                        direction = 1;
-                    }
-                    p.general.position.x +=
-                        (direction as f64 * HALFTILE_WIDTH as f64 * 0.7)
-                            as i16;
+                if direction > 0 {
+                    p.actor_adder.add_actor(
+                        ActorType::HostileShotRight,
+                        p.general.position.top_left().offset(0, -6),
+                    );
                 } else {
-                    // reached the end, turning around
-                    self.orientation = match self.orientation {
-                        HorizontalDirection::Left => {
-                            HorizontalDirection::Right
-                        }
-                        HorizontalDirection::Right => {
-                            HorizontalDirection::Left
-                        }
-                        HorizontalDirection::Center => unreachable!(),
-                    };
-                    if direction > 0 {
-                        direction = 1;
-                    }
-                    direction *= -1;
-                    p.general.position.x +=
-                        direction as i16 * HALFTILE_WIDTH as i16;
-                    let tile = self.tile as isize + 4 * direction;
-                    self.tile = tile as usize;
-
-                    if direction > 0 {
-                        p.actor_adder.add_actor(
-                            ActorType::HostileShotRight,
-                            p.general.position.x as u16,
-                            p.general.position.y as u16 - 6,
-                        );
-                    } else {
-                        p.actor_adder.add_actor(
-                            ActorType::HostileShotLeft,
-                            p.general.position.x as u16,
-                            p.general.position.y as u16 - 6,
-                        );
-                    }
+                    p.actor_adder.add_actor(
+                        ActorType::HostileShotLeft,
+                        p.general.position.top_left().offset(0, -6),
+                    );
                 }
             }
         }
@@ -150,21 +145,24 @@ impl ActorInterface for Specific {
             if self.current_frame == 0 {
                 p.actor_adder.add_actor(
                     ActorType::Steam,
-                    p.general.position.x as u16 + HALFTILE_WIDTH as u16,
-                    p.general.position.y as u16 - TILE_HEIGHT as u16,
+                    p.general.position.top_left().offset(
+                        HALFTILE_WIDTH as i32,
+                        -(TILE_HEIGHT as i32),
+                    ),
                 );
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
         let tile = self.tile + (self.current_frame / 2) * 2;
-        p.renderer.place_tile(tile, destrect);
+        p.renderer.place_tile(tile, pos)?;
 
         let tile = self.tile + (self.current_frame / 2) * 2 + 1;
-        destrect.x += TILE_WIDTH as i16;
-        p.renderer.place_tile(tile, destrect);
+        pos = pos.offset(TILE_WIDTH as i32, 0);
+        p.renderer.place_tile(tile, pos)?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _gerenal: &ActorData) -> bool {

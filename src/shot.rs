@@ -1,14 +1,12 @@
-use crate::actor::{ActorAdder, ActorType, ActorsList};
-use crate::hero::HeroData;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::rendering::{Renderer, SurfaceRenderer};
-use crate::tilecache::TileCache;
 use crate::{
-    HorizontalDirection, HALFTILE_WIDTH, LEVELWINDOW_WIDTH, OBJECT_SHOT,
-    TILE_HEIGHT, TILE_WIDTH,
+    actor::{ActorAdder, ActorType, ActorsList},
+    hero::HeroData,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    rendering::Renderer,
+    HorizontalDirection, Result, HALFTILE_WIDTH, LEVELWINDOW_WIDTH,
+    OBJECT_SHOT, TILE_HEIGHT, TILE_WIDTH,
 };
-use transdl::video::Rect;
+use sdl2::rect::Rect;
 
 pub type ShotList = Vec<Shot>;
 
@@ -22,16 +20,16 @@ pub struct Shot {
 }
 
 impl Shot {
-    pub fn new(x: i16, y: i16, direction: HorizontalDirection) -> Self {
+    pub fn new(x: i32, y: i32, direction: HorizontalDirection) -> Self {
         let w = 4;
-        let h = TILE_HEIGHT as u16 - 4;
+        let h = TILE_HEIGHT - 4;
         Shot {
-            position: Rect {
-                x: x + HALFTILE_WIDTH as i16 - w as i16 / 2,
-                y: y + TILE_HEIGHT as i16 - h as i16,
+            position: Rect::new(
+                x + HALFTILE_WIDTH as i32 - w as i32 / 2,
+                y + TILE_HEIGHT as i32 - h as i32,
                 w,
                 h,
-            },
+            ),
             is_alive: true,
             direction,
             counter: 0,
@@ -56,16 +54,16 @@ impl Shot {
             self.countdown -= 1;
         }
 
-        let x_start = hero_data.position.geometry.x
-            - TILE_WIDTH as i16 * LEVELWINDOW_WIDTH as i16 / 2;
-        let x_end = hero_data.position.geometry.x
-            + hero_data.position.geometry.w as i16
-            + TILE_WIDTH as i16 * LEVELWINDOW_WIDTH as i16 / 2;
+        let x_start = hero_data.position.geometry.x()
+            - TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
+        let x_end = hero_data.position.geometry.x()
+            + hero_data.position.geometry.w as i32
+            + TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
 
         if self.countdown == 2 {
             let distance = match self.direction {
-                HorizontalDirection::Left => -(HALFTILE_WIDTH as i16),
-                HorizontalDirection::Right => HALFTILE_WIDTH as i16,
+                HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
+                HorizontalDirection::Right => HALFTILE_WIDTH as i32,
                 _ => unreachable!(),
             };
 
@@ -98,24 +96,29 @@ impl Shot {
         self.is_alive
     }
 
-    pub fn blit(
+    pub fn render(
         &self,
-        target: &mut transdl::video::Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
-    ) {
+    ) -> Result<()> {
         if self.is_alive {
             let mut destrect = self.position;
-            destrect.x += destrect.w as i16 / 2 - HALFTILE_WIDTH as i16;
-            destrect.w = TILE_WIDTH as u16;
+            destrect.set_x(
+                destrect.x() + destrect.width() as i32 / 2
+                    - HALFTILE_WIDTH as i32,
+            );
+            destrect.set_width(TILE_WIDTH);
 
-            let mut renderer = SurfaceRenderer { target, tilecache };
-            renderer.place_tile(OBJECT_SHOT + self.counter, destrect);
+            renderer.place_tile(
+                OBJECT_SHOT + self.counter,
+                destrect.top_left(),
+            )?;
             if draw_collision_bounds {
                 let color = crate::collision_bounds_color();
-                renderer.draw_rect(self.position, &color);
+                renderer.draw_rect(self.position, color)?;
             }
         }
+        Ok(())
     }
 
     pub fn push(
@@ -124,7 +127,7 @@ impl Shot {
         actors: &mut ActorsList,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        offset: i16,
+        offset: i32,
         actor_adder: &mut dyn ActorAdder,
     ) {
         if self.countdown == 2 {
@@ -139,16 +142,16 @@ impl Shot {
                 self.countdown = 1;
             }
         }
-        if self.countdown == 2 {
-            if solids.collides(self.position) {
-                self.countdown = 1;
-                actor_adder.add_actor(
-                    ActorType::Explosion,
-                    self.position.x as u16 + self.position.w / 2
-                        - HALFTILE_WIDTH as u16,
-                    self.position.y as u16,
-                );
-            }
+        if self.countdown == 2 && solids.collides(self.position) {
+            self.countdown = 1;
+            actor_adder.add_actor(
+                ActorType::Explosion,
+                self.position.top_left().offset(
+                    self.position.width() as i32 / 2
+                        - HALFTILE_WIDTH as i32,
+                    0,
+                ),
+            );
         }
     }
 

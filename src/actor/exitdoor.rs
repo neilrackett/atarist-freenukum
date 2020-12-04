@@ -1,10 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    HeroInteractStartParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        HeroInteractStartParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(PartialEq, Eq, Debug)]
 enum State {
@@ -26,8 +27,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16 * 2;
-        general.position.h = TILE_HEIGHT as u16 * 2;
+        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT * 2);
         general.is_in_foreground = false;
 
         Specific {
@@ -72,19 +72,19 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
+        p.renderer.place_tile(self.tile + self.counter * 4, pos)?;
+        pos.x += TILE_WIDTH as i32;
         p.renderer
-            .place_tile(self.tile + self.counter * 4, destrect);
-        destrect.x += TILE_WIDTH as i16;
+            .place_tile(self.tile + self.counter * 4 + 1, pos)?;
+        pos.x -= TILE_WIDTH as i32;
+        pos.y += TILE_HEIGHT as i32;
         p.renderer
-            .place_tile(self.tile + self.counter * 4 + 1, destrect);
-        destrect.x -= TILE_WIDTH as i16;
-        destrect.y += TILE_HEIGHT as i16;
+            .place_tile(self.tile + self.counter * 4 + 2, pos)?;
+        pos.x += TILE_WIDTH as i32;
         p.renderer
-            .place_tile(self.tile + self.counter * 4 + 2, destrect);
-        destrect.x += TILE_WIDTH as i16;
-        p.renderer
-            .place_tile(self.tile + self.counter * 4 + 3, destrect);
+            .place_tile(self.tile + self.counter * 4 + 3, pos)?;
+        Ok(())
     }
 }

@@ -7,6 +7,7 @@ pub mod borders;
 pub mod data;
 pub mod episodes;
 pub mod event;
+#[cfg(feature = "build_unrefactored")]
 pub mod file;
 pub mod game;
 pub mod geometry;
@@ -29,31 +30,33 @@ pub mod tilecache;
 
 use anyhow::Result;
 
-pub const HALFTILE_WIDTH: usize = 8;
-pub const HALFTILE_HEIGHT: usize = 8;
-pub const TILE_WIDTH: usize = HALFTILE_WIDTH * 2;
-pub const TILE_HEIGHT: usize = HALFTILE_HEIGHT * 2;
+pub const GAME_INTERVAL: u32 = 80;
+
+pub const HALFTILE_WIDTH: u32 = 8;
+pub const HALFTILE_HEIGHT: u32 = 8;
+pub const TILE_WIDTH: u32 = HALFTILE_WIDTH * 2;
+pub const TILE_HEIGHT: u32 = HALFTILE_HEIGHT * 2;
 pub const MAX_TILES_PER_FILE: usize = 50;
 pub const HEALTH_COUNT: usize = 8;
 pub const INVENTORY_WIDTH: usize = HEALTH_COUNT / 2;
-pub const FONT_WIDTH: usize = 8;
-pub const FONT_HEIGHT: usize = 8;
-pub const WINDOW_WIDTH: usize = 320;
-pub const WINDOW_HEIGHT: usize = 200;
-pub const PICTURE_WIDTH: usize = 40;
-pub const PICTURE_HEIGHT: usize = 200;
-pub const BACKDROP_WIDTH: usize = 13;
-pub const BACKDROP_HEIGHT: usize = 10;
+pub const FONT_WIDTH: u32 = 8;
+pub const FONT_HEIGHT: u32 = 8;
+pub const WINDOW_WIDTH: u32 = 320;
+pub const WINDOW_HEIGHT: u32 = 200;
+pub const PICTURE_WIDTH: u32 = 40;
+pub const PICTURE_HEIGHT: u32 = 200;
+pub const BACKDROP_WIDTH: u32 = 13;
+pub const BACKDROP_HEIGHT: u32 = 10;
 pub const MAX_LIFE: usize = 8;
 pub const MAX_FIREPOWER: usize = 4;
 pub const SCORE_DIGITS: usize = 8;
-pub const LEVELWINDOW_WIDTH: usize = 13;
-pub const LEVELWINDOW_HEIGHT: usize = 10;
+pub const LEVELWINDOW_WIDTH: u32 = 13;
+pub const LEVELWINDOW_HEIGHT: u32 = 10;
 
 /// The height of the level in full tiles
-pub const LEVEL_HEIGHT: usize = 90;
+pub const LEVEL_HEIGHT: u32 = 90;
 /// The width of the level in full tiles
-pub const LEVEL_WIDTH: usize = 128;
+pub const LEVEL_WIDTH: u32 = 128;
 
 const BACKGROUND_START: usize = 0;
 const BACKGROUND_LIGHT_GREY: usize = BACKGROUND_START + 70;
@@ -76,7 +79,7 @@ const BORDER_GREY_START: usize = BORDER_START;
 
 const NUMBER_START: usize = BORDER_START + 48;
 
-const NUMBER_100: usize = NUMBER_START + 0;
+const NUMBER_100: usize = NUMBER_START;
 const NUMBER_200: usize = NUMBER_START + 2;
 const NUMBER_500: usize = NUMBER_START + 4;
 const NUMBER_1000: usize = NUMBER_START + 6;
@@ -99,12 +102,12 @@ const NUMBER_BONUS_7_LEFT: usize = NUMBER_START + 38;
 const NUMBER_BONUS_7_RIGHT: usize = NUMBER_START + 40;
 
 const SOLID_START: usize = 4 * 48;
-const SOLID_SHOOTABLE_WALL_BRICKS: usize = SOLID_START + 0;
+const SOLID_SHOOTABLE_WALL_BRICKS: usize = SOLID_START;
 const SOLID_ELEVATOR: usize = SOLID_START + 23;
 const SOLID_BLACK: usize = SOLID_START + 65;
 const SOLID_EXPANDINGFLOOR: usize = SOLID_START + 191;
 const SOLID_CONVEYORBELT: usize = SOLID_START + 0x1C;
-const SOLID_CONVEYORBELT_LEFTEND: usize = SOLID_CONVEYORBELT + 0;
+const SOLID_CONVEYORBELT_LEFTEND: usize = SOLID_CONVEYORBELT;
 const SOLID_CONVEYORBELT_CENTER: usize = SOLID_CONVEYORBELT + 4;
 const SOLID_CONVEYORBELT_RIGHTEND: usize = SOLID_CONVEYORBELT + 6;
 
@@ -136,7 +139,7 @@ const ANIMATION_WINDOWBG: usize = ANIMATION_START + 253;
 const ANIMATION_BADGUYSCREEN: usize = ANIMATION_START + 260;
 
 const OBJECT_START: usize = ANIMATION_START + 6 * 48;
-const OBJECT_BOX_GREY: usize = OBJECT_START + 0;
+const OBJECT_BOX_GREY: usize = OBJECT_START;
 const OBJECT_SPARK_PINK: usize = OBJECT_START + 1;
 const OBJECT_SPARK_BLUE: usize = OBJECT_START + 2;
 const OBJECT_SPARK_WHITE: usize = OBJECT_START + 3;
@@ -195,7 +198,7 @@ const OBJECT_SPIKES_DOWN: usize = OBJECT_START + 149;
 const HERO_START: usize = OBJECT_START + 150;
 
 const HERO_NUM_WALKING: usize = 4;
-const HERO_WALKING_LEFT: usize = HERO_START + 0;
+const HERO_WALKING_LEFT: usize = HERO_START;
 const HERO_WALKING_RIGHT: usize = HERO_START + 0x10;
 const HERO_NUM_JUMPING: usize = 1;
 const HERO_JUMPING_LEFT: usize = HERO_START + 0x20;
@@ -221,8 +224,8 @@ pub fn data_dir() -> std::path::PathBuf {
     directories().data_dir().to_path_buf()
 }
 
-fn collision_bounds_color() -> impl rendering::Color {
-    (182u8, 6u8, 0u8)
+fn collision_bounds_color() -> sdl2::pixels::Color {
+    sdl2::pixels::Color::RGB(182, 6, 0)
 }
 
 #[derive(Hash, Debug, Eq, PartialEq, Clone, Copy)]
@@ -242,16 +245,5 @@ pub enum VerticalDirection {
 #[derive(Debug, Eq, PartialEq)]
 pub enum UserEvent {
     Timer,
-    HeroMoved,
-    HeroScored,
-    HeroFirepowerChanged,
-    HeroInventoryChanged,
-    HeroHealthChanged,
-    HeroLanded,
-}
-
-pub fn sdl_surface_transparent(
-    format: &transdl::video::PixelFormat,
-) -> u32 {
-    transdl::video::map_rgb(format, 100, 1, 1)
+    Redraw,
 }

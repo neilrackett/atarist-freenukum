@@ -1,26 +1,22 @@
 use super::tile::{self, TileHeader};
-use crate::graphics::SurfaceCreator;
 use crate::{
     Result, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
+use anyhow::anyhow;
+use sdl2::{
+    pixels::PixelFormatEnum, rect::Rect, render::Canvas, surface::Surface,
+};
 use std::io::Read;
-use transdl::video::{Rect, Surface};
 
-pub fn load<R: Read>(
-    r: &mut R,
-    surface_creator: &dyn SurfaceCreator,
-) -> Result<Surface> {
-    let mut backdrop = surface_creator.create(
-        BACKDROP_WIDTH as u32 * TILE_WIDTH as u32,
-        BACKDROP_HEIGHT as u32 * TILE_HEIGHT as u32,
-    );
+pub fn load<'t, R: Read>(r: &mut R) -> Result<Surface<'t>> {
+    let surface = Surface::new(
+        BACKDROP_WIDTH * TILE_WIDTH,
+        BACKDROP_HEIGHT * TILE_HEIGHT,
+        PixelFormatEnum::RGB888,
+    )
+    .map_err(|s| anyhow!(s))?;
 
-    let mut geometry = Rect {
-        x: 0,
-        y: 0,
-        w: TILE_WIDTH as u16,
-        h: TILE_HEIGHT as u16,
-    };
+    let mut geometry = Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT);
 
     let header = TileHeader {
         width: 2,
@@ -28,16 +24,25 @@ pub fn load<R: Read>(
         tiles: 0,
     };
 
-    for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
-        let tile = tile::load(r, surface_creator, header.clone(), false)?;
-        tile.blit(None, &mut backdrop, Some(geometry));
+    let mut canvas =
+        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
+    {
+        let texture_creator = canvas.texture_creator();
 
-        geometry.x += 16;
-        if geometry.x == 16 * BACKDROP_WIDTH as i16 {
-            geometry.x = 0;
-            geometry.y += 16;
+        for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
+            let tile = tile::load(r, header, false)?;
+            canvas
+                .copy(&tile.as_texture(&texture_creator)?, None, geometry)
+                .map_err(|s| anyhow!(s))?;
+
+            geometry.x += 16;
+            if geometry.x == 16 * BACKDROP_WIDTH as i32 {
+                geometry.x = 0;
+                geometry.y += 16;
+            }
         }
     }
-
-    Ok(backdrop)
+    canvas.present();
+    let surface = canvas.into_surface();
+    Ok(surface)
 }

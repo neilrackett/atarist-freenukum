@@ -1,12 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
     OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
 };
 
@@ -26,8 +25,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = false;
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         let (tile, num_frames, can_hurt_hero, replaced_by) = match general
             .actor_type
@@ -64,11 +62,8 @@ impl ActorInterface for Specific {
         if self.current_frame == self.num_frames {
             p.general.is_alive = false;
             if let Some(successor) = self.replaced_by {
-                p.actor_adder.add_actor(
-                    successor,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
-                );
+                p.actor_adder
+                    .add_actor(successor, p.general.position.top_left());
             }
         }
     }
@@ -83,10 +78,11 @@ impl ActorInterface for Specific {
         p.general.hurts_hero = false;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 }

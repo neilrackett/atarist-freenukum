@@ -1,24 +1,21 @@
 use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
-use super::tilecache::TileCache;
-use crate::rendering::{
-    MovePositionRenderer, Renderer, SurfaceRenderer, TileIndex,
-};
+use crate::rendering::{MovePositionRenderer, Renderer, TileIndex};
 use crate::{
-    BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
+    Result, BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
     HALFTILE_WIDTH, MAX_LIFE, OBJECT_ACCESS_CARD, OBJECT_BOOT,
     OBJECT_CLAMP, OBJECT_GLOVE, OBJECT_GUN, OBJECT_HEALTH,
     OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
     OBJECT_NONHEALTH, OBJECT_SHOT, SCORE_DIGITS, TILE_HEIGHT, TILE_WIDTH,
     WINDOW_HEIGHT, WINDOW_WIDTH,
 };
-use transdl::video::{Rect, Surface};
+use sdl2::rect::Point;
 
 pub struct Borders {}
 
 #[rustfmt::skip]
 const BORDERS:
-[i32; (2 * WINDOW_HEIGHT / TILE_HEIGHT) * (2 * WINDOW_WIDTH / TILE_WIDTH)] =
+[i32; (2 * WINDOW_HEIGHT / TILE_HEIGHT) as usize * (2 * WINDOW_WIDTH / TILE_WIDTH) as usize] =
 [
      4,-1, 2,-1, 2,-1, 2,-1, 2,-1, 2,-1, 2,-1, 2,-1, 2,-1, 2,-1,
      2,-1, 2,-1, 2,-1, 2,-1, 5,-1, 8,-1,38,-1,39,-1, 8,-1, 9,-1,
@@ -99,19 +96,13 @@ const BORDERS:
 impl Borders {
     fn render_tile(
         &self,
-        x: i16,
-        y: i16,
+        x: i32,
+        y: i32,
         renderer: &mut dyn Renderer,
         tile: TileIndex,
-    ) {
-        let geometry = Rect {
-            x,
-            y,
-            w: TILE_WIDTH as u16,
-            h: TILE_HEIGHT as u16,
-        };
-
-        renderer.place_tile(tile, geometry);
+    ) -> Result<()> {
+        renderer.place_tile(tile, Point::new(x, y))?;
+        Ok(())
     }
 
     fn render_iter<I>(
@@ -121,22 +112,24 @@ impl Borders {
         grid_y: u16,
         renderer: &mut dyn Renderer,
         borders: I,
-    ) where
+    ) -> Result<()>
+    where
         I: Iterator<Item = Option<usize>>,
     {
         for (i, border) in borders.enumerate() {
             if let Some(border) = border {
                 self.render_tile(
-                    (i as i16 % columns as i16) * (grid_x as i16),
-                    (i as i16 / columns as i16) * (grid_y as i16),
+                    (i as i32 % columns as i32) * (grid_x as i32),
+                    (i as i32 / columns as i32) * (grid_y as i32),
                     renderer,
                     border,
-                )
+                )?;
             }
         }
+        Ok(())
     }
 
-    pub fn render(&self, renderer: &mut dyn Renderer) {
+    pub fn render(&self, renderer: &mut dyn Renderer) -> Result<()> {
         self.render_iter(
             (2 * WINDOW_WIDTH / TILE_WIDTH) as u8,
             HALFTILE_WIDTH as u16,
@@ -149,10 +142,14 @@ impl Borders {
                     Some(*i as usize + BORDER_GREY_START)
                 }
             }),
-        );
+        )
     }
 
-    pub fn render_life(&self, health: u8, renderer: &mut dyn Renderer) {
+    pub fn render_life(
+        &self,
+        health: u8,
+        renderer: &mut dyn Renderer,
+    ) -> Result<()> {
         let health = std::cmp::min(health as usize, MAX_LIFE);
         let iter = (0..MAX_LIFE).map(|i| {
             if i < health {
@@ -172,37 +169,32 @@ impl Borders {
             HALFTILE_HEIGHT as u16,
             &mut move_renderer,
             iter,
-        );
+        )
     }
 
-    pub fn blit_score(
+    pub fn render_score(
         &self,
-        screen: &mut Surface,
-        tilecache: &TileCache,
         score: u128,
-    ) {
+        renderer: &mut dyn Renderer,
+    ) -> Result<()> {
         let score = std::cmp::min(99999999, score);
         let score_string =
             format!("{0:0width$}", score, width = SCORE_DIGITS);
 
-        let mut renderer = SurfaceRenderer {
-            target: screen,
-            tilecache,
-        };
         let mut position_renderer = MovePositionRenderer {
             offset_x: 30 * FONT_WIDTH as i32,
             offset_y: 3 * FONT_HEIGHT as i32,
-            upstream: &mut renderer,
+            upstream: renderer,
         };
 
-        text::render(&mut position_renderer, &score_string);
+        text::render(&mut position_renderer, &score_string)
     }
 
     pub fn render_firepower(
         &self,
         firepower: &Firepower,
         renderer: &mut dyn Renderer,
-    ) {
+    ) -> Result<()> {
         const GUN: Option<usize> = Some(OBJECT_GUN);
         const SHOT: Option<usize> = Some(OBJECT_SHOT);
 
@@ -232,14 +224,14 @@ impl Borders {
             HALFTILE_HEIGHT as u16,
             &mut move_renderer,
             tiles.into_iter(),
-        );
+        )
     }
 
     pub fn render_inventory(
         &self,
         inventory: &Inventory,
         renderer: &mut dyn Renderer,
-    ) {
+    ) -> Result<()> {
         let red_key = if inventory.is_set(InventoryItem::KeyRed) {
             Some(OBJECT_KEY_RED)
         } else {
@@ -298,6 +290,6 @@ impl Borders {
             TILE_HEIGHT as u16,
             &mut move_renderer,
             tiles.into_iter(),
-        );
+        )
     }
 }

@@ -1,13 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters,
-};
-use crate::hero::InventoryItem;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
-    TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+    },
+    hero::InventoryItem,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK,
+    OBJECT_KEY_RED, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -19,8 +18,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {}
@@ -41,15 +39,14 @@ impl ActorInterface for Specific {
         p.hero_data.score.add(1000);
         p.actor_adder.add_actor(
             ActorType::Score1000,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
+            p.general.position.top_left(),
         );
         p.general.is_alive = false;
     }
 
     fn act(&mut self, _p: ActParameters) {}
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = match p.general.actor_type {
             ActorType::KeyRed => OBJECT_KEY_RED,
             ActorType::KeyBlue => OBJECT_KEY_BLUE,
@@ -57,7 +54,7 @@ impl ActorInterface for Specific {
             ActorType::KeyGreen => OBJECT_KEY_GREEN,
             _ => unreachable!(),
         };
-
-        p.renderer.place_tile(tile, p.general.position);
+        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        Ok(())
     }
 }

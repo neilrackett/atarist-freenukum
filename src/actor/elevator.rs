@@ -1,14 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    HeroInteractEndParameters, HeroInteractStartParameters,
-    RenderParameters,
-};
-use crate::geometry::RectExt;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR, TILE_HEIGHT,
-    TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        HeroInteractEndParameters, HeroInteractStartParameters,
+        RenderParameters,
+    },
+    geometry::RectExt,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(PartialEq, Eq, Debug)]
@@ -29,8 +28,8 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16 * 2;
-        general.position.h = TILE_HEIGHT as u16;
+        // TODO: check whether we *really* need the double width
+        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         Specific { state: State::Idle }
@@ -43,7 +42,7 @@ impl ActorInterface for Specific {
 
         if self.state == State::Ascending
             || self.state == State::Idle
-                && p.general.position.h as usize > TILE_HEIGHT
+                && p.general.position.height() as u32 > TILE_HEIGHT
         {
             // check if hero leaves elevator
             if !hero_geometry.touches(p.general.position)
@@ -56,8 +55,8 @@ impl ActorInterface for Specific {
         match self.state {
             State::Ascending => {
                 if p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH,
-                    p.general.position.y as usize / TILE_HEIGHT - 3,
+                    p.general.position.x() as u32 / TILE_WIDTH,
+                    p.general.position.y() as u32 / TILE_HEIGHT - 3,
                 ) {
                     // hero touches solid with head
                     self.state = State::Idle;
@@ -65,19 +64,21 @@ impl ActorInterface for Specific {
                     let offset = p
                         .hero_data
                         .position
-                        .push_vertically(&p.solids, -(TILE_HEIGHT as i16));
-                    if -offset < TILE_HEIGHT as i16 {
+                        .push_vertically(&p.solids, -(TILE_HEIGHT as i32));
+                    if -offset < TILE_HEIGHT as i32 {
                         p.hero_data
                             .position
                             .push_vertically(&p.solids, -offset);
                         self.state = State::Idle;
                     } else {
-                        p.general.position.h += (-offset) as u16;
-                        p.general.position.y += offset as i16;
+                        p.general.position.offset(0, offset);
+                        p.general.position.set_height(
+                            p.general.position.height() + (-offset) as u32,
+                        );
 
                         p.solids.set(
-                            p.general.position.x as usize / TILE_WIDTH,
-                            p.general.position.y as usize / TILE_HEIGHT,
+                            p.general.position.x() as u32 / TILE_WIDTH,
+                            p.general.position.y() as u32 / TILE_HEIGHT,
                             true,
                         );
                     }
@@ -85,14 +86,16 @@ impl ActorInterface for Specific {
             }
             State::Descending => {
                 for _ in 0..2 {
-                    if p.general.position.h as usize > TILE_HEIGHT {
+                    if p.general.position.height() as u32 > TILE_HEIGHT {
                         p.solids.set(
-                            p.general.position.x as usize / TILE_WIDTH,
-                            p.general.position.y as usize / TILE_HEIGHT,
+                            p.general.position.x() as u32 / TILE_WIDTH,
+                            p.general.position.y() as u32 / TILE_HEIGHT,
                             false,
                         );
-                        p.general.position.y += TILE_HEIGHT as i16;
-                        p.general.position.h -= TILE_HEIGHT as u16;
+                        p.general.position.offset(0, TILE_HEIGHT as i32);
+                        p.general.position.set_height(
+                            p.general.position.height() - TILE_HEIGHT,
+                        );
                     } else {
                         self.state = State::Idle;
                     }
@@ -108,9 +111,8 @@ impl ActorInterface for Specific {
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         if p.hero_data.position.geometry.touches(p.general.position)
-            && p.hero_data.position.geometry.y
-                + p.hero_data.position.geometry.h as i16
-                == p.general.position.y
+            && p.hero_data.position.geometry.bottom()
+                == p.general.position.top()
         {
             self.state = State::Ascending;
         }
@@ -126,15 +128,16 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = SOLID_ELEVATOR;
-        let mut destrect = p.general.position;
-        for _ in 0..(p.general.position.h as usize / TILE_HEIGHT - 1) * 2 {
-            destrect.y += HALFTILE_HEIGHT as i16;
-            p.renderer.place_tile(tile, destrect);
+        let mut pos = p.general.position.top_left();
+        for _ in 0..(p.general.position.height() / TILE_HEIGHT - 1) * 2 {
+            pos.y += HALFTILE_HEIGHT as i32;
+            p.renderer.place_tile(tile, pos)?;
         }
-        destrect = p.general.position;
+        pos = p.general.position.top_left();
         let tile = OBJECT_ELEVATOR_TOP;
-        p.renderer.place_tile(tile, destrect);
+        p.renderer.place_tile(tile, pos)?;
+        Ok(())
     }
 }

@@ -1,12 +1,15 @@
 use anyhow::{anyhow, Result};
-use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::picture;
 use freenukum::settings::Settings;
 use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    pixels::Color,
+};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use transdl::event::{Event, KeyCode};
 
 /// Show an original Duke Nukem 1 game picture.
 #[derive(StructOpt, Debug)]
@@ -18,37 +21,57 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
     let args = Arguments::from_args();
 
     let mut file = File::open(&args.filename)?;
 
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        WINDOW_WIDTH as i32,
-        WINDOW_HEIGHT as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+
+    let window = game::create_window(
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
         settings.fullscreen,
-        format!("Freenukum {} picture example", VERSION),
-        format!("Freenukum {} picture example", VERSION),
+        &format!("Freenukum {} picture example", VERSION),
+        &video_subsystem,
     )?;
 
-    let picture = picture::load(&mut file, &screen.surface_creator())?;
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
 
-    picture.blit(None, &mut screen, None);
-    screen.update();
+    let picture = picture::load(&mut file)?;
+
+    canvas
+        .copy(&picture.as_texture(&texture_creator)?, None, None)
+        .map_err(|s| anyhow!(s))?;
+    canvas.present();
 
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
+        match event_pump.wait_event() {
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
-            Event::VideoExpose => screen.update(),
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => canvas.present(),
             _ => {}
         }
     }

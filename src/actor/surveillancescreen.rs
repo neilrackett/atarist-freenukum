@@ -1,10 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    HeroInteractStartParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        HeroInteractStartParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -15,9 +16,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16 * 2;
-        general.position.h = TILE_HEIGHT as u16;
-
+        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
         Specific {}
     }
 }
@@ -35,10 +34,11 @@ impl ActorInterface for Specific {
 
     fn act(&mut self, _p: ActParameters) {}
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
-        p.renderer.place_tile(ANIMATION_BADGUYSCREEN, destrect);
-        destrect.x += TILE_WIDTH as i16;
-        p.renderer.place_tile(ANIMATION_BADGUYSCREEN + 1, destrect);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
+        p.renderer.place_tile(ANIMATION_BADGUYSCREEN, pos)?;
+        pos = pos.offset(TILE_WIDTH as i32, 0);
+        p.renderer.place_tile(ANIMATION_BADGUYSCREEN + 1, pos)?;
+        Ok(())
     }
 }

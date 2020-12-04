@@ -1,15 +1,18 @@
 use anyhow::{anyhow, Result};
 use freenukum::backdrop;
-use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::settings::Settings;
 use freenukum::tile::TileHeader;
 use freenukum::{
     game, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    pixels::Color,
+};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use transdl::event::{Event, KeyCode};
 
 /// Show an original Duke Nukem 1 backdrop.
 #[derive(StructOpt, Debug)]
@@ -20,37 +23,57 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
     let args = Arguments::from_args();
 
     let mut file = File::open(&args.filename)?;
 
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        (BACKDROP_WIDTH * TILE_WIDTH) as i32,
-        (BACKDROP_HEIGHT * TILE_HEIGHT) as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+
+    let window = game::create_window(
+        BACKDROP_WIDTH * TILE_WIDTH,
+        BACKDROP_HEIGHT * TILE_HEIGHT,
         settings.fullscreen,
-        format!("Freenukum {} backdrop example", VERSION),
-        format!("Freenukum {} backdrop example", VERSION),
+        &format!("Freenukum {} backdrop example", VERSION),
+        &video_subsystem,
     )?;
 
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
+
     TileHeader::load_from(&mut file)?;
-    let backdrop = backdrop::load(&mut file, &screen.surface_creator())?;
-    backdrop.blit(None, &mut screen, None);
-    screen.update();
+    let backdrop = backdrop::load(&mut file)?;
+    canvas
+        .copy(&backdrop.as_texture(&texture_creator)?, None, None)
+        .map_err(|s| anyhow!(s))?;
+    canvas.present();
 
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
+        match event_pump.wait_event() {
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
-            Event::VideoExpose => screen.update(),
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => canvas.present(),
             _ => {}
         }
     }

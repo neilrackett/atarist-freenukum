@@ -1,45 +1,66 @@
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
-use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
-use anyhow::Result;
-use transdl::video::{Rect, Surface};
+use crate::Result;
+use anyhow::anyhow;
+use sdl2::{
+    rect::{Point, Rect},
+    render::WindowCanvas,
+    surface::Surface,
+    EventPump,
+};
 
 pub fn show(
-    screen: &mut Surface,
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
     text: &str,
+    event_pump: &mut EventPump,
 ) -> Result<()> {
-    let messagebox =
-        messagebox(text, tilecache, &mut screen.surface_creator());
-    let destrect = Rect {
-        x: (screen.width() as isize - messagebox.width() as isize) as i16
-            / 2,
-        y: (screen.height() as isize - messagebox.height() as isize)
-            as i16
-            / 2,
-        w: messagebox.width() as u16,
-        h: messagebox.height() as u16,
-    };
+    let texture_creator = canvas.texture_creator();
+    let messagebox = messagebox(text, tilecache, &texture_creator)?;
+    let surface = canvas
+        .window()
+        .surface(event_pump)
+        .map_err(|s| anyhow!(s))?;
+    let destrect = Rect::from_center(
+        Point::new(
+            surface.width() as i32 / 2,
+            surface.height() as i32 / 2,
+        ),
+        messagebox.width(),
+        messagebox.height(),
+    );
 
-    // backup the background
-    let mut background_backup = screen
-        .surface_creator()
-        .create(destrect.w as u32, destrect.h as u32);
+    let mut background_backup = Surface::new(
+        destrect.width(),
+        destrect.height(),
+        surface.pixel_format_enum(),
+    )
+    .map_err(|s| anyhow!(s))?;
+    surface
+        .blit(destrect, &mut background_backup, None)
+        .map_err(|s| anyhow!(s))?;
 
-    screen.blit(Some(destrect), &mut background_backup, None);
-    messagebox.blit(None, screen, Some(destrect));
-    screen.update_rect(0, 0, 0, 0);
+    canvas
+        .copy(&messagebox.as_texture(&texture_creator)?, None, destrect)
+        .map_err(|s| anyhow!(s))?;
+    canvas.present();
 
     loop {
-        match ConfirmEvent::wait()? {
+        match ConfirmEvent::wait(event_pump)? {
             ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
-                background_backup.blit(None, screen, Some(destrect));
-                screen.update_rect(0, 0, 0, 0);
+                canvas
+                    .copy(
+                        &background_backup.as_texture(&texture_creator)?,
+                        None,
+                        destrect,
+                    )
+                    .map_err(|s| anyhow!(s))?;
+                canvas.present();
                 return Ok(());
             }
             ConfirmEvent::RefreshScreen => {
-                screen.update_rect(0, 0, 0, 0);
+                canvas.present();
             }
         }
     }
@@ -59,11 +80,12 @@ impl InfoMessageQueue {
 
     pub fn process(
         &mut self,
-        screen: &mut Surface,
+        canvas: &mut WindowCanvas,
         tilecache: &TileCache,
+        event_pump: &mut EventPump,
     ) -> Result<()> {
         for message in self.messages.drain(..) {
-            show(screen, tilecache, &message)?;
+            show(canvas, tilecache, &message, event_pump)?;
         }
         Ok(())
     }

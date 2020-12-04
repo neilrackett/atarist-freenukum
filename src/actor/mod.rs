@@ -37,20 +37,23 @@ mod teleporter;
 mod unstablefloor;
 mod wallcrawler;
 
-use crate::geometry::RectExt;
-use crate::hero::HeroData;
-use crate::infobox::InfoMessageQueue;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::rendering::{Renderer, SurfaceRenderer};
-use crate::tilecache::TileCache;
-use crate::{TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::{Rect, Surface};
+use crate::{
+    geometry::RectExt, hero::HeroData, infobox::InfoMessageQueue,
+    level::solids::LevelSolids, level::tiles::LevelTiles,
+    rendering::Renderer, Result,
+};
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub struct ActorsList {
     actors: Vec<Actor>,
     interaction_target: Option<usize>,
+}
+
+impl Default for ActorsList {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ActorsList {
@@ -213,56 +216,41 @@ impl ActorsList {
         hero_data.gets_hurt = actors_hurting_hero > 0;
     }
 
-    pub fn update_visibility(
-        &mut self,
-        vis_x_start: i16,
-        vis_x_end: i16,
-        vis_y_start: i16,
-        vis_y_end: i16,
-    ) {
+    pub fn update_visibility(&mut self, visible_rect: Rect) {
         self.actors.iter_mut().for_each(|actor| {
-            let pos = actor.general.position;
-            let x_left = pos.x / TILE_WIDTH as i16;
-            let y_top = pos.y / TILE_HEIGHT as i16;
-            let x_right = x_left + pos.w as i16 / TILE_WIDTH as i16;
-            let y_bottom = y_top + pos.h as i16 / TILE_HEIGHT as i16;
-            actor.general.is_visible = x_right > vis_x_start
-                && y_bottom > vis_y_start
-                && x_left < vis_x_end
-                && y_top < vis_y_end;
+            actor.general.is_visible =
+                actor.general.position.has_intersection(visible_rect);
         });
     }
 
-    pub fn blit_background_actors(
+    pub fn render_background_actors(
         &mut self,
-        target: &mut Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
-    ) {
-        self.actors
+    ) -> Result<()> {
+        Ok(self
+            .actors
             .iter_mut()
             .filter(|actor| {
                 actor.general.is_visible && !actor.general.is_in_foreground
             })
-            .for_each(|actor| {
-                actor.render(target, tilecache, draw_collision_bounds)
-            });
+            .map(|actor| actor.render(renderer, draw_collision_bounds))
+            .collect::<Result<_>>()?)
     }
 
-    pub fn blit_foreground_actors(
+    pub fn render_foreground_actors(
         &mut self,
-        target: &mut Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
-    ) {
-        self.actors
+    ) -> Result<()> {
+        Ok(self
+            .actors
             .iter_mut()
             .filter(|actor| {
                 actor.general.is_visible && actor.general.is_in_foreground
             })
-            .for_each(|actor| {
-                actor.render(target, tilecache, draw_collision_bounds)
-            });
+            .map(|actor| actor.render(renderer, draw_collision_bounds))
+            .collect::<Result<_>>()?)
     }
 }
 
@@ -315,16 +303,14 @@ impl Actor {
 
                 self.specific.hero_touch_start(p);
             }
-        } else {
-            if self.general.touches_hero {
-                self.general.touches_hero = false;
+        } else if self.general.touches_hero {
+            self.general.touches_hero = false;
 
-                let p = HeroTouchEndParameters {
-                    general: &mut self.general,
-                    hero_data,
-                };
-                self.specific.hero_touch_end(p);
-            }
+            let p = HeroTouchEndParameters {
+                general: &mut self.general,
+                hero_data,
+            };
+            self.specific.hero_touch_end(p);
         }
     }
 
@@ -373,21 +359,20 @@ impl Actor {
 
     pub fn render(
         &mut self,
-        target: &mut Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
-    ) {
-        let mut renderer = SurfaceRenderer { target, tilecache };
+    ) -> Result<()> {
         let p = RenderParameters {
             general: &mut self.general,
-            renderer: &mut renderer,
+            renderer,
         };
-        self.specific.render(p);
+        self.specific.render(p)?;
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color();
-            renderer.draw_rect(self.general.position, &color);
+            renderer.draw_rect(self.general.position, color)?;
         }
+        Ok(())
     }
 }
 
@@ -915,7 +900,7 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            position: Rect::default(),
+            position: Rect::new(0, 0, 0, 0),
             is_in_foreground: true,
             hurts_hero: false,
             is_alive: true,
@@ -928,14 +913,13 @@ impl ActorData {
 
 pub struct ActorQueueItem {
     pub actor_type: ActorType,
-    pub x: u16,
-    pub y: u16,
+    pub pos: Point,
 }
 
 pub trait ActorAdder {
-    fn add_actor(&mut self, actor_type: ActorType, x: u16, y: u16);
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point);
 
-    fn add_particle_firework(&mut self, x: u16, y: u16, count: usize) {
+    fn add_particle_firework(&mut self, pos: Point, count: usize) {
         for i in 0..count {
             let actor_type = match i % 4 {
                 0 => ActorType::ParticlePink,
@@ -944,7 +928,7 @@ pub trait ActorAdder {
                 3 => ActorType::ParticleGreen,
                 _ => unreachable!(),
             };
-            self.add_actor(actor_type, x, y);
+            self.add_actor(actor_type, pos);
         }
     }
 }
@@ -955,8 +939,8 @@ pub struct ActorQueue {
 }
 
 impl ActorAdder for ActorQueue {
-    fn add_actor(&mut self, actor_type: ActorType, x: u16, y: u16) {
-        self.push_back(actor_type, x, y);
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
+        self.push_back(actor_type, pos);
     }
 }
 
@@ -965,13 +949,13 @@ impl ActorQueue {
         Self { actors: Vec::new() }
     }
 
-    pub fn push_back(&mut self, actor_type: ActorType, x: u16, y: u16) {
-        self.actors.push(ActorQueueItem { actor_type, x, y });
+    pub fn push_back(&mut self, actor_type: ActorType, pos: Point) {
+        self.actors.push(ActorQueueItem { actor_type, pos });
     }
 
     pub(crate) fn process(&mut self, destination: &mut dyn ActorAdder) {
-        for ActorQueueItem { actor_type, x, y } in self.actors.drain(..) {
-            destination.add_actor(actor_type, x, y);
+        for ActorQueueItem { actor_type, pos } in self.actors.drain(..) {
+            destination.add_actor(actor_type, pos);
         }
     }
 }
@@ -982,10 +966,9 @@ pub struct LevelActorAdder<'a> {
     pub actors: &'a mut ActorsList,
 }
 impl<'a> ActorAdder for LevelActorAdder<'a> {
-    fn add_actor(&mut self, actor_type: ActorType, x: u16, y: u16) {
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
         let mut general = ActorData::new(actor_type);
-        general.position.x = x as i16;
-        general.position.y = y as i16;
+        general.position.reposition(pos);
         let specific = actor_type.create_actor_interface(
             &mut general,
             self.solids,
@@ -1113,7 +1096,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
 
     fn act(&mut self, p: ActParameters);
 
-    fn render(&mut self, p: RenderParameters);
+    fn render(&mut self, p: RenderParameters) -> Result<()>;
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
         false

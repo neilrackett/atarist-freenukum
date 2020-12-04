@@ -1,10 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+        ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -20,18 +22,19 @@ impl ActorCreateInterface for Specific {
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         while general.position.y > 0
             && !solids.get(
-                general.position.x as usize / TILE_WIDTH,
-                general.position.y as usize / TILE_HEIGHT - 1,
+                general.position.x() as u32 / TILE_WIDTH,
+                general.position.y() as u32 / TILE_HEIGHT - 1,
             )
         {
-            general.position.y -= TILE_HEIGHT as i16;
-            general.position.h += TILE_HEIGHT as u16;
+            general.position.offset(0, -(TILE_HEIGHT as i32));
+            general
+                .position
+                .set_height(general.position.height() + TILE_HEIGHT);
         }
 
         Specific {
@@ -55,14 +58,14 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
 
-        for _ in 0..p.general.position.h as usize / TILE_WIDTH {
-            p.renderer
-                .place_tile(self.tile + self.current_frame, destrect);
-            destrect.y += TILE_HEIGHT as i16;
+        for _ in 0..p.general.position.height() / TILE_WIDTH {
+            p.renderer.place_tile(self.tile + self.current_frame, pos)?;
+            pos.y += TILE_HEIGHT as i32;
         }
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -72,30 +75,27 @@ impl ActorInterface for Specific {
     fn shot(&mut self, p: ShotParameters) {
         self.lives -= 1;
         if self.lives > 0 {
-            p.actor_adder.add_particle_firework(
-                p.general.position.x as u16 + p.general.position.w / 2,
-                p.general.position.y as u16 + p.general.position.h / 2,
-                4,
-            );
+            p.actor_adder
+                .add_particle_firework(p.general.position.center(), 4);
         } else {
             // TODO: add removal animation (destroyed body)
             p.general.is_alive = false;
             p.hero_data.score.add(20000);
-            p.actor_adder.add_particle_firework(
-                p.general.position.x as u16 + p.general.position.w / 2,
-                p.general.position.y as u16 + p.general.position.h / 2,
-                20,
+            p.actor_adder
+                .add_particle_firework(p.general.position.center(), 20);
+            p.actor_adder.add_actor(
+                ActorType::Score10000,
+                p.general.position.top_left().offset(
+                    0,
+                    (p.general.position.height() / 2 - TILE_HEIGHT) as i32,
+                ),
             );
             p.actor_adder.add_actor(
                 ActorType::Score10000,
-                p.general.position.x as u16,
-                p.general.position.y as u16 + p.general.position.h / 2
-                    - TILE_HEIGHT as u16,
-            );
-            p.actor_adder.add_actor(
-                ActorType::Score10000,
-                p.general.position.x as u16,
-                p.general.position.y as u16 + p.general.position.h / 2,
+                p.general
+                    .position
+                    .top_left()
+                    .offset(0, p.general.position.height() as i32 / 2),
             );
         }
     }

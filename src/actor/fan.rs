@@ -1,11 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters, ShotParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters, ShotParameters,
+    },
+    geometry::RectExt,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::geometry::RectExt;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -21,9 +22,8 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.y -= TILE_HEIGHT as i16;
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16 * 2;
+        general.position.offset(0, -(TILE_HEIGHT as i32));
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT * 2);
 
         Specific {
             tile: ANIMATION_FAN,
@@ -61,50 +61,50 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
         if self.running < 10 && self.running > 0 {
             self.running -= 1;
-        } else if self.running == 10 {
-            if p.hero_data
+        } else if self.running == 10
+            && p.hero_data
                 .position
                 .geometry
                 .overlaps_vertically(p.general.position)
+        {
+            let mut hdistance = p
+                .hero_data
+                .position
+                .geometry
+                .horizontal_distance(p.general.position);
+
+            let fan_direction = match p.general.actor_type {
+                ActorType::FanLeft => -1,
+                ActorType::FanRight => 1,
+                _ => unreachable!(),
+            };
+            if (fan_direction > 0 && hdistance > 0)
+                || (fan_direction < 0 && hdistance < 0)
             {
-                let mut hdistance = p
-                    .hero_data
-                    .position
-                    .geometry
-                    .horizontal_distance(p.general.position);
+                return;
+            }
 
-                let fan_direction = match p.general.actor_type {
-                    ActorType::FanLeft => -1,
-                    ActorType::FanRight => 1,
-                    _ => unreachable!(),
-                };
-                if (fan_direction > 0 && hdistance > 0)
-                    || (fan_direction < 0 && hdistance < 0)
-                {
-                    return;
-                }
+            if hdistance == 0 {
+                hdistance = HALFTILE_WIDTH as i32 * fan_direction;
+            }
 
-                if hdistance == 0 {
-                    hdistance = HALFTILE_WIDTH as i32 * fan_direction;
-                }
-
-                if hdistance.abs() < 8 * HALFTILE_WIDTH as i32 {
-                    p.hero_data.position.push_horizontally(
-                        &p.solids,
-                        fan_direction as i16 * TILE_WIDTH as i16,
-                    );
-                }
+            if hdistance.abs() < 8 * HALFTILE_WIDTH as i32 {
+                p.hero_data.position.push_horizontally(
+                    &p.solids,
+                    fan_direction * TILE_WIDTH as i32,
+                );
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
         p.renderer
-            .place_tile(self.tile + self.current_frame * 2, destrect);
-        destrect.y += TILE_HEIGHT as i16;
+            .place_tile(self.tile + self.current_frame * 2, pos)?;
+        pos.y += TILE_HEIGHT as i32;
         p.renderer
-            .place_tile(self.tile + self.current_frame * 2 + 1, destrect);
+            .place_tile(self.tile + self.current_frame * 2 + 1, pos)?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -113,10 +113,7 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, p: ShotParameters) {
         self.running = 9;
-        p.actor_adder.add_actor(
-            ActorType::Steam,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
-        );
+        p.actor_adder
+            .add_actor(ActorType::Steam, p.general.position.top_left());
     }
 }

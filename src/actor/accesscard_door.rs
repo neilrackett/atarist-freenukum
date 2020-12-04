@@ -1,10 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType, ReceiveMessageParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -19,8 +20,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
@@ -37,19 +37,20 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
         if p.message != ActorMessageType::OpenDoor {
             return;
         }
-        let x = p.general.position.x as usize / TILE_WIDTH;
-        let y = p.general.position.y as usize / TILE_HEIGHT;
+        let x = p.general.position.x() as u32 / TILE_WIDTH;
+        let y = p.general.position.y() as u32 / TILE_HEIGHT;
         p.solids.set(x, y, false);
         p.general.is_alive = false;
     }

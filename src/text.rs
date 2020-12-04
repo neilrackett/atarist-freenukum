@@ -1,11 +1,11 @@
 use crate::rendering::{MovePositionRenderer, Renderer};
 use crate::{
-    FONT_ASCII_LOWERCASE, FONT_ASCII_UPPERCASE, FONT_HEIGHT,
+    Result, FONT_ASCII_LOWERCASE, FONT_ASCII_UPPERCASE, FONT_HEIGHT,
     FONT_QUESTIONMARK, FONT_WIDTH,
 };
-use transdl::video::Rect;
+use sdl2::rect::Point;
 
-fn render_letter(renderer: &mut dyn Renderer, letter: char) {
+fn render_letter(renderer: &mut dyn Renderer, letter: char) -> Result<()> {
     let tilenr = match letter {
         c if c >= ' ' && c <= 'Z' => {
             c as usize - ' ' as usize + FONT_ASCII_UPPERCASE
@@ -15,18 +15,10 @@ fn render_letter(renderer: &mut dyn Renderer, letter: char) {
         }
         _ => FONT_QUESTIONMARK,
     } as usize;
-    renderer.place_tile(
-        tilenr,
-        Rect {
-            x: 0,
-            y: 0,
-            w: FONT_WIDTH as u16,
-            h: FONT_HEIGHT as u16,
-        },
-    );
+    renderer.place_tile(tilenr, Point::new(0, 0))
 }
 
-pub fn render(renderer: &mut dyn Renderer, text: &str) {
+pub fn render(renderer: &mut dyn Renderer, text: &str) -> Result<()> {
     let mut offset_x = 0;
     let mut offset_y = 0;
 
@@ -40,8 +32,9 @@ pub fn render(renderer: &mut dyn Renderer, text: &str) {
                 offset_y,
                 upstream: renderer,
             };
-            render_letter(&mut renderer, c);
+            render_letter(&mut renderer, c)?;
             offset_x += FONT_WIDTH as i32;
         }
     }
+    Ok(())
 }

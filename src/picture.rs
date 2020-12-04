@@ -1,34 +1,38 @@
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
-use crate::graphics::{
-    SurfaceCreator, SurfaceCreatorProvider, SurfaceExt,
-};
 use crate::{
     Result, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
+use anyhow::anyhow;
+use sdl2::{
+    pixels::{Color, PixelFormatEnum},
+    rect::Rect,
+    render::{Canvas, WindowCanvas},
+    surface::Surface,
+    EventPump,
+};
 use std::fs::File;
 use std::io::Read;
-use transdl::video::{Rect, Surface};
 
-pub fn load(
-    input: &mut File,
-    surface_creator: &dyn SurfaceCreator,
-) -> Result<Surface> {
-    let mut picture =
-        surface_creator.create(WINDOW_WIDTH as u32, WINDOW_HEIGHT as u32);
-    const NUM_LOADS: usize = PICTURE_WIDTH * PICTURE_HEIGHT;
+pub fn load<'t>(input: &mut File) -> Result<Surface<'t>> {
+    let surface =
+        Surface::new(WINDOW_WIDTH, WINDOW_HEIGHT, PixelFormatEnum::RGB888)
+            .map_err(|s| anyhow!(s))?;
+
+    const NUM_LOADS: usize = (PICTURE_WIDTH * PICTURE_HEIGHT) as usize;
     let mut buffer = [0u8; NUM_LOADS];
 
-    let mut data = [0u8; PICTURE_WIDTH * PICTURE_HEIGHT * 4 * 8];
+    let mut data =
+        [0u8; PICTURE_WIDTH as usize * PICTURE_HEIGHT as usize * 4 * 8];
     let mut index;
 
     // read blue
     index = 2;
     input.read_exact(&mut buffer)?;
-    for i in 0..NUM_LOADS {
+    for item in buffer.iter().take(NUM_LOADS) {
         for j in 0..8 {
-            let blue_pixel: u8 = (buffer[i] >> (7 - j)) & 1;
+            let blue_pixel: u8 = (item >> (7 - j)) & 1;
             data[index] += blue_pixel * 0x54 * 2;
             index += 4;
         }
@@ -37,9 +41,9 @@ pub fn load(
     // read green
     index = 1;
     input.read_exact(&mut buffer)?;
-    for i in 0..NUM_LOADS {
+    for item in buffer.iter().take(NUM_LOADS) {
         for j in 0..8 {
-            let green_pixel: u8 = (buffer[i] >> (7 - j)) & 1;
+            let green_pixel: u8 = (item >> (7 - j)) & 1;
             data[index] += green_pixel * 0x54 * 2;
             index += 4;
         }
@@ -48,9 +52,9 @@ pub fn load(
     // read red
     index = 0;
     input.read_exact(&mut buffer)?;
-    for i in 0..NUM_LOADS {
+    for item in buffer.iter().take(NUM_LOADS) {
         for j in 0..8 {
-            let red_pixel: u8 = (buffer[i] >> (7 - j)) & 1;
+            let red_pixel: u8 = (item >> (7 - j)) & 1;
             data[index] += red_pixel * 0x54 * 2;
             index += 4;
         }
@@ -59,9 +63,9 @@ pub fn load(
     // read brighten, and set pixels opaque
     index = 0;
     input.read_exact(&mut buffer)?;
-    for i in 0..NUM_LOADS {
+    for item in buffer.iter().take(NUM_LOADS) {
         for j in 0..8 {
-            let bright_pixel: u8 = (buffer[i] >> (7 - j)) & 1;
+            let bright_pixel: u8 = (item >> (7 - j)) & 1;
 
             // brighten red
             data[index] += bright_pixel * 0x54;
@@ -81,50 +85,67 @@ pub fn load(
         }
     }
 
-    picture.set_data(&data);
+    use crate::graphics::SurfaceExt;
+    let mut canvas =
+        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.set_data(&data, PICTURE_WIDTH * 8, PICTURE_HEIGHT)?;
+    let surface = canvas.into_surface();
 
-    Ok(picture)
+    Ok(surface)
 }
 
 pub fn show_splash(
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
-    target: &mut Surface,
     file: &mut File,
+    event_pump: &mut EventPump,
 ) -> Result<()> {
-    show_splash_with_message(tilecache, target, file, None, 0, 0)
+    show_splash_with_message(
+        canvas, tilecache, file, event_pump, None, 0, 0,
+    )
 }
 
 pub fn show_splash_with_message(
+    canvas: &mut WindowCanvas,
     tilecache: &TileCache,
-    target: &mut Surface,
     file: &mut File,
+    event_pump: &mut EventPump,
     message: Option<&str>,
-    x: i16,
-    y: i16,
+    x: i32,
+    y: i32,
 ) -> Result<()> {
-    let picture = load(file, &target.surface_creator())?;
-    picture.blit(None, target, None);
+    let picture = load(file)?;
+
+    let texture_creator = canvas.texture_creator();
+
+    canvas
+        .copy(&picture.as_texture(&texture_creator)?, None, None)
+        .map_err(|s| anyhow!(s))?;
 
     if let Some(message) = message {
-        let messagebox =
-            messagebox(message, tilecache, &mut target.surface_creator());
-        let destrect = Rect {
-            x,
-            y,
-            w: messagebox.width() as u16,
-            h: messagebox.height() as u16,
-        };
-        messagebox.blit(None, target, Some(destrect));
+        let messagebox = messagebox(message, tilecache, &texture_creator)?;
+        let destrect =
+            Rect::new(x, y, messagebox.width(), messagebox.height());
+
+        canvas
+            .copy(
+                &messagebox.as_texture(&texture_creator)?,
+                None,
+                destrect,
+            )
+            .map_err(|s| anyhow!(s))?;
     }
-    target.update_rect(0, 0, 0, 0);
+    canvas.present();
 
     loop {
-        match ConfirmEvent::wait()? {
+        match ConfirmEvent::wait(event_pump)? {
             ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
                 return Ok(())
             }
             ConfirmEvent::RefreshScreen => {
-                target.update_rect(0, 0, 0, 0);
+                canvas.present();
             }
         }
     }

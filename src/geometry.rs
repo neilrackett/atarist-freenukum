@@ -1,3 +1,5 @@
+use sdl2::rect::Rect;
+
 pub trait RectExt {
     fn touches(&self, other: Self) -> bool;
     fn overlaps(&self, other: Self) -> bool;
@@ -5,12 +7,12 @@ pub trait RectExt {
     fn horizontal_distance(&self, other: Self) -> i32;
 }
 
-impl RectExt for transdl::video::Rect {
+impl RectExt for Rect {
     fn touches(&self, other: Self) -> bool {
-        let mut r1 = self.clone();
+        let mut r1 = *self;
         r1.w += 1;
         r1.h += 1;
-        let mut r2 = other.clone();
+        let mut r2 = other;
         r2.w += 1;
         r2.h += 1;
         r1.overlaps(r2)
@@ -43,12 +45,12 @@ impl RectExt for transdl::video::Rect {
     }
 
     fn horizontal_distance(&self, other: Self) -> i32 {
-        if (self.x as i32 + self.w as i32) < other.x as i32 {
-            return other.x as i32 - self.w as i32 - self.x as i32;
+        if self.right() < other.left() {
+            other.left() - self.right()
+        } else if other.right() < self.left() {
+            self.left() - other.right()
+        } else {
+            0
         }
-        if (other.x as i32 + other.w as i32) < self.x as i32 {
-            return -(self.x as i32 - other.w as i32 - other.x as i32);
-        }
-        return 0;
     }
 }

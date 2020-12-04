@@ -1,17 +1,18 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, SOLID_START, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{SOLID_START, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     touch_count: usize,
     touching_hero: bool,
-    floor_length: usize,
+    floor_length: u32,
 }
 
 impl ActorCreateInterface for Specific {
@@ -22,19 +23,20 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         let mut floor_length = 0;
         while !solids.get(
-            general.position.x as usize / TILE_WIDTH + floor_length,
-            general.position.y as usize / TILE_HEIGHT,
+            general.position.x() as u32 / TILE_WIDTH + floor_length,
+            general.position.y() as u32 / TILE_HEIGHT,
         ) {
             solids.set(
-                general.position.x as usize / TILE_WIDTH + floor_length,
-                general.position.y as usize / TILE_HEIGHT,
+                general.position.x() as u32 / TILE_WIDTH + floor_length,
+                general.position.y() as u32 / TILE_HEIGHT,
                 true,
             );
             floor_length += 1;
         }
 
-        general.position.w = (TILE_WIDTH * floor_length) as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general
+            .position
+            .resize(TILE_WIDTH * floor_length, TILE_HEIGHT);
 
         Specific {
             tile: SOLID_START + 77,
@@ -52,12 +54,10 @@ impl ActorInterface for Specific {
         // because it only gets triggered when the hero geometry
         // overlaps with the part, which is not the case here.
         let hero_geometry = p.hero_data.position.geometry;
-        let hero_center = hero_geometry.x + (hero_geometry.w as i16) / 2;
-        let stands_upon = hero_center >= p.general.position.x
-            && hero_center
-                <= p.general.position.x + p.general.position.w as i16
-            && hero_geometry.y + hero_geometry.h as i16
-                == p.general.position.y;
+        let hero_center = hero_geometry.x() + (hero_geometry.w as i32) / 2;
+        let stands_upon = hero_center >= p.general.position.left()
+            && hero_center <= p.general.position.right()
+            && hero_geometry.bottom() == p.general.position.top();
 
         if stands_upon {
             if !self.touching_hero {
@@ -72,28 +72,25 @@ impl ActorInterface for Specific {
             let mut r = p.general.position;
             for _ in 0..self.floor_length {
                 p.solids.set(
-                    r.x as usize / TILE_WIDTH,
-                    r.y as usize / TILE_HEIGHT,
+                    r.x() as u32 / TILE_WIDTH,
+                    r.y() as u32 / TILE_HEIGHT,
                     false,
                 );
-                p.actor_adder.add_actor(
-                    ActorType::Explosion,
-                    r.x as u16,
-                    r.y as u16,
-                );
                 p.actor_adder
-                    .add_particle_firework(r.x as u16, r.y as u16, 4);
-                r.x += TILE_WIDTH as i16;
+                    .add_actor(ActorType::Explosion, r.top_left());
+                p.actor_adder.add_particle_firework(r.center(), 4);
+                r.offset(TILE_WIDTH as i32, 0);
             }
             p.general.is_alive = false;
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
         for _ in 0..self.floor_length {
-            p.renderer.place_tile(self.tile, destrect);
-            destrect.x += TILE_WIDTH as i16;
+            p.renderer.place_tile(self.tile, pos)?;
+            pos.x += TILE_WIDTH as i32;
         }
+        Ok(())
     }
 }

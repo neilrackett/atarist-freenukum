@@ -1,13 +1,16 @@
 use anyhow::{anyhow, Result};
 use freenukum::game;
-use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::settings::Settings;
 use freenukum::tile::{self, TileHeader};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    pixels::Color,
+    rect::Rect,
+};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
-use transdl::event::{Event, KeyCode};
-use transdl::video::Rect;
 
 /// Show tiles from a Duke Nukem 1 grame graphics file.
 #[derive(StructOpt, Debug)]
@@ -20,7 +23,7 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
     let args = Arguments::from_args();
 
     let settings = Settings::load_or_create();
@@ -28,45 +31,56 @@ fn main() -> Result<()> {
     let mut file = File::open(&args.filename)?;
     let header = TileHeader::load_from(&mut file)?;
 
-    let mut r = Rect {
-        x: 0,
-        y: 0,
-        w: header.width as u16 * 8,
-        h: header.height as u16,
-    };
+    let mut r =
+        Rect::new(0, 0, header.width as u32 * 8, header.height as u32);
 
-    let mut screen = game::initialize_and_get_window(
-        r.w as i32 * header.tiles as i32,
-        r.h as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let window = game::create_window(
+        r.width() * header.tiles as u32,
+        r.height(),
         settings.fullscreen,
-        format!("Freenukum {} tile example", VERSION),
-        format!("Freenukum {} tile example", VERSION),
+        &format!("Freenukum {} tile example", VERSION),
+        &video_subsystem,
     )?;
 
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
+
     for _ in 0..header.tiles {
-        let tile = tile::load(
-            &mut file,
-            &screen.surface_creator(),
-            header,
-            false,
-        )?;
-        tile.blit(None, &mut screen, Some(r));
-        r.x += header.width as i16 * 8;
+        let tile = tile::load(&mut file, header, false)?;
+        canvas
+            .copy(&tile.as_texture(&texture_creator)?, None, r)
+            .map_err(|s| anyhow!(s))?;
+        r.set_x(r.x() + header.width as i32 * 8);
     }
-    screen.update();
+    canvas.present();
+
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
 
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
+        match event_pump.wait_event() {
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
-            Event::VideoExpose => screen.update(),
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => canvas.present(),
             _ => {}
         }
     }

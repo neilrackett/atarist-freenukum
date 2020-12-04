@@ -1,11 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -21,8 +22,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         let tile = match general.actor_type {
             ActorType::HostileShotLeft => OBJECT_HOSTILESHOT,
@@ -56,15 +56,15 @@ impl ActorInterface for Specific {
 
     fn act(&mut self, p: ActParameters) {
         let offset = match p.general.actor_type {
-            ActorType::HostileShotLeft => -(TILE_WIDTH as i16),
-            ActorType::HostileShotRight => TILE_WIDTH as i16,
+            ActorType::HostileShotLeft => -(TILE_WIDTH as i32),
+            ActorType::HostileShotRight => TILE_WIDTH as i32,
             _ => unreachable!(),
         };
-        p.general.position.x += offset;
+        p.general.position.offset(offset, 0);
 
         if p.solids.get(
-            p.general.position.x as usize / TILE_WIDTH,
-            p.general.position.y as usize / TILE_HEIGHT,
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT,
         ) {
             p.general.is_alive = false;
             if self.touching_hero {
@@ -76,10 +76,11 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 }

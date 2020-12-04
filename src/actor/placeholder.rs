@@ -1,9 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 
 #[derive(Debug)]
 pub(crate) struct Specific {}
@@ -27,5 +29,7 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
-    fn render(&mut self, _p: RenderParameters) {}
+    fn render(&mut self, _p: RenderParameters) -> Result<()> {
+        Ok(())
+    }
 }

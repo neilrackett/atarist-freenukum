@@ -1,11 +1,10 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, RenderParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
 
@@ -13,8 +12,8 @@ use crate::{
 pub(crate) struct Specific {
     tile: usize,
     countdown: usize,
-    hspeed: i16,
-    vspeed: i16,
+    hspeed: i32,
+    vspeed: i32,
 }
 
 impl ActorCreateInterface for Specific {
@@ -24,8 +23,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = true;
-        general.position.w = HALFTILE_WIDTH as u16;
-        general.position.h = HALFTILE_HEIGHT as u16;
+        general.position.resize(HALFTILE_WIDTH, HALFTILE_HEIGHT);
 
         use rand::Rng;
         let mut rng = rand::thread_rng();
@@ -53,15 +51,16 @@ impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;
-            p.general.position.x += self.hspeed;
-            p.general.position.y += self.vspeed;
+            p.general.position.offset(self.hspeed, self.vspeed);
             self.vspeed += 2;
         } else {
             p.general.is_alive = false;
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 }

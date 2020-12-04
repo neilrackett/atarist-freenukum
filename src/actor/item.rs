@@ -1,13 +1,13 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
-};
-use crate::hero::{FetchedLetter, InventoryItem};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    ANIMATION_SODA, HALFTILE_HEIGHT, OBJECT_ACCESS_CARD, OBJECT_BOOT,
-    OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+        ShotParameters,
+    },
+    hero::{FetchedLetter, InventoryItem},
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_SODA, HALFTILE_HEIGHT, OBJECT_ACCESS_CARD,
+    OBJECT_BOOT, OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
     OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE, OBJECT_CLAMP,
     OBJECT_DISK, OBJECT_FLAG, OBJECT_FOOTBALL, OBJECT_GLOVE, OBJECT_GUN,
     OBJECT_JOYSTICK, OBJECT_LETTER_D, OBJECT_LETTER_E, OBJECT_LETTER_K,
@@ -28,8 +28,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         let (tile, num_frames) = match general.actor_type {
@@ -95,8 +94,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::LetterU => {
@@ -105,8 +103,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::LetterK => {
@@ -115,8 +112,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::LetterE => {
@@ -126,15 +122,13 @@ impl ActorInterface for Specific {
                 if p.hero_data.fetched_letter_state.succeeded() {
                     p.actor_adder.add_actor(
                         ActorType::Score10000,
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                     );
                     p.hero_data.score.add(10000);
                 } else {
                     p.actor_adder.add_actor(
                         ActorType::Score500,
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                     );
                     p.hero_data.score.add(500);
                 }
@@ -145,8 +139,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Gun => {
@@ -155,8 +148,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::AccessCard => {
@@ -165,8 +157,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Glove => {
@@ -175,8 +166,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Boots => {
@@ -185,8 +175,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Clamps => {
@@ -195,8 +184,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Football => {
@@ -204,8 +192,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Disk => {
@@ -213,8 +200,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(5000);
                 p.actor_adder.add_actor(
                     ActorType::Score5000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Joystick => {
@@ -222,8 +208,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(2000);
                 p.actor_adder.add_actor(
                     ActorType::Score2000,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::Radio | ActorType::Flag => {
@@ -233,24 +218,21 @@ impl ActorInterface for Specific {
                         p.hero_data.score.add(100);
                         p.actor_adder.add_actor(
                             ActorType::Score100,
-                            p.general.position.x as u16,
-                            p.general.position.y as u16,
+                            p.general.position.top_left(),
                         );
                     }
                     1 => {
                         p.hero_data.score.add(2000);
                         p.actor_adder.add_actor(
                             ActorType::Score2000,
-                            p.general.position.x as u16,
-                            p.general.position.y as u16,
+                            p.general.position.top_left(),
                         );
                     }
                     2 => {
                         p.hero_data.score.add(5000);
                         p.actor_adder.add_actor(
                             ActorType::Score5000,
-                            p.general.position.x as u16,
-                            p.general.position.y as u16,
+                            p.general.position.top_left(),
                         );
                     }
                     _ => unreachable!(),
@@ -262,8 +244,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::ChickenSingle => {
@@ -272,8 +253,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             ActorType::ChickenDouble => {
@@ -282,8 +262,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             _ => {}
@@ -295,163 +274,162 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            p.general.position.x as usize / TILE_WIDTH,
-            p.general.position.y as usize / TILE_HEIGHT + 1,
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
             // fall down until the actor lands on solid ground
-            p.general.position.y += HALFTILE_HEIGHT as i16;
+            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 
     fn can_get_shot(&self, general: &ActorData) -> bool {
-        match general.actor_type {
+        matches!(
+            general.actor_type,
             ActorType::BoxBlueFootball
-            | ActorType::BoxBlueJoystick
-            | ActorType::BoxBlueDisk
-            | ActorType::BoxBlueBalloon
-            | ActorType::BoxBlueFlag
-            | ActorType::BoxBlueRadio
-            | ActorType::BoxRedSoda
-            | ActorType::BoxRedChicken
-            | ActorType::BoxGreyEmpty
-            | ActorType::BoxGreyBoots
-            | ActorType::BoxGreyClamps
-            | ActorType::BoxGreyGun
-            | ActorType::BoxGreyBomb
-            | ActorType::BoxGreyGlove
-            | ActorType::BoxGreyFullLife
-            | ActorType::BoxGreyAccessCard
-            | ActorType::BoxGreyLetterD
-            | ActorType::BoxGreyLetterU
-            | ActorType::BoxGreyLetterK
-            | ActorType::BoxGreyLetterE
-            | ActorType::ChickenSingle
-            | ActorType::Soda => true,
-            _ => false,
-        }
+                | ActorType::BoxBlueJoystick
+                | ActorType::BoxBlueDisk
+                | ActorType::BoxBlueBalloon
+                | ActorType::BoxBlueFlag
+                | ActorType::BoxBlueRadio
+                | ActorType::BoxRedSoda
+                | ActorType::BoxRedChicken
+                | ActorType::BoxGreyEmpty
+                | ActorType::BoxGreyBoots
+                | ActorType::BoxGreyClamps
+                | ActorType::BoxGreyGun
+                | ActorType::BoxGreyBomb
+                | ActorType::BoxGreyGlove
+                | ActorType::BoxGreyFullLife
+                | ActorType::BoxGreyAccessCard
+                | ActorType::BoxGreyLetterD
+                | ActorType::BoxGreyLetterU
+                | ActorType::BoxGreyLetterK
+                | ActorType::BoxGreyLetterE
+                | ActorType::ChickenSingle
+                | ActorType::Soda
+        )
     }
 
     fn shot(&mut self, p: ShotParameters) {
-        let x = p.general.position.x as u16;
-        let y = p.general.position.y as u16;
+        let pos = p.general.position.top_left();
         match p.general.actor_type {
             ActorType::BoxBlueFootball => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Football, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Football, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxBlueJoystick => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Joystick, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Joystick, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxBlueDisk => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Disk, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Disk, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxBlueBalloon => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::Balloon,
-                    x,
-                    y - TILE_HEIGHT as u16,
+                    pos.offset(0, -(TILE_HEIGHT as i32)),
                 );
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxBlueFlag => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Flag, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Flag, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxBlueRadio => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Radio, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Radio, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxRedSoda => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Soda, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Soda, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxRedChicken => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::ChickenSingle, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::ChickenSingle, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyEmpty => {
                 p.general.is_alive = false;
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyBoots => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Boots, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Boots, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyClamps => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Clamps, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Clamps, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyGun => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Gun, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Gun, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyBomb => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Bomb, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Bomb, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyGlove => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Glove, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::Glove, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyFullLife => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::FullLife, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::FullLife, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyAccessCard => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::AccessCard, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::AccessCard, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyLetterD => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterD, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::LetterD, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyLetterU => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterU, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::LetterU, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyLetterK => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterK, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::LetterK, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::BoxGreyLetterE => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterE, x, y);
-                p.actor_adder.add_particle_firework(x, y, 4);
+                p.actor_adder.add_actor(ActorType::LetterE, pos);
+                p.actor_adder.add_particle_firework(pos, 4);
             }
             ActorType::ChickenSingle => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::ChickenDouble, x, y);
+                p.actor_adder.add_actor(ActorType::ChickenDouble, pos);
             }
             ActorType::Soda => {
                 p.general.is_alive = false;
-                p.actor_adder.add_actor(ActorType::SodaFlying, x, y);
+                p.actor_adder.add_actor(ActorType::SodaFlying, pos);
             }
             _ => {}
         }

@@ -38,7 +38,7 @@ impl Episodes {
                 }
             }
         }
-        return true;
+        true
     }
 
     pub fn switch_next(&mut self) -> usize {

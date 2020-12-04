@@ -1,14 +1,14 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType, ActorType, HeroInteractStartParameters,
-    RenderParameters,
-};
-use crate::hero::InventoryItem;
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN,
-    OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED, TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorMessageType, ActorType, HeroInteractStartParameters,
+        RenderParameters,
+    },
+    hero::InventoryItem,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
+    OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -23,8 +23,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
@@ -42,7 +41,7 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = match (self.counter, p.general.actor_type) {
             (0, _) => self.tile,
             (_, ActorType::KeyholeRed) => OBJECT_KEYHOLE_RED,
@@ -52,7 +51,8 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.renderer.place_tile(tile, p.general.position);
+        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        Ok(())
     }
 
     fn hero_can_interact(&self) -> bool {

@@ -72,13 +72,13 @@ fn read_file_entry<R: Read>(
     match reader.read_exact(&mut filename) {
         Ok(_) => {}
         Err(e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
-        Err(e) => Err(e)?,
+        Err(e) => return Err(e.into()),
     }
 
     let mut filename = std::str::from_utf8(
         filename
             .split(|c| *c == 0)
-            .nth(0)
+            .next()
             .context("Couldn't extract filename")?,
     )?
     .to_string();

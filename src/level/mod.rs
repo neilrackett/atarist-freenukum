@@ -2,28 +2,30 @@ pub mod raw;
 pub mod solids;
 pub mod tiles;
 
-use super::actor::{
-    ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
-    LevelActorAdder,
-};
-use super::hero::HeroData;
-use super::infobox::InfoMessageQueue;
-use super::level::raw::LevelRaw;
-use super::level::solids::LevelSolids;
-use super::level::tiles::LevelTiles;
-use super::shot::{Shot, ShotList};
-use super::tilecache::TileCache;
-use super::HorizontalDirection;
-use crate::graphics::SurfaceCreator;
-use crate::rendering::{Renderer, SurfaceRenderer, Transparent};
 use crate::{
-    Result, ANIMATION_START, HALFTILE_WIDTH, LEVELWINDOW_HEIGHT,
-    LEVELWINDOW_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK,
-    SOLID_CONVEYORBELT_LEFTEND, TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
+        LevelActorAdder,
+    },
+    hero::HeroData,
+    infobox::InfoMessageQueue,
+    rendering::Renderer,
+    shot::{Shot, ShotList},
+    HorizontalDirection, Result, ANIMATION_START, HALFTILE_WIDTH,
+    LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use log::warn;
+use raw::LevelRaw;
+use sdl2::{
+    pixels::Color,
+    rect::{Point, Rect},
+    surface::Surface,
+};
+use solids::LevelSolids;
+use std::convert::TryFrom;
 use std::io::Read;
-use transdl::video::{Rect, Surface};
+use tiles::LevelTiles;
 
 #[derive(Debug)]
 pub struct LevelData {
@@ -34,16 +36,12 @@ pub struct LevelData {
     pub actors: ActorsList,
     pub animated_frames_since_last_act: usize,
     pub shots: ShotList,
-    pub surface_fixed: Surface,
-    pub surface: Surface,
 }
 
 impl LevelData {
     pub fn load<R: Read>(
         reader: &mut R,
         hero: &mut HeroData,
-        tilecache: &TileCache,
-        surface_creator: &dyn SurfaceCreator,
         raw: &mut Option<&mut LevelRaw>,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
@@ -57,11 +55,11 @@ impl LevelData {
             let mut tile_buf = [0u8; 2];
             reader.read_exact(&mut tile_buf)?;
 
-            let tx = (x * TILE_WIDTH) as u16;
-            let ty = (y * TILE_HEIGHT) as u16;
+            let tx = (x * TILE_WIDTH) as i32;
+            let ty = (y * TILE_HEIGHT) as i32;
 
             let mut aa = |actor_type, x, y| {
-                actor_queue.add_actor(actor_type, x, y);
+                actor_queue.add_actor(actor_type, Point::new(x, y));
             };
 
             let tile = u16::from_le_bytes(tile_buf);
@@ -280,7 +278,7 @@ impl LevelData {
                 0x3011 =>
                 /* exit door */
                 {
-                    aa(ActorType::ExitDoor, tx, ty - TILE_HEIGHT as u16);
+                    aa(ActorType::ExitDoor, tx, ty - TILE_HEIGHT as i32);
                 }
                 0x3012 =>
                 /* grey box with bomb inside */
@@ -520,10 +518,7 @@ impl LevelData {
                 0x3032 =>
                 /* we found our hero! */
                 {
-                    hero.enter_level(
-                        (x * TILE_WIDTH) as i16,
-                        ((y - 1) * TILE_HEIGHT) as i16,
-                    );
+                    hero.enter_level(tx, ty - TILE_HEIGHT as i32);
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
@@ -827,37 +822,6 @@ impl LevelData {
         };
         actor_queue.process(&mut actor_adder);
 
-        let mut surface_fixed = surface_creator.create(
-            TILE_WIDTH as u32 * LEVEL_WIDTH as u32,
-            TILE_HEIGHT as u32 * LEVEL_HEIGHT as u32,
-        );
-        let surface = surface_creator.create(
-            TILE_WIDTH as u32 * LEVEL_WIDTH as u32,
-            TILE_HEIGHT as u32 * LEVEL_HEIGHT as u32,
-        );
-
-        let mut surface_renderer = SurfaceRenderer {
-            target: &mut surface_fixed,
-            tilecache,
-        };
-
-        surface_renderer.fill(&Transparent);
-
-        for y in 0..LEVEL_HEIGHT {
-            for x in 0..LEVEL_WIDTH {
-                let tilenr = tiles.get(x, y);
-                if tilenr > 1 && tilenr < (48 * 8) {
-                    let destrect = Rect {
-                        x: (TILE_WIDTH * x) as i16,
-                        y: (TILE_HEIGHT * y) as i16,
-                        w: TILE_WIDTH as u16,
-                        h: TILE_HEIGHT as u16,
-                    };
-                    surface_renderer.place_tile(tilenr as usize, destrect);
-                }
-            }
-        }
-
         Ok(LevelData {
             tiles,
             solids,
@@ -866,8 +830,6 @@ impl LevelData {
             actors,
             animated_frames_since_last_act: 0,
             shots: Vec::new(),
-            surface_fixed,
-            surface,
         })
     }
 
@@ -895,87 +857,57 @@ impl LevelData {
         self.animated_frames_since_last_act
     }
 
-    pub fn blit(
+    pub fn render(
         &mut self,
-        target: &mut Surface,
-        tilecache: &TileCache,
+        renderer: &mut dyn Renderer,
         hero: &mut HeroData,
         draw_collision_bounds: bool,
-        targetrect: Rect,
-        sourcerect: Rect,
+        srcrect: Rect,
         backdrop1: Option<&Surface>,
         _backdrop2: Option<&Surface>,
-    ) {
+    ) -> Result<()> {
         if let Some(backdrop) = backdrop1 {
-            backdrop.blit(None, &mut self.surface, Some(sourcerect))
+            renderer.place_surface(backdrop, srcrect)?;
         } else {
-            self.surface.fill_rect(sourcerect, 0);
+            renderer.fill_rect(srcrect, Color::RGB(0, 0, 0))?;
         }
 
-        self.surface_fixed.blit(
-            Some(sourcerect),
-            &mut self.surface,
-            Some(sourcerect),
-        );
+        let start_x =
+            u32::try_from(srcrect.left()).unwrap_or_default() / TILE_WIDTH;
+        let end_x = u32::try_from(srcrect.right()).unwrap_or_default()
+            / TILE_WIDTH;
+        let start_y =
+            u32::try_from(srcrect.top()).unwrap_or_default() / TILE_HEIGHT;
+        let end_y = u32::try_from(srcrect.bottom()).unwrap_or_default()
+            / TILE_HEIGHT;
 
-        // calculate the bounds of the area we have to blit
-        let (x_start, x_end) = {
-            let mut start = (sourcerect.x as usize / TILE_WIDTH)
-                .saturating_sub(LEVELWINDOW_WIDTH / 2);
-            let mut end = start + (sourcerect.w as usize / TILE_WIDTH) * 2;
-            if end > LEVEL_WIDTH {
-                let diff = end - LEVEL_WIDTH;
-                start = start.saturating_sub(diff);
-                end = end.saturating_sub(diff);
+        for y in start_y..=end_y {
+            for x in start_x..=end_x {
+                let tilenr = self.tiles.get(x, y);
+                if tilenr > 1 && tilenr < (48 * 8) {
+                    let point = Point::new(
+                        (TILE_WIDTH * x) as i32,
+                        (TILE_HEIGHT * y) as i32,
+                    );
+                    renderer.place_tile(tilenr as usize, point)?;
+                }
             }
-            (start, end)
-        };
-        let (y_start, y_end) = {
-            let mut start = (sourcerect.y as usize / TILE_HEIGHT)
-                .saturating_sub(LEVELWINDOW_WIDTH / 2);
-            let mut end = start
-                + (sourcerect.h as usize / TILE_HEIGHT) * 2
-                + LEVELWINDOW_HEIGHT / 2;
-            if end > LEVEL_HEIGHT {
-                let diff = end - LEVEL_HEIGHT;
-                start = start.saturating_sub(diff);
-                end = end.saturating_sub(diff);
-            }
-            (start, end)
-        };
+        }
 
-        self.actors.update_visibility(
-            x_start as i16,
-            x_end as i16,
-            y_start as i16,
-            y_end as i16,
-        );
+        self.actors.update_visibility(srcrect);
 
-        self.actors.blit_background_actors(
-            &mut self.surface,
-            tilecache,
-            draw_collision_bounds,
-        );
+        self.actors
+            .render_background_actors(renderer, draw_collision_bounds)?;
 
-        hero.blit(
-            &mut self.surface,
-            tilecache,
-            &self.solids,
-            draw_collision_bounds,
-        );
+        hero.render(renderer, &self.solids, draw_collision_bounds)?;
 
-        self.actors.blit_foreground_actors(
-            &mut self.surface,
-            tilecache,
-            draw_collision_bounds,
-        );
+        self.actors
+            .render_foreground_actors(renderer, draw_collision_bounds)?;
 
         for shot in self.shots.iter() {
-            shot.blit(&mut self.surface, tilecache, draw_collision_bounds);
+            shot.render(renderer, draw_collision_bounds)?;
         }
-
-        self.surface
-            .blit(Some(sourcerect), target, Some(targetrect));
+        Ok(())
     }
 
     pub fn act(
@@ -983,7 +915,7 @@ impl LevelData {
         hero_data: &mut HeroData,
         actor_queue: &mut ActorQueue,
         actor_message_queue: &mut ActorMessageQueue,
-    ) {
+    ) -> Result<()> {
         let animated_frames =
             self.animated_frames_since_last_act_increase();
 
@@ -1016,10 +948,12 @@ impl LevelData {
         );
 
         if animated_frames == 0 {
-            hero_data.act(&mut self.solids);
+            hero_data.act(&self.solids, actor_queue)?;
         }
         hero_data.next_frame();
         hero_data.update_animation();
+
+        Ok(())
     }
 
     pub fn fire_shot(
@@ -1032,8 +966,8 @@ impl LevelData {
             let mut shot = Shot::new(heropos.x, heropos.y, hero.direction);
 
             let distance = match shot.direction {
-                HorizontalDirection::Left => -(HALFTILE_WIDTH as i16),
-                HorizontalDirection::Right => HALFTILE_WIDTH as i16,
+                HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
+                HorizontalDirection::Right => HALFTILE_WIDTH as i32,
                 _ => unreachable!(),
             };
 

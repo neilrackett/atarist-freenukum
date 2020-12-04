@@ -1,10 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -18,8 +19,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         Specific {
             tile: ANIMATION_MINE,
@@ -36,10 +36,10 @@ impl ActorInterface for Specific {
 
     fn act(&mut self, p: ActParameters) {
         if !p.solids.get(
-            p.general.position.x as usize / TILE_WIDTH,
-            p.general.position.y as usize / TILE_HEIGHT + 1,
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
-            p.general.position.y += HALFTILE_HEIGHT as i16;
+            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
         }
 
         match self.touching_hero {
@@ -49,15 +49,16 @@ impl ActorInterface for Specific {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::BombFire,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
             _ => {}
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 }

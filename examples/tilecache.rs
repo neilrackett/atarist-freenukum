@@ -1,100 +1,124 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
-use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
-use freenukum::rendering::SurfaceRenderer;
+use freenukum::graphics::load_default_font;
+use freenukum::rendering::{
+    CanvasRenderer, MovePositionRenderer, Renderer,
+};
 use freenukum::settings::Settings;
 use freenukum::text;
 use freenukum::tilecache::{FileProperties, TileCache};
 use freenukum::{game, TILE_HEIGHT, TILE_WIDTH};
-use transdl::event::{Event, KeyCode};
-use transdl::video::{Rect, Surface};
+use sdl2::{
+    event::{Event, WindowEvent},
+    keyboard::Keycode,
+    pixels::Color,
+    rect::Point,
+};
 
 fn main() -> Result<()> {
-    const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     let file_properties = FileProperties::get_all();
     let max_tiles =
         file_properties.iter().map(|p| p.num_tiles).max().unwrap();
 
     let settings = Settings::load_or_create();
-    let mut screen = game::initialize_and_get_window(
-        ((max_tiles + 2) * TILE_WIDTH) as i32,
-        ((file_properties.len() + 2) * TILE_HEIGHT) as i32,
+    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
+    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let ttf_context = sdl2::ttf::init()?;
+    let mut event_pump =
+        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+
+    let window = game::create_window(
+        (max_tiles + 2) as u32 * TILE_WIDTH,
+        (file_properties.len() as u32 + 2) * TILE_HEIGHT,
         settings.fullscreen,
-        format!("Freenukum {} tilecache example", VERSION),
-        format!("Freenukum {} tilecache example", VERSION),
+        &format!("Freenukum {} tilecache example", VERSION),
+        &video_subsystem,
     )?;
 
-    game::check_episodes(&mut screen)?;
-    let tilecache = TileCache::load_from_path(
-        &original_data_dir(),
-        &screen.surface_creator(),
-    )?;
+    let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+    canvas.present();
+    let texture_creator = canvas.texture_creator();
 
-    let mut destrect = Rect {
-        x: TILE_WIDTH as i16,
-        y: 0,
-        w: TILE_WIDTH as u16,
-        h: TILE_HEIGHT as u16,
+    game::check_episodes(
+        &mut canvas,
+        &load_default_font(&ttf_context)?,
+        &texture_creator,
+        &mut event_pump,
+    )?;
+    let tilecache = TileCache::load_from_path(&original_data_dir())?;
+
+    let mut dest = Point::new(TILE_WIDTH as i32, 0);
+
+    let mut renderer = CanvasRenderer {
+        canvas: &mut canvas,
+        texture_creator: &texture_creator,
+        tilecache: &tilecache,
     };
 
-    let blithex = |value: usize, destrect: Rect, target: &mut Surface| {
-        let mut text = target
-            .surface_creator()
-            .create(TILE_WIDTH as u32, TILE_HEIGHT as u32);
-        let mut renderer = SurfaceRenderer {
-            target: &mut text,
-            tilecache: &tilecache,
+    let blithex = |value: usize,
+                   dest: Point,
+                   renderer: &mut dyn Renderer|
+     -> Result<()> {
+        let mut renderer = MovePositionRenderer {
+            offset_x: dest.x(),
+            offset_y: dest.y(),
+            upstream: renderer,
         };
-        text::render(&mut renderer, &format!("{:02X}", value));
-        text.blit(None, target, Some(destrect));
+        text::render(&mut renderer, &format!("{:02X}", value))
     };
 
     for x in 0..max_tiles {
-        blithex(x, destrect, &mut screen);
-        destrect.x += TILE_WIDTH as i16;
+        blithex(x, dest, &mut renderer)?;
+        dest.x += TILE_WIDTH as i32;
     }
-    destrect.x = 0;
-    destrect.y += TILE_HEIGHT as i16;
+    dest.x = 0;
+    dest.y += TILE_HEIGHT as i32;
 
     let mut i = 0;
     for (row, file) in FileProperties::get_all().iter().enumerate() {
-        blithex(row, destrect, &mut screen);
-        destrect.x += TILE_WIDTH as i16;
+        blithex(row, dest, &mut renderer)?;
+        dest.x += TILE_WIDTH as i32;
         for _ in 0..file.num_tiles {
-            tilecache.get_tile(i).unwrap().blit(
-                None,
-                &mut screen,
-                Some(destrect),
-            );
-            destrect.x += TILE_WIDTH as i16;
+            renderer.place_tile(i, dest)?;
+            dest.x += TILE_WIDTH as i32;
             i += 1;
         }
-        destrect.x = (TILE_WIDTH * (max_tiles + 1)) as i16;
-        blithex(row, destrect, &mut screen);
-        destrect.x = 0;
-        destrect.y += TILE_HEIGHT as i16;
+        dest.x = (TILE_WIDTH * (max_tiles as u32 + 1)) as i32;
+        blithex(row, dest, &mut renderer)?;
+        dest.x = 0;
+        dest.y += TILE_HEIGHT as i32;
     }
-    destrect.x += TILE_WIDTH as i16;
+    dest.x += TILE_WIDTH as i32;
     for x in 0..max_tiles {
-        blithex(x, destrect, &mut screen);
-        destrect.x += TILE_WIDTH as i16;
+        blithex(x, dest, &mut renderer)?;
+        dest.x += TILE_WIDTH as i32;
     }
 
-    screen.update();
+    canvas.present();
 
     'event_loop: loop {
-        match Event::wait().map_err(|e| anyhow!("{}", e))? {
-            Event::Quit
+        match event_pump.wait_event() {
+            Event::Quit { .. }
             | Event::KeyDown {
-                key: Some(KeyCode::Escape),
+                keycode: Some(Keycode::Escape),
                 ..
             }
             | Event::KeyDown {
-                key: Some(KeyCode::Q),
+                keycode: Some(Keycode::Q),
                 ..
             } => break 'event_loop,
-            Event::VideoExpose => screen.update(),
+            Event::Window {
+                win_event: WindowEvent::Exposed,
+                ..
+            }
+            | Event::Window {
+                win_event: WindowEvent::Shown,
+                ..
+            } => canvas.present(),
             _ => {}
         }
     }

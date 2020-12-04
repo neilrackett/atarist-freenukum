@@ -1,10 +1,11 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType, ReceiveMessageParameters, RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, SOLID_EXPANDINGFLOOR, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{SOLID_EXPANDINGFLOOR, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -18,8 +19,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         Specific {
             expanding: false,
@@ -31,14 +31,14 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
-            let x = (p.general.position.x as usize
-                + p.general.position.w as usize)
-                / TILE_WIDTH;
-            let y = p.general.position.y as usize / TILE_HEIGHT;
+            let x = p.general.position.right() as u32 / TILE_WIDTH;
+            let y = p.general.position.top() as u32 / TILE_HEIGHT;
             let can_expand = !p.solids.get(x, y);
             if can_expand {
                 p.solids.set(x, y, true);
-                p.general.position.w += TILE_WIDTH as u16;
+                p.general.position.set_right(
+                    p.general.position.right() + TILE_WIDTH as i32,
+                );
             } else {
                 self.expanding = false;
                 self.finished = true;
@@ -46,13 +46,14 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = SOLID_EXPANDINGFLOOR;
-        let mut destrect = p.general.position;
-        for _ in 0..p.general.position.w as usize / TILE_WIDTH {
-            p.renderer.place_tile(tile, destrect);
-            destrect.x += TILE_WIDTH as i16;
+        let mut pos = p.general.position.top_left();
+        for _ in 0..p.general.position.width() as u32 / TILE_WIDTH {
+            p.renderer.place_tile(tile, pos)?;
+            pos.x += TILE_WIDTH as i32;
         }
+        Ok(())
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {

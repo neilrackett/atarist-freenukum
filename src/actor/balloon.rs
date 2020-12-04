@@ -1,10 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+        ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -18,8 +20,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16 * 2;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT * 2);
 
         Specific {
             destroyed: false,
@@ -35,8 +36,7 @@ impl ActorInterface for Specific {
             p.hero_data.score.add(10000);
             p.actor_adder.add_actor(
                 ActorType::Score10000,
-                p.general.position.x as u16,
-                p.general.position.y as u16,
+                p.general.position.top_left(),
             );
         }
     }
@@ -50,35 +50,35 @@ impl ActorInterface for Specific {
         } else {
             p.general.position.y -= 1;
             if p.solids.get(
-                p.general.position.x as usize / TILE_WIDTH,
-                p.general.position.y as usize / TILE_WIDTH,
+                p.general.position.x() as u32 / TILE_WIDTH,
+                p.general.position.y() as u32 / TILE_WIDTH,
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;
                 p.actor_adder.add_actor(
                     ActorType::Steam,
-                    p.general.position.x as u16,
-                    p.general.position.y as u16,
+                    p.general.position.top_left(),
                 );
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
 
         let tile = if self.destroyed {
             OBJECT_BALLOON + 4
         } else {
             OBJECT_BALLOON
         };
-        p.renderer.place_tile(tile, destrect);
+        p.renderer.place_tile(tile, pos)?;
 
-        destrect.y += TILE_HEIGHT as i16;
+        pos.y += TILE_HEIGHT as i32;
         p.renderer.place_tile(
             OBJECT_BALLOON + 1 + self.current_frame / 3,
-            destrect,
-        );
+            pos,
+        )?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -87,10 +87,7 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, p: ShotParameters) {
         self.destroyed = true;
-        p.actor_adder.add_actor(
-            ActorType::Steam,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
-        );
+        p.actor_adder
+            .add_actor(ActorType::Steam, p.general.position.top_left());
     }
 }

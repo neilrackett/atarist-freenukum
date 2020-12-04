@@ -1,10 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchStartParameters, RenderParameters, ShotParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchStartParameters, RenderParameters,
+        ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
-use crate::{OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -19,8 +21,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16 * 2;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         Specific {
@@ -37,19 +38,19 @@ impl ActorInterface for Specific {
 
         match self.counter {
             0 => {
-                let xl = p.general.position.x as u16;
-                let xr = xl + p.general.position.w;
-                let y = p.general.position.y;
-                let hxl = hero_geometry.x as u16;
-                let hxr = hxl + hero_geometry.w;
-                let hy = hero_geometry.y;
+                let xl = p.general.position.left();
+                let xr = p.general.position.right();
+                let y = p.general.position.y();
+                let hxl = hero_geometry.left();
+                let hxr = hero_geometry.right();
+                let hy = hero_geometry.y();
 
                 if y < hy && xl < hxr && xr > hxl {
                     let mut solid_between = false;
-                    for i in (y as usize / TILE_HEIGHT) + 1
-                        ..hy as usize / TILE_HEIGHT
+                    for i in (y as u32 / TILE_HEIGHT) + 1
+                        ..hy as u32 / TILE_HEIGHT
                     {
-                        let x = xl as usize / TILE_WIDTH;
+                        let x = xl as u32 / TILE_WIDTH;
                         if p.solids.get(x, i) || p.solids.get(x + 1, i) {
                             solid_between = true;
                             break;
@@ -70,32 +71,31 @@ impl ActorInterface for Specific {
             }
             _ => {
                 if p.solids.get(
-                    p.general.position.x as usize / TILE_WIDTH,
-                    p.general.position.y as usize / TILE_HEIGHT + 1,
+                    p.general.position.x() as u32 / TILE_WIDTH,
+                    p.general.position.y() as u32 / TILE_HEIGHT + 1,
                 ) {
                     p.actor_adder.add_actor(
                         ActorType::Steam,
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                     );
                     p.actor_adder.add_particle_firework(
-                        p.general.position.x as u16,
-                        p.general.position.y as u16,
+                        p.general.position.top_left(),
                         4,
                     );
                     p.general.is_alive = false;
                 } else {
-                    p.general.position.y += TILE_HEIGHT as i16;
+                    p.general.position.offset(0, TILE_HEIGHT as i32);
                 }
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        let mut destrect = p.general.position;
-        p.renderer.place_tile(self.tile, destrect);
-        destrect.x += TILE_WIDTH as i16;
-        p.renderer.place_tile(self.tile + 1, destrect);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let mut pos = p.general.position.top_left();
+        p.renderer.place_tile(self.tile, pos)?;
+        pos.x += TILE_WIDTH as i32;
+        p.renderer.place_tile(self.tile + 1, pos)?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -107,14 +107,10 @@ impl ActorInterface for Specific {
             p.hero_data.score.add(500);
             p.actor_adder.add_actor(
                 ActorType::Score500,
-                p.general.position.x as u16,
-                p.general.position.y as u16,
+                p.general.position.top_left(),
             );
-            p.actor_adder.add_particle_firework(
-                p.general.position.x as u16,
-                p.general.position.y as u16,
-                4,
-            );
+            p.actor_adder
+                .add_particle_firework(p.general.position.top_left(), 4);
 
             p.general.is_alive = false;
         }

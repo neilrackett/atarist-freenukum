@@ -1,12 +1,13 @@
-use super::super::hero::InventoryItem;
-use super::super::level::solids::LevelSolids;
-use super::super::level::tiles::LevelTiles;
-use super::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorMessageType, ActorType, HeroInteractStartParameters,
-    RenderParameters,
+use crate::{
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorMessageType, ActorType, HeroInteractStartParameters,
+        RenderParameters,
+    },
+    hero::InventoryItem,
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    Result, OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH,
 };
-use crate::{OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -21,8 +22,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
@@ -59,10 +59,11 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
     }
 
-    fn render(&mut self, p: RenderParameters) {
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position,
-        );
+            p.general.position.top_left(),
+        )?;
+        Ok(())
     }
 }

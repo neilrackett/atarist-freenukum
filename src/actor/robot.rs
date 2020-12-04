@@ -1,13 +1,12 @@
-use crate::actor::{
-    ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-    ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-    RenderParameters, ShotParameters,
-};
-use crate::level::solids::LevelSolids;
-use crate::level::tiles::LevelTiles;
 use crate::{
-    HorizontalDirection, ANIMATION_ROBOT, HALFTILE_HEIGHT, HALFTILE_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    actor::{
+        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
+        RenderParameters, ShotParameters,
+    },
+    level::{solids::LevelSolids, tiles::LevelTiles},
+    HorizontalDirection, Result, ANIMATION_ROBOT, HALFTILE_HEIGHT,
+    HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -25,8 +24,7 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.w = TILE_WIDTH as u16;
-        general.position.h = TILE_HEIGHT as u16;
+        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         Specific {
@@ -55,11 +53,11 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            p.general.position.x as usize / TILE_WIDTH,
-            p.general.position.y as usize / TILE_HEIGHT + 1,
+            p.general.position.x() as u32 / TILE_WIDTH,
+            p.general.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
             // In the air, falling down.
-            p.general.position.y += HALFTILE_HEIGHT as i16;
+            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
         } else {
             // On the floor, walking.
             if self.current_frame == 0 {
@@ -71,24 +69,25 @@ impl ActorInterface for Specific {
                 // Check if the place next to the bot is free
                 if !p.solids.get(
                 (
-                    p.general.position.x as isize +
-                    direction * HALFTILE_WIDTH as isize
-                ) as usize/ TILE_WIDTH,
-                p.general.position.y as usize / TILE_HEIGHT
+                    p.general.position.x() +
+                    direction * HALFTILE_WIDTH as i32
+                ) as u32/ TILE_WIDTH,
+                p.general.position.y() as u32 / TILE_HEIGHT
             ) &&
             // Check if the tile below this free place is solid
             p.solids.get(
                 (
-                    p.general.position.x as isize +
-                    direction * HALFTILE_WIDTH as isize
-                ) as usize / TILE_WIDTH,
-                (p.general.position.y as usize + TILE_HEIGHT) / TILE_HEIGHT
+                    p.general.position.x() +
+                    direction * HALFTILE_WIDTH as i32
+                ) as u32 / TILE_WIDTH,
+                (p.general.position.y() as u32 + TILE_HEIGHT) / TILE_HEIGHT
             ) {
                     if direction == 2 {
                         direction = 1;
                     }
-                    p.general.position.x +=
-                        direction as i16 * HALFTILE_WIDTH as i16;
+                    p.general
+                        .position
+                        .offset(direction * HALFTILE_WIDTH as i32, 0);
                 } else {
                     self.direction =
                         if self.direction == HorizontalDirection::Left {
@@ -100,15 +99,18 @@ impl ActorInterface for Specific {
                         direction = 1
                     };
                     direction *= -1;
-                    p.general.position.x +=
-                        direction as i16 * HALFTILE_WIDTH as i16;
+                    p.general
+                        .position
+                        .offset(direction * HALFTILE_WIDTH as i32, 0);
                 }
             }
         }
     }
 
-    fn render(&mut self, p: RenderParameters) {
-        p.renderer.place_tile(self.tile, p.general.position);
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer
+            .place_tile(self.tile, p.general.position.top_left())?;
+        Ok(())
     }
 
     fn can_get_shot(&self, _general: &ActorData) -> bool {
@@ -123,8 +125,7 @@ impl ActorInterface for Specific {
         }
         p.actor_adder.add_actor(
             ActorType::RobotDisappearing,
-            p.general.position.x as u16,
-            p.general.position.y as u16,
+            p.general.position.top_left(),
         );
         p.general.is_alive = false;
     }
