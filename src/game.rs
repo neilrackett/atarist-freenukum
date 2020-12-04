@@ -3,7 +3,6 @@ use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, WaitEvent};
-use crate::geometry::Geometry;
 use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
@@ -24,7 +23,7 @@ use std::collections::HashSet;
 use std::fs::File;
 use transdl::timer::Timer;
 use transdl::ttf::Font;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 #[derive(PartialEq, Eq)]
 enum Ending {
@@ -86,14 +85,14 @@ fn start_in_level(
         )?
     };
 
-    let destrect = Geometry {
+    let destrect = Rect {
         x: TILE_WIDTH as i16,
         y: TILE_HEIGHT as i16,
         w: ((LEVELWINDOW_WIDTH + 2) * TILE_WIDTH) as u16,
         h: ((LEVELWINDOW_HEIGHT + 2) * TILE_HEIGHT) as u16,
     };
     let heropos = hero.position.geometry;
-    let mut srcrect = Geometry {
+    let mut srcrect = Rect {
         x: (heropos.x as usize + TILE_WIDTH)
             .saturating_sub(destrect.w as usize / 2) as i16,
         y: (heropos.y as usize).saturating_sub(destrect.h as usize / 2)
@@ -130,11 +129,7 @@ fn start_in_level(
                 Some(&backdrop),
                 None,
             );
-            level_surface.blit(
-                Some(srcrect.as_sdl_rect()),
-                target,
-                Some(destrect.as_sdl_rect()),
-            );
+            level_surface.blit(Some(srcrect), target, Some(destrect));
 
             if update_whole_screen {
                 target.update();

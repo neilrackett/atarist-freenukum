@@ -1,5 +1,4 @@
 use crate::actor::{ActorAdder, ActorType, ActorsList};
-use crate::geometry::Geometry;
 use crate::hero::HeroData;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
@@ -9,12 +8,13 @@ use crate::{
     HorizontalDirection, HALFTILE_WIDTH, LEVELWINDOW_WIDTH, OBJECT_SHOT,
     TILE_HEIGHT, TILE_WIDTH,
 };
+use transdl::video::Rect;
 
 pub type ShotList = Vec<Shot>;
 
 #[derive(Debug)]
 pub struct Shot {
-    position: Geometry,
+    position: Rect,
     pub is_alive: bool,
     pub direction: HorizontalDirection,
     counter: usize,
@@ -26,7 +26,7 @@ impl Shot {
         let w = 4;
         let h = TILE_HEIGHT as u16 - 4;
         Shot {
-            position: Geometry {
+            position: Rect {
                 x: x + HALFTILE_WIDTH as i16 - w as i16 / 2,
                 y: y + TILE_HEIGHT as i16 - h as i16,
                 w,

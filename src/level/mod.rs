@@ -6,7 +6,6 @@ use super::actor::{
     ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
     LevelActorAdder,
 };
-use super::geometry::Geometry;
 use super::hero::HeroData;
 use super::infobox::InfoMessageQueue;
 use super::level::raw::LevelRaw;
@@ -24,7 +23,7 @@ use crate::{
 };
 use log::warn;
 use std::io::Read;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 #[derive(Debug)]
 pub struct LevelData {
@@ -848,7 +847,7 @@ impl LevelData {
             for x in 0..LEVEL_WIDTH {
                 let tilenr = tiles.get(x, y);
                 if tilenr > 1 && tilenr < (48 * 8) {
-                    let destrect = Geometry {
+                    let destrect = Rect {
                         x: (TILE_WIDTH * x) as i16,
                         y: (TILE_HEIGHT * y) as i16,
                         w: TILE_WIDTH as u16,
@@ -902,25 +901,21 @@ impl LevelData {
         tilecache: &TileCache,
         hero: &mut HeroData,
         draw_collision_bounds: bool,
-        targetrect: Geometry,
-        sourcerect: Geometry,
+        targetrect: Rect,
+        sourcerect: Rect,
         backdrop1: Option<&Surface>,
         _backdrop2: Option<&Surface>,
     ) {
         if let Some(backdrop) = backdrop1 {
-            backdrop.blit(
-                None,
-                &mut self.surface,
-                Some(sourcerect.as_sdl_rect()),
-            )
+            backdrop.blit(None, &mut self.surface, Some(sourcerect))
         } else {
-            self.surface.fill_rect(sourcerect.as_sdl_rect(), 0);
+            self.surface.fill_rect(sourcerect, 0);
         }
 
         self.surface_fixed.blit(
-            Some(sourcerect.as_sdl_rect()),
+            Some(sourcerect),
             &mut self.surface,
-            Some(sourcerect.as_sdl_rect()),
+            Some(sourcerect),
         );
 
         // calculate the bounds of the area we have to blit
@@ -979,11 +974,8 @@ impl LevelData {
             shot.blit(&mut self.surface, tilecache, draw_collision_bounds);
         }
 
-        self.surface.blit(
-            Some(sourcerect.as_sdl_rect()),
-            target,
-            Some(targetrect.as_sdl_rect()),
-        );
+        self.surface
+            .blit(Some(sourcerect), target, Some(targetrect));
     }
 
     pub fn act(

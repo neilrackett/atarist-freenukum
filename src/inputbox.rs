@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::inputfield::InputField;
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
@@ -7,7 +6,7 @@ use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use crate::rendering::{MovePositionRenderer, SurfaceRenderer};
 use crate::{FONT_HEIGHT, FONT_WIDTH};
 use anyhow::Result;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub enum Answer {
     Ok(String),
@@ -31,22 +30,19 @@ pub fn show(
         &mut screen.surface_creator(),
     );
 
-    let destrect = Geometry::new(
-        (screen.width() as isize - msgbox.width() as isize) as i16 / 2,
-        (screen.height() as isize - msgbox.height() as isize) as i16 / 2,
-        msgbox.width() as u16,
-        msgbox.height() as u16,
-    );
+    let destrect = Rect {
+        x: (screen.width() as isize - msgbox.width() as isize) as i16 / 2,
+        y: (screen.height() as isize - msgbox.height() as isize) as i16
+            / 2,
+        w: msgbox.width() as u16,
+        h: msgbox.height() as u16,
+    };
 
     // backup the background
     let mut background_backup = screen
         .surface_creator()
         .create(destrect.w as u32, destrect.h as u32);
-    screen.blit(
-        Some(destrect.as_sdl_rect()),
-        &mut background_backup,
-        None,
-    );
+    screen.blit(Some(destrect), &mut background_backup, None);
 
     let mut input_field = InputField::new(max_length);
     {
@@ -63,7 +59,7 @@ pub fn show(
 
         input_field.render(&mut input_field_renderer);
     }
-    msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
+    msgbox.blit(None, screen, Some(destrect));
     screen.update_rect(0, 0, 0, 0);
 
     loop {
@@ -81,20 +77,12 @@ pub fn show(
                 input_field.right_pressed();
             }
             InputEvent::Confirm => {
-                background_backup.blit(
-                    None,
-                    screen,
-                    Some(destrect.as_sdl_rect()),
-                );
+                background_backup.blit(None, screen, Some(destrect));
                 let text = input_field.get_text();
                 return Ok(Answer::Ok(text.to_string()));
             }
             InputEvent::Abort => {
-                background_backup.blit(
-                    None,
-                    screen,
-                    Some(destrect.as_sdl_rect()),
-                );
+                background_backup.blit(None, screen, Some(destrect));
                 return Ok(Answer::Quit);
             }
             InputEvent::Letter(c) => {
@@ -116,7 +104,7 @@ pub fn show(
             };
             input_field.render(&mut input_field_renderer);
         }
-        msgbox.blit(None, screen, Some(destrect.as_sdl_rect()));
+        msgbox.blit(None, screen, Some(destrect));
         screen.update_rect(0, 0, 0, 0);
     }
 }

@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::text;
 use super::tilecache::TileCache;
 use crate::graphics::SurfaceCreator;
@@ -9,7 +8,7 @@ use crate::{
     BORDER_BLUE_TOP, BORDER_BLUE_TOPLEFT, BORDER_BLUE_TOPRIGHT,
     FONT_HEIGHT, FONT_WIDTH,
 };
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub fn get_information(text: &str) -> (usize, usize) {
     let mut columns = 0;
@@ -54,12 +53,12 @@ pub fn messagebox(
                 _ => BORDER_BLUE_MIDDLE,
             };
 
-            let r = Geometry::new(
-                col as i16 * FONT_WIDTH as i16,
-                row as i16 * FONT_HEIGHT as i16,
-                FONT_WIDTH as u16,
-                FONT_HEIGHT as u16,
-            );
+            let r = Rect {
+                x: col as i16 * FONT_WIDTH as i16,
+                y: row as i16 * FONT_HEIGHT as i16,
+                w: FONT_WIDTH as u16,
+                h: FONT_HEIGHT as u16,
+            };
 
             renderer.place_tile(tilenr, r);
         }

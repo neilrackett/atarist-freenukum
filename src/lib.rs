@@ -209,8 +209,6 @@ const HERO_STANDING_RIGHT: usize = HERO_START + 0x34;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
-pub use geometry::Geometry;
-
 fn directories() -> directories::ProjectDirs {
     directories::ProjectDirs::from("", "", "freenukum").unwrap()
 }

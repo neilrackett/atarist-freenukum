@@ -2,6 +2,7 @@ use crate::actor::{
     ActParameters, ActorCreateInterface, ActorData, ActorInterface,
     ActorType, RenderParameters, ShotParameters,
 };
+use crate::geometry::RectExt;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
 use crate::{ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH};

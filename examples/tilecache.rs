@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
-use freenukum::geometry::Geometry;
 use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use freenukum::rendering::SurfaceRenderer;
 use freenukum::settings::Settings;
@@ -8,7 +7,7 @@ use freenukum::text;
 use freenukum::tilecache::{FileProperties, TileCache};
 use freenukum::{game, TILE_HEIGHT, TILE_WIDTH};
 use transdl::event::{Event, KeyCode};
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 fn main() -> Result<()> {
     const VERSION: &'static str = env!("CARGO_PKG_VERSION");
@@ -32,25 +31,24 @@ fn main() -> Result<()> {
         &screen.surface_creator(),
     )?;
 
-    let mut destrect = Geometry {
+    let mut destrect = Rect {
         x: TILE_WIDTH as i16,
         y: 0,
         w: TILE_WIDTH as u16,
         h: TILE_HEIGHT as u16,
     };
 
-    let blithex =
-        |value: usize, destrect: Geometry, target: &mut Surface| {
-            let mut text = target
-                .surface_creator()
-                .create(TILE_WIDTH as u32, TILE_HEIGHT as u32);
-            let mut renderer = SurfaceRenderer {
-                target: &mut text,
-                tilecache: &tilecache,
-            };
-            text::render(&mut renderer, &format!("{:02X}", value));
-            text.blit(None, target, Some(destrect.as_sdl_rect()));
+    let blithex = |value: usize, destrect: Rect, target: &mut Surface| {
+        let mut text = target
+            .surface_creator()
+            .create(TILE_WIDTH as u32, TILE_HEIGHT as u32);
+        let mut renderer = SurfaceRenderer {
+            target: &mut text,
+            tilecache: &tilecache,
         };
+        text::render(&mut renderer, &format!("{:02X}", value));
+        text.blit(None, target, Some(destrect));
+    };
 
     for x in 0..max_tiles {
         blithex(x, destrect, &mut screen);
@@ -67,7 +65,7 @@ fn main() -> Result<()> {
             tilecache.get_tile(i).unwrap().blit(
                 None,
                 &mut screen,
-                Some(destrect.as_sdl_rect()),
+                Some(destrect),
             );
             destrect.x += TILE_WIDTH as i16;
             i += 1;

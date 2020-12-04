@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use freenukum::game;
-use freenukum::geometry::Geometry;
 use freenukum::graphics::SurfaceCreatorProvider;
 use freenukum::settings::Settings;
 use freenukum::tile::{self, TileHeader};
@@ -8,6 +7,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
 use transdl::event::{Event, KeyCode};
+use transdl::video::Rect;
 
 /// Show tiles from a Duke Nukem 1 grame graphics file.
 #[derive(StructOpt, Debug)]
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
     let mut file = File::open(&args.filename)?;
     let header = TileHeader::load_from(&mut file)?;
 
-    let mut r = Geometry {
+    let mut r = Rect {
         x: 0,
         y: 0,
         w: header.width as u16 * 8,
@@ -50,7 +50,7 @@ fn main() -> Result<()> {
             header,
             false,
         )?;
-        tile.blit(None, &mut screen, Some(r.as_sdl_rect()));
+        tile.blit(None, &mut screen, Some(r));
         r.x += header.width as i16 * 8;
     }
     screen.update();

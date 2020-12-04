@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
 use super::tilecache::TileCache;
@@ -13,7 +12,7 @@ use crate::{
     OBJECT_NONHEALTH, OBJECT_SHOT, SCORE_DIGITS, TILE_HEIGHT, TILE_WIDTH,
     WINDOW_HEIGHT, WINDOW_WIDTH,
 };
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub struct Borders {}
 
@@ -105,7 +104,7 @@ impl Borders {
         renderer: &mut dyn Renderer,
         tile: TileIndex,
     ) {
-        let geometry = Geometry {
+        let geometry = Rect {
             x,
             y,
             w: TILE_WIDTH as u16,

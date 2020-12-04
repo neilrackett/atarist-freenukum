@@ -3,6 +3,7 @@ use crate::actor::{
     HeroInteractEndParameters, HeroInteractStartParameters,
     RenderParameters,
 };
+use crate::geometry::RectExt;
 use crate::level::solids::LevelSolids;
 use crate::level::tiles::LevelTiles;
 use crate::{

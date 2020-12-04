@@ -1,6 +1,5 @@
-use crate::geometry::Geometry;
 use crate::tilecache::TileCache;
-use transdl::video::{PixelFormat, Surface};
+use transdl::video::{PixelFormat, Rect, Surface};
 
 pub type TileIndex = usize;
 
@@ -24,11 +23,11 @@ impl Color for Transparent {
 }
 
 pub trait Renderer {
-    fn place_tile(&mut self, tile: TileIndex, destination: Geometry);
-    fn fill_rect(&mut self, rect: Geometry, color: &dyn Color);
+    fn place_tile(&mut self, tile: TileIndex, destination: Rect);
+    fn fill_rect(&mut self, rect: Rect, color: &dyn Color);
     fn fill(&mut self, color: &dyn Color);
 
-    fn draw_rect(&mut self, rect: Geometry, color: &dyn Color) {
+    fn draw_rect(&mut self, rect: Rect, color: &dyn Color) {
         {
             let mut r = rect.clone();
             r.w = 1;
@@ -61,8 +60,8 @@ pub struct MovePositionRenderer<'a> {
 }
 
 impl<'a> Renderer for MovePositionRenderer<'a> {
-    fn place_tile(&mut self, tile: TileIndex, destination: Geometry) {
-        let new_destination = Geometry {
+    fn place_tile(&mut self, tile: TileIndex, destination: Rect) {
+        let new_destination = Rect {
             x: destination.x + self.offset_x as i16,
             y: destination.y + self.offset_y as i16,
             w: destination.w,
@@ -71,7 +70,7 @@ impl<'a> Renderer for MovePositionRenderer<'a> {
         self.upstream.place_tile(tile, new_destination);
     }
 
-    fn fill_rect(&mut self, mut rect: Geometry, color: &dyn Color) {
+    fn fill_rect(&mut self, mut rect: Rect, color: &dyn Color) {
         rect.x += self.offset_x as i16;
         rect.y += self.offset_y as i16;
         self.upstream.fill_rect(rect, color);
@@ -88,19 +87,17 @@ pub struct SurfaceRenderer<'a> {
 }
 
 impl<'a> Renderer for SurfaceRenderer<'a> {
-    fn place_tile(&mut self, tile: TileIndex, destination: Geometry) {
+    fn place_tile(&mut self, tile: TileIndex, destination: Rect) {
         self.tilecache.get_tile(tile).unwrap().blit(
             None,
             self.target,
-            Some(destination.as_sdl_rect()),
+            Some(destination),
         );
     }
 
-    fn fill_rect(&mut self, rect: Geometry, color: &dyn Color) {
-        self.target.fill_rect(
-            rect.as_sdl_rect(),
-            color.transdl_map_rgb(&self.target.format()),
-        );
+    fn fill_rect(&mut self, rect: Rect, color: &dyn Color) {
+        self.target
+            .fill_rect(rect, color.transdl_map_rgb(&self.target.format()));
     }
 
     fn fill(&mut self, color: &dyn Color) {

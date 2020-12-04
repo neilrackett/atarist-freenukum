@@ -37,7 +37,7 @@ mod teleporter;
 mod unstablefloor;
 mod wallcrawler;
 
-use crate::geometry::Geometry;
+use crate::geometry::RectExt;
 use crate::hero::HeroData;
 use crate::infobox::InfoMessageQueue;
 use crate::level::solids::LevelSolids;
@@ -45,7 +45,7 @@ use crate::level::tiles::LevelTiles;
 use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::tilecache::TileCache;
 use crate::{TILE_HEIGHT, TILE_WIDTH};
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 #[derive(Debug)]
 pub struct ActorsList {
@@ -114,7 +114,7 @@ impl ActorsList {
 
     pub fn process_shot(
         &mut self,
-        shot_position: Geometry,
+        shot_position: Rect,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
@@ -367,7 +367,7 @@ impl Actor {
         self.general.is_alive
     }
 
-    pub fn position(&self) -> Geometry {
+    pub fn position(&self) -> Rect {
         self.general.position
     }
 
@@ -902,7 +902,7 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub position: Geometry,
+    pub position: Rect,
     pub is_in_foreground: bool,
     pub hurts_hero: bool,
     pub is_alive: bool,
@@ -915,7 +915,7 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            position: Geometry::default(),
+            position: Rect::default(),
             is_in_foreground: true,
             hurts_hero: false,
             is_alive: true,

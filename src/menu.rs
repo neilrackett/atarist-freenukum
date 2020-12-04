@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
@@ -7,7 +6,7 @@ use crate::rendering::{Renderer, SurfaceRenderer};
 use crate::UserEvent;
 use crate::{FONT_HEIGHT, FONT_WIDTH, OBJECT_POINT};
 use anyhow::Result;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub struct MenuEntry {
     pub shortcut: char,
@@ -67,7 +66,7 @@ impl Menu {
             .surface_creator()
             .create(msgbox.width() as u32, msgbox.height() as u32);
 
-        let destrect = Geometry {
+        let destrect = Rect {
             x: (screen.width() - msgbox.width() as usize) as i16 / 2,
             y: (screen.height() - msgbox.height() as usize) as i16 / 2,
             w: msgbox.width() as u16,
@@ -80,7 +79,7 @@ impl Menu {
             transdl::event::push_user_event(UserEvent::Timer as i32)
         });
 
-        let pointrect = Geometry {
+        let pointrect = Rect {
             x: (FONT_WIDTH * 2 + destrect.x as usize) as i16,
             y: (FONT_HEIGHT + destrect.y as usize) as i16,
             w: FONT_WIDTH as u16,
@@ -96,7 +95,7 @@ impl Menu {
             if changed || true {
                 msgbox.blit(None, &mut target, None);
 
-                let targetrect = Geometry {
+                let targetrect = Rect {
                     x: (FONT_WIDTH * 3) as i16 / 2,
                     y: (FONT_HEIGHT * (self.current + headerrows + 2))
                         as i16,
@@ -115,7 +114,7 @@ impl Menu {
                     );
                 }
 
-                target.blit(None, screen, Some(destrect.as_sdl_rect()));
+                target.blit(None, screen, Some(destrect));
 
                 if update_whole_screen {
                     screen.update_rect(0, 0, 0, 0);

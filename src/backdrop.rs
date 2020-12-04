@@ -1,11 +1,10 @@
-use super::geometry::Geometry;
 use super::tile::{self, TileHeader};
 use crate::graphics::SurfaceCreator;
 use crate::{
     Result, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use std::io::Read;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub fn load<R: Read>(
     r: &mut R,
@@ -16,7 +15,7 @@ pub fn load<R: Read>(
         BACKDROP_HEIGHT as u32 * TILE_HEIGHT as u32,
     );
 
-    let mut geometry = Geometry {
+    let mut geometry = Rect {
         x: 0,
         y: 0,
         w: TILE_WIDTH as u16,
@@ -31,7 +30,7 @@ pub fn load<R: Read>(
 
     for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
         let tile = tile::load(r, surface_creator, header.clone(), false)?;
-        tile.blit(None, &mut backdrop, Some(geometry.as_sdl_rect()));
+        tile.blit(None, &mut backdrop, Some(geometry));
 
         geometry.x += 16;
         if geometry.x == 16 * BACKDROP_WIDTH as i16 {

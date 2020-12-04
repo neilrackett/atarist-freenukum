@@ -1,5 +1,6 @@
-use super::super::geometry::Geometry;
+use crate::geometry::RectExt;
 use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
+use transdl::video::Rect;
 
 #[derive(Debug)]
 pub struct LevelSolids {
@@ -79,8 +80,8 @@ impl LevelSolids {
         self.solids[y][x]
     }
 
-    pub fn collides(&self, rect: Geometry) -> bool {
-        let mut solidrect = Geometry {
+    pub fn collides(&self, rect: Rect) -> bool {
+        let mut solidrect = Rect {
             x: 0,
             y: 0,
             w: TILE_WIDTH as u16,
@@ -109,7 +110,7 @@ impl LevelSolids {
 
     pub fn push_rect_standing_on_ground(
         &self,
-        rect: &mut Geometry,
+        rect: &mut Rect,
         offset: i16,
         gravity: u8,
     ) -> bool {
@@ -143,7 +144,7 @@ impl LevelSolids {
         }
     }
 
-    fn rect_fall_down(&self, rect: &mut Geometry, distance: u8) -> u8 {
+    fn rect_fall_down(&self, rect: &mut Rect, distance: u8) -> u8 {
         if self.collides(*rect) {
             // can't fall down because collides with solid ground.
             return 0;
@@ -162,7 +163,7 @@ impl LevelSolids {
         return distance;
     }
 
-    fn rect_stands_on_ground_partially(&self, rect: Geometry) -> bool {
+    fn rect_stands_on_ground_partially(&self, rect: Rect) -> bool {
         if ((rect.y as usize + rect.h as usize) % TILE_HEIGHT) > 0 {
             return false;
         }
@@ -177,7 +178,7 @@ impl LevelSolids {
         return false;
     }
 
-    fn rect_stands_on_ground_completely(&self, rect: Geometry) -> bool {
+    fn rect_stands_on_ground_completely(&self, rect: Rect) -> bool {
         if ((rect.y as usize + rect.h as usize) % TILE_HEIGHT) > 0 {
             return false;
         }

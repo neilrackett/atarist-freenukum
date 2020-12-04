@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::level::solids::LevelSolids;
 use super::tilecache::TileCache;
 use super::{HorizontalDirection, UserEvent};
@@ -13,7 +12,7 @@ use crate::{
     TILE_WIDTH,
 };
 use std::convert::TryFrom;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Motion {
@@ -192,7 +191,7 @@ impl HeroData {
                 {
                     if i > 0 && j > 0 && solids.get(i as usize, j as usize)
                     {
-                        let obstacle = Geometry {
+                        let obstacle = Rect {
                             x: (i as i16 * TILE_WIDTH as i16),
                             y: (j as i16 * TILE_HEIGHT as i16),
                             w: TILE_WIDTH as u16,
@@ -417,7 +416,7 @@ impl HeroData {
 
 #[derive(Debug)]
 pub struct Position {
-    pub geometry: Geometry,
+    pub geometry: Rect,
 }
 
 impl Default for Position {
@@ -437,8 +436,8 @@ impl Position {
         self.geometry = Self::default_geometry();
     }
 
-    fn default_geometry() -> Geometry {
-        Geometry {
+    fn default_geometry() -> Rect {
+        Rect {
             x: 0,
             y: 0,
             w: TILE_WIDTH as u16,

@@ -1,6 +1,5 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
-use freenukum::geometry::Geometry;
 use freenukum::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use freenukum::hero::HeroData;
 use freenukum::level::raw::LevelRaw;
@@ -16,7 +15,7 @@ use std::num::NonZeroUsize;
 use std::num::ParseIntError;
 use structopt::StructOpt;
 use transdl::event::{Event, KeyCode, MouseButton};
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 /// Show an original Duke Nukem 1 level.
 #[derive(StructOpt, Debug)]
@@ -77,7 +76,7 @@ fn main() -> Result<()> {
         (TILE_WIDTH * LEVEL_WIDTH) as u32,
         (TILE_HEIGHT * LEVEL_HEIGHT) as u32,
     );
-    let mut r = Geometry {
+    let mut r = Rect {
         x: 0,
         y: 0,
         w: (TILE_WIDTH * LEVEL_WIDTH) as u16,
@@ -94,7 +93,7 @@ fn main() -> Result<()> {
         None,
         None,
     );
-    level_surface.blit(Some(r.as_sdl_rect()), &mut screen, None);
+    level_surface.blit(Some(r), &mut screen, None);
     screen.update();
 
     let mut multiply = 10;
@@ -201,7 +200,7 @@ fn main() -> Result<()> {
 fn scroll(
     x_dist: i16,
     y_dist: i16,
-    r: &mut Geometry,
+    r: &mut Rect,
     level_surface: &mut Surface,
     screen: &mut Surface,
 ) {
@@ -222,6 +221,6 @@ fn scroll(
         r.y = level_surface.height() as i16 - screen.height() as i16;
     }
 
-    level_surface.blit(Some(r.as_sdl_rect()), screen, None);
+    level_surface.blit(Some(*r), screen, None);
     screen.update();
 }

@@ -1,4 +1,3 @@
-use super::geometry::Geometry;
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
@@ -10,7 +9,7 @@ use crate::{
 };
 use std::fs::File;
 use std::io::Read;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub fn load(
     input: &mut File,
@@ -109,13 +108,13 @@ pub fn show_splash_with_message(
     if let Some(message) = message {
         let messagebox =
             messagebox(message, tilecache, &mut target.surface_creator());
-        let destrect = Geometry {
+        let destrect = Rect {
             x,
             y,
             w: messagebox.width() as u16,
             h: messagebox.height() as u16,
         };
-        messagebox.blit(None, target, Some(destrect.as_sdl_rect()));
+        messagebox.blit(None, target, Some(destrect));
     }
     target.update_rect(0, 0, 0, 0);
 

@@ -1,10 +1,9 @@
-use super::geometry::Geometry;
 use super::messagebox::messagebox;
 use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
 use crate::graphics::{SurfaceCreator, SurfaceCreatorProvider};
 use anyhow::Result;
-use transdl::video::Surface;
+use transdl::video::{Rect, Surface};
 
 pub fn show(
     screen: &mut Surface,
@@ -13,7 +12,7 @@ pub fn show(
 ) -> Result<()> {
     let messagebox =
         messagebox(text, tilecache, &mut screen.surface_creator());
-    let destrect = Geometry {
+    let destrect = Rect {
         x: (screen.width() as isize - messagebox.width() as isize) as i16
             / 2,
         y: (screen.height() as isize - messagebox.height() as isize)
@@ -28,22 +27,14 @@ pub fn show(
         .surface_creator()
         .create(destrect.w as u32, destrect.h as u32);
 
-    screen.blit(
-        Some(destrect.as_sdl_rect()),
-        &mut background_backup,
-        None,
-    );
-    messagebox.blit(None, screen, Some(destrect.as_sdl_rect()));
+    screen.blit(Some(destrect), &mut background_backup, None);
+    messagebox.blit(None, screen, Some(destrect));
     screen.update_rect(0, 0, 0, 0);
 
     loop {
         match ConfirmEvent::wait()? {
             ConfirmEvent::Confirmed | ConfirmEvent::Aborted => {
-                background_backup.blit(
-                    None,
-                    screen,
-                    Some(destrect.as_sdl_rect()),
-                );
+                background_backup.blit(None, screen, Some(destrect));
                 screen.update_rect(0, 0, 0, 0);
                 return Ok(());
             }

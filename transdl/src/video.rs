@@ -3,6 +3,17 @@ use crate::ll;
 pub use ll::SDL_Color as Color;
 pub use ll::SDL_Rect as Rect;
 
+impl Default for Rect {
+    fn default() -> Self {
+        Rect {
+            x: 0,
+            y: 0,
+            w: 0,
+            h: 0,
+        }
+    }
+}
+
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct Surface {

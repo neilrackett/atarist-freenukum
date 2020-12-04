@@ -1,7 +1,7 @@
-use super::geometry::Geometry;
 use super::text;
 use crate::rendering::Renderer;
 use crate::{FONT_HEIGHT, FONT_WIDTH};
+use transdl::video::Rect;
 
 pub struct InputField {
     text: String,
@@ -59,7 +59,7 @@ impl InputField {
     }
 
     pub fn render(&self, renderer: &mut dyn Renderer) {
-        let bgrect = Geometry {
+        let bgrect = Rect {
             x: 0,
             y: 0,
             w: (FONT_WIDTH * self.max_length) as u16,
@@ -67,7 +67,7 @@ impl InputField {
         };
         renderer.fill_rect(bgrect, &(0, 0, 0));
         text::render(renderer, &self.text);
-        let cursorrect = Geometry {
+        let cursorrect = Rect {
             x: (self.cursor_position * FONT_WIDTH) as i16,
             y: 1,
             w: 1,
