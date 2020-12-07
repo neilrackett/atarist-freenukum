@@ -8,8 +8,14 @@ use sdl2::{
 };
 
 pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
-    // TODO: replace this by some determination method
+    #[cfg(target_os = "windows")]
+    let font_path = std::path::Path::new(&std::env::var("WINDIR")?)
+        .join("Fonts")
+        .join("Arial.ttf");
+
+    #[cfg(target_os = "linux")]
     let font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+
     let mut font = ttf_context
         .load_font(font_path, 10)
         .map_err(|s| anyhow!(s))?;
