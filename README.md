@@ -14,6 +14,9 @@ The game data can be obtained:
   charge)
 * Search on https://archive.org/ for it.
 * The Duke Nukem 3D CD contains a copy of the full version.
-* Buy it from 
+* Buy it from an online store if you find it. It used to be available on
+  [GOG.com](https://www.gog.com/news/release_duke_nukem_12), but that is no
+  longer the case. Maybe it will be available some time in the future
+  again.
 
 The home of FreeNukum is <https://gitlab.com/silwol/freenukum>.
