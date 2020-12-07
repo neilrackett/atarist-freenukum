@@ -6,6 +6,10 @@ edition = "2018"
 default-run = "freenukum"
 categories = ["games"]
 license = "AGPL-3.0-or-later"
+description = "A clone of the 1991 DOS game Duke Nukem 1"
+readme = "README.md"
+homepage = "https://gitlab.com/silwol/freenukum"
+repository = "https://gitlab.com/silwol/freenukum"
 
 [dependencies]
 anyhow = "1.0.33"
