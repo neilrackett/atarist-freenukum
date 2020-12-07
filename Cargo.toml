@@ -5,6 +5,7 @@ authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"
 default-run = "freenukum"
 categories = ["games"]
+license = "AGPL-3.0-or-later"
 
 [dependencies]
 anyhow = "1.0.33"
