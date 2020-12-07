@@ -146,7 +146,7 @@ fn main() -> Result<()> {
                         "\
                              You don't have another\n\
                              episode installed.\n\
-                             \n
+                             \n\
                              We stay in this episode",
                         &mut event_pump,
                     )?;
