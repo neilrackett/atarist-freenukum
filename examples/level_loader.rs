@@ -206,7 +206,7 @@ fn main() -> Result<()> {
                     let mut renderer = CanvasRenderer {
                         canvas: &mut canvas,
                         texture_creator: &texture_creator,
-                        tilecache: &tilecache,
+                        tileprovider: &tilecache,
                     };
                     let mut renderer = MovePositionRenderer {
                         offset_x: -r.x(),

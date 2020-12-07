@@ -11,8 +11,7 @@ use crate::picture::show_splash_with_message;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::settings::Settings;
 use crate::tile::TileHeader;
-use crate::tilecache::TileCache;
-use crate::{backdrop, HorizontalDirection, UserEvent};
+use crate::{backdrop, HorizontalDirection, TileProvider, UserEvent};
 use crate::{
     Result, GAME_INTERVAL, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH,
     LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
@@ -41,7 +40,7 @@ enum Ending {
 fn start_in_level(
     level_number: usize,
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     hero: &mut HeroData,
     settings: &mut Settings,
     episodes: &Episodes,
@@ -120,7 +119,7 @@ fn start_in_level(
         let mut renderer = CanvasRenderer {
             canvas,
             texture_creator: &texture_creator,
-            tilecache: &tilecache,
+            tileprovider,
         };
 
         if do_update {
@@ -162,7 +161,7 @@ fn start_in_level(
             do_update = false;
         }
 
-        info_message_queue.process(canvas, tilecache, event_pump)?;
+        info_message_queue.process(canvas, tileprovider, event_pump)?;
 
         match GameEvent::wait(event_pump)? {
             GameEvent::Escape => break 'game_loop,
@@ -292,7 +291,7 @@ fn start_in_level(
 #[allow(clippy::too_many_arguments)]
 pub fn start(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     hero: &mut HeroData,
     settings: &mut Settings,
     episodes: &Episodes,
@@ -311,7 +310,7 @@ pub fn start(
             soon rule the world!";
         show_splash_with_message(
             canvas,
-            tilecache,
+            tileprovider,
             &mut file,
             event_pump,
             Some(message),
@@ -330,7 +329,7 @@ pub fn start(
             time to watch Oprah!";
         show_splash_with_message(
             canvas,
-            tilecache,
+            tileprovider,
             &mut file,
             event_pump,
             Some(message),
@@ -353,7 +352,7 @@ pub fn start(
 
     infobox::show(
         canvas,
-        tilecache,
+        tileprovider,
         "Get ready FreeNukum,\nyou are going in.\n",
         event_pump,
     )?;
@@ -363,7 +362,7 @@ pub fn start(
             success = start_in_level(
                 2,
                 canvas,
-                tilecache,
+                tileprovider,
                 hero,
                 settings,
                 episodes,
@@ -378,7 +377,7 @@ pub fn start(
             success = start_in_level(
                 level,
                 canvas,
-                tilecache,
+                tileprovider,
                 hero,
                 settings,
                 episodes,

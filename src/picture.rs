@@ -1,8 +1,8 @@
 use super::messagebox::messagebox;
-use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
 use crate::{
-    Result, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH,
+    Result, TileProvider, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 };
 use anyhow::anyhow;
 use sdl2::{
@@ -98,18 +98,24 @@ pub fn load<'t>(input: &mut File) -> Result<Surface<'t>> {
 
 pub fn show_splash(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     file: &mut File,
     event_pump: &mut EventPump,
 ) -> Result<()> {
     show_splash_with_message(
-        canvas, tilecache, file, event_pump, None, 0, 0,
+        canvas,
+        tileprovider,
+        file,
+        event_pump,
+        None,
+        0,
+        0,
     )
 }
 
 pub fn show_splash_with_message(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     file: &mut File,
     event_pump: &mut EventPump,
     message: Option<&str>,
@@ -125,7 +131,8 @@ pub fn show_splash_with_message(
         .map_err(|s| anyhow!(s))?;
 
     if let Some(message) = message {
-        let messagebox = messagebox(message, tilecache, &texture_creator)?;
+        let messagebox =
+            messagebox(message, tileprovider, &texture_creator)?;
         let destrect =
             Rect::new(x, y, messagebox.width(), messagebox.height());
 

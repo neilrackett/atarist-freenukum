@@ -1,5 +1,5 @@
 use super::menu::{Menu, MenuEntry};
-use super::tilecache::TileCache;
+use crate::TileProvider;
 use anyhow::Result;
 use sdl2::{
     event::EventSender, render::WindowCanvas, EventPump, TimerSubsystem,
@@ -91,7 +91,7 @@ impl Into<MenuEntry> for MainMenuEntry {
 
 pub fn mainmenu(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
@@ -117,7 +117,7 @@ pub fn mainmenu(
 
     Ok(MainMenuEntry::from(menu.get_choice(
         canvas,
-        tilecache,
+        tileprovider,
         event_pump,
         event_sender,
         timer_subsystem,

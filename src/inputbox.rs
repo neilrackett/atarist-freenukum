@@ -1,11 +1,9 @@
 use super::inputfield::InputField;
 use super::messagebox::messagebox;
-use super::tilecache::TileCache;
 use crate::event::{InputEvent, WaitEvent};
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
-use crate::{FONT_HEIGHT, FONT_WIDTH};
-use anyhow::anyhow;
-use anyhow::Result;
+use crate::{TileProvider, FONT_HEIGHT, FONT_WIDTH};
+use anyhow::{anyhow, Result};
 use sdl2::{
     rect::{Point, Rect},
     render::WindowCanvas,
@@ -20,7 +18,7 @@ pub enum Answer {
 
 pub fn show(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     msg: &str,
     max_length: usize,
     event_pump: &mut EventPump,
@@ -32,7 +30,7 @@ pub fn show(
     );
     let texture_creator = canvas.texture_creator();
     let messagebox =
-        messagebox(&placeholder_msg, tilecache, &texture_creator)?;
+        messagebox(&placeholder_msg, tileprovider, &texture_creator)?;
     let surface = canvas
         .window()
         .surface(event_pump)
@@ -68,7 +66,7 @@ pub fn show(
         let mut input_field_renderer = CanvasRenderer {
             canvas,
             texture_creator: &texture_creator,
-            tilecache,
+            tileprovider,
         };
         let mut input_field_renderer = MovePositionRenderer {
             offset_x,
@@ -127,7 +125,7 @@ pub fn show(
             let mut input_field_renderer = CanvasRenderer {
                 canvas,
                 texture_creator: &texture_creator,
-                tilecache,
+                tileprovider,
             };
             let mut input_field_renderer = MovePositionRenderer {
                 offset_x,

@@ -1,9 +1,9 @@
 use super::messagebox;
-use super::tilecache::TileCache;
 use crate::event::{MenuEvent, WaitEvent};
 use crate::rendering::{CanvasRenderer, Renderer};
 use crate::{
-    UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL, OBJECT_POINT,
+    TileProvider, UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL,
+    OBJECT_POINT,
 };
 use anyhow::{anyhow, Result};
 use sdl2::{
@@ -43,7 +43,7 @@ impl Menu {
     pub fn get_choice(
         &mut self,
         canvas: &mut WindowCanvas,
-        tilecache: &TileCache,
+        tileprovider: &dyn TileProvider,
         event_pump: &mut EventPump,
         event_sender: &EventSender,
         timer_subsystem: &TimerSubsystem,
@@ -67,7 +67,7 @@ impl Menu {
 
         let messagebox = messagebox::messagebox(
             &contents,
-            tilecache,
+            tileprovider,
             &texture_creator,
         )?;
 
@@ -108,7 +108,7 @@ impl Menu {
                 let mut renderer = CanvasRenderer {
                     canvas,
                     texture_creator: &texture_creator,
-                    tilecache,
+                    tileprovider,
                 };
 
                 let point_pos = Point::new(

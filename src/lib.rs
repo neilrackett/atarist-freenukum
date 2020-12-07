@@ -25,8 +25,10 @@ pub mod shot;
 pub mod text;
 pub mod tile;
 pub mod tilecache;
+pub mod tileprovider;
 
 use anyhow::Result;
+use tileprovider::TileProvider;
 
 pub const GAME_INTERVAL: u32 = 80;
 

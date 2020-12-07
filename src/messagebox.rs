@@ -1,8 +1,7 @@
 use super::text;
-use super::tilecache::TileCache;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer, Renderer};
 use crate::{
-    Result, BORDER_BLUE_BOTTOM, BORDER_BLUE_BOTTOMLEFT,
+    Result, TileProvider, BORDER_BLUE_BOTTOM, BORDER_BLUE_BOTTOMLEFT,
     BORDER_BLUE_BOTTOMRIGHT, BORDER_BLUE_LEFT, BORDER_BLUE_MIDDLE,
     BORDER_BLUE_RIGHT, BORDER_BLUE_TOP, BORDER_BLUE_TOPLEFT,
     BORDER_BLUE_TOPRIGHT, FONT_HEIGHT, FONT_WIDTH,
@@ -27,7 +26,7 @@ pub fn get_information(text: &str) -> (usize, usize) {
 
 pub fn messagebox<'t, T>(
     text: &str,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     texture_creator: &TextureCreator<T>,
 ) -> Result<Surface<'t>> {
     let (columns, rows) = get_information(text);
@@ -47,7 +46,7 @@ pub fn messagebox<'t, T>(
         let mut renderer = CanvasRenderer {
             canvas: &mut canvas,
             texture_creator: &texture_creator,
-            tilecache,
+            tileprovider,
         };
 
         for row in 0..=rows {

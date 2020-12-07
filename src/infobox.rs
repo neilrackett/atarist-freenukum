@@ -1,7 +1,6 @@
 use super::messagebox::messagebox;
-use super::tilecache::TileCache;
 use crate::event::{ConfirmEvent, WaitEvent};
-use crate::Result;
+use crate::{Result, TileProvider};
 use anyhow::anyhow;
 use sdl2::{
     rect::{Point, Rect},
@@ -12,12 +11,12 @@ use sdl2::{
 
 pub fn show(
     canvas: &mut WindowCanvas,
-    tilecache: &TileCache,
+    tileprovider: &dyn TileProvider,
     text: &str,
     event_pump: &mut EventPump,
 ) -> Result<()> {
     let texture_creator = canvas.texture_creator();
-    let messagebox = messagebox(text, tilecache, &texture_creator)?;
+    let messagebox = messagebox(text, tileprovider, &texture_creator)?;
     let surface = canvas
         .window()
         .surface(event_pump)
@@ -81,11 +80,11 @@ impl InfoMessageQueue {
     pub fn process(
         &mut self,
         canvas: &mut WindowCanvas,
-        tilecache: &TileCache,
+        tileprovider: &dyn TileProvider,
         event_pump: &mut EventPump,
     ) -> Result<()> {
         for message in self.messages.drain(..) {
-            show(canvas, tilecache, &message, event_pump)?;
+            show(canvas, tileprovider, &message, event_pump)?;
         }
         Ok(())
     }

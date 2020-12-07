@@ -1,5 +1,5 @@
-use crate::tilecache::TileCache;
 use crate::Result;
+use crate::TileProvider;
 use anyhow::anyhow;
 use sdl2::{
     pixels::Color,
@@ -72,7 +72,7 @@ impl<'a> Renderer for MovePositionRenderer<'a> {
 pub struct CanvasRenderer<'a, RT: RenderTarget, T> {
     pub canvas: &'a mut Canvas<RT>,
     pub texture_creator: &'a TextureCreator<T>,
-    pub tilecache: &'a TileCache<'a>,
+    pub tileprovider: &'a dyn TileProvider,
 }
 
 impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
@@ -92,7 +92,7 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
         tile: TileIndex,
         destination: Point,
     ) -> Result<()> {
-        let tile = self.tilecache.get_tile(tile).unwrap();
+        let tile = self.tileprovider.get_tile(tile).unwrap();
         let rect = Rect::new(
             destination.x,
             destination.y,

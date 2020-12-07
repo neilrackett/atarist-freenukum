@@ -1,5 +1,6 @@
 use super::tile::{self, TileHeader};
 use crate::Result;
+use crate::TileProvider;
 use sdl2::surface::Surface;
 use std::fs::File;
 use std::io::Read;
@@ -61,6 +62,12 @@ impl FileProperties {
     }
 }
 
+impl<'t> TileProvider for TileCache<'t> {
+    fn get_tile(&self, index: usize) -> Option<&Surface> {
+        self.tiles.get(index)
+    }
+}
+
 impl<'t> TileCache<'t> {
     pub fn load_from_path(path: &Path) -> Result<Self> {
         let mut tiles = Vec::new();
@@ -98,9 +105,5 @@ impl<'t> TileCache<'t> {
             tiles.push(tile::load(r, header, has_transparency)?);
         }
         Ok(tiles)
-    }
-
-    pub fn get_tile(&self, index: usize) -> Option<&Surface> {
-        self.tiles.get(index)
     }
 }

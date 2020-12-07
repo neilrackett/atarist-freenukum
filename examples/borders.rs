@@ -47,7 +47,7 @@ fn main() -> Result<()> {
     let mut border_renderer = CanvasRenderer {
         canvas: &mut canvas,
         texture_creator: &texture_creator,
-        tilecache: &tilecache,
+        tileprovider: &tilecache,
     };
     borders.render(&mut border_renderer)?;
     canvas.present();
