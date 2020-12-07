@@ -7,8 +7,6 @@ pub mod borders;
 pub mod data;
 pub mod episodes;
 pub mod event;
-#[cfg(feature = "build_unrefactored")]
-pub mod file;
 pub mod game;
 pub mod geometry;
 pub mod graphics;

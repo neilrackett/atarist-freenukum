@@ -7,7 +7,6 @@ default-run = "freenukum"
 
 [features]
 default = []
-build_unrefactored = []
 
 [dependencies]
 anyhow = "1.0.33"
