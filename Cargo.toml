@@ -4,9 +4,7 @@ version = "0.3.0"
 authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"
 default-run = "freenukum"
-
-[features]
-default = []
+categories = ["games"]
 
 [dependencies]
 anyhow = "1.0.33"
