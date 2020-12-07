@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+- Fix a whitespace problem in the episode switch message
+- Look for a TTF font on in the windows system font path when running on
+  Windows
+
 ## [0.3.0] - 2020-12-07
 
 ### Added
