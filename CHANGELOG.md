@@ -1,6 +1,6 @@
 # Freenukum Changelog
 
-## Unreleased
+## [0.3.1] - 2020-12-08
 
 ### Added
 - Show a disclaimer about the game version being under development
