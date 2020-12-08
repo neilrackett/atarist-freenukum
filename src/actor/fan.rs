@@ -78,9 +78,8 @@ impl ActorInterface for Specific {
                 ActorType::FanRight => 1,
                 _ => unreachable!(),
             };
-            if (fan_direction > 0 && hdistance > 0)
-                || (fan_direction < 0 && hdistance < 0)
-            {
+
+            if (fan_direction * hdistance) < 0 {
                 return;
             }
 
@@ -88,7 +87,8 @@ impl ActorInterface for Specific {
                 hdistance = HALFTILE_WIDTH as i32 * fan_direction;
             }
 
-            if hdistance.abs() < 8 * HALFTILE_WIDTH as i32 {
+            let range = HALFTILE_WIDTH as i32 * 8;
+            if hdistance.abs() < range {
                 p.hero_data.position.push_horizontally(
                     &p.solids,
                     fan_direction * TILE_WIDTH as i32,

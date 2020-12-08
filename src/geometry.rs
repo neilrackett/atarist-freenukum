@@ -46,7 +46,7 @@ impl RectExt for Rect {
 
     fn horizontal_distance(&self, other: Self) -> i32 {
         if self.right() < other.left() {
-            other.left() - self.right()
+            self.right() - other.left()
         } else if other.right() < self.left() {
             self.left() - other.right()
         } else {
