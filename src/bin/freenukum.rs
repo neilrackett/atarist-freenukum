@@ -21,6 +21,19 @@ fn main() -> Result<()> {
     let ttf_context = sdl2::ttf::init()?;
     let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
     let timer_subsystem = sdl_context.timer().map_err(|s| anyhow!(s))?;
+    let controller_subsystem =
+        sdl_context.game_controller().map_err(|s| anyhow!(s))?;
+    controller_subsystem.set_event_state(true);
+
+    let mut controllers = Vec::new();
+    for i in 0..controller_subsystem
+        .num_joysticks()
+        .map_err(|s| anyhow!(s))?
+    {
+        if controller_subsystem.is_game_controller(i) {
+            controllers.push(controller_subsystem.open(i).unwrap());
+        }
+    }
     let mut event_pump =
         sdl_context.event_pump().map_err(|s| anyhow!(s))?;
     let event_sender = event_subsystem.event_sender();

@@ -4,6 +4,7 @@
 
 ### Added
 - Show a disclaimer about the game version being under development
+- Initial controller support (tested with 8BitDo SN30 Pro and Pro+)
 
 ### Fixed
 - Fix fan range for pushing away the hero

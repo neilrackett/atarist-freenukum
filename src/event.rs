@@ -4,6 +4,7 @@ use crate::UserEvent;
 use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH};
 use anyhow::{anyhow, Error, Result};
 use sdl2::{
+    controller::Button,
     event::{Event, WindowEvent},
     keyboard::{Keycode, Mod},
     mouse::MouseButton,
@@ -80,6 +81,7 @@ impl TryFrom<Event> for GameEvent {
     type Error = Error;
 
     fn try_from(e: Event) -> Result<GameEvent> {
+        use Button as B;
         use Event as E;
         use Keycode as K;
         use WindowEvent as W;
@@ -92,6 +94,9 @@ impl TryFrom<Event> for GameEvent {
             | E::KeyDown {
                 keycode: Some(K::Q),
                 ..
+            }
+            | E::ControllerButtonDown {
+                button: B::Start, ..
             } => Ok(GameEvent::Escape),
             E::KeyDown {
                 keycode: Some(K::Num1),
@@ -195,6 +200,7 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::Up),
                 ..
             }
+            | E::ControllerButtonDown { button: B::Y, .. }
             | E::MouseButtonDown {
                 mouse_btn: MouseButton::Middle,
                 ..
@@ -202,12 +208,20 @@ impl TryFrom<Event> for GameEvent {
             E::KeyDown {
                 keycode: Some(K::Right),
                 ..
+            }
+            | E::ControllerButtonDown {
+                button: B::DPadRight,
+                ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
                 true,
             ))),
             E::KeyDown {
                 keycode: Some(K::Left),
+                ..
+            }
+            | E::ControllerButtonDown {
+                button: B::DPadLeft,
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
@@ -217,12 +231,21 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::LCtrl),
                 ..
             }
+            | E::ControllerButtonDown { button: B::A, .. }
             | E::MouseButtonDown {
                 mouse_btn: MouseButton::Right,
                 ..
             } => Ok(GameEvent::HeroJump),
             E::KeyDown {
                 keycode: Some(K::LAlt),
+                ..
+            }
+            | E::ControllerButtonDown {
+                button: B::LeftShoulder,
+                ..
+            }
+            | E::ControllerButtonDown {
+                button: B::RightShoulder,
                 ..
             }
             | E::MouseButtonDown {
@@ -240,6 +263,10 @@ impl TryFrom<Event> for GameEvent {
             E::KeyUp {
                 keycode: Some(K::Right),
                 ..
+            }
+            | E::ControllerButtonUp {
+                button: B::DPadRight,
+                ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Right,
                 false,
@@ -247,12 +274,24 @@ impl TryFrom<Event> for GameEvent {
             E::KeyUp {
                 keycode: Some(K::Left),
                 ..
+            }
+            | E::ControllerButtonUp {
+                button: B::DPadLeft,
+                ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
                 HorizontalDirection::Left,
                 false,
             ))),
             E::KeyUp {
                 keycode: Some(K::LAlt),
+                ..
+            }
+            | E::ControllerButtonUp {
+                button: B::LeftShoulder,
+                ..
+            }
+            | E::ControllerButtonUp {
+                button: B::RightShoulder,
                 ..
             }
             | E::MouseButtonUp {
@@ -288,6 +327,7 @@ impl TryFrom<Event> for ConfirmEvent {
     type Error = Error;
 
     fn try_from(e: Event) -> Result<ConfirmEvent> {
+        use Button as B;
         use Event as E;
         use Keycode as K;
         use WindowEvent as W;
@@ -295,11 +335,15 @@ impl TryFrom<Event> for ConfirmEvent {
             E::KeyDown {
                 keycode: Some(K::Return),
                 ..
-            } => Ok(ConfirmEvent::Confirmed),
+            }
+            | E::ControllerButtonDown { button: B::A, .. } => {
+                Ok(ConfirmEvent::Confirmed)
+            }
             E::KeyDown {
                 keycode: Some(K::Escape),
                 ..
             }
+            | E::ControllerButtonDown { button: B::B, .. }
             | E::Quit { .. }
             | E::Window {
                 win_event: W::Close,
@@ -322,11 +366,27 @@ impl TryFrom<Event> for InputEvent {
     type Error = Error;
 
     fn try_from(e: Event) -> Result<InputEvent> {
+        use Button as B;
         use Event as E;
         use Keycode as K;
         use Mod as M;
         use WindowEvent as W;
         match e {
+            E::ControllerButtonDown {
+                button: B::DPadLeft,
+                ..
+            } => Ok(InputEvent::MoveCursorLeft),
+            E::ControllerButtonDown {
+                button: B::DPadRight,
+                ..
+            } => Ok(InputEvent::MoveCursorRight),
+            E::ControllerButtonDown { button: B::A, .. } => {
+                Ok(InputEvent::Confirm)
+            }
+            E::ControllerButtonDown { button: B::B, .. } => {
+                Ok(InputEvent::Abort)
+            }
+
             E::KeyDown {
                 keycode, keymod, ..
             } => match keycode {
@@ -423,6 +483,7 @@ impl TryFrom<Event> for MenuEvent {
     type Error = Error;
 
     fn try_from(e: Event) -> Result<MenuEvent> {
+        use Button as B;
         use Event as E;
         use Keycode as K;
         use MouseButton as M;
@@ -431,18 +492,31 @@ impl TryFrom<Event> for MenuEvent {
             E::KeyDown {
                 keycode: Some(K::Return),
                 ..
-            } => Ok(MenuEvent::ChooseCurrentEntry),
+            }
+            | E::ControllerButtonDown { button: B::A, .. } => {
+                Ok(MenuEvent::ChooseCurrentEntry)
+            }
             E::KeyDown {
                 keycode: Some(K::Escape),
                 ..
-            } => Ok(MenuEvent::Abort),
+            }
+            | E::ControllerButtonDown { button: B::B, .. } => {
+                Ok(MenuEvent::Abort)
+            }
             E::KeyDown {
                 keycode: Some(K::Down),
+                ..
+            }
+            | E::ControllerButtonDown {
+                button: B::DPadDown,
                 ..
             } => Ok(MenuEvent::NextEntry),
             E::KeyDown {
                 keycode: Some(K::Up),
                 ..
+            }
+            | E::ControllerButtonDown {
+                button: B::DPadUp, ..
             } => Ok(MenuEvent::PreviousEntry),
             E::KeyDown {
                 keycode: Some(key), ..
