@@ -56,6 +56,20 @@ fn main() -> Result<()> {
         show_splash(&mut canvas, &tilecache, &mut file, &mut event_pump)?;
     }
 
+    infobox::show(
+        &mut canvas,
+        &tilecache,
+        "DISCLAIMER\n\
+        \n\
+        This is an early development\n\
+        version of the game.\n\
+        \n\
+        Expect functionality to be\n\
+        broken or missing.\
+        ",
+        &mut event_pump,
+    )?;
+
     let mut hero = HeroData::new();
 
     'menu_loop: loop {

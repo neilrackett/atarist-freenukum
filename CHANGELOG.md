@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Show a disclaimer about the game version being under development
+
 ### Fixed
 - Fix fan range for pushing away the hero
 - Fix a whitespace problem in the episode switch message
