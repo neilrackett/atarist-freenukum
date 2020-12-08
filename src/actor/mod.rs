@@ -288,8 +288,10 @@ impl Actor {
         hero_data: &mut HeroData,
         actor_adder: &mut dyn ActorAdder,
     ) {
-        let touching_hero =
-            self.general.position.overlaps(hero_data.position.geometry);
+        let touching_hero = self
+            .general
+            .position
+            .has_intersection(hero_data.position.geometry);
 
         if touching_hero {
             if !self.general.touches_hero {
