@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters,
+        RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
@@ -69,5 +69,9 @@ impl ActorInterface for Specific {
          * the bullet when the actor is shot.
          */
         true
+    }
+
+    fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
+        ShotProcessing::Absorb
     }
 }

@@ -7,6 +7,7 @@
 - Properly absorb shots when hitting actors
 - Make score, particles and singleanimation act while invisible, so they
   don't reappear when they went out of view
+- Make jumping mines absorb the shot
 
 ## [0.3.1] - 2020-12-08
 
