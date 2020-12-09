@@ -66,12 +66,12 @@ impl LevelData {
             if let Some(raw) = raw {
                 raw.set(x, y, tile);
             }
+            if tile >= 4 && tile <= 0x2fe0 {
+                tiles.set(x, y, tile / 0x20);
+                solids.set(x, y, tile >= 0x1800);
+            }
             match tile {
                 0x0000 => {}
-                t if t >= 4 && t <= 0x2fe0 => {
-                    tiles.set(x, y, t / 0x20);
-                    solids.set(x, y, t >= 0x1800);
-                }
                 0x0080 =>
                 /* written text on black screen */
                 {
@@ -801,6 +801,7 @@ impl LevelData {
                     }
                     aa(ActorType::SpikesDown, tx, ty);
                 }
+                t if t >= 4 && t <= 0x2fe0 => {}
                 t if (t as usize / 0x20 >= ANIMATION_START) => {
                     warn!(
                         "Unknown tile 0x{:04x} at x: {}, y: {}\n",

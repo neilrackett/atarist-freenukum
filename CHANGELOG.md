@@ -1,5 +1,10 @@
 # Freenukum Changelog
 
+## [Unreleased]
+
+### Fixed
+- Fix loading of shootable wall
+
 ## [0.3.1] - 2020-12-08
 
 ### Added
