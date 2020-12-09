@@ -27,6 +27,7 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         general.is_in_foreground = true;
         general.position.resize(TILE_WIDTH, TILE_HEIGHT);
+        general.acts_while_invisible = true;
 
         let tile = match general.actor_type {
             ActorType::Score100 => NUMBER_100,

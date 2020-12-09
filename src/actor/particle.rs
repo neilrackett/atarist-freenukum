@@ -23,6 +23,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = true;
+        general.acts_while_invisible = true;
         general.position.resize(HALFTILE_WIDTH, HALFTILE_HEIGHT);
 
         use rand::Rng;
