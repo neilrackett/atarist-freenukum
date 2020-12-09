@@ -2,8 +2,7 @@ use crate::actor::{ActorMessageQueue, ActorQueue};
 use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
-use crate::event::GameEvent;
-use crate::event::{ConfirmEvent, WaitEvent};
+use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::LevelData;
@@ -27,7 +26,7 @@ use sdl2::{
     video::Window,
     EventPump, TimerSubsystem, VideoSubsystem,
 };
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::fs::File;
 
 #[derive(PartialEq, Eq)]
@@ -110,7 +109,8 @@ fn start_in_level(
     let mut actor_message_queue = ActorMessageQueue::new();
 
     let mut do_update = true;
-    let mut directions = HashSet::new();
+    let mut walking_left = BTreeSet::new();
+    let mut walking_right = BTreeSet::new();
 
     'game_loop: while level_data.do_play {
         let texture_creator = canvas.texture_creator();
@@ -225,19 +225,39 @@ fn start_in_level(
                 level_data.hero_interact_end(hero);
                 do_update = true;
             }
-            GameEvent::HeroSetWalkingDirectionEnabled((
+            GameEvent::HeroSetWalkingDirectionEnabled {
                 direction,
+                context,
                 enabled,
-            )) => {
-                if enabled {
-                    directions.insert(direction);
-                } else {
-                    directions.remove(&direction);
+            } => {
+                match direction {
+                    HorizontalDirection::Left => {
+                        if enabled {
+                            walking_left.insert(context);
+                            if context == InputContext::ControllerAxis {
+                                walking_right
+                                    .remove(&InputContext::ControllerAxis);
+                            }
+                        } else {
+                            walking_left.remove(&context);
+                            if context == InputContext::ControllerAxis {
+                                walking_left
+                                    .remove(&InputContext::ControllerAxis);
+                            }
+                        }
+                    }
+                    HorizontalDirection::Right => {
+                        if enabled {
+                            walking_right.insert(context);
+                        } else {
+                            walking_right.remove(&context);
+                        }
+                    }
+                    HorizontalDirection::Center => unreachable!(),
                 }
-                match (
-                    directions.contains(&HorizontalDirection::Left),
-                    directions.contains(&HorizontalDirection::Right),
-                ) {
+
+                match (!walking_left.is_empty(), !walking_right.is_empty())
+                {
                     (true, true) | (false, false) => {
                         hero.motion = Motion::NotMoving
                     }

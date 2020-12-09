@@ -4,13 +4,13 @@ use crate::UserEvent;
 use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH};
 use anyhow::{anyhow, Error, Result};
 use sdl2::{
-    controller::Button,
+    controller::{Axis, Button},
     event::{Event, WindowEvent},
     keyboard::{Keycode, Mod},
     mouse::MouseButton,
     EventPump,
 };
-use std::convert::TryFrom;
+use std::{collections::BTreeSet, convert::TryFrom};
 
 #[must_use]
 pub enum GameEvent {
@@ -19,10 +19,17 @@ pub enum GameEvent {
     IncreaseLife,
     FinishLevel,
     ToggleFullscreen,
-    MoveViewPoint { x: i32, y: i32 },
+    MoveViewPoint {
+        x: i32,
+        y: i32,
+    },
     HeroInteractionStart,
     HeroInteractionEnd,
-    HeroSetWalkingDirectionEnabled((HorizontalDirection, bool)),
+    HeroSetWalkingDirectionEnabled {
+        direction: HorizontalDirection,
+        context: InputContext,
+        enabled: bool,
+    },
     RefreshScreen,
     HeroJump,
     HeroStartFiring,
@@ -53,13 +60,67 @@ pub enum InputEvent {
 pub enum MenuEvent {
     ChooseCurrentEntry,
     Abort,
-    NextEntry,
-    PreviousEntry,
+    NextEntry {
+        context: InputContext,
+        enabled: bool,
+    },
+    PreviousEntry {
+        context: InputContext,
+        enabled: bool,
+    },
     ChooseShortcutEntry(char),
-    MoveMouse { x: i32, y: i32 },
+    MoveMouse {
+        x: i32,
+        y: i32,
+    },
     ClickMouse,
     RefreshScreen,
     TimerTriggered,
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum InputContext {
+    ControllerDPad,
+    ControllerAxis,
+    Keyboard,
+}
+
+pub trait OnOffTracking {
+    type Context;
+
+    fn set_enabled(
+        &mut self,
+        context: Self::Context,
+        enable: bool,
+        off_to_on: &mut dyn FnMut(),
+        on_to_off: &mut dyn FnMut(),
+    );
+}
+
+impl OnOffTracking for BTreeSet<InputContext> {
+    type Context = InputContext;
+
+    fn set_enabled(
+        &mut self,
+        context: Self::Context,
+        enable: bool,
+        off_to_on: &mut dyn FnMut(),
+        on_to_off: &mut dyn FnMut(),
+    ) {
+        let was_enabled = !self.is_empty();
+        if enable {
+            self.insert(context);
+        } else {
+            self.remove(&context);
+        }
+        let is_enabled = !self.is_empty();
+
+        match (was_enabled, is_enabled) {
+            (false, true) => off_to_on(),
+            (true, false) => on_to_off(),
+            (false, false) | (true, true) => {}
+        }
+    }
 }
 
 pub trait WaitEvent: Sized {
@@ -205,28 +266,60 @@ impl TryFrom<Event> for GameEvent {
                 mouse_btn: MouseButton::Middle,
                 ..
             } => Ok(GameEvent::HeroInteractionStart),
+            E::ControllerAxisMotion {
+                axis: Axis::LeftX,
+                value,
+                ..
+            } if value < 0 => {
+                Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                    direction: HorizontalDirection::Left,
+                    context: InputContext::ControllerAxis,
+                    enabled: value < -20000,
+                })
+            }
+            E::ControllerAxisMotion {
+                axis: Axis::LeftX,
+                value,
+                ..
+            } if value > 0 => {
+                Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                    direction: HorizontalDirection::Right,
+                    context: InputContext::ControllerAxis,
+                    enabled: value > 20000,
+                })
+            }
             E::KeyDown {
                 keycode: Some(K::Right),
                 ..
-            }
-            | E::ControllerButtonDown {
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Right,
+                context: InputContext::Keyboard,
+                enabled: true,
+            }),
+            E::ControllerButtonDown {
                 button: B::DPadRight,
                 ..
-            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
-                HorizontalDirection::Right,
-                true,
-            ))),
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Right,
+                context: InputContext::ControllerDPad,
+                enabled: true,
+            }),
             E::KeyDown {
                 keycode: Some(K::Left),
                 ..
-            }
-            | E::ControllerButtonDown {
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Left,
+                context: InputContext::Keyboard,
+                enabled: true,
+            }),
+            E::ControllerButtonDown {
                 button: B::DPadLeft,
                 ..
-            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
-                HorizontalDirection::Left,
-                true,
-            ))),
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Left,
+                context: InputContext::ControllerDPad,
+                enabled: true,
+            }),
             E::KeyDown {
                 keycode: Some(K::LCtrl),
                 ..
@@ -263,25 +356,35 @@ impl TryFrom<Event> for GameEvent {
             E::KeyUp {
                 keycode: Some(K::Right),
                 ..
-            }
-            | E::ControllerButtonUp {
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Right,
+                context: InputContext::Keyboard,
+                enabled: false,
+            }),
+            E::ControllerButtonUp {
                 button: B::DPadRight,
                 ..
-            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
-                HorizontalDirection::Right,
-                false,
-            ))),
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Right,
+                context: InputContext::ControllerDPad,
+                enabled: false,
+            }),
             E::KeyUp {
                 keycode: Some(K::Left),
                 ..
-            }
-            | E::ControllerButtonUp {
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Left,
+                context: InputContext::Keyboard,
+                enabled: false,
+            }),
+            E::ControllerButtonUp {
                 button: B::DPadLeft,
                 ..
-            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled((
-                HorizontalDirection::Left,
-                false,
-            ))),
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                direction: HorizontalDirection::Left,
+                context: InputContext::ControllerDPad,
+                enabled: false,
+            }),
             E::KeyUp {
                 keycode: Some(K::LAlt),
                 ..
@@ -503,21 +606,66 @@ impl TryFrom<Event> for MenuEvent {
             | E::ControllerButtonDown { button: B::B, .. } => {
                 Ok(MenuEvent::Abort)
             }
+            E::ControllerAxisMotion {
+                axis: Axis::LeftY,
+                value,
+                ..
+            } if value < 0 => Ok(MenuEvent::PreviousEntry {
+                context: InputContext::ControllerAxis,
+                enabled: value < -20000,
+            }),
+            E::ControllerAxisMotion {
+                axis: Axis::LeftY,
+                value,
+                ..
+            } if value > 0 => Ok(MenuEvent::NextEntry {
+                context: InputContext::ControllerAxis,
+                enabled: value > 20000,
+            }),
             E::KeyDown {
                 keycode: Some(K::Down),
                 ..
-            }
-            | E::ControllerButtonDown {
+            } => Ok(MenuEvent::NextEntry {
+                context: InputContext::Keyboard,
+                enabled: true,
+            }),
+            E::ControllerButtonDown {
                 button: B::DPadDown,
                 ..
-            } => Ok(MenuEvent::NextEntry),
+            } => Ok(MenuEvent::NextEntry {
+                context: InputContext::ControllerDPad,
+                enabled: true,
+            }),
+            E::KeyUp {
+                keycode: Some(K::Down),
+                ..
+            } => Ok(MenuEvent::NextEntry {
+                context: InputContext::Keyboard,
+                enabled: true,
+            }),
+            E::ControllerButtonUp {
+                button: B::DPadDown,
+                ..
+            } => Ok(MenuEvent::NextEntry {
+                context: InputContext::ControllerDPad,
+                enabled: false,
+            }),
+            E::ControllerButtonUp {
+                button: B::DPadUp, ..
+            } => Ok(MenuEvent::PreviousEntry {
+                context: InputContext::ControllerDPad,
+                enabled: false,
+            }),
             E::KeyDown {
                 keycode: Some(K::Up),
                 ..
             }
             | E::ControllerButtonDown {
                 button: B::DPadUp, ..
-            } => Ok(MenuEvent::PreviousEntry),
+            } => Ok(MenuEvent::PreviousEntry {
+                context: InputContext::ControllerDPad,
+                enabled: true,
+            }),
             E::KeyDown {
                 keycode: Some(key), ..
             } => {

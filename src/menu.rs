@@ -1,5 +1,5 @@
 use super::messagebox;
-use crate::event::{MenuEvent, WaitEvent};
+use crate::event::{MenuEvent, OnOffTracking, WaitEvent};
 use crate::rendering::{CanvasRenderer, Renderer};
 use crate::{
     TileProvider, UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL,
@@ -12,6 +12,7 @@ use sdl2::{
     render::WindowCanvas,
     EventPump, TimerSubsystem,
 };
+use std::collections::BTreeSet;
 
 pub struct MenuEntry {
     pub shortcut: char,
@@ -95,6 +96,9 @@ impl Menu {
         let mut changed = true;
         let mut animationframe = 0;
 
+        let mut next_enabled = BTreeSet::new();
+        let mut previous_enabled = BTreeSet::new();
+
         loop {
             if changed {
                 canvas
@@ -133,16 +137,30 @@ impl Menu {
                     Some(self.entries[self.current].shortcut)
                 }
                 MenuEvent::Abort => Some('\0'),
-                MenuEvent::NextEntry => {
-                    self.current += 1;
-                    self.current %= self.entries.len();
+                MenuEvent::NextEntry { context, enabled } => {
+                    next_enabled.set_enabled(
+                        context,
+                        enabled,
+                        &mut || {
+                            self.current += 1;
+                            self.current %= self.entries.len();
+                        },
+                        &mut || {},
+                    );
                     None
                 }
-                MenuEvent::PreviousEntry => {
-                    if self.current == 0 {
-                        self.current = self.entries.len();
-                    }
-                    self.current -= 1;
+                MenuEvent::PreviousEntry { context, enabled } => {
+                    previous_enabled.set_enabled(
+                        context,
+                        enabled,
+                        &mut || {
+                            if self.current == 0 {
+                                self.current = self.entries.len();
+                            }
+                            self.current -= 1;
+                        },
+                        &mut || {},
+                    );
                     None
                 }
                 MenuEvent::ChooseShortcutEntry(key) => {
