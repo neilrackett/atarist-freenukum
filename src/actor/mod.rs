@@ -123,18 +123,18 @@ impl ActorsList {
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
     ) -> bool {
-        let mut hit_actor = false;
         for actor in self.actors.iter_mut() {
             if actor.can_get_shot()
                 && shot_position.touches(actor.position())
             {
-                actor.shot(solids, tiles, actor_adder, hero_data);
-                if !actor.is_alive() {
-                    hit_actor = true;
+                if actor.shot(solids, tiles, actor_adder, hero_data)
+                    == ShotProcessing::Absorb
+                {
+                    return true;
                 }
             }
         }
-        hit_actor
+        false
     }
 
     pub fn start_interaction(
@@ -254,6 +254,12 @@ impl ActorsList {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum ShotProcessing {
+    Absorb,
+    Ignore,
+}
+
 #[derive(Debug)]
 pub struct Actor {
     pub(crate) general: ActorData,
@@ -340,7 +346,7 @@ impl Actor {
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
-    ) {
+    ) -> ShotProcessing {
         let p = ShotParameters {
             general: &mut self.general,
             solids,
@@ -348,7 +354,7 @@ impl Actor {
             actor_adder,
             hero_data,
         };
-        self.specific.shot(p);
+        self.specific.shot(p)
     }
 
     pub fn is_alive(&self) -> bool {
@@ -1104,7 +1110,9 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
         false
     }
 
-    fn shot(&mut self, _p: ShotParameters) {}
+    fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
+        ShotProcessing::Ignore
+    }
 
     fn receive_message(&mut self, _p: ReceiveMessageParameters) {}
 }

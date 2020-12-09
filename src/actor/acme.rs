@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters,
+        ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
@@ -102,7 +102,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.counter > 0 {
             p.hero_data.score.add(500);
             p.actor_adder.add_actor(
@@ -114,6 +114,7 @@ impl ActorInterface for Specific {
 
             p.general.is_alive = false;
         }
+        ShotProcessing::Absorb
     }
 
     fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {

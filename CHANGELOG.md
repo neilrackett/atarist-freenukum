@@ -4,6 +4,7 @@
 
 ### Fixed
 - Fix loading of shootable wall
+- Properly absorb shots when hitting actors
 
 ## [0.3.1] - 2020-12-08
 

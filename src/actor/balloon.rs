@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters,
+        ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH,
@@ -85,9 +85,10 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.destroyed = true;
         p.actor_adder
             .add_actor(ActorType::Steam, p.general.position.top_left());
+        ShotProcessing::Absorb
     }
 }

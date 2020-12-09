@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
@@ -31,7 +31,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.hero_data.score.add(10);
         p.actor_adder.add_actor(
             ActorType::Explosion,
@@ -43,6 +43,7 @@ impl ActorInterface for Specific {
             p.general.position.y() as u32 / TILE_HEIGHT,
             false,
         );
+        ShotProcessing::Absorb
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {

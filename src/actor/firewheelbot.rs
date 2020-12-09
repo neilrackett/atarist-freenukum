@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters, ShotParameters,
+        RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
@@ -149,7 +149,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if !self.fire_is_on {
             if self.was_shot == 1 && self.touching_hero {
                 p.general.hurts_hero = false;
@@ -159,5 +159,6 @@ impl ActorInterface for Specific {
                 self.was_shot += 1;
             }
         }
+        ShotProcessing::Absorb
     }
 }

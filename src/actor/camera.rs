@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
@@ -54,7 +54,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.general.is_alive = false;
         p.hero_data.score.add(100);
         p.actor_adder
@@ -63,5 +63,6 @@ impl ActorInterface for Specific {
             ActorType::Explosion,
             p.general.position.top_left(),
         );
+        ShotProcessing::Absorb
     }
 }

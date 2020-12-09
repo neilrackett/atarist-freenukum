@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        RenderParameters, ShotParameters,
+        RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, HALFTILE_HEIGHT, OBJECT_ROCKET, TILE_HEIGHT, TILE_WIDTH,
@@ -99,7 +99,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.state == State::Idle {
             // TODO: create animation
             self.state = State::Flying;
@@ -112,5 +112,6 @@ impl ActorInterface for Specific {
             // TODO: trigger a re-rendering of the affected tiles
             p.tiles.copy_from_to(tile_x, tile_y + 1, tile_x, tile_y);
         }
+        ShotProcessing::Absorb
     }
 }

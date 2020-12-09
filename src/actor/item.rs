@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters,
+        ShotParameters, ShotProcessing,
     },
     hero::{FetchedLetter, InventoryItem},
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -318,23 +318,26 @@ impl ActorInterface for Specific {
         )
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         let pos = p.general.position.top_left();
         match p.general.actor_type {
             ActorType::BoxBlueFootball => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Football, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxBlueJoystick => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Joystick, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxBlueDisk => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Disk, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxBlueBalloon => {
                 p.general.is_alive = false;
@@ -343,95 +346,114 @@ impl ActorInterface for Specific {
                     pos.offset(0, -(TILE_HEIGHT as i32)),
                 );
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxBlueFlag => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Flag, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxBlueRadio => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Radio, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxRedSoda => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Soda, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxRedChicken => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::ChickenSingle, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyEmpty => {
                 p.general.is_alive = false;
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyBoots => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Boots, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyClamps => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Clamps, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyGun => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Gun, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyBomb => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Bomb, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyGlove => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Glove, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyFullLife => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::FullLife, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyAccessCard => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::AccessCard, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterD => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterD, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterU => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterU, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterK => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterK, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterE => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterE, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
+                ShotProcessing::Absorb
             }
             ActorType::ChickenSingle => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::ChickenDouble, pos);
+                ShotProcessing::Absorb
             }
             ActorType::Soda => {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(ActorType::SodaFlying, pos);
+                ShotProcessing::Absorb
             }
-            _ => {}
+            _ => ShotProcessing::Ignore,
         }
     }
 }

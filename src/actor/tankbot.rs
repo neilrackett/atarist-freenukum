@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters, ShotParameters,
+        RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
@@ -169,7 +169,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.was_shot == 1 && self.touching_hero {
             p.general.hurts_hero = false;
             self.touching_hero = false;
@@ -177,5 +177,6 @@ impl ActorInterface for Specific {
         if self.was_shot != 2 {
             self.was_shot += 1;
         }
+        ShotProcessing::Absorb
     }
 }

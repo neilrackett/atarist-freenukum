@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters,
+        ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
@@ -72,7 +72,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.lives -= 1;
         if self.lives > 0 {
             p.actor_adder
@@ -98,5 +98,6 @@ impl ActorInterface for Specific {
                     .offset(0, p.general.position.height() as i32 / 2),
             );
         }
+        ShotProcessing::Absorb
     }
 }

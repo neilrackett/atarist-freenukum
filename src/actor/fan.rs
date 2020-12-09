@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     geometry::RectExt,
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -111,9 +111,10 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) {
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.running = 9;
         p.actor_adder
             .add_actor(ActorType::Steam, p.general.position.top_left());
+        ShotProcessing::Absorb
     }
 }
