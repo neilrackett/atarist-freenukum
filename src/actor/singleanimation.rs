@@ -26,6 +26,7 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         general.is_in_foreground = false;
         general.position.resize(TILE_WIDTH, TILE_HEIGHT);
+        general.acts_while_invisible = true;
 
         let (tile, num_frames, can_hurt_hero, replaced_by) = match general
             .actor_type
