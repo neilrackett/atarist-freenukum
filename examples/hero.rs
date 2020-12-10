@@ -5,7 +5,7 @@ use freenukum::{
     game,
     graphics::load_default_font,
     hero::{HeroData, Motion},
-    level::solids::LevelSolids,
+    level::{solids::LevelSolids, PlayState},
     rendering::{CanvasRenderer, Renderer},
     settings::Settings,
     tilecache::TileCache,
@@ -80,6 +80,7 @@ fn main() -> Result<()> {
     let mut directions = HashSet::new();
 
     let event_sender = event_subsystem.event_sender();
+    let mut play_state = PlayState::Playing;
 
     let timer = timer_subsystem.add_timer(
         GAME_INTERVAL,
@@ -204,7 +205,7 @@ fn main() -> Result<()> {
                     renderer.fill(Color::RGB(0, 0, 0))?;
                     hero.next_frame();
                     hero.update_animation();
-                    hero.act(&solids, &mut actor_adder)?;
+                    hero.act(&solids, &mut actor_adder, &mut play_state)?;
                     hero.render(
                         &mut renderer,
                         &solids,

@@ -38,9 +38,12 @@ mod unstablefloor;
 mod wallcrawler;
 
 use crate::{
-    geometry::RectExt, hero::HeroData, infobox::InfoMessageQueue,
-    level::solids::LevelSolids, level::tiles::LevelTiles,
-    rendering::Renderer, Result,
+    geometry::RectExt,
+    hero::HeroData,
+    infobox::InfoMessageQueue,
+    level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
+    rendering::Renderer,
+    Result,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -139,7 +142,7 @@ impl ActorsList {
 
     pub fn start_interaction(
         &mut self,
-        level_passed: &mut bool,
+        play_state: &mut PlayState,
         hero_data: &mut HeroData,
         info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,
@@ -153,12 +156,12 @@ impl ActorsList {
         });
 
         if let Some(i) = new_interactor {
-            self.end_interaction(level_passed, hero_data);
+            self.end_interaction(play_state, hero_data);
 
             let actor = self.actors.get_mut(i).unwrap();
             let p = HeroInteractStartParameters {
                 general: &mut actor.general,
-                level_passed,
+                play_state,
                 hero_data,
                 info_message_queue,
                 actor_message_queue,
@@ -170,14 +173,14 @@ impl ActorsList {
 
     pub fn end_interaction(
         &mut self,
-        level_passed: &mut bool,
+        play_state: &mut PlayState,
         hero_data: &mut HeroData,
     ) {
         if let Some(i) = self.interaction_target.take() {
             if let Some(actor) = self.actors.get_mut(i) {
                 let p = HeroInteractEndParameters {
                     general: &mut actor.general,
-                    level_passed,
+                    play_state,
                     hero_data,
                 };
                 actor.specific.hero_interact_end(p);
@@ -191,14 +194,20 @@ impl ActorsList {
         tiles: &mut LevelTiles,
         hero_data: &mut HeroData,
         actor_queue: &mut ActorQueue,
-        do_play: &mut bool,
+        play_state: &mut PlayState,
     ) {
         let mut actors_hurting_hero = 0usize;
         for actor in self.actors.iter_mut() {
             if actor.general.acts_while_invisible
                 || actor.general.is_visible
             {
-                actor.act(solids, tiles, hero_data, actor_queue, do_play);
+                actor.act(
+                    solids,
+                    tiles,
+                    hero_data,
+                    actor_queue,
+                    play_state,
+                );
                 if actor.general.is_alive && actor.general.hurts_hero {
                     actors_hurting_hero += 1;
                 }
@@ -273,7 +282,7 @@ impl Actor {
         tiles: &mut LevelTiles,
         hero_data: &mut HeroData,
         actor_adder: &mut dyn ActorAdder,
-        do_play: &mut bool,
+        play_state: &mut PlayState,
     ) -> bool {
         self.check_hero_touch(hero_data, actor_adder);
 
@@ -283,7 +292,7 @@ impl Actor {
             tiles,
             hero_data,
             actor_adder,
-            do_play,
+            play_state,
         };
         self.specific.act(p);
         self.general.is_alive
@@ -1041,7 +1050,7 @@ pub struct ActParameters<'a> {
     pub tiles: &'a mut LevelTiles,
     pub hero_data: &'a mut HeroData,
     pub actor_adder: &'a mut dyn ActorAdder,
-    pub do_play: &'a mut bool,
+    pub play_state: &'a mut PlayState,
 }
 
 pub struct ShotParameters<'a> {
@@ -1066,7 +1075,7 @@ pub struct ReceiveMessageParameters<'a> {
 
 pub struct HeroInteractStartParameters<'a> {
     pub general: &'a mut ActorData,
-    pub level_passed: &'a mut bool,
+    pub play_state: &'a mut PlayState,
     pub hero_data: &'a mut HeroData,
     pub info_message_queue: &'a mut InfoMessageQueue,
     pub actor_message_queue: &'a mut ActorMessageQueue,
@@ -1075,7 +1084,7 @@ pub struct HeroInteractStartParameters<'a> {
 pub struct HeroInteractEndParameters<'a> {
     pub general: &'a mut ActorData,
     pub hero_data: &'a mut HeroData,
-    pub level_passed: &'a mut bool,
+    pub play_state: &'a mut PlayState,
 }
 
 pub struct HeroTouchStartParameters<'a> {

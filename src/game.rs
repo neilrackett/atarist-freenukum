@@ -5,7 +5,7 @@ use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
 use crate::hero::{HeroData, Motion};
 use crate::infobox::{self, InfoMessageQueue};
-use crate::level::LevelData;
+use crate::level::{LevelData, PlayState};
 use crate::picture::show_splash_with_message;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::settings::Settings;
@@ -30,9 +30,10 @@ use std::collections::BTreeSet;
 use std::fs::File;
 
 #[derive(PartialEq, Eq)]
-enum Ending {
-    Passed,
-    Failed,
+enum NextAction {
+    RestartLevel,
+    NextLevel,
+    GoToMainScreen,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -47,7 +48,7 @@ fn start_in_level(
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
-) -> Result<Ending> {
+) -> Result<NextAction> {
     let backdrop = {
         let backdrop_number = match level_number {
             1 | 3 => 0,
@@ -112,7 +113,7 @@ fn start_in_level(
     let mut walking_left = BTreeSet::new();
     let mut walking_right = BTreeSet::new();
 
-    'game_loop: while level_data.do_play {
+    while level_data.play_state.keep_acting() {
         let texture_creator = canvas.texture_creator();
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
@@ -124,6 +125,28 @@ fn start_in_level(
 
         if do_update {
             let heropos = hero.position.geometry;
+
+            match level_data.play_state {
+                PlayState::KilledPlayingAnimation(0) => {
+                    level_data.play_state = PlayState::RestartLevel;
+                    info_message_queue.push_back(
+                        "You died.\nRestarting level.".to_string(),
+                    );
+                }
+                PlayState::KilledPlayingAnimation(i) => {
+                    hero.hidden = true;
+
+                    if i > 30 && i % 2 == 0 {
+                        use crate::actor::ActorAdder;
+                        actor_queue
+                            .add_particle_firework(heropos.center(), 4);
+                    }
+                    level_data.play_state =
+                        PlayState::KilledPlayingAnimation(i - 1);
+                }
+                _ => {}
+            }
+
             srcrect.x = std::cmp::min(
                 (heropos.center().x as u32)
                     .saturating_sub(LEVELWINDOW_WIDTH * TILE_WIDTH / 2),
@@ -164,7 +187,9 @@ fn start_in_level(
         info_message_queue.process(canvas, tileprovider, event_pump)?;
 
         match GameEvent::wait(event_pump)? {
-            GameEvent::Escape => break 'game_loop,
+            GameEvent::Escape => {
+                level_data.play_state = PlayState::GoToMainScreen;
+            }
             GameEvent::GetInventoryItem(item) => {
                 hero.inventory.set(item);
             }
@@ -172,8 +197,7 @@ fn start_in_level(
                 hero.firepower.increase(1);
             }
             GameEvent::FinishLevel => {
-                level_data.level_passed = true;
-                level_data.do_play = false;
+                level_data.play_state = PlayState::LevelFinished
             }
             GameEvent::ToggleFullscreen => {
                 use sdl2::video::FullscreenType;
@@ -300,12 +324,13 @@ fn start_in_level(
     }
     drop(timer);
 
-    let ending = if level_data.level_passed {
-        Ending::Passed
-    } else {
-        Ending::Failed
+    let next_action = match level_data.play_state {
+        PlayState::LevelFinished => NextAction::NextLevel,
+        PlayState::GoToMainScreen => NextAction::GoToMainScreen,
+        PlayState::RestartLevel => NextAction::RestartLevel,
+        _ => unreachable!(),
     };
-    Ok(ending)
+    Ok(next_action)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -368,7 +393,6 @@ pub fn start(
     // start the game itself
     let mut level = 1;
     let mut interlevel = false;
-    let mut success = Ending::Passed;
 
     infobox::show(
         canvas,
@@ -376,10 +400,11 @@ pub fn start(
         "Get ready FreeNukum,\nyou are going in.\n",
         event_pump,
     )?;
+    let mut finished = false;
 
-    while success == Ending::Passed && level < 13 {
+    'level_loop: loop {
         if interlevel {
-            success = start_in_level(
+            match start_in_level(
                 2,
                 canvas,
                 tileprovider,
@@ -390,11 +415,18 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
-            )?;
-            level = if level == 1 { level + 2 } else { level + 1 };
-            interlevel = false;
+            )? {
+                NextAction::NextLevel => {
+                    level = if level == 1 { level + 2 } else { level + 1 };
+                    interlevel = false;
+                }
+                NextAction::RestartLevel => {
+                    unreachable!()
+                }
+                NextAction::GoToMainScreen => break 'level_loop,
+            }
         } else {
-            success = start_in_level(
+            match start_in_level(
                 level,
                 canvas,
                 tileprovider,
@@ -405,12 +437,24 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
-            )?;
-            interlevel = true;
+            )? {
+                NextAction::NextLevel => {
+                    if level == 13 {
+                        finished = true;
+                        break 'level_loop;
+                    } else {
+                        interlevel = true;
+                    }
+                }
+                NextAction::RestartLevel => {
+                    // Restart the level
+                }
+                NextAction::GoToMainScreen => break 'level_loop,
+            }
         }
     }
 
-    if success == Ending::Passed {
+    if finished {
         // TODO: the player finished, so we should show the end sequence
     }
 

@@ -1,6 +1,6 @@
 use crate::{
     actor::{ActorAdder, ActorType},
-    level::solids::LevelSolids,
+    level::{solids::LevelSolids, PlayState},
     rendering::Renderer,
     HorizontalDirection, Result, HALFTILE_HEIGHT, HALFTILE_WIDTH,
     HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
@@ -274,11 +274,17 @@ impl HeroData {
         &mut self,
         solids: &LevelSolids,
         actor_adder: &mut dyn ActorAdder,
-    ) -> Result<u8> {
+        play_state: &mut PlayState,
+    ) -> Result<()> {
         self.immunity.count_down();
         if !self.immunity.hero_is_protected() && self.gets_hurt {
             self.immunity.enable();
-            self.health.decrease(1);
+            if self.health.life() == 0 && *play_state == PlayState::Playing
+            {
+                *play_state = PlayState::KilledPlayingAnimation(80);
+            } else {
+                self.health.decrease(1);
+            }
         }
 
         if self.motion == Motion::Walking {
@@ -381,7 +387,7 @@ impl HeroData {
             }
         }
 
-        Ok(self.health.life)
+        Ok(())
     }
 }
 

@@ -27,12 +27,26 @@ use std::convert::TryFrom;
 use std::io::Read;
 use tiles::LevelTiles;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PlayState {
+    Playing,
+    LevelFinished,
+    KilledPlayingAnimation(usize),
+    RestartLevel,
+    GoToMainScreen,
+}
+
+impl PlayState {
+    pub fn keep_acting(&self) -> bool {
+        matches!(self, PlayState::Playing | PlayState::KilledPlayingAnimation(_))
+    }
+}
+
 #[derive(Debug)]
 pub struct LevelData {
     pub tiles: LevelTiles,
     pub solids: LevelSolids,
-    pub do_play: bool,
-    pub level_passed: bool,
+    pub play_state: PlayState,
     pub actors: ActorsList,
     pub animated_frames_since_last_act: usize,
     pub shots: ShotList,
@@ -826,8 +840,7 @@ impl LevelData {
         Ok(LevelData {
             tiles,
             solids,
-            do_play: true,
-            level_passed: false,
+            play_state: PlayState::Playing,
             actors,
             animated_frames_since_last_act: 0,
             shots: Vec::new(),
@@ -841,7 +854,7 @@ impl LevelData {
         actor_message_queue: &mut ActorMessageQueue,
     ) {
         self.actors.start_interaction(
-            &mut self.level_passed,
+            &mut self.play_state,
             hero,
             info_message_queue,
             actor_message_queue,
@@ -849,7 +862,7 @@ impl LevelData {
     }
 
     pub fn hero_interact_end(&mut self, hero: &mut HeroData) {
-        self.actors.end_interaction(&mut self.level_passed, hero);
+        self.actors.end_interaction(&mut self.play_state, hero);
     }
 
     pub fn animated_frames_since_last_act_increase(&mut self) -> usize {
@@ -947,11 +960,15 @@ impl LevelData {
             &mut self.tiles,
             hero_data,
             actor_queue,
-            &mut self.do_play,
+            &mut self.play_state,
         );
 
         if animated_frames == 0 {
-            hero_data.act(&self.solids, actor_queue)?;
+            hero_data.act(
+                &self.solids,
+                actor_queue,
+                &mut self.play_state,
+            )?;
         }
         hero_data.next_frame();
         hero_data.update_animation();

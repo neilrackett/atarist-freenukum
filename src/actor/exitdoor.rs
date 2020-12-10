@@ -3,7 +3,7 @@ use crate::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
         HeroInteractStartParameters, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
     Result, ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH,
 };
 
@@ -43,11 +43,10 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+    fn hero_interact_start(&mut self, _p: HeroInteractStartParameters) {
         if self.state == State::Closed {
             self.state = State::Opening;
         }
-        *p.level_passed = true;
     }
 
     fn act(&mut self, p: ActParameters) {
@@ -63,7 +62,7 @@ impl ActorInterface for Specific {
             }
             State::Closing => {
                 if self.counter == 0 {
-                    *p.do_play = false;
+                    *p.play_state = PlayState::LevelFinished;
                     p.hero_data.hidden = false;
                 } else {
                     self.counter -= 1;
