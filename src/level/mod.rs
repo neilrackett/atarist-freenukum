@@ -969,15 +969,17 @@ impl LevelData {
 
         if self.play_state.hero_can_act() {
             if animated_frames == 0 {
-                hero_data.act(
-                    &self.solids,
-                    actor_queue,
-                    &mut self.play_state,
-                )?;
+                hero_data.act(&self.solids, actor_queue)?;
             }
         }
         hero_data.next_frame();
         hero_data.update_animation();
+
+        if hero_data.health.life().is_none()
+            && self.play_state == PlayState::Playing
+        {
+            self.play_state = PlayState::KilledPlayingAnimation(80);
+        }
 
         Ok(())
     }

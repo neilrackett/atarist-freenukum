@@ -159,7 +159,10 @@ fn start_in_level(
             ) as i32;
 
             borders.render(&mut renderer)?;
-            borders.render_life(hero.health.life(), &mut renderer)?;
+            borders.render_life(
+                hero.health.life().unwrap_or(0),
+                &mut renderer,
+            )?;
             borders.render_firepower(&hero.firepower, &mut renderer)?;
             borders.render_inventory(&hero.inventory, &mut renderer)?;
             borders.render_score(hero.score.value(), &mut renderer)?;
@@ -401,7 +404,7 @@ pub fn start(
         event_pump,
     )?;
     let mut finished = false;
-    let mut initial_lives = hero.health.life();
+    let mut initial_lives = hero.health.life().unwrap();
     let mut initial_score = hero.score.value();
 
     'level_loop: loop {
@@ -419,7 +422,7 @@ pub fn start(
                 timer_subsystem,
             )? {
                 NextAction::NextLevel => {
-                    initial_lives = hero.health.life();
+                    initial_lives = hero.health.life().unwrap();
                     initial_score = hero.score.value();
                     level = if level == 1 { level + 2 } else { level + 1 };
                     interlevel = false;

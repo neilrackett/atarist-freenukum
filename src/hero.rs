@@ -1,6 +1,6 @@
 use crate::{
     actor::{ActorAdder, ActorType},
-    level::{solids::LevelSolids, PlayState},
+    level::solids::LevelSolids,
     rendering::Renderer,
     HorizontalDirection, Result, HALFTILE_HEIGHT, HALFTILE_WIDTH,
     HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
@@ -274,17 +274,11 @@ impl HeroData {
         &mut self,
         solids: &LevelSolids,
         actor_adder: &mut dyn ActorAdder,
-        play_state: &mut PlayState,
     ) -> Result<()> {
         self.immunity.count_down();
         if !self.immunity.hero_is_protected() && self.gets_hurt {
             self.immunity.enable();
-            if self.health.life() == 0 && *play_state == PlayState::Playing
-            {
-                *play_state = PlayState::KilledPlayingAnimation(80);
-            } else {
-                self.health.decrease(1);
-            }
+            self.health.decrease(1);
         }
 
         if self.motion == Motion::Walking {
@@ -565,12 +559,12 @@ impl Score {
 
 #[derive(Debug)]
 pub struct Health {
-    life: u8,
+    life: Option<u8>,
 }
 
 impl Default for Health {
     fn default() -> Self {
-        Health { life: 8u8 }
+        Health { life: Some(8u8) }
     }
 }
 
@@ -582,34 +576,37 @@ impl Health {
     }
 
     pub fn reset(&mut self) {
-        self.life = Self::MAX;
+        self.life = Some(Self::MAX);
     }
 
     pub fn set(&mut self, count: u8) {
-        self.life = std::cmp::min(Self::MAX, count);
+        self.life = Some(std::cmp::min(Self::MAX, count));
     }
 
     pub fn increase(&mut self, count: u8) {
-        self.life = std::cmp::min(Self::MAX, self.life + count);
-    }
-
-    pub fn decrease(&mut self, count: u8) {
-        if self.life > count {
-            self.life -= count;
-        } else {
-            self.life = 0;
+        self.life = match self.life {
+            Some(life) => Some(std::cmp::min(Self::MAX, life + count)),
+            None => None,
         }
     }
 
+    pub fn decrease(&mut self, count: u8) {
+        self.life = match self.life {
+            Some(life) if life < count => None,
+            Some(life) => Some(life - count),
+            None => None,
+        };
+    }
+
     pub fn fill_max(&mut self) {
-        self.life = Self::MAX;
+        self.life = Some(Self::MAX);
     }
 
     pub fn kill(&mut self) {
-        self.life = 0;
+        self.life = None
     }
 
-    pub fn life(&self) -> u8 {
+    pub fn life(&self) -> Option<u8> {
         self.life
     }
 }
