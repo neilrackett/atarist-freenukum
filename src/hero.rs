@@ -581,6 +581,10 @@ impl Health {
         self.life = Self::MAX;
     }
 
+    pub fn set(&mut self, count: u8) {
+        self.life = std::cmp::min(Self::MAX, count);
+    }
+
     pub fn increase(&mut self, count: u8) {
         self.life = std::cmp::min(Self::MAX, self.life + count);
     }
