@@ -554,6 +554,10 @@ impl Score {
         self.count = 0;
     }
 
+    pub fn set_value(&mut self, value: u128) {
+        self.count = value;
+    }
+
     pub fn value(&self) -> u128 {
         self.count
     }
