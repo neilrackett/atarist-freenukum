@@ -875,15 +875,17 @@ impl LevelData {
 
         let start_x =
             u32::try_from(srcrect.left()).unwrap_or_default() / TILE_WIDTH;
-        let end_x = u32::try_from(srcrect.right()).unwrap_or_default()
-            / TILE_WIDTH;
+        let end_x = (u32::try_from(srcrect.right()).unwrap_or_default()
+            / TILE_WIDTH)
+            + 1;
         let start_y =
             u32::try_from(srcrect.top()).unwrap_or_default() / TILE_HEIGHT;
-        let end_y = u32::try_from(srcrect.bottom()).unwrap_or_default()
-            / TILE_HEIGHT;
+        let end_y = (u32::try_from(srcrect.bottom()).unwrap_or_default()
+            / TILE_HEIGHT)
+            + 1;
 
-        for y in start_y..=end_y {
-            for x in start_x..=end_x {
+        for y in start_y..std::cmp::min(end_y, LEVEL_HEIGHT) {
+            for x in start_x..std::cmp::min(end_x, LEVEL_WIDTH) {
                 let tilenr = self.tiles.get(x, y);
                 if tilenr > 1 && tilenr < (48 * 8) {
                     let point = Point::new(
