@@ -674,6 +674,17 @@ impl Inventory {
         self.items.clear();
     }
 
+    pub fn get_items(&self) -> std::collections::BTreeSet<InventoryItem> {
+        self.items.clone()
+    }
+
+    pub fn set_items(
+        &mut self,
+        items: std::collections::BTreeSet<InventoryItem>,
+    ) {
+        self.items = items;
+    }
+
     pub fn set(&mut self, item: InventoryItem) {
         self.items.insert(item);
     }

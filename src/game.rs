@@ -406,6 +406,7 @@ pub fn start(
     let mut finished = false;
     let mut initial_lives = hero.health.life().unwrap();
     let mut initial_score = hero.score.value();
+    let mut initial_inventory = hero.inventory.get_items();
 
     'level_loop: loop {
         if interlevel {
@@ -424,6 +425,7 @@ pub fn start(
                 NextAction::NextLevel => {
                     initial_lives = hero.health.life().unwrap();
                     initial_score = hero.score.value();
+                    initial_inventory = hero.inventory.get_items();
                     level = if level == 1 { level + 2 } else { level + 1 };
                     interlevel = false;
                 }
@@ -434,6 +436,7 @@ pub fn start(
             hero.reset_for_level();
             hero.health.set(initial_lives);
             hero.score.set_value(initial_score);
+            hero.inventory.set_items(initial_inventory.clone());
             match start_in_level(
                 level,
                 canvas,
