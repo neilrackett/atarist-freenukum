@@ -1,6 +1,6 @@
 # Freenukum Changelog
 
-## [unreleased]
+## [0.3.3] - 2020-12-1-
 
 ### Added
 - Implement basic handling of hero death
