@@ -1,5 +1,14 @@
 # Freenukum Changelog
 
+## [unreleased]
+
+### Added
+- Implement basic handling of hero death
+
+### Fixed
+- Prevent drawing outside of the level size range which caused a crash
+  at the range assertion
+
 ## [0.3.2] - 2020-12-09
 
 ### Fixed
