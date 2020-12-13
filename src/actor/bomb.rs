@@ -26,6 +26,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Self {
         general.position.resize(TILE_WIDTH, TILE_HEIGHT);
+        general.acts_while_invisible = true;
 
         Specific {
             tile: ANIMATION_BOMB,
