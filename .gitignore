@@ -1,6 +1,5 @@
 /build
 /apidoc
-/Cargo.lock
 /target
 **/*.rs.bk
 /transdl/target
