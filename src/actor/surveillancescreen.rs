@@ -17,6 +17,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
+        general.is_in_foreground = false;
         Specific {}
     }
 }
