@@ -989,7 +989,9 @@ impl LevelData {
         hero: &mut HeroData,
         actor_adder: &mut dyn ActorAdder,
     ) {
-        if self.shots.len() < hero.firepower.num_shots() as usize {
+        if self.shots.len() < hero.firepower.num_shots() as usize
+            && self.play_state.hero_can_act()
+        {
             let heropos = hero.position.geometry;
             let mut shot = Shot::new(heropos.x, heropos.y, hero.direction);
 
