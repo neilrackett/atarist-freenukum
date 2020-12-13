@@ -1,6 +1,24 @@
 # Freenukum Changelog
 
-## [0.3.3] - 2020-12-1-
+## [0.3.4] - 2020-12-13
+
+### Added
+- The hero can do somersaults when jumping with boots
+- When the hero gets hurt while jumping, the jump is interrupted and the
+  hero starts to fall down
+
+### Fixed
+- Shots collide with other actors slightly later, preventing things from
+  being shot that are actually behind it
+- Stop interaction with items when releasing the interaction button on a
+  game controller
+- Move surveillance screen into background
+- Make the elevator act while invisible so that it can fully descend while
+  not seen
+- Prohibit hero from shooting while playing death animation
+
+
+## [0.3.3] - 2020-12-10
 
 ### Added
 - Implement basic handling of hero death
@@ -8,6 +26,7 @@
 ### Fixed
 - Prevent drawing outside of the level size range which caused a crash
   at the range assertion
+
 
 ## [0.3.2] - 2020-12-09
 
@@ -17,6 +36,7 @@
 - Make score, particles and singleanimation act while invisible, so they
   don't reappear when they went out of view
 - Make jumping mines absorb the shot
+
 
 ## [0.3.1] - 2020-12-08
 
