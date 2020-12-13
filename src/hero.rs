@@ -279,6 +279,9 @@ impl HeroData {
         if !self.immunity.hero_is_protected() && self.gets_hurt {
             self.immunity.enable();
             self.health.decrease(1);
+            // when jumping, this jump should be interrupted
+            // just as if the hero had bumped against a ceiling
+            self.counter = 0;
         }
 
         if self.motion == Motion::Walking {
