@@ -1,6 +1,6 @@
 [package]
 name = "freenukum"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Wolfgang Silbermayr <wolfgang@silbermayr.at>"]
 edition = "2018"
 default-run = "freenukum"
