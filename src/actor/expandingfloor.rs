@@ -36,9 +36,9 @@ impl ActorInterface for Specific {
             let can_expand = !p.solids.get(x, y);
             if can_expand {
                 p.solids.set(x, y, true);
-                p.general.position.set_right(
-                    p.general.position.right() + TILE_WIDTH as i32,
-                );
+                p.general
+                    .position
+                    .set_width(p.general.position.width() + TILE_WIDTH);
             } else {
                 self.expanding = false;
                 self.finished = true;
