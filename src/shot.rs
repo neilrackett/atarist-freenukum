@@ -33,7 +33,7 @@ impl Shot {
             is_alive: true,
             direction,
             counter: 0,
-            countdown: 2,
+            countdown: 3,
         }
     }
 
@@ -60,7 +60,7 @@ impl Shot {
             + hero_data.position.geometry.w as i32
             + TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
 
-        if self.countdown == 2 {
+        if self.countdown >= 2 {
             let distance = match self.direction {
                 HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
                 HorizontalDirection::Right => HALFTILE_WIDTH as i32,
@@ -130,19 +130,23 @@ impl Shot {
         offset: i32,
         actor_adder: &mut dyn ActorAdder,
     ) {
-        if self.countdown == 2 {
+        if self.countdown >= 2 {
             self.position.x += offset;
-            if actors.process_shot(
-                self.position,
-                solids,
-                tiles,
-                actor_adder,
-                hero_data,
-            ) {
-                self.countdown = 1;
+            if self.countdown == 2 {
+                if actors.process_shot(
+                    self.position,
+                    solids,
+                    tiles,
+                    actor_adder,
+                    hero_data,
+                ) {
+                    self.countdown = 1;
+                }
+            } else {
+                self.countdown -= 1;
             }
         }
-        if self.countdown == 2 && solids.collides(self.position) {
+        if self.countdown >= 2 && solids.collides(self.position) {
             self.countdown = 1;
             actor_adder.add_actor(
                 ActorType::Explosion,
