@@ -4,7 +4,8 @@ use crate::{
     rendering::Renderer,
     HorizontalDirection, Result, HALFTILE_HEIGHT, HALFTILE_WIDTH,
     HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
-    HERO_JUMPING_RIGHT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
+    HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
+    HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
     HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
     HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
     HERO_WALKING_LEFT, HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
@@ -35,6 +36,7 @@ pub struct HeroData {
     is_in_the_air: bool,
     pub is_shooting: bool,
     counter: usize,
+    somersault: Option<usize>,
     base_tile_number: usize,
     current_frame: usize,
     num_frames: usize,
@@ -65,6 +67,7 @@ impl HeroData {
             is_in_the_air: false,
             is_shooting: false,
             counter: 0,
+            somersault: None,
             base_tile_number: HERO_STANDING_RIGHT,
             current_frame: 0,
             num_frames: 1,
@@ -205,17 +208,33 @@ impl HeroData {
                 // hero is jumping
                 self.num_frames = HERO_NUM_JUMPING;
                 if self.direction == HorizontalDirection::Left {
-                    HERO_JUMPING_LEFT
+                    if let Some(frame) = self.somersault {
+                        HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
+                    } else {
+                        HERO_JUMPING_LEFT
+                    }
                 } else {
-                    HERO_JUMPING_RIGHT
+                    if let Some(frame) = self.somersault {
+                        HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
+                    } else {
+                        HERO_JUMPING_RIGHT
+                    }
                 }
             } else {
                 // hero is falling
                 self.num_frames = HERO_NUM_FALLING;
                 if self.direction == HorizontalDirection::Left {
-                    HERO_FALLING_LEFT
+                    if let Some(frame) = self.somersault {
+                        HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
+                    } else {
+                        HERO_FALLING_LEFT
+                    }
                 } else {
-                    HERO_FALLING_RIGHT
+                    if let Some(frame) = self.somersault {
+                        HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
+                    } else {
+                        HERO_FALLING_RIGHT
+                    }
                 }
             }
         } else {
@@ -248,11 +267,25 @@ impl HeroData {
 
     pub fn jump(&mut self) {
         if !self.is_in_the_air {
-            self.counter = if self.inventory.is_set(InventoryItem::Boot) {
-                7
-            } else {
-                6
-            };
+            let (counter, somersault) =
+                if self.inventory.is_set(InventoryItem::Boot) {
+                    use rand::Rng;
+                    let mut rng = rand::thread_rng();
+                    (
+                        7,
+                        if self.motion == Motion::Walking
+                            && rng.gen_range(0, 5) == 0
+                        {
+                            Some(0)
+                        } else {
+                            None
+                        },
+                    )
+                } else {
+                    (6, None)
+                };
+            self.counter = counter;
+            self.somersault = somersault;
             self.vertical_speed = 2;
             self.is_in_the_air = true;
         }
@@ -261,6 +294,7 @@ impl HeroData {
     pub fn land(&mut self) {
         self.vertical_speed = 0;
         self.is_in_the_air = false;
+        self.somersault = None;
         self.counter = 0;
     }
 
@@ -283,6 +317,12 @@ impl HeroData {
             // just as if the hero had bumped against a ceiling
             self.counter = 0;
         }
+
+        self.somersault = match self.somersault {
+            Some(frame) if frame == 13 => None,
+            Some(frame) => Some(frame + 1),
+            None => None,
+        };
 
         if self.motion == Motion::Walking {
             // the hero is moving
