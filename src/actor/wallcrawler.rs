@@ -7,7 +7,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     HorizontalDirection, Result, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
-    TILE_HEIGHT, TILE_WIDTH,
+    LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug)]
@@ -25,20 +25,31 @@ impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
+        tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.set_width(TILE_WIDTH);
         general.position.set_height(TILE_HEIGHT);
         general.is_in_foreground = true;
 
+        let x = general.position.x() as u32 / TILE_WIDTH;
+        let y = general.position.y() as u32 / TILE_HEIGHT;
+
         let (tile, orientation) = match general.actor_type {
             ActorType::WallCrawlerBotLeft => {
+                if x < LEVEL_WIDTH + 1 {
+                    tiles.copy_from_to(x + 1, y, x, y);
+                }
                 (ANIMATION_WALLCRAWLERBOT_LEFT, HorizontalDirection::Left)
             }
-            ActorType::WallCrawlerBotRight => (
-                ANIMATION_WALLCRAWLERBOT_RIGHT,
-                HorizontalDirection::Right,
-            ),
+            ActorType::WallCrawlerBotRight => {
+                if x > 0 {
+                    tiles.copy_from_to(x - 1, y, x, y);
+                }
+                (
+                    ANIMATION_WALLCRAWLERBOT_RIGHT,
+                    HorizontalDirection::Right,
+                )
+            }
             _ => unreachable!(),
         };
 
