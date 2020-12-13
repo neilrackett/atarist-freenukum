@@ -207,34 +207,42 @@ impl HeroData {
             if self.counter > 0 {
                 // hero is jumping
                 self.num_frames = HERO_NUM_JUMPING;
-                if self.direction == HorizontalDirection::Left {
-                    if let Some(frame) = self.somersault {
-                        HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
-                    } else {
-                        HERO_JUMPING_LEFT
+                match self.direction {
+                    HorizontalDirection::Left => {
+                        if let Some(frame) = self.somersault {
+                            HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
+                        } else {
+                            HERO_JUMPING_LEFT
+                        }
                     }
-                } else {
-                    if let Some(frame) = self.somersault {
-                        HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
-                    } else {
-                        HERO_JUMPING_RIGHT
+                    HorizontalDirection::Right => {
+                        if let Some(frame) = self.somersault {
+                            HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
+                        } else {
+                            HERO_JUMPING_RIGHT
+                        }
                     }
+                    HorizontalDirection::Center => unreachable!(),
                 }
             } else {
                 // hero is falling
                 self.num_frames = HERO_NUM_FALLING;
-                if self.direction == HorizontalDirection::Left {
-                    if let Some(frame) = self.somersault {
-                        HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
-                    } else {
-                        HERO_FALLING_LEFT
+                match self.direction {
+                    HorizontalDirection::Left => {
+                        if let Some(frame) = self.somersault {
+                            HERO_JUMPING_LEFT_SOMERSAULT + 4 * (frame / 2)
+                        } else {
+                            HERO_FALLING_LEFT
+                        }
                     }
-                } else {
-                    if let Some(frame) = self.somersault {
-                        HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
-                    } else {
-                        HERO_FALLING_RIGHT
+                    HorizontalDirection::Right => {
+                        if let Some(frame) = self.somersault {
+                            HERO_JUMPING_RIGHT_SOMERSAULT + 4 * (frame / 2)
+                        } else {
+                            HERO_FALLING_RIGHT
+                        }
                     }
+                    HorizontalDirection::Center => unreachable!(),
                 }
             }
         } else {
@@ -242,24 +250,34 @@ impl HeroData {
             if self.motion == Motion::NotMoving {
                 // hero is standing
                 self.num_frames = HERO_NUM_STANDING;
-                if self.direction == HorizontalDirection::Left {
-                    if self.is_shooting {
-                        HERO_WALKING_LEFT + 12
-                    } else {
-                        HERO_STANDING_LEFT
+                match self.direction {
+                    HorizontalDirection::Left => {
+                        if self.is_shooting {
+                            HERO_WALKING_LEFT + 12
+                        } else {
+                            HERO_STANDING_LEFT
+                        }
                     }
-                } else if self.is_shooting {
-                    HERO_WALKING_RIGHT + 12
-                } else {
-                    HERO_STANDING_RIGHT
+                    HorizontalDirection::Right => {
+                        if self.is_shooting {
+                            HERO_WALKING_RIGHT + 12
+                        } else {
+                            HERO_STANDING_RIGHT
+                        }
+                    }
+                    HorizontalDirection::Center => unreachable!(),
                 }
             } else {
                 // hero is walking
                 self.num_frames = HERO_NUM_WALKING;
-                if self.direction == HorizontalDirection::Left {
-                    HERO_WALKING_LEFT + 4 * self.current_frame
-                } else {
-                    HERO_WALKING_RIGHT + 4 * self.current_frame
+                match self.direction {
+                    HorizontalDirection::Left => {
+                        HERO_WALKING_LEFT + 4 * self.current_frame
+                    }
+                    HorizontalDirection::Right => {
+                        HERO_WALKING_RIGHT + 4 * self.current_frame
+                    }
+                    HorizontalDirection::Center => unreachable!(),
                 }
             }
         };

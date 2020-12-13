@@ -967,10 +967,8 @@ impl LevelData {
             &mut self.play_state,
         );
 
-        if self.play_state.hero_can_act() {
-            if animated_frames == 0 {
-                hero_data.act(&self.solids, actor_queue)?;
-            }
+        if self.play_state.hero_can_act() && animated_frames == 0 {
+            hero_data.act(&self.solids, actor_queue)?;
         }
         hero_data.next_frame();
         hero_data.update_animation();

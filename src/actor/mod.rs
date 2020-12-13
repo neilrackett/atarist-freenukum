@@ -129,12 +129,10 @@ impl ActorsList {
         for actor in self.actors.iter_mut() {
             if actor.can_get_shot()
                 && shot_position.touches(actor.position())
-            {
-                if actor.shot(solids, tiles, actor_adder, hero_data)
+                && actor.shot(solids, tiles, actor_adder, hero_data)
                     == ShotProcessing::Absorb
-                {
-                    return true;
-                }
+            {
+                return true;
             }
         }
         false
