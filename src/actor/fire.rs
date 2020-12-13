@@ -5,8 +5,8 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, OBJECT_FIRELEFT, OBJECT_FIRERIGHT,
-    TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
+    OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -29,16 +29,25 @@ impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
         _solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
+        tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
+        let x = general.position.x() as u32 / TILE_WIDTH;
+        let y = general.position.y() as u32 / TILE_HEIGHT;
+
         let (tile, direction) = match general.actor_type {
             ActorType::FireRight => {
+                if x < LEVEL_WIDTH + 1 {
+                    tiles.copy_from_to(x + 1, y, x, y);
+                }
                 (OBJECT_FIRERIGHT, HorizontalDirection::Right)
             }
             ActorType::FireLeft => {
+                if x > 0 {
+                    tiles.copy_from_to(x - 1, y, x, y);
+                }
                 general.position.offset(-2 * TILE_WIDTH as i32, 0);
                 (OBJECT_FIRELEFT, HorizontalDirection::Left)
             }
