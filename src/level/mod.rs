@@ -145,12 +145,12 @@ impl LevelData {
                 {
                     aa(ActorType::BlueLightBackground4, tx, ty)
                 }
-                0x0480 =>
+                0x0500 =>
                 /* background green poison liquid */
                 {
                     aa(ActorType::GreenPoisonBackground, tx, ty)
                 }
-                0x0500 =>
+                0x0580 =>
                 /* background lava */
                 {
                     aa(ActorType::LavaBackground, tx, ty)
