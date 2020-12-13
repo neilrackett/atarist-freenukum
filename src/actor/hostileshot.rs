@@ -23,6 +23,7 @@ impl ActorCreateInterface for Specific {
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.position.resize(TILE_WIDTH, TILE_HEIGHT);
+        general.acts_while_invisible = true;
 
         let tile = match general.actor_type {
             ActorType::HostileShotLeft => OBJECT_HOSTILESHOT,
