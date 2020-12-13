@@ -349,6 +349,7 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::Up),
                 ..
             }
+            | E::ControllerButtonUp { button: B::Y, .. }
             | E::MouseButtonUp {
                 mouse_btn: MouseButton::Middle,
                 ..
