@@ -10,7 +10,7 @@ use sdl2::{
     mouse::MouseButton,
     EventPump,
 };
-use std::{collections::BTreeSet, convert::TryFrom};
+use std::{collections::BTreeSet, convert::TryFrom, iter::FromIterator};
 
 #[must_use]
 pub enum GameEvent {
@@ -26,7 +26,7 @@ pub enum GameEvent {
     HeroInteractionStart,
     HeroInteractionEnd,
     HeroSetWalkingDirectionEnabled {
-        direction: HorizontalDirection,
+        directions: BTreeSet<HorizontalDirection>,
         context: InputContext,
         enabled: bool,
     },
@@ -270,29 +270,48 @@ impl TryFrom<Event> for GameEvent {
                 axis: Axis::LeftX,
                 value,
                 ..
-            } if value < 0 => {
+            } if value < -20000 => {
                 Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                    direction: HorizontalDirection::Left,
+                    directions: BTreeSet::from_iter(
+                        Some(HorizontalDirection::Left).into_iter(),
+                    ),
                     context: InputContext::ControllerAxis,
-                    enabled: value < -20000,
+                    enabled: true,
                 })
             }
             E::ControllerAxisMotion {
                 axis: Axis::LeftX,
                 value,
                 ..
-            } if value > 0 => {
+            } if value > 20000 => {
                 Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                    direction: HorizontalDirection::Right,
+                    directions: BTreeSet::from_iter(
+                        Some(HorizontalDirection::Right).into_iter(),
+                    ),
                     context: InputContext::ControllerAxis,
-                    enabled: value > 20000,
+                    enabled: true,
                 })
             }
+            E::ControllerAxisMotion {
+                axis: Axis::LeftX, ..
+            } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
+                directions: BTreeSet::from_iter(
+                    vec![
+                        HorizontalDirection::Left,
+                        HorizontalDirection::Right,
+                    ]
+                    .into_iter(),
+                ),
+                context: InputContext::ControllerAxis,
+                enabled: false,
+            }),
             E::KeyDown {
                 keycode: Some(K::Right),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Right,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Right).into_iter(),
+                ),
                 context: InputContext::Keyboard,
                 enabled: true,
             }),
@@ -300,7 +319,9 @@ impl TryFrom<Event> for GameEvent {
                 button: B::DPadRight,
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Right,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Right).into_iter(),
+                ),
                 context: InputContext::ControllerDPad,
                 enabled: true,
             }),
@@ -308,7 +329,9 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::Left),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Left,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Left).into_iter(),
+                ),
                 context: InputContext::Keyboard,
                 enabled: true,
             }),
@@ -316,7 +339,9 @@ impl TryFrom<Event> for GameEvent {
                 button: B::DPadLeft,
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Left,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Left).into_iter(),
+                ),
                 context: InputContext::ControllerDPad,
                 enabled: true,
             }),
@@ -358,7 +383,9 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::Right),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Right,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Right).into_iter(),
+                ),
                 context: InputContext::Keyboard,
                 enabled: false,
             }),
@@ -366,7 +393,9 @@ impl TryFrom<Event> for GameEvent {
                 button: B::DPadRight,
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Right,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Right).into_iter(),
+                ),
                 context: InputContext::ControllerDPad,
                 enabled: false,
             }),
@@ -374,7 +403,9 @@ impl TryFrom<Event> for GameEvent {
                 keycode: Some(K::Left),
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Left,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Left).into_iter(),
+                ),
                 context: InputContext::Keyboard,
                 enabled: false,
             }),
@@ -382,7 +413,9 @@ impl TryFrom<Event> for GameEvent {
                 button: B::DPadLeft,
                 ..
             } => Ok(GameEvent::HeroSetWalkingDirectionEnabled {
-                direction: HorizontalDirection::Left,
+                directions: BTreeSet::from_iter(
+                    Some(HorizontalDirection::Left).into_iter(),
+                ),
                 context: InputContext::ControllerDPad,
                 enabled: false,
             }),

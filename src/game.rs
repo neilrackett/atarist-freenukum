@@ -253,31 +253,37 @@ fn start_in_level(
                 do_update = true;
             }
             GameEvent::HeroSetWalkingDirectionEnabled {
-                direction,
+                directions,
                 context,
                 enabled,
             } => {
-                match direction {
-                    HorizontalDirection::Left => {
-                        if enabled {
-                            walking_left.insert(context);
-                            if context == InputContext::ControllerAxis {
-                                walking_right
-                                    .remove(&InputContext::ControllerAxis);
+                for direction in directions {
+                    match direction {
+                        HorizontalDirection::Left => {
+                            if enabled {
+                                walking_left.insert(context);
+                                if context == InputContext::ControllerAxis
+                                {
+                                    walking_right.remove(
+                                        &InputContext::ControllerAxis,
+                                    );
+                                }
+                            } else {
+                                walking_left.remove(&context);
                             }
-                        } else {
-                            walking_left.remove(&context);
                         }
-                    }
-                    HorizontalDirection::Right => {
-                        if enabled {
-                            walking_right.insert(context);
-                            if context == InputContext::ControllerAxis {
-                                walking_left
-                                    .remove(&InputContext::ControllerAxis);
+                        HorizontalDirection::Right => {
+                            if enabled {
+                                walking_right.insert(context);
+                                if context == InputContext::ControllerAxis
+                                {
+                                    walking_left.remove(
+                                        &InputContext::ControllerAxis,
+                                    );
+                                }
+                            } else {
+                                walking_right.remove(&context);
                             }
-                        } else {
-                            walking_right.remove(&context);
                         }
                     }
                 }

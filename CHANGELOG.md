@@ -1,5 +1,11 @@
 # Freenukum Changelog
 
+## [unreleased]
+
+### Fixed
+- Track and process controller x-axis events with value of 0, so that the
+  hero movement stops when that event occurs
+
 ## [0.3.4] - 2020-12-13
 
 ### Added

@@ -230,7 +230,7 @@ fn collision_bounds_color() -> sdl2::pixels::Color {
     sdl2::pixels::Color::RGB(182, 6, 0)
 }
 
-#[derive(Hash, Debug, Eq, PartialEq, Clone, Copy)]
+#[derive(Hash, Debug, Eq, PartialEq, Ord, PartialOrd, Clone, Copy)]
 pub enum HorizontalDirection {
     Left,
     Right,
