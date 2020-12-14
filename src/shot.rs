@@ -25,7 +25,8 @@ impl Shot {
         let h = TILE_HEIGHT - 4;
         Shot {
             position: Rect::new(
-                x + HALFTILE_WIDTH as i32 - w as i32 / 2,
+                x + HALFTILE_WIDTH as i32 - w as i32 / 2
+                    + direction.as_factor_i32() * w as i32,
                 y + TILE_HEIGHT as i32 - h as i32,
                 w,
                 h,
@@ -33,7 +34,7 @@ impl Shot {
             is_alive: true,
             direction,
             counter: 0,
-            countdown: 3,
+            countdown: 2,
         }
     }
 
