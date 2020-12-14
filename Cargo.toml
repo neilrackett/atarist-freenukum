@@ -13,7 +13,7 @@ repository = "https://gitlab.com/silwol/freenukum"
 
 [dependencies]
 anyhow = "1.0.33"
-directories = "3.0.1"
+directories-next = "2"
 sdl2 = { version = "0.34", features = ["ttf"] }
 serde = "1"
 serde_derive = "1"

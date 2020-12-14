@@ -214,8 +214,8 @@ const HERO_JUMPING_RIGHT_SOMERSAULT: usize = HERO_START + 0x54;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
-fn directories() -> directories::ProjectDirs {
-    directories::ProjectDirs::from("", "", "freenukum").unwrap()
+fn directories() -> directories_next::ProjectDirs {
+    directories_next::ProjectDirs::from("", "", "freenukum").unwrap()
 }
 
 fn config_dir() -> std::path::PathBuf {
