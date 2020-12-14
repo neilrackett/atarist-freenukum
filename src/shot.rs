@@ -61,10 +61,8 @@ impl Shot {
             + TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
 
         if self.countdown >= 2 {
-            let distance = match self.direction {
-                HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
-                HorizontalDirection::Right => HALFTILE_WIDTH as i32,
-            };
+            let distance =
+                HALFTILE_WIDTH as i32 * self.direction.as_factor_i32();
 
             // we only push half of the distance, but do it twice, so that
             // also the intermediate position gets covered, not just the

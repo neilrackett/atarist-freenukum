@@ -77,23 +77,17 @@ impl ActorInterface for Specific {
     }
 
     fn act(&mut self, p: ActParameters) {
-        let direction = match self.direction {
-            VerticalDirection::Up => 1,
-            VerticalDirection::Down => -1,
-        };
-        let orientation = match self.orientation {
-            HorizontalDirection::Left => -1i32,
-            HorizontalDirection::Right => 1i32,
-        };
+        let orientation = self.orientation.as_factor_i32();
 
-        if direction > 0 {
-            // going up
-            self.current_frame += 1;
-            self.current_frame %= self.num_frames;
+        match self.direction {
+            VerticalDirection::Up => {
+                // going up
+                self.current_frame += 1;
+                self.current_frame %= self.num_frames;
 
-            if
-            // bot collides with solid tile
-            p.solids.get(
+                if
+                // bot collides with solid tile
+                p.solids.get(
                 p.general.position.x as u32 / TILE_WIDTH,
                 (p.general.position.y as u32 - 1) / TILE_WIDTH) ||
             // bot has no more wall to stick upon
@@ -104,22 +98,23 @@ impl ActorInterface for Specific {
                     TILE_WIDTH as i32
                 ) as u32 / TILE_WIDTH,
                 (p.general.position.y - 1) as u32 / TILE_HEIGHT)
-            {
-                p.general.position.y += 1;
-                self.direction = VerticalDirection::Down;
-            } else {
-                p.general.position.y -= 1;
+                {
+                    p.general.position.y += 1;
+                    self.direction = VerticalDirection::Down;
+                } else {
+                    p.general.position.y -= 1;
+                }
             }
-        } else {
-            // going down
-            if self.current_frame == 0 {
-                self.current_frame = self.num_frames;
-            }
-            self.current_frame -= 1;
+            VerticalDirection::Down => {
+                // going down
+                if self.current_frame == 0 {
+                    self.current_frame = self.num_frames;
+                }
+                self.current_frame -= 1;
 
-            if
-            // bot collides with solid tile
-            p.solids.get(
+                if
+                // bot collides with solid tile
+                p.solids.get(
                     p.general.position.x as u32 / TILE_WIDTH,
                     (
                         p.general.position.y as u32 + TILE_HEIGHT
@@ -132,11 +127,12 @@ impl ActorInterface for Specific {
                     TILE_WIDTH as i32) as u32 /
                 TILE_WIDTH,
                 (p.general.position.y as u32 + TILE_HEIGHT) / TILE_HEIGHT)
-            {
-                p.general.position.y -= 1;
-                self.direction = VerticalDirection::Up;
-            } else {
-                p.general.position.y += 1;
+                {
+                    p.general.position.y -= 1;
+                    self.direction = VerticalDirection::Up;
+                } else {
+                    p.general.position.y += 1;
+                }
             }
         }
     }

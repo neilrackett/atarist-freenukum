@@ -88,12 +88,7 @@ impl ActorInterface for Specific {
                         .position
                         .offset(direction * HALFTILE_WIDTH as i32, 0);
                 } else {
-                    self.direction =
-                        if self.direction == HorizontalDirection::Left {
-                            HorizontalDirection::Right
-                        } else {
-                            HorizontalDirection::Left
-                        };
+                    self.direction.reverse();
                     if direction == 2 {
                         direction = 1
                     };

@@ -11,9 +11,8 @@ use crate::{
     infobox::InfoMessageQueue,
     rendering::Renderer,
     shot::{Shot, ShotList},
-    HorizontalDirection, Result, ANIMATION_START, HALFTILE_WIDTH,
-    LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND,
-    TILE_HEIGHT, TILE_WIDTH,
+    Result, ANIMATION_START, HALFTILE_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH,
+    SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND, TILE_HEIGHT, TILE_WIDTH,
 };
 use log::warn;
 use raw::LevelRaw;
@@ -993,10 +992,8 @@ impl LevelData {
             let heropos = hero.position.geometry;
             let mut shot = Shot::new(heropos.x, heropos.y, hero.direction);
 
-            let distance = match shot.direction {
-                HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
-                HorizontalDirection::Right => HALFTILE_WIDTH as i32,
-            };
+            let distance =
+                HALFTILE_WIDTH as i32 * shot.direction.as_factor_i32();
 
             // we only push half of the distance, but do it twice, so that
             // also the intermediate position gets covered, not just the

@@ -236,6 +236,33 @@ pub enum HorizontalDirection {
     Right,
 }
 
+impl HorizontalDirection {
+    pub fn opposite(self) -> Self {
+        match self {
+            HorizontalDirection::Left => HorizontalDirection::Right,
+            HorizontalDirection::Right => HorizontalDirection::Left,
+        }
+    }
+
+    pub fn reverse(&mut self) {
+        *self = self.opposite();
+    }
+
+    pub fn as_factor_i32(&self) -> i32 {
+        match self {
+            HorizontalDirection::Left => -1,
+            HorizontalDirection::Right => 1,
+        }
+    }
+
+    pub fn map<T>(&self, left: T, right: T) -> T {
+        match self {
+            HorizontalDirection::Left => left,
+            HorizontalDirection::Right => right,
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum VerticalDirection {
     Up,

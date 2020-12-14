@@ -267,15 +267,15 @@ fn start_in_level(
                             }
                         } else {
                             walking_left.remove(&context);
-                            if context == InputContext::ControllerAxis {
-                                walking_left
-                                    .remove(&InputContext::ControllerAxis);
-                            }
                         }
                     }
                     HorizontalDirection::Right => {
                         if enabled {
                             walking_right.insert(context);
+                            if context == InputContext::ControllerAxis {
+                                walking_left
+                                    .remove(&InputContext::ControllerAxis);
+                            }
                         } else {
                             walking_right.remove(&context);
                         }

@@ -86,10 +86,7 @@ impl ActorInterface for Specific {
                 }
             }
 
-            let direction = match self.direction {
-                HorizontalDirection::Left => -1,
-                HorizontalDirection::Right => 1,
-            };
+            let direction = self.direction.as_factor_i32();
 
             if !p.solids.push_rect_standing_on_ground(
                 &mut p.general.position,
@@ -97,14 +94,7 @@ impl ActorInterface for Specific {
                 HALFTILE_HEIGHT as u8,
             ) {
                 // push was not successful, so we reverse the direction
-                self.direction = match self.direction {
-                    HorizontalDirection::Left => {
-                        HorizontalDirection::Right
-                    }
-                    HorizontalDirection::Right => {
-                        HorizontalDirection::Left
-                    }
-                };
+                self.direction.reverse();
             }
 
             if self.was_shot == 1 {

@@ -108,14 +108,7 @@ impl ActorInterface for Specific {
                 );
             } else {
                 // reached the end, turning around
-                self.orientation = match self.orientation {
-                    HorizontalDirection::Left => {
-                        HorizontalDirection::Right
-                    }
-                    HorizontalDirection::Right => {
-                        HorizontalDirection::Left
-                    }
-                };
+                self.orientation.reverse();
                 if direction > 0 {
                     direction = 1;
                 }
