@@ -82,7 +82,6 @@ impl ActorInterface for Specific {
                 self.current_frame %= self.num_frames;
                 HALFTILE_WIDTH as i32
             }
-            _ => unreachable!(),
         };
 
         let hero_geometry = p.hero_data.position.geometry;

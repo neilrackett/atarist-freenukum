@@ -996,7 +996,6 @@ impl LevelData {
             let distance = match shot.direction {
                 HorizontalDirection::Left => -(HALFTILE_WIDTH as i32),
                 HorizontalDirection::Right => HALFTILE_WIDTH as i32,
-                _ => unreachable!(),
             };
 
             // we only push half of the distance, but do it twice, so that

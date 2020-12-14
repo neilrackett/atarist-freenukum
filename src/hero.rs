@@ -141,7 +141,6 @@ impl HeroData {
             match self.direction {
                 HorizontalDirection::Left => HERO_SKELETON_LEFT,
                 HorizontalDirection::Right => HERO_SKELETON_RIGHT,
-                HorizontalDirection::Center => unreachable!(),
             }
         } else {
             self.base_tile_number
@@ -222,7 +221,6 @@ impl HeroData {
                             HERO_JUMPING_RIGHT
                         }
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
             } else {
                 // hero is falling
@@ -242,7 +240,6 @@ impl HeroData {
                             HERO_FALLING_RIGHT
                         }
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
             }
         } else {
@@ -265,7 +262,6 @@ impl HeroData {
                             HERO_STANDING_RIGHT
                         }
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
             } else {
                 // hero is walking
@@ -277,7 +273,6 @@ impl HeroData {
                     HorizontalDirection::Right => {
                         HERO_WALKING_RIGHT + 4 * self.current_frame
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
             }
         };
@@ -355,7 +350,6 @@ impl HeroData {
                     HorizontalDirection::Right => {
                         new_position.x += HALFTILE_WIDTH as i32;
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
                 if !self.would_collide(
                     solids,

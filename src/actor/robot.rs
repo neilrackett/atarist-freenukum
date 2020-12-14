@@ -64,7 +64,6 @@ impl ActorInterface for Specific {
                 let mut direction = match self.direction {
                     HorizontalDirection::Left => -1,
                     HorizontalDirection::Right => 2,
-                    HorizontalDirection::Center => unreachable!(),
                 };
                 // Check if the place next to the bot is free
                 if !p.solids.get(

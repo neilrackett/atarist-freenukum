@@ -89,7 +89,6 @@ impl ActorInterface for Specific {
             let direction = match self.direction {
                 HorizontalDirection::Left => -1,
                 HorizontalDirection::Right => 1,
-                HorizontalDirection::Center => unreachable!(),
             };
 
             if !p.solids.push_rect_standing_on_ground(
@@ -105,7 +104,6 @@ impl ActorInterface for Specific {
                     HorizontalDirection::Right => {
                         HorizontalDirection::Left
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 };
             }
 

@@ -280,7 +280,6 @@ fn start_in_level(
                             walking_right.remove(&context);
                         }
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 }
 
                 match (!walking_left.is_empty(), !walking_right.is_empty())

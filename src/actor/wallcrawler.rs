@@ -80,12 +80,10 @@ impl ActorInterface for Specific {
         let direction = match self.direction {
             VerticalDirection::Up => 1,
             VerticalDirection::Down => -1,
-            VerticalDirection::Center => unreachable!(),
         };
         let orientation = match self.orientation {
             HorizontalDirection::Left => -1i32,
             HorizontalDirection::Right => 1i32,
-            HorizontalDirection::Center => unreachable!(),
         };
 
         if direction > 0 {

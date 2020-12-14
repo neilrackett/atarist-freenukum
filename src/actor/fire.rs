@@ -118,7 +118,6 @@ impl ActorInterface for Specific {
                         HorizontalDirection::Right => {
                             (Some(self.tile), None, None)
                         }
-                        HorizontalDirection::Center => unreachable!(),
                     }
                 } else {
                     (None, None, None)
@@ -137,7 +136,6 @@ impl ActorInterface for Specific {
                         Some(self.tile + 1 + offset),
                         Some(self.tile + 3 + offset),
                     ),
-                    HorizontalDirection::Center => unreachable!(),
                 }
             }
         };

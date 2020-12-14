@@ -80,7 +80,6 @@ impl ActorInterface for Specific {
             let mut direction = match self.orientation {
                 HorizontalDirection::Left => -1,
                 HorizontalDirection::Right => 4,
-                HorizontalDirection::Center => unreachable!(),
             };
 
             if !p.solids.get(
@@ -116,7 +115,6 @@ impl ActorInterface for Specific {
                     HorizontalDirection::Right => {
                         HorizontalDirection::Left
                     }
-                    HorizontalDirection::Center => unreachable!(),
                 };
                 if direction > 0 {
                     direction = 1;
