@@ -1,8 +1,8 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters, ShotProcessing,
+        ActorMessageType, ActorType, HeroTouchStartParameters,
+        RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
@@ -80,6 +80,10 @@ impl ActorInterface for Specific {
         } else {
             // TODO: add removal animation (destroyed body)
             p.general.is_alive = false;
+            p.actor_message_queue.push_back(
+                ActorType::ElectricArc,
+                ActorMessageType::Remove,
+            );
             p.hero_data.score.add(20000);
             p.actor_adder
                 .add_particle_firework(p.general.position.center(), 20);

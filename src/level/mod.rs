@@ -360,12 +360,12 @@ impl LevelData {
                     aa(ActorType::UnstableFloor, tx, ty);
                 }
                 0x301a =>
-                /* horizontal laser beam which gets deactivated when mill is shot */
+                /* horizontal electric arc which gets deactivated when mill is shot */
                 {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::Laserbeam, tx, ty);
+                    aa(ActorType::ElectricArc, tx, ty);
                 }
                 0x301b =>
                 /* fan wheel mounted on right wall blowing to the left */
@@ -945,6 +945,7 @@ impl LevelData {
                 &mut self.solids,
                 &mut self.tiles,
                 actor_queue,
+                actor_message_queue,
             );
         }
         self.shots.retain(|s| s.is_alive);
@@ -985,6 +986,7 @@ impl LevelData {
         &mut self,
         hero: &mut HeroData,
         actor_adder: &mut dyn ActorAdder,
+        actor_message_queue: &mut ActorMessageQueue,
     ) {
         if self.shots.len() < hero.firepower.num_shots() as usize
             && self.play_state.hero_can_act()
@@ -1005,6 +1007,7 @@ impl LevelData {
                 &mut self.tiles,
                 distance,
                 actor_adder,
+                actor_message_queue,
             );
 
             self.shots.push(shot);

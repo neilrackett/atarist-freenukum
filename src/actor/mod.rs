@@ -6,6 +6,7 @@ mod bomb;
 mod camera;
 mod conveyor;
 mod door;
+mod electric_arc;
 mod elevator;
 mod exitdoor;
 mod expandingfloor;
@@ -125,12 +126,18 @@ impl ActorsList {
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        actor_message_queue: &mut ActorMessageQueue,
     ) -> bool {
         for actor in self.actors.iter_mut() {
             if actor.can_get_shot()
                 && shot_position.touches(actor.position())
-                && actor.shot(solids, tiles, actor_adder, hero_data)
-                    == ShotProcessing::Absorb
+                && actor.shot(
+                    solids,
+                    tiles,
+                    actor_adder,
+                    hero_data,
+                    actor_message_queue,
+                ) == ShotProcessing::Absorb
             {
                 return true;
             }
@@ -353,6 +360,7 @@ impl Actor {
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         hero_data: &mut HeroData,
+        actor_message_queue: &mut ActorMessageQueue,
     ) -> ShotProcessing {
         let p = ShotParameters {
             general: &mut self.general,
@@ -360,6 +368,7 @@ impl Actor {
             tiles,
             actor_adder,
             hero_data,
+            actor_message_queue,
         };
         self.specific.shot(p)
     }
@@ -501,7 +510,7 @@ pub enum ActorType {
     FireRight,
     FireLeft,
     Mill,
-    Laserbeam,
+    ElectricArc,
     AccessCardDoor,
     SpikesUp,
     SpikesDown,
@@ -794,8 +803,8 @@ impl ActorType {
             ActorType::FireRight => fire::Specific::create_boxed(g, s, t),
             ActorType::FireLeft => fire::Specific::create_boxed(g, s, t),
             ActorType::Mill => mill::Specific::create_boxed(g, s, t),
-            ActorType::Laserbeam => {
-                placeholder::Specific::create_boxed(g, s, t)
+            ActorType::ElectricArc => {
+                electric_arc::Specific::create_boxed(g, s, t)
             }
             ActorType::AccessCardDoor => {
                 accesscard_door::Specific::create_boxed(g, s, t)
@@ -998,6 +1007,7 @@ pub enum ActorMessageType {
     OpenDoor,
     Teleport,
     Expand,
+    Remove,
 }
 
 pub struct ActorMessage {
@@ -1057,6 +1067,7 @@ pub struct ShotParameters<'a> {
     pub tiles: &'a mut LevelTiles,
     pub actor_adder: &'a mut dyn ActorAdder,
     pub hero_data: &'a mut HeroData,
+    pub actor_message_queue: &'a mut ActorMessageQueue,
 }
 
 pub struct RenderParameters<'a> {

@@ -313,7 +313,11 @@ fn start_in_level(
             }
             GameEvent::HeroStartFiring => {
                 hero.is_shooting = true;
-                level_data.fire_shot(hero, &mut actor_queue);
+                level_data.fire_shot(
+                    hero,
+                    &mut actor_queue,
+                    &mut actor_message_queue,
+                );
                 hero.update_animation();
             }
             GameEvent::HeroStopFiring => {

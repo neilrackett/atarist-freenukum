@@ -2,6 +2,9 @@
 
 ## [unreleased]
 
+### Added
+- Implement horizontal electric arc
+
 ### Fixed
 - Track and process controller x-axis events with value of 0, so that the
   hero movement stops when that event occurs

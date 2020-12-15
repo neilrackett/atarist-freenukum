@@ -1,5 +1,5 @@
 use crate::{
-    actor::{ActorAdder, ActorType, ActorsList},
+    actor::{ActorAdder, ActorMessageQueue, ActorType, ActorsList},
     hero::HeroData,
     level::{solids::LevelSolids, tiles::LevelTiles},
     rendering::Renderer,
@@ -46,6 +46,7 @@ impl Shot {
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
+        actor_message_queue: &mut ActorMessageQueue,
     ) -> bool {
         self.counter += 1;
         self.counter %= 4;
@@ -75,6 +76,7 @@ impl Shot {
                 tiles,
                 distance,
                 actor_adder,
+                actor_message_queue,
             );
             self.push(
                 hero_data,
@@ -83,6 +85,7 @@ impl Shot {
                 tiles,
                 distance,
                 actor_adder,
+                actor_message_queue,
             );
 
             let x = self.position.x;
@@ -127,6 +130,7 @@ impl Shot {
         tiles: &mut LevelTiles,
         offset: i32,
         actor_adder: &mut dyn ActorAdder,
+        actor_message_queue: &mut ActorMessageQueue,
     ) {
         if self.countdown >= 2 {
             self.position.x += offset;
@@ -137,6 +141,7 @@ impl Shot {
                     tiles,
                     actor_adder,
                     hero_data,
+                    actor_message_queue,
                 ) {
                     self.countdown = 1;
                 }
