@@ -5,6 +5,8 @@ A clone of the 1991 DOS game *Duke Nukem 1*.
 The game is still work in progress. Expect many things to not function yet,
 such as opponents and some other items missing from the levels.
 
+[Screenshots](https://gitlab.com/silwol/freenukum/-/wikis/FreeNukum-Screenshots).
+
 ## How to install
 
 For now, no compiled executable files are built or distributed by the
