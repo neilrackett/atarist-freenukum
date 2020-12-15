@@ -18,8 +18,8 @@ book](https://doc.rust-lang.org/book/ch14-04-installing-binaries.html).
 
 If your desired system is not listed and you'd like to contribute the guide
 for it, please either submit
-[https://gitlab.com/silwol/freenukum/-/issues](an issue) or
-[https://gitlab.com/silwol/freenukum/-/merge_requests](a merge request).
+[an issue](https://gitlab.com/silwol/freenukum/-/issues) or
+[a merge request](https://gitlab.com/silwol/freenukum/-/merge_requests).
 
 ### Debian GNU/Linux or derived distributions such as Ubuntu or Mint
 
