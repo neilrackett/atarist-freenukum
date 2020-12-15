@@ -9,6 +9,10 @@ such as opponents and some other items missing from the levels.
 
 [Screenshots can be found here](https://gitlab.com/silwol/freenukum/-/wikis/FreeNukum-Screenshots).
 
+## Changelog
+
+[Changelog can be found here](https://gitlab.com/silwol/freenukum/-/blob/main/CHANGELOG.md)
+
 ## How to install
 
 For now, no compiled executable files are built or distributed by the
