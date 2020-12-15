@@ -1,6 +1,6 @@
 # Freenukum Changelog
 
-## [unreleased]
+## [0.3.5] - 2020-12-15
 
 ### Added
 - Implement horizontal electric arc
