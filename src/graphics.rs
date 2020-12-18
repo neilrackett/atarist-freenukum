@@ -8,6 +8,16 @@ use sdl2::{
     ttf::{Font, FontStyle, Sdl2TtfContext},
 };
 
+trait AsSdlColor {
+    fn as_sdl_color(&self) -> Color;
+}
+
+impl AsSdlColor for RGBA8 {
+    fn as_sdl_color(&self) -> Color {
+        Color::RGBA(self.r, self.g, self.b, self.a)
+    }
+}
+
 pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
     #[cfg(target_os = "windows")]
     let font_path = std::path::Path::new(&std::env::var("WINDIR")?)
@@ -25,28 +35,40 @@ pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
 }
 
 pub trait Picture: Sized {
-    fn from_data(width: u32, height: u32, color: &[RGBA8])
-        -> Result<Self>;
-}
+    fn create(width: u32, height: u32) -> Result<Self>;
+    fn load_data(&mut self, pixels: &[RGBA8]) -> Result<()>;
 
-impl<'t> Picture for Surface<'t> {
     fn from_data(
         width: u32,
         height: u32,
         pixels: &[RGBA8],
     ) -> Result<Self> {
+        let mut p = Self::create(width, height)?;
+        p.load_data(pixels)?;
+        Ok(p)
+    }
+}
+
+impl Picture for Surface<'_> {
+    fn create(width: u32, height: u32) -> Result<Self> {
         let mut surface =
             Surface::new(width, height, PixelFormatEnum::RGBA8888)
                 .map_err(|s| anyhow!(s))?;
-        for i in 0..height {
-            for j in 0..width {
-                let pixel = pixels[(i * width + j) as usize];
+        surface
+            .fill_rect(None, RGBA8::default().as_sdl_color())
+            .map_err(|s| anyhow!(s))?;
+        Ok(surface)
+    }
+
+    fn load_data(&mut self, pixels: &[RGBA8]) -> Result<()> {
+        for i in 0..self.height() {
+            for j in 0..self.width() {
                 let color =
-                    Color::RGBA(pixel.r, pixel.g, pixel.b, pixel.a);
+                    pixels[(i * self.width() + j) as usize].as_sdl_color();
                 let rect = Rect::new(j as i32, i as i32, 1, 1);
-                surface.fill_rect(rect, color).map_err(|s| anyhow!(s))?;
+                self.fill_rect(rect, color).map_err(|s| anyhow!(s))?;
             }
         }
-        Ok(surface)
+        Ok(())
     }
 }
