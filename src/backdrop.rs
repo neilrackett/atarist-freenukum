@@ -1,22 +1,15 @@
 use super::tile::{self, TileHeader};
 use crate::{
-    Result, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    graphics::Picture, Result, BACKDROP_HEIGHT, BACKDROP_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
-use anyhow::anyhow;
-use sdl2::{
-    pixels::PixelFormatEnum, rect::Rect, render::Canvas, surface::Surface,
-};
+use rgb::RGBA8;
 use std::io::Read;
 
-pub fn load<'t, R: Read>(r: &mut R) -> Result<Surface<'t>> {
-    let surface = Surface::new(
-        BACKDROP_WIDTH * TILE_WIDTH,
-        BACKDROP_HEIGHT * TILE_HEIGHT,
-        PixelFormatEnum::RGB888,
-    )
-    .map_err(|s| anyhow!(s))?;
-
-    let mut geometry = Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT);
+pub fn load<R: Read, P: Picture>(r: &mut R) -> Result<P> {
+    const W: u32 = BACKDROP_WIDTH * TILE_WIDTH;
+    const H: u32 = BACKDROP_HEIGHT * TILE_HEIGHT;
+    let mut pixels = [RGBA8::default(); (W * H) as usize];
 
     let header = TileHeader {
         width: 2,
@@ -24,25 +17,24 @@ pub fn load<'t, R: Read>(r: &mut R) -> Result<Surface<'t>> {
         tiles: 0,
     };
 
-    let mut canvas =
-        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
-    {
-        let texture_creator = canvas.texture_creator();
+    for tile_y in 0..BACKDROP_HEIGHT {
+        for tile_x in 0..BACKDROP_WIDTH {
+            let x = tile_x * TILE_WIDTH;
+            let y = tile_y * TILE_HEIGHT;
 
-        for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
-            let tile: Surface = tile::load(r, header, false)?;
-            canvas
-                .copy(&tile.as_texture(&texture_creator)?, None, geometry)
-                .map_err(|s| anyhow!(s))?;
+            let tile: Vec<RGBA8> = tile::load(r, header, false)?;
 
-            geometry.x += 16;
-            if geometry.x == 16 * BACKDROP_WIDTH as i32 {
-                geometry.x = 0;
-                geometry.y += 16;
+            for row in 0..TILE_HEIGHT {
+                let target_start = ((y + row) * W + x) as usize;
+                let target_end = target_start + TILE_WIDTH as usize;
+
+                let source_start = (row * TILE_WIDTH) as usize;
+                let source_end = source_start + TILE_WIDTH as usize;
+                let source = &tile[source_start..source_end];
+
+                pixels[target_start..target_end].copy_from_slice(source)
             }
         }
     }
-    canvas.present();
-    let surface = canvas.into_surface();
-    Ok(surface)
+    P::from_data(W, H, &pixels)
 }

@@ -72,3 +72,16 @@ impl Picture for Surface<'_> {
         Ok(())
     }
 }
+
+impl Picture for Vec<RGBA8> {
+    fn create(width: u32, height: u32) -> Result<Self> {
+        Ok(std::iter::repeat(RGBA8::default())
+            .take((width * height) as usize)
+            .collect())
+    }
+
+    fn load_data(&mut self, pixels: &[RGBA8]) -> Result<()> {
+        self.copy_from_slice(pixels);
+        Ok(())
+    }
+}

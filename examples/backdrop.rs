@@ -9,6 +9,7 @@ use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
     pixels::Color,
+    surface::Surface,
 };
 use std::fs::File;
 use std::path::PathBuf;
@@ -49,7 +50,7 @@ fn main() -> Result<()> {
     let texture_creator = canvas.texture_creator();
 
     TileHeader::load_from(&mut file)?;
-    let backdrop = backdrop::load(&mut file)?;
+    let backdrop: Surface = backdrop::load(&mut file)?;
     canvas
         .copy(&backdrop.as_texture(&texture_creator)?, None, None)
         .map_err(|s| anyhow!(s))?;

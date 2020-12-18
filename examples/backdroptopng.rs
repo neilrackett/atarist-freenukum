@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use freenukum::backdrop;
-use sdl2::image::SaveSurface;
+use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -20,7 +20,7 @@ fn main() -> Result<()> {
     let args = Arguments::from_args();
 
     let mut file = File::open(&args.infile)?;
-    let backdrop = backdrop::load(&mut file)?;
+    let backdrop: Surface = backdrop::load(&mut file)?;
 
     backdrop.save(args.outfile).map_err(|s| anyhow!(s))?;
     Ok(())
