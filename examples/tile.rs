@@ -7,6 +7,7 @@ use sdl2::{
     keyboard::Keycode,
     pixels::Color,
     rect::Rect,
+    surface::Surface,
 };
 use std::fs::File;
 use std::path::PathBuf;
@@ -51,7 +52,7 @@ fn main() -> Result<()> {
     let texture_creator = canvas.texture_creator();
 
     for _ in 0..header.tiles {
-        let tile = tile::load(&mut file, header, false)?;
+        let tile: Surface = tile::load(&mut file, header, false)?;
         canvas
             .copy(&tile.as_texture(&texture_creator)?, None, r)
             .map_err(|s| anyhow!(s))?;

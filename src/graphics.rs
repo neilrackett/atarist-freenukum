@@ -1,9 +1,11 @@
 use crate::Result;
 use anyhow::anyhow;
+use rgb::RGBA8;
 use sdl2::{
-    pixels::Color,
+    pixels::{Color, PixelFormatEnum},
     rect::Point,
     render::{Canvas, RenderTarget},
+    surface::Surface,
     ttf::{Font, FontStyle, Sdl2TtfContext},
 };
 
@@ -60,5 +62,29 @@ impl<RT: RenderTarget> SurfaceExt for Canvas<RT> {
             }
         }
         Ok(())
+    }
+}
+
+pub trait Picture: Sized {
+    fn from_data(width: u32, height: u32, color: &[RGBA8])
+        -> Result<Self>;
+}
+
+impl<'t> Picture for Surface<'t> {
+    fn from_data(
+        width: u32,
+        height: u32,
+        color: &[RGBA8],
+    ) -> Result<Self> {
+        let surface =
+            Surface::new(width, height, PixelFormatEnum::RGBA8888)
+                .map_err(|s| anyhow!(s))?;
+        let mut canvas =
+            Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
+        canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
+        canvas.clear();
+        use rgb::ComponentBytes;
+        canvas.set_data(color.as_bytes(), width, height)?;
+        Ok(canvas.into_surface())
     }
 }

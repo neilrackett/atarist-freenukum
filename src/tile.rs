@@ -1,10 +1,5 @@
-use crate::Result;
-use anyhow::anyhow;
-use sdl2::{
-    pixels::{Color, PixelFormatEnum},
-    render::Canvas,
-    surface::Surface,
-};
+use crate::{graphics::Picture, Result};
+use rgb::RGBA8;
 use std::io::Read;
 
 #[derive(Clone, Copy)]
@@ -26,18 +21,16 @@ impl TileHeader {
     }
 }
 
-pub fn load<'t, R: Read>(
+pub fn load<'t, R: Read, P: Picture>(
     r: &mut R,
     header: TileHeader,
     has_transparency: bool,
-) -> Result<Surface<'t>> {
+) -> Result<P> {
     let width: u32 = header.width as u32 * 8;
     let height: u32 = header.height as u32;
 
-    let surface = Surface::new(width, height, PixelFormatEnum::RGBA8888)
-        .map_err(|s| anyhow!(s))?;
-    let mut data: Vec<u8> =
-        Vec::with_capacity(width as usize * height as usize * 4);
+    let mut pixels: Vec<RGBA8> =
+        Vec::with_capacity(width as usize * height as usize);
 
     let mut readbuf = [0u8; 5];
 
@@ -72,22 +65,15 @@ pub fn load<'t, R: Read>(
                 0
             };
 
-            data.push(0x54 * (red_pixel * 2 + bright_pixel));
-            data.push(
+            let pixel = RGBA8::new_alpha(
+                0x54 * (red_pixel * 2 + bright_pixel),
                 0x54 * (green_pixel * 2 + bright_pixel - ugly_yellow),
+                0x54 * (blue_pixel * 2 + bright_pixel),
+                opaque_pixel * 0xff,
             );
-            data.push(0x54 * (blue_pixel * 2 + bright_pixel));
-            data.push(opaque_pixel * 0xff);
+            pixels.push(pixel);
         }
     }
 
-    use crate::graphics::SurfaceExt;
-    let mut canvas =
-        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
-    canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
-    canvas.clear();
-    canvas.set_data(&data, width, height)?;
-    let surface = canvas.into_surface();
-
-    Ok(surface)
+    P::from_data(width, height, &pixels)
 }

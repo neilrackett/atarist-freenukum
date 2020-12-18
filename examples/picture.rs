@@ -6,6 +6,7 @@ use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
     pixels::Color,
+    surface::Surface,
 };
 use std::fs::File;
 use std::path::PathBuf;
@@ -46,7 +47,7 @@ fn main() -> Result<()> {
     canvas.present();
     let texture_creator = canvas.texture_creator();
 
-    let picture = picture::load(&mut file)?;
+    let picture: Surface = picture::load(&mut file)?;
 
     canvas
         .copy(&picture.as_texture(&texture_creator)?, None, None)

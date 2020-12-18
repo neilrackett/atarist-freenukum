@@ -1,99 +1,69 @@
 use super::messagebox::messagebox;
-use crate::event::{ConfirmEvent, WaitEvent};
 use crate::{
+    event::{ConfirmEvent, WaitEvent},
+    graphics::Picture,
     Result, TileProvider, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT,
     WINDOW_WIDTH,
 };
 use anyhow::anyhow;
+use rgb::RGBA8;
 use sdl2::{
-    pixels::{Color, PixelFormatEnum},
-    rect::Rect,
-    render::{Canvas, WindowCanvas},
-    surface::Surface,
-    EventPump,
+    rect::Rect, render::WindowCanvas, surface::Surface, EventPump,
 };
 use std::fs::File;
 use std::io::Read;
 
-pub fn load<'t>(input: &mut File) -> Result<Surface<'t>> {
-    let surface =
-        Surface::new(WINDOW_WIDTH, WINDOW_HEIGHT, PixelFormatEnum::RGB888)
-            .map_err(|s| anyhow!(s))?;
-
+pub fn load<P: Picture>(input: &mut File) -> Result<P> {
     const NUM_LOADS: usize = (PICTURE_WIDTH * PICTURE_HEIGHT) as usize;
     let mut buffer = [0u8; NUM_LOADS];
 
-    let mut data =
-        [0u8; PICTURE_WIDTH as usize * PICTURE_HEIGHT as usize * 4 * 8];
-    let mut index;
+    let mut pixels = [RGBA8::default();
+        PICTURE_WIDTH as usize * PICTURE_HEIGHT as usize * 8];
 
     // read blue
-    index = 2;
     input.read_exact(&mut buffer)?;
-    for item in buffer.iter().take(NUM_LOADS) {
+    for (i, item) in buffer.iter().take(NUM_LOADS).enumerate() {
         for j in 0..8 {
+            let p = &mut pixels[i * 8 + j];
             let blue_pixel: u8 = (item >> (7 - j)) & 1;
-            data[index] += blue_pixel * 0x54 * 2;
-            index += 4;
+            p.b = blue_pixel * 0x54 * 2;
         }
     }
 
     // read green
-    index = 1;
     input.read_exact(&mut buffer)?;
-    for item in buffer.iter().take(NUM_LOADS) {
+    for (i, item) in buffer.iter().take(NUM_LOADS).enumerate() {
         for j in 0..8 {
+            let p = &mut pixels[i * 8 + j];
             let green_pixel: u8 = (item >> (7 - j)) & 1;
-            data[index] += green_pixel * 0x54 * 2;
-            index += 4;
+            p.g = green_pixel * 0x54 * 2;
         }
     }
 
     // read red
-    index = 0;
     input.read_exact(&mut buffer)?;
-    for item in buffer.iter().take(NUM_LOADS) {
+    for (i, item) in buffer.iter().take(NUM_LOADS).enumerate() {
         for j in 0..8 {
+            let p = &mut pixels[i * 8 + j];
             let red_pixel: u8 = (item >> (7 - j)) & 1;
-            data[index] += red_pixel * 0x54 * 2;
-            index += 4;
+            p.r = red_pixel * 0x54 * 2;
         }
     }
 
     // read brighten, and set pixels opaque
-    index = 0;
     input.read_exact(&mut buffer)?;
-    for item in buffer.iter().take(NUM_LOADS) {
+    for (i, item) in buffer.iter().take(NUM_LOADS).enumerate() {
         for j in 0..8 {
+            let p = &mut pixels[i * 8 + j];
             let bright_pixel: u8 = (item >> (7 - j)) & 1;
-
-            // brighten red
-            data[index] += bright_pixel * 0x54;
-            index += 1;
-
-            // brighten blue
-            data[index] += bright_pixel * 0x54;
-            index += 1;
-
-            // brighten green
-            data[index] += bright_pixel * 0x54;
-            index += 1;
-
-            // set opaque
-            data[index] = 0xff;
-            index += 1;
+            p.r += bright_pixel * 0x54;
+            p.g += bright_pixel * 0x54;
+            p.b += bright_pixel * 0x54;
+            p.a = 0xff;
         }
     }
 
-    use crate::graphics::SurfaceExt;
-    let mut canvas =
-        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
-    canvas.set_draw_color(Color::RGB(0, 0, 0));
-    canvas.clear();
-    canvas.set_data(&data, PICTURE_WIDTH * 8, PICTURE_HEIGHT)?;
-    let surface = canvas.into_surface();
-
-    Ok(surface)
+    P::from_data(WINDOW_WIDTH, WINDOW_HEIGHT, &pixels)
 }
 
 pub fn show_splash(
@@ -122,7 +92,7 @@ pub fn show_splash_with_message(
     x: i32,
     y: i32,
 ) -> Result<()> {
-    let picture = load(file)?;
+    let picture = load::<Surface>(file)?;
 
     let texture_creator = canvas.texture_creator();
 

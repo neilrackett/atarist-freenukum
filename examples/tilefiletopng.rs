@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use freenukum::tile::{self, TileHeader};
-use sdl2::image::SaveSurface;
+use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -29,7 +29,7 @@ fn main() -> Result<()> {
     create_dir_all(&args.destination)?;
 
     for i in 0..header.tiles {
-        let tile = tile::load(&mut file, header, false)?;
+        let tile: Surface = tile::load(&mut file, header, false)?;
         let filename = format!("tile_{:02}.png", i);
         tile.save(args.destination.join(filename))
             .map_err(|s| anyhow!(s))?;

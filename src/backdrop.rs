@@ -30,7 +30,7 @@ pub fn load<'t, R: Read>(r: &mut R) -> Result<Surface<'t>> {
         let texture_creator = canvas.texture_creator();
 
         for _ in 0..BACKDROP_WIDTH * BACKDROP_HEIGHT {
-            let tile = tile::load(r, header, false)?;
+            let tile: Surface = tile::load(r, header, false)?;
             canvas
                 .copy(&tile.as_texture(&texture_creator)?, None, geometry)
                 .map_err(|s| anyhow!(s))?;

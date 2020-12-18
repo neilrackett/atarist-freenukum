@@ -1,16 +1,15 @@
 use anyhow::{anyhow, Result};
-use freenukum::picture;
-use sdl2::{image::SaveSurface, surface::Surface};
+use freenukum::backdrop;
+use sdl2::image::SaveSurface;
 use std::fs::File;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// Convert an original original Duke Nukem 1 tile file to a set of png files.
+/// Convert an original original Duke Nukem 1 backdrop file to a set of png files.
 #[derive(StructOpt, Debug)]
 struct Arguments {
     /// The path to the file that should be converted.
-    /// The file is usually named one of: `badguy.dn1`, `credits.dn1`,
-    /// `dn.dn1`, `duke.dn1`, `end.dn1`.
+    /// The file is usually named `drop1.dn1` or similar.
     infile: PathBuf,
 
     /// The path to the output file.
@@ -21,8 +20,8 @@ fn main() -> Result<()> {
     let args = Arguments::from_args();
 
     let mut file = File::open(&args.infile)?;
-    let picture: Surface = picture::load(&mut file)?;
+    let backdrop = backdrop::load(&mut file)?;
 
-    picture.save(args.outfile).map_err(|s| anyhow!(s))?;
+    backdrop.save(args.outfile).map_err(|s| anyhow!(s))?;
     Ok(())
 }
