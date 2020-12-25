@@ -10,25 +10,28 @@ use crate::{
     OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED,
     TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     counter: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
             tile: OBJECT_KEYHOLE_BLACK,
             counter: 0,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -51,7 +54,7 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())
     }
 
@@ -92,5 +95,9 @@ impl ActorInterface for Specific {
             p.info_message_queue
                 .push_back(format!("You don't have the {} key.", color));
         }
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

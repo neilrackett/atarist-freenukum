@@ -8,6 +8,7 @@ use crate::{
     HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
     OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -23,20 +24,23 @@ pub(crate) struct Specific {
     state: State,
     counter: usize,
     touching_hero: bool,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
-        let x = general.position.x() as u32 / TILE_WIDTH;
-        let y = general.position.y() as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / TILE_WIDTH;
+        let y = pos.y as u32 / TILE_HEIGHT;
 
+        let mut position =
+            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
         let (tile, direction) = match general.actor_type {
             ActorType::FireRight => {
                 if x < LEVEL_WIDTH + 1 {
@@ -48,7 +52,7 @@ impl ActorCreateInterface for Specific {
                 if x > 0 {
                     tiles.copy_from_to(x - 1, y, x, y);
                 }
-                general.position.offset(-2 * TILE_WIDTH as i32, 0);
+                position.offset(-2 * TILE_WIDTH as i32, 0);
                 (OBJECT_FIRELEFT, HorizontalDirection::Left)
             }
             _ => unreachable!(),
@@ -60,6 +64,7 @@ impl ActorCreateInterface for Specific {
             state: State::Off,
             counter: 0,
             touching_hero: false,
+            position,
         }
     }
 }
@@ -140,7 +145,7 @@ impl ActorInterface for Specific {
             }
         };
 
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         if let Some(tile) = tile0 {
             p.renderer.place_tile(tile, pos)?;
         }
@@ -153,5 +158,9 @@ impl ActorInterface for Specific {
             p.renderer.place_tile(tile, pos)?;
         }
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

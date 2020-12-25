@@ -6,6 +6,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -19,20 +20,21 @@ pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     state: State,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
-
         Specific {
             tile: OBJECT_DOOR,
             counter: 0,
             state: State::Closed,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -44,8 +46,8 @@ impl ActorInterface for Specific {
             State::Opening => {
                 if self.counter == 0 {
                     p.solids.set(
-                        p.general.position.x() as u32 / TILE_WIDTH,
-                        p.general.position.y() as u32 / TILE_HEIGHT,
+                        self.position.x() as u32 / TILE_WIDTH,
+                        self.position.y() as u32 / TILE_HEIGHT,
                         false,
                     );
                 }
@@ -62,7 +64,7 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.counter,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
     }
@@ -72,5 +74,9 @@ impl ActorInterface for Specific {
             return;
         }
         self.state = State::Opening;
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

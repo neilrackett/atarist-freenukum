@@ -8,20 +8,25 @@ use crate::{
     Result, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK,
     OBJECT_KEY_RED, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub struct Specific {}
+pub struct Specific {
+    position: Rect,
+}
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
-        Specific {}
+        Specific {
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+        }
     }
 }
 
@@ -37,10 +42,8 @@ impl ActorInterface for Specific {
 
         p.hero_data.inventory.set(item);
         p.hero_data.score.add(1000);
-        p.actor_adder.add_actor(
-            ActorType::Score1000,
-            p.general.position.top_left(),
-        );
+        p.actor_adder
+            .add_actor(ActorType::Score1000, self.position.top_left());
         p.general.is_alive = false;
     }
 
@@ -54,7 +57,11 @@ impl ActorInterface for Specific {
             ActorType::KeyGreen => OBJECT_KEY_GREEN,
             _ => unreachable!(),
         };
-        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

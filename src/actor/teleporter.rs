@@ -7,20 +7,25 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_TELEPORTER1, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {}
+pub(crate) struct Specific {
+    position: Rect,
+}
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
-        Specific {}
+        Specific {
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+        }
     }
 }
 
@@ -45,7 +50,7 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         for i in 0..3 {
             for j in 0..3 {
-                let pos = p.general.position.top_left().offset(
+                let pos = self.position.top_left().offset(
                     (j - 1) * TILE_WIDTH as i32,
                     (i - 2) * TILE_HEIGHT as i32,
                 );
@@ -63,8 +68,12 @@ impl ActorInterface for Specific {
         }
 
         p.hero_data.position.move_to(
-            p.general.position.x(),
-            p.general.position.y() - TILE_HEIGHT as i32,
+            self.position.x(),
+            self.position.y() - TILE_HEIGHT as i32,
         );
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

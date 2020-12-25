@@ -8,23 +8,25 @@ use crate::{
     Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
     TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     touching_hero: bool,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
-        let x = general.position.x() as u32 / TILE_WIDTH;
-        let y = general.position.y() as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / TILE_WIDTH;
+        let y = pos.y as u32 / TILE_HEIGHT;
 
         match general.actor_type {
             ActorType::SpikesUp | ActorType::Spike => {
@@ -38,6 +40,7 @@ impl ActorCreateInterface for Specific {
 
         Specific {
             touching_hero: false,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -64,7 +67,11 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.renderer.place_tile(tile, p.general.position.top_left())?;
+        p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

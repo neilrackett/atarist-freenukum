@@ -7,6 +7,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -14,27 +15,28 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     lives: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
-        while general.position.y > 0
+        let mut position =
+            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
+        while position.y > 0
             && !solids.get(
-                general.position.x() as u32 / TILE_WIDTH,
-                general.position.y() as u32 / TILE_HEIGHT - 1,
+                position.x() as u32 / TILE_WIDTH,
+                position.y() as u32 / TILE_HEIGHT - 1,
             )
         {
-            general.position.offset(0, -(TILE_HEIGHT as i32));
-            general
-                .position
-                .set_height(general.position.height() + TILE_HEIGHT);
+            position.offset(0, -(TILE_HEIGHT as i32));
+            position.set_height(position.height() + TILE_HEIGHT);
         }
 
         Specific {
@@ -42,6 +44,7 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames: 5,
             lives: 10,
+            position,
         }
     }
 }
@@ -59,9 +62,9 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
 
-        for _ in 0..p.general.position.height() / TILE_WIDTH {
+        for _ in 0..self.position.height() / TILE_WIDTH {
             p.renderer.place_tile(self.tile + self.current_frame, pos)?;
             pos.y += TILE_HEIGHT as i32;
         }
@@ -76,7 +79,7 @@ impl ActorInterface for Specific {
         self.lives -= 1;
         if self.lives > 0 {
             p.actor_adder
-                .add_particle_firework(p.general.position.center(), 4);
+                .add_particle_firework(self.position.center(), 4);
         } else {
             // TODO: add removal animation (destroyed body)
             p.general.is_alive = false;
@@ -86,22 +89,25 @@ impl ActorInterface for Specific {
             );
             p.hero_data.score.add(20000);
             p.actor_adder
-                .add_particle_firework(p.general.position.center(), 20);
+                .add_particle_firework(self.position.center(), 20);
             p.actor_adder.add_actor(
                 ActorType::Score10000,
-                p.general.position.top_left().offset(
+                self.position.top_left().offset(
                     0,
-                    (p.general.position.height() / 2 - TILE_HEIGHT) as i32,
+                    (self.position.height() / 2 - TILE_HEIGHT) as i32,
                 ),
             );
             p.actor_adder.add_actor(
                 ActorType::Score10000,
-                p.general
-                    .position
+                self.position
                     .top_left()
-                    .offset(0, p.general.position.height() as i32 / 2),
+                    .offset(0, self.position.height() as i32 / 2),
             );
         }
         ShotProcessing::Absorb
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

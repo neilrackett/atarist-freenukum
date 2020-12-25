@@ -7,26 +7,28 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     counter: u16,
     base_y: i32,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
-
         Specific {
             tile: ANIMATION_MINE,
             counter: 0,
-            base_y: general.position.y(),
+            base_y: pos.y,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -40,7 +42,7 @@ impl ActorInterface for Specific {
         p.general.hurts_hero = false;
     }
 
-    fn act(&mut self, p: ActParameters) {
+    fn act(&mut self, _p: ActParameters) {
         let distance = match self.counter {
             0 => 0,
             1 | 11 => 16,
@@ -51,15 +53,14 @@ impl ActorInterface for Specific {
             6 => 42,
             _ => unreachable!(),
         };
-        p.general.position.set_y(self.base_y - distance);
+        self.position.set_y(self.base_y - distance);
 
         self.counter += 1;
         self.counter %= 12;
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer
-            .place_tile(self.tile, p.general.position.top_left())?;
+        p.renderer.place_tile(self.tile, self.position.top_left())?;
         Ok(())
     }
 
@@ -73,5 +74,9 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
         ShotProcessing::Absorb
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

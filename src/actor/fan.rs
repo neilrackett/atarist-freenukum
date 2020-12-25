@@ -7,6 +7,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -14,22 +15,27 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     running: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.offset(0, -(TILE_HEIGHT as i32));
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT * 2);
-
         Specific {
             tile: ANIMATION_FAN,
             current_frame: 0,
             num_frames: 4,
             running: 10,
+            position: Rect::new(
+                pos.x,
+                pos.y - TILE_HEIGHT as i32,
+                TILE_WIDTH,
+                TILE_HEIGHT * 2,
+            ),
         }
     }
 }
@@ -65,13 +71,13 @@ impl ActorInterface for Specific {
             && p.hero_data
                 .position
                 .geometry
-                .overlaps_vertically(p.general.position)
+                .overlaps_vertically(self.position)
         {
             let mut hdistance = p
                 .hero_data
                 .position
                 .geometry
-                .horizontal_distance(p.general.position);
+                .horizontal_distance(self.position);
 
             let fan_direction = match p.general.actor_type {
                 ActorType::FanLeft => -1,
@@ -98,7 +104,7 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         p.renderer
             .place_tile(self.tile + self.current_frame * 2, pos)?;
         pos.y += TILE_HEIGHT as i32;
@@ -114,7 +120,11 @@ impl ActorInterface for Specific {
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.running = 9;
         p.actor_adder
-            .add_actor(ActorType::Steam, p.general.position.top_left());
+            .add_actor(ActorType::Steam, self.position.top_left());
         ShotProcessing::Absorb
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

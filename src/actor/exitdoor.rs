@@ -6,6 +6,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
     Result, ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(PartialEq, Eq, Debug)]
 enum State {
@@ -19,21 +20,28 @@ pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     state: State,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT * 2);
         general.is_in_foreground = false;
 
         Specific {
             tile: ANIMATION_EXITDOOR,
             counter: 0,
             state: State::Closed,
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                TILE_WIDTH * 2,
+                TILE_HEIGHT * 2,
+            ),
         }
     }
 }
@@ -72,7 +80,7 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile + self.counter * 4, pos)?;
         pos.x += TILE_WIDTH as i32;
         p.renderer
@@ -85,5 +93,9 @@ impl ActorInterface for Specific {
         p.renderer
             .place_tile(self.tile + self.counter * 4 + 3, pos)?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

@@ -7,22 +7,24 @@ use crate::{
     Result, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
     ANIMATION_WINDOWBG, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = false;
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
 
         let (tile, num_frames) = match general.actor_type {
             ActorType::TextOnScreenBackground => (0x0004, 4),
@@ -59,6 +61,7 @@ impl ActorCreateInterface for Specific {
             tile,
             current_frame: 0,
             num_frames,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -72,8 +75,12 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

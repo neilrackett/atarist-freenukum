@@ -6,24 +6,26 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     touching_hero: u8,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
-
         Specific {
             tile: ANIMATION_MINE,
             touching_hero: 0,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -36,10 +38,10 @@ impl ActorInterface for Specific {
 
     fn act(&mut self, p: ActParameters) {
         if !p.solids.get(
-            p.general.position.x() as u32 / TILE_WIDTH,
-            p.general.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / TILE_WIDTH,
+            self.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
-            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, HALFTILE_HEIGHT as i32);
         }
 
         match self.touching_hero {
@@ -49,7 +51,7 @@ impl ActorInterface for Specific {
                 p.general.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::BombFire,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             _ => {}
@@ -57,8 +59,11 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer
-            .place_tile(self.tile, p.general.position.top_left())?;
+        p.renderer.place_tile(self.tile, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

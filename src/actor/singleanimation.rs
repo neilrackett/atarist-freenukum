@@ -8,6 +8,7 @@ use crate::{
     Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
     OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -16,16 +17,17 @@ pub(crate) struct Specific {
     num_frames: usize,
     can_hurt_hero: bool,
     replaced_by: Option<ActorType>,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = false;
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.acts_while_invisible = true;
 
         let (tile, num_frames, can_hurt_hero, replaced_by) = match general
@@ -53,6 +55,7 @@ impl ActorCreateInterface for Specific {
             num_frames,
             can_hurt_hero,
             replaced_by,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -64,7 +67,7 @@ impl ActorInterface for Specific {
             p.general.is_alive = false;
             if let Some(successor) = self.replaced_by {
                 p.actor_adder
-                    .add_actor(successor, p.general.position.top_left());
+                    .add_actor(successor, self.position.top_left());
             }
         }
     }
@@ -82,8 +85,12 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

@@ -8,27 +8,30 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
             tile: OBJECT_ACCESS_CARD_SLOT,
             current_frame: 0,
             num_frames: 8,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -62,8 +65,12 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

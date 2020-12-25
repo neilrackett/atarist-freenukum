@@ -12,21 +12,23 @@ use crate::{
     NUMBER_BONUS_6_LEFT, NUMBER_BONUS_6_RIGHT, NUMBER_BONUS_7_LEFT,
     NUMBER_BONUS_7_RIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     countdown: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = true;
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.acts_while_invisible = true;
 
         let tile = match general.actor_type {
@@ -63,6 +65,7 @@ impl ActorCreateInterface for Specific {
         Specific {
             tile,
             countdown: 40,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -70,17 +73,20 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         self.countdown -= 1;
-        p.general.position.y -= 1;
+        self.position.y -= 1;
         if self.countdown == 0
-            || p.general.position.y() == -(TILE_HEIGHT as i32)
+            || self.position.y() == -(TILE_HEIGHT as i32)
         {
             p.general.is_alive = false;
         }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer
-            .place_tile(self.tile, p.general.position.top_left())?;
+        p.renderer.place_tile(self.tile, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

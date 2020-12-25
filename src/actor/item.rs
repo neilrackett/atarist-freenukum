@@ -14,21 +14,23 @@ use crate::{
     OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE, OBJECT_RADIO, TILE_HEIGHT,
     TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = true;
 
         let (tile, num_frames) = match general.actor_type {
@@ -81,6 +83,7 @@ impl ActorCreateInterface for Specific {
             tile,
             current_frame: 0,
             num_frames,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -94,7 +97,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::LetterU => {
@@ -103,7 +106,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::LetterK => {
@@ -112,7 +115,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::LetterE => {
@@ -122,13 +125,13 @@ impl ActorInterface for Specific {
                 if p.hero_data.fetched_letter_state.succeeded() {
                     p.actor_adder.add_actor(
                         ActorType::Score10000,
-                        p.general.position.top_left(),
+                        self.position.top_left(),
                     );
                     p.hero_data.score.add(10000);
                 } else {
                     p.actor_adder.add_actor(
                         ActorType::Score500,
-                        p.general.position.top_left(),
+                        self.position.top_left(),
                     );
                     p.hero_data.score.add(500);
                 }
@@ -139,7 +142,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Gun => {
@@ -148,7 +151,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::AccessCard => {
@@ -157,7 +160,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Glove => {
@@ -166,7 +169,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Boots => {
@@ -175,7 +178,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Clamps => {
@@ -184,7 +187,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Football => {
@@ -192,7 +195,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Disk => {
@@ -200,7 +203,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(5000);
                 p.actor_adder.add_actor(
                     ActorType::Score5000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Joystick => {
@@ -208,7 +211,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(2000);
                 p.actor_adder.add_actor(
                     ActorType::Score2000,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::Radio | ActorType::Flag => {
@@ -218,21 +221,21 @@ impl ActorInterface for Specific {
                         p.hero_data.score.add(100);
                         p.actor_adder.add_actor(
                             ActorType::Score100,
-                            p.general.position.top_left(),
+                            self.position.top_left(),
                         );
                     }
                     1 => {
                         p.hero_data.score.add(2000);
                         p.actor_adder.add_actor(
                             ActorType::Score2000,
-                            p.general.position.top_left(),
+                            self.position.top_left(),
                         );
                     }
                     2 => {
                         p.hero_data.score.add(5000);
                         p.actor_adder.add_actor(
                             ActorType::Score5000,
-                            p.general.position.top_left(),
+                            self.position.top_left(),
                         );
                     }
                     _ => unreachable!(),
@@ -244,7 +247,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::ChickenSingle => {
@@ -253,7 +256,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             ActorType::ChickenDouble => {
@@ -262,7 +265,7 @@ impl ActorInterface for Specific {
                 p.hero_data.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
-                    p.general.position.top_left(),
+                    self.position.top_left(),
                 );
             }
             _ => {}
@@ -274,18 +277,18 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            p.general.position.x() as u32 / TILE_WIDTH,
-            p.general.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / TILE_WIDTH,
+            self.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
             // fall down until the actor lands on solid ground
-            p.general.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, HALFTILE_HEIGHT as i32);
         }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
     }
@@ -319,7 +322,7 @@ impl ActorInterface for Specific {
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        let pos = p.general.position.top_left();
+        let pos = self.position.top_left();
         match p.general.actor_type {
             ActorType::BoxBlueFootball => {
                 p.general.is_alive = false;
@@ -455,5 +458,9 @@ impl ActorInterface for Specific {
             }
             _ => ShotProcessing::Ignore,
         }
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

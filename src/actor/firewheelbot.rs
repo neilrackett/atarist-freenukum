@@ -9,6 +9,7 @@ use crate::{
     ANIMATION_FIREWHEEL_ON, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
     TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -20,16 +21,16 @@ pub(crate) struct Specific {
     fire_is_on: bool,
     counter: usize,
     touching_hero: bool,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
-
         Specific {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_FIREWHEEL_OFF,
@@ -39,6 +40,7 @@ impl ActorCreateInterface for Specific {
             num_frames: 4,
             was_shot: 0,
             fire_is_on: false,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -61,13 +63,10 @@ impl ActorInterface for Specific {
             p.general.is_alive = false;
             p.actor_adder.add_actor(
                 ActorType::Explosion,
-                p.general
-                    .position
-                    .top_left()
-                    .offset(HALFTILE_WIDTH as i32, 0),
+                self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
             );
             p.actor_adder
-                .add_particle_firework(p.general.position.top_left(), 8);
+                .add_particle_firework(self.position.top_left(), 8);
             p.hero_data.score.add(2500);
         } else {
             self.counter += 1;
@@ -89,7 +88,7 @@ impl ActorInterface for Specific {
             let direction = self.direction.as_factor_i32();
 
             if !p.solids.push_rect_standing_on_ground(
-                &mut p.general.position,
+                &mut self.position,
                 direction * HALFTILE_WIDTH as i32 / 2,
                 HALFTILE_HEIGHT as u8,
             ) {
@@ -102,7 +101,7 @@ impl ActorInterface for Specific {
                 if self.current_frame == 0 {
                     p.actor_adder.add_actor(
                         ActorType::Steam,
-                        p.general.position.top_left().offset(
+                        self.position.top_left().offset(
                             HALFTILE_WIDTH as i32,
                             -(TILE_HEIGHT as i32),
                         ),
@@ -113,7 +112,7 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let r = p.general.position;
+        let r = self.position;
         let mut pos = r.top_left();
         pos.x = pos.x + r.width() as i32 / 2 - TILE_WIDTH as i32;
         pos.y -= TILE_HEIGHT as i32;
@@ -148,5 +147,9 @@ impl ActorInterface for Specific {
             }
         }
         ShotProcessing::Absorb
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

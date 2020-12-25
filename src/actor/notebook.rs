@@ -6,19 +6,24 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {}
+pub(crate) struct Specific {
+    position: Rect,
+}
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
-        Specific {}
+        Specific {
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+        }
     }
 }
 
@@ -37,7 +42,11 @@ impl ActorInterface for Specific {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer
-            .place_tile(OBJECT_NOTEBOOK, p.general.position.top_left())?;
+            .place_tile(OBJECT_NOTEBOOK, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

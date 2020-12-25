@@ -7,6 +7,7 @@ use crate::{
     Result, HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -14,17 +15,18 @@ pub(crate) struct Specific {
     countdown: usize,
     hspeed: i32,
     vspeed: i32,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         general.is_in_foreground = true;
         general.acts_while_invisible = true;
-        general.position.resize(HALFTILE_WIDTH, HALFTILE_HEIGHT);
 
         use rand::Rng;
         let mut rng = rand::thread_rng();
@@ -44,6 +46,12 @@ impl ActorCreateInterface for Specific {
             countdown: 20,
             hspeed,
             vspeed,
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                HALFTILE_WIDTH,
+                HALFTILE_HEIGHT,
+            ),
         }
     }
 }
@@ -52,7 +60,7 @@ impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;
-            p.general.position.offset(self.hspeed, self.vspeed);
+            self.position.offset(self.hspeed, self.vspeed);
             self.vspeed += 2;
         } else {
             p.general.is_alive = false;
@@ -60,8 +68,11 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer
-            .place_tile(self.tile, p.general.position.top_left())?;
+        p.renderer.place_tile(self.tile, self.position.top_left())?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

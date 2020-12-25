@@ -8,6 +8,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 enum State {
@@ -23,15 +24,16 @@ pub(crate) struct Specific {
     num_frames: usize,
     state: State,
     countdown: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.is_in_foreground = false;
 
         Specific {
@@ -40,6 +42,7 @@ impl ActorCreateInterface for Specific {
             num_frames: 4,
             state: State::Idle,
             countdown: 0,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -81,12 +84,12 @@ impl ActorInterface for Specific {
                 if self.countdown % 4 == 0 {
                     p.actor_adder.add_actor(
                         ActorType::HostileShotRight,
-                        p.general.position.top_left(),
+                        self.position.top_left(),
                     );
                 } else if self.countdown % 4 == 2 {
                     p.actor_adder.add_actor(
                         ActorType::HostileShotLeft,
-                        p.general.position.top_left(),
+                        self.position.top_left(),
                     );
                 }
                 if self.countdown == 0 {
@@ -99,7 +102,7 @@ impl ActorInterface for Specific {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let adder = if self.current_frame == 0 { 0 } else { 1 };
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile + adder, pos)?;
 
         pos.x -= TILE_WIDTH as i32;
@@ -108,5 +111,9 @@ impl ActorInterface for Specific {
         pos.x += 2 * TILE_WIDTH as i32;
         p.renderer.place_tile(self.tile + 3, pos)?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

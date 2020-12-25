@@ -7,6 +7,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -14,15 +15,16 @@ pub(crate) struct Specific {
     touching_hero: bool,
     current_frame: usize,
     num_frames: usize,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
         general.acts_while_invisible = true;
 
         let tile = match general.actor_type {
@@ -40,6 +42,7 @@ impl ActorCreateInterface for Specific {
             touching_hero: false,
             current_frame: 0,
             num_frames: 2,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
@@ -61,11 +64,11 @@ impl ActorInterface for Specific {
             ActorType::HostileShotRight => TILE_WIDTH as i32,
             _ => unreachable!(),
         };
-        p.general.position.offset(offset, 0);
+        self.position.offset(offset, 0);
 
         if p.solids.get(
-            p.general.position.x() as u32 / TILE_WIDTH,
-            p.general.position.y() as u32 / TILE_HEIGHT,
+            self.position.x() as u32 / TILE_WIDTH,
+            self.position.y() as u32 / TILE_HEIGHT,
         ) {
             p.general.is_alive = false;
             if self.touching_hero {
@@ -80,8 +83,12 @@ impl ActorInterface for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
-            p.general.position.top_left(),
+            self.position.top_left(),
         )?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

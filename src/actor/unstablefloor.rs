@@ -6,6 +6,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, SOLID_START, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -13,36 +14,39 @@ pub(crate) struct Specific {
     touch_count: usize,
     touching_hero: bool,
     floor_length: u32,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         let mut floor_length = 0;
+        let mut position =
+            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
         while !solids.get(
-            general.position.x() as u32 / TILE_WIDTH + floor_length,
-            general.position.y() as u32 / TILE_HEIGHT,
+            position.x() as u32 / TILE_WIDTH + floor_length,
+            position.y() as u32 / TILE_HEIGHT,
         ) {
             solids.set(
-                general.position.x() as u32 / TILE_WIDTH + floor_length,
-                general.position.y() as u32 / TILE_HEIGHT,
+                position.x() as u32 / TILE_WIDTH + floor_length,
+                position.y() as u32 / TILE_HEIGHT,
                 true,
             );
             floor_length += 1;
         }
 
-        general
-            .position
-            .resize(TILE_WIDTH * floor_length, TILE_HEIGHT);
+        position.resize(TILE_WIDTH * floor_length, TILE_HEIGHT);
 
         Specific {
             tile: SOLID_START + 77,
             touch_count: 0,
             touching_hero: false,
             floor_length,
+            position,
         }
     }
 }
@@ -55,9 +59,9 @@ impl ActorInterface for Specific {
         // overlaps with the part, which is not the case here.
         let hero_geometry = p.hero_data.position.geometry;
         let hero_center = hero_geometry.x() + (hero_geometry.w as i32) / 2;
-        let stands_upon = hero_center >= p.general.position.left()
-            && hero_center <= p.general.position.right()
-            && hero_geometry.bottom() == p.general.position.top();
+        let stands_upon = hero_center >= self.position.left()
+            && hero_center <= self.position.right()
+            && hero_geometry.bottom() == self.position.top();
 
         if stands_upon {
             if !self.touching_hero {
@@ -69,7 +73,7 @@ impl ActorInterface for Specific {
         }
 
         if self.touch_count >= 2 {
-            let mut r = p.general.position;
+            let mut r = self.position;
             for _ in 0..self.floor_length {
                 p.solids.set(
                     r.x() as u32 / TILE_WIDTH,
@@ -86,11 +90,15 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         for _ in 0..self.floor_length {
             p.renderer.place_tile(self.tile, pos)?;
             pos.x += TILE_WIDTH as i32;
         }
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

@@ -154,10 +154,7 @@ impl ActorsList {
     ) {
         let new_interactor = self.actors.iter().position(|actor| {
             actor.hero_can_interact(hero_data)
-                && hero_data
-                    .position
-                    .geometry
-                    .touches(actor.general.position)
+                && hero_data.position.geometry.touches(actor.position())
         });
 
         if let Some(i) = new_interactor {
@@ -233,7 +230,7 @@ impl ActorsList {
     pub fn update_visibility(&mut self, visible_rect: Rect) {
         self.actors.iter_mut().for_each(|actor| {
             actor.general.is_visible =
-                actor.general.position.has_intersection(visible_rect);
+                actor.position().has_intersection(visible_rect);
         });
     }
 
@@ -309,8 +306,7 @@ impl Actor {
         actor_adder: &mut dyn ActorAdder,
     ) {
         let touching_hero = self
-            .general
-            .position
+            .position()
             .has_intersection(hero_data.position.geometry);
 
         if touching_hero {
@@ -339,12 +335,12 @@ impl Actor {
     fn hero_can_interact(&self, hero_data: &HeroData) -> bool {
         if self.general.actor_type == ActorType::Lift {
             /* This check needs to be done for elevator only because
-             * if there are two elevators next to each other, the mostleft
+             * if there are two elevators next to each other, the leftmost
              * elevator would be chosen for interaction instead of the one on
              * which the hero stands.
              */
             // TODO: this should be moved into ActorInterface::hero_can_interact
-            self.general.position.x == hero_data.position.geometry.x
+            self.position().x == hero_data.position.geometry.x
         } else {
             self.specific.hero_can_interact()
         }
@@ -378,7 +374,7 @@ impl Actor {
     }
 
     pub fn position(&self) -> Rect {
-        self.general.position
+        self.specific.position()
     }
 
     pub fn render(
@@ -394,7 +390,7 @@ impl Actor {
 
         if draw_collision_bounds {
             let color = crate::collision_bounds_color();
-            renderer.draw_rect(self.general.position, color)?;
+            renderer.draw_rect(self.position(), color)?;
         }
         Ok(())
     }
@@ -555,354 +551,403 @@ impl ActorType {
     pub(crate) fn create_actor_interface(
         &self,
         g: &mut ActorData,
+        p: Point,
         s: &mut LevelSolids,
         t: &mut LevelTiles,
     ) -> Box<dyn ActorInterface> {
         match self {
             ActorType::FireWheelBot => {
-                firewheelbot::Specific::create_boxed(g, s, t)
+                firewheelbot::Specific::create_boxed(g, p, s, t)
             }
             ActorType::FlameGnomeBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::FlyingBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::FootBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::HelicopterBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::RabbitoidBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::RedBallJumping => {
-                redball_jumping::Specific::create_boxed(g, s, t)
+                redball_jumping::Specific::create_boxed(g, p, s, t)
             }
             ActorType::RedBallLying => {
-                redball_lying::Specific::create_boxed(g, s, t)
+                redball_lying::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Robot => robot::Specific::create_boxed(g, s, t),
+            ActorType::Robot => robot::Specific::create_boxed(g, p, s, t),
             ActorType::RobotDisappearing => {
-                singleanimation::Specific::create_boxed(g, s, t)
+                singleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::SnakeBot => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::TankBot => tankbot::Specific::create_boxed(g, s, t),
+            ActorType::TankBot => {
+                tankbot::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::WallCrawlerBotLeft => {
-                wallcrawler::Specific::create_boxed(g, s, t)
+                wallcrawler::Specific::create_boxed(g, p, s, t)
             }
             ActorType::WallCrawlerBotRight => {
-                wallcrawler::Specific::create_boxed(g, s, t)
+                wallcrawler::Specific::create_boxed(g, p, s, t)
             }
             ActorType::DrProton => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Camera => camera::Specific::create_boxed(g, s, t),
+            ActorType::Camera => {
+                camera::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::Explosion => {
-                singleanimation::Specific::create_boxed(g, s, t)
+                singleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::DustCloud => {
-                singleanimation::Specific::create_boxed(g, s, t)
+                singleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Steam => {
-                singleanimation::Specific::create_boxed(g, s, t)
+                singleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ParticlePink => {
-                particle::Specific::create_boxed(g, s, t)
+                particle::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ParticleBlue => {
-                particle::Specific::create_boxed(g, s, t)
+                particle::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ParticleWhite => {
-                particle::Specific::create_boxed(g, s, t)
+                particle::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ParticleGreen => {
-                particle::Specific::create_boxed(g, s, t)
+                particle::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Rocket => rocket::Specific::create_boxed(g, s, t),
-            ActorType::Bomb => bomb::Specific::create_boxed(g, s, t),
+            ActorType::Rocket => {
+                rocket::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Bomb => bomb::Specific::create_boxed(g, p, s, t),
             ActorType::BombFire => {
-                singleanimation::Specific::create_boxed(g, s, t)
+                singleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Water => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ExitDoor => {
-                exitdoor::Specific::create_boxed(g, s, t)
+                exitdoor::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Notebook => {
-                notebook::Specific::create_boxed(g, s, t)
+                notebook::Specific::create_boxed(g, p, s, t)
             }
             ActorType::SurveillanceScreen => {
-                surveillancescreen::Specific::create_boxed(g, s, t)
+                surveillancescreen::Specific::create_boxed(g, p, s, t)
             }
             ActorType::HostileShotLeft => {
-                hostileshot::Specific::create_boxed(g, s, t)
+                hostileshot::Specific::create_boxed(g, p, s, t)
             }
             ActorType::HostileShotRight => {
-                hostileshot::Specific::create_boxed(g, s, t)
+                hostileshot::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Soda => item::Specific::create_boxed(g, s, t),
+            ActorType::Soda => item::Specific::create_boxed(g, p, s, t),
             ActorType::SodaFlying => {
-                soda_flying::Specific::create_boxed(g, s, t)
+                soda_flying::Specific::create_boxed(g, p, s, t)
             }
             ActorType::UnstableFloor => {
-                unstablefloor::Specific::create_boxed(g, s, t)
+                unstablefloor::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ExpandingFloor => {
-                expandingfloor::Specific::create_boxed(g, s, t)
+                expandingfloor::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ConveyorLeftMovingRightEnd => {
-                conveyor::Specific::create_boxed(g, s, t)
+                conveyor::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ConveyorRightMovingRightEnd => {
-                conveyor::Specific::create_boxed(g, s, t)
+                conveyor::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::FanLeft => fan::Specific::create_boxed(g, s, t),
-            ActorType::FanRight => fan::Specific::create_boxed(g, s, t),
+            ActorType::FanLeft => fan::Specific::create_boxed(g, p, s, t),
+            ActorType::FanRight => fan::Specific::create_boxed(g, p, s, t),
             ActorType::BrokenWallBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::StoneBackground => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Teleporter1 => {
-                teleporter::Specific::create_boxed(g, s, t)
+                teleporter::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Teleporter2 => {
-                teleporter::Specific::create_boxed(g, s, t)
+                teleporter::Specific::create_boxed(g, p, s, t)
             }
             ActorType::FenceBackground => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::StoneWindowBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::WindowLeftBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::WindowRightBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::Screen => {
-                placeholder::Specific::create_boxed(g, s, t)
+                placeholder::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BoxGreyEmpty => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BoxGreyBoots => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Boots => item::Specific::create_boxed(g, s, t),
+            ActorType::Boots => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyClamps => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Clamps => item::Specific::create_boxed(g, s, t),
-            ActorType::BoxGreyGun => item::Specific::create_boxed(g, s, t),
-            ActorType::Gun => item::Specific::create_boxed(g, s, t),
+            ActorType::Clamps => item::Specific::create_boxed(g, p, s, t),
+            ActorType::BoxGreyGun => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Gun => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyBomb => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::BoxRedSoda => item::Specific::create_boxed(g, s, t),
+            ActorType::BoxRedSoda => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxRedChicken => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ChickenSingle => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ChickenDouble => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BoxBlueFootball => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Football => item::Specific::create_boxed(g, s, t),
-            ActorType::Flag => item::Specific::create_boxed(g, s, t),
+            ActorType::Football => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Flag => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxBlueJoystick => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Joystick => item::Specific::create_boxed(g, s, t),
+            ActorType::Joystick => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxBlueDisk => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Disk => item::Specific::create_boxed(g, s, t),
+            ActorType::Disk => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxBlueBalloon => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Balloon => balloon::Specific::create_boxed(g, s, t),
+            ActorType::Balloon => {
+                balloon::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxGreyGlove => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Glove => item::Specific::create_boxed(g, s, t),
+            ActorType::Glove => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyFullLife => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::FullLife => item::Specific::create_boxed(g, s, t),
+            ActorType::FullLife => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxBlueFlag => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::BlueFlag => item::Specific::create_boxed(g, s, t),
+            ActorType::BlueFlag => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxBlueRadio => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Radio => item::Specific::create_boxed(g, s, t),
+            ActorType::Radio => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyAccessCard => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::AccessCard => item::Specific::create_boxed(g, s, t),
+            ActorType::AccessCard => {
+                item::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::BoxGreyLetterD => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::LetterD => item::Specific::create_boxed(g, s, t),
+            ActorType::LetterD => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyLetterU => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::LetterU => item::Specific::create_boxed(g, s, t),
+            ActorType::LetterU => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyLetterK => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::LetterK => item::Specific::create_boxed(g, s, t),
+            ActorType::LetterK => item::Specific::create_boxed(g, p, s, t),
             ActorType::BoxGreyLetterE => {
-                item::Specific::create_boxed(g, s, t)
+                item::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::LetterE => item::Specific::create_boxed(g, s, t),
+            ActorType::LetterE => item::Specific::create_boxed(g, p, s, t),
             ActorType::AccessCardSlot => {
-                accesscard_slot::Specific::create_boxed(g, s, t)
+                accesscard_slot::Specific::create_boxed(g, p, s, t)
             }
             ActorType::GloveSlot => {
-                glove_slot::Specific::create_boxed(g, s, t)
+                glove_slot::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::KeyRed => key::Specific::create_boxed(g, s, t),
+            ActorType::KeyRed => key::Specific::create_boxed(g, p, s, t),
             ActorType::KeyholeRed => {
-                keyhole::Specific::create_boxed(g, s, t)
+                keyhole::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::DoorRed => door::Specific::create_boxed(g, s, t),
-            ActorType::KeyBlue => key::Specific::create_boxed(g, s, t),
+            ActorType::DoorRed => door::Specific::create_boxed(g, p, s, t),
+            ActorType::KeyBlue => key::Specific::create_boxed(g, p, s, t),
             ActorType::KeyholeBlue => {
-                keyhole::Specific::create_boxed(g, s, t)
+                keyhole::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::DoorBlue => door::Specific::create_boxed(g, s, t),
-            ActorType::KeyPink => key::Specific::create_boxed(g, s, t),
+            ActorType::DoorBlue => {
+                door::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::KeyPink => key::Specific::create_boxed(g, p, s, t),
             ActorType::KeyholePink => {
-                keyhole::Specific::create_boxed(g, s, t)
+                keyhole::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::DoorPink => door::Specific::create_boxed(g, s, t),
-            ActorType::KeyGreen => key::Specific::create_boxed(g, s, t),
+            ActorType::DoorPink => {
+                door::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::KeyGreen => key::Specific::create_boxed(g, p, s, t),
             ActorType::KeyholeGreen => {
-                keyhole::Specific::create_boxed(g, s, t)
+                keyhole::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::DoorGreen => door::Specific::create_boxed(g, s, t),
+            ActorType::DoorGreen => {
+                door::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::ShootableWall => {
-                shootable_wall::Specific::create_boxed(g, s, t)
+                shootable_wall::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Lift => elevator::Specific::create_boxed(g, s, t),
-            ActorType::Acme => acme::Specific::create_boxed(g, s, t),
-            ActorType::FireRight => fire::Specific::create_boxed(g, s, t),
-            ActorType::FireLeft => fire::Specific::create_boxed(g, s, t),
-            ActorType::Mill => mill::Specific::create_boxed(g, s, t),
+            ActorType::Lift => {
+                elevator::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Acme => acme::Specific::create_boxed(g, p, s, t),
+            ActorType::FireRight => {
+                fire::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::FireLeft => {
+                fire::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Mill => mill::Specific::create_boxed(g, p, s, t),
             ActorType::ElectricArc => {
-                electric_arc::Specific::create_boxed(g, s, t)
+                electric_arc::Specific::create_boxed(g, p, s, t)
             }
             ActorType::AccessCardDoor => {
-                accesscard_door::Specific::create_boxed(g, s, t)
+                accesscard_door::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::SpikesUp => spikes::Specific::create_boxed(g, s, t),
+            ActorType::SpikesUp => {
+                spikes::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::SpikesDown => {
-                spikes::Specific::create_boxed(g, s, t)
+                spikes::Specific::create_boxed(g, p, s, t)
             }
-            ActorType::Spike => spikes::Specific::create_boxed(g, s, t),
-            ActorType::Score100 => score::Specific::create_boxed(g, s, t),
-            ActorType::Score200 => score::Specific::create_boxed(g, s, t),
-            ActorType::Score500 => score::Specific::create_boxed(g, s, t),
-            ActorType::Score1000 => score::Specific::create_boxed(g, s, t),
-            ActorType::Score2000 => score::Specific::create_boxed(g, s, t),
-            ActorType::Score5000 => score::Specific::create_boxed(g, s, t),
+            ActorType::Spike => spikes::Specific::create_boxed(g, p, s, t),
+            ActorType::Score100 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Score200 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Score500 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Score1000 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Score2000 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
+            ActorType::Score5000 => {
+                score::Specific::create_boxed(g, p, s, t)
+            }
             ActorType::Score10000 => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus1Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus1Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus2Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus2Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus3Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus3Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus4Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus4Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus5Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus5Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus6Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus6Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus7Left => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::ScoreBonus7Right => {
-                score::Specific::create_boxed(g, s, t)
+                score::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BlueLightBackground1 => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BlueLightBackground2 => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BlueLightBackground3 => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BlueLightBackground4 => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::TextOnScreenBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::HighVoltageFlashBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::RedFlashlightBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::BlueFlashlightBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::KeypanelBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::RedRotationLightBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::UpArrowBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::GreenPoisonBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
             ActorType::LavaBackground => {
-                simpleanimation::Specific::create_boxed(g, s, t)
+                simpleanimation::Specific::create_boxed(g, p, s, t)
             }
         }
     }
@@ -911,7 +956,6 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub position: Rect,
     pub is_in_foreground: bool,
     pub hurts_hero: bool,
     pub is_alive: bool,
@@ -924,7 +968,6 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            position: Rect::new(0, 0, 0, 0),
             is_in_foreground: true,
             hurts_hero: false,
             is_alive: true,
@@ -992,9 +1035,9 @@ pub struct LevelActorAdder<'a> {
 impl<'a> ActorAdder for LevelActorAdder<'a> {
     fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
         let mut general = ActorData::new(actor_type);
-        general.position.reposition(pos);
         let specific = actor_type.create_actor_interface(
             &mut general,
+            pos,
             self.solids,
             self.tiles,
         );
@@ -1039,16 +1082,18 @@ impl ActorMessageQueue {
 pub(crate) trait ActorCreateInterface: Sized {
     fn create(
         general: &mut ActorData,
+        position: Point,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self;
 
     fn create_boxed(
         general: &mut ActorData,
+        position: Point,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Box<Self> {
-        Box::new(Self::create(general, solids, tiles))
+        Box::new(Self::create(general, position, solids, tiles))
     }
 }
 
@@ -1133,4 +1178,6 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     }
 
     fn receive_message(&mut self, _p: ReceiveMessageParameters) {}
+
+    fn position(&self) -> Rect;
 }

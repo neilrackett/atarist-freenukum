@@ -6,6 +6,7 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, HALFTILE_HEIGHT, OBJECT_ROCKET, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug, PartialEq)]
 enum State {
@@ -16,21 +17,24 @@ enum State {
 #[derive(Debug, PartialEq)]
 pub(crate) struct Specific {
     state: State,
+    position: Rect,
 }
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH, TILE_HEIGHT);
-
-        let tile_x = general.position.x() as u32 / TILE_WIDTH;
-        let tile_y = general.position.y() as u32 / TILE_HEIGHT;
+        let tile_x = pos.x as u32 / TILE_WIDTH;
+        let tile_y = pos.y as u32 / TILE_HEIGHT;
         tiles.copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
 
-        Specific { state: State::Idle }
+        Specific {
+            state: State::Idle,
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+        }
     }
 }
 
@@ -39,12 +43,10 @@ impl ActorInterface for Specific {
         match self.state {
             State::Idle => {}
             State::Flying => {
-                p.general.position.offset(0, -(HALFTILE_HEIGHT as i32));
-                if p.solids.collides(p.general.position) {
-                    let tile_x =
-                        p.general.position.x() as u32 / TILE_WIDTH;
-                    let tile_y =
-                        p.general.position.y() as u32 / TILE_HEIGHT;
+                self.position.offset(0, -(HALFTILE_HEIGHT as i32));
+                if p.solids.collides(self.position) {
+                    let tile_x = self.position.x() as u32 / TILE_WIDTH;
+                    let tile_y = self.position.y() as u32 / TILE_HEIGHT;
                     p.solids.set(tile_x, tile_y + 1, false);
                     // TODO: trigger a re-rendering of the affected tiles
                     p.tiles.copy_from_to(
@@ -59,8 +61,7 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p
-            .general
+        let mut pos = self
             .position
             .top_left()
             .offset(0, -(TILE_HEIGHT as i32 * 3));
@@ -103,9 +104,9 @@ impl ActorInterface for Specific {
         if self.state == State::Idle {
             // TODO: create animation
             self.state = State::Flying;
-            let tile_x = p.general.position.x() as u32 / TILE_WIDTH;
-            let tile_y = (p.general.position.y() as u32
-                + p.general.position.height())
+            let tile_x = self.position.x() as u32 / TILE_WIDTH;
+            let tile_y = (self.position.y() as u32
+                + self.position.height())
                 / TILE_HEIGHT;
 
             p.solids.set(tile_x, tile_y, false);
@@ -113,5 +114,9 @@ impl ActorInterface for Specific {
             p.tiles.copy_from_to(tile_x, tile_y + 1, tile_x, tile_y);
         }
         ShotProcessing::Absorb
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }

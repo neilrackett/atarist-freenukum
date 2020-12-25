@@ -6,19 +6,24 @@ use crate::{
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH,
 };
+use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {}
+pub(crate) struct Specific {
+    position: Rect,
+}
 
 impl ActorCreateInterface for Specific {
     fn create(
         general: &mut ActorData,
+        pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.position.resize(TILE_WIDTH * 2, TILE_HEIGHT);
         general.is_in_foreground = false;
-        Specific {}
+        Specific {
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+        }
     }
 }
 
@@ -36,10 +41,14 @@ impl ActorInterface for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut pos = p.general.position.top_left();
+        let mut pos = self.position.top_left();
         p.renderer.place_tile(ANIMATION_BADGUYSCREEN, pos)?;
         pos = pos.offset(TILE_WIDTH as i32, 0);
         p.renderer.place_tile(ANIMATION_BADGUYSCREEN + 1, pos)?;
         Ok(())
+    }
+
+    fn position(&self) -> Rect {
+        self.position
     }
 }
