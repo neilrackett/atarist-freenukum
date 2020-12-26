@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
@@ -15,9 +15,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -41,8 +40,10 @@ impl ActorInterface for Specific {
 
         if p.hero.position.geometry.has_intersection(self.position) {
             self.is_alive = false;
-            p.actor_adder
-                .add_actor(ActorType::BombFire, self.position.top_left());
+            p.actor_adder.add_actor(
+                ActorType::SingleAnimation(SingleAnimationType::BombFire),
+                self.position.top_left(),
+            );
         }
     }
 

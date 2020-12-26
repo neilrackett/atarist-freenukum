@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH,
@@ -16,9 +17,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -41,7 +41,7 @@ impl ActorInterface for Specific {
             self.is_alive = false;
             p.hero.score.add(10000);
             p.actor_adder.add_actor(
-                ActorType::Score10000,
+                ActorType::Score(ScoreType::Score10000),
                 self.position.top_left(),
             );
         } else {
@@ -52,8 +52,10 @@ impl ActorInterface for Specific {
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;
-                p.actor_adder
-                    .add_actor(ActorType::Steam, self.position.top_left());
+                p.actor_adder.add_actor(
+                    ActorType::SingleAnimation(SingleAnimationType::Steam),
+                    self.position.top_left(),
+                );
             }
         }
     }
@@ -76,14 +78,16 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.destroyed = true;
-        p.actor_adder
-            .add_actor(ActorType::Steam, self.position.top_left());
+        p.actor_adder.add_actor(
+            ActorType::SingleAnimation(SingleAnimationType::Steam),
+            self.position.top_left(),
+        );
         ShotProcessing::Absorb
     }
 

@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
@@ -25,9 +25,11 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = HorizontalDirection;
+
+    fn create_with_details(
+        direction: HorizontalDirection,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -37,21 +39,20 @@ impl ActorCreateInterface for Specific {
 
         let mut position =
             Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
-        let (tile, direction) = match general.actor_type {
-            ActorType::FireRight => {
+        let tile = match direction {
+            HorizontalDirection::Right => {
                 if x < LEVEL_WIDTH + 1 {
                     tiles.copy_from_to(x + 1, y, x, y);
                 }
-                (OBJECT_FIRERIGHT, HorizontalDirection::Right)
+                OBJECT_FIRERIGHT
             }
-            ActorType::FireLeft => {
+            HorizontalDirection::Left => {
                 if x > 0 {
                     tiles.copy_from_to(x - 1, y, x, y);
                 }
                 position.offset(-2 * TILE_WIDTH as i32, 0);
-                (OBJECT_FIRELEFT, HorizontalDirection::Left)
+                OBJECT_FIRELEFT
             }
-            _ => unreachable!(),
         };
 
         Specific {

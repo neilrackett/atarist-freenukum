@@ -1,12 +1,12 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType, ActorType,
+        CreateActor, HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT,
+    TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -27,9 +27,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -54,10 +53,8 @@ impl ActorInterface for Specific {
         match self.state {
             State::Idle => {
                 if p.hero.inventory.is_set(InventoryItem::Glove) {
-                    p.actor_message_queue.push_back(
-                        ActorType::ExpandingFloor,
-                        ActorMessageType::Expand,
-                    );
+                    p.actor_message_queue
+                        .push_back(ActorMessageType::ExpandFloor);
                     self.state = State::Expanded;
                 } else {
                     self.state = State::Shooting;
@@ -81,12 +78,12 @@ impl ActorInterface for Specific {
                 self.countdown -= 1;
                 if self.countdown % 4 == 0 {
                     p.actor_adder.add_actor(
-                        ActorType::HostileShotRight,
+                        ActorType::HostileShot(HorizontalDirection::Right),
                         self.position.top_left(),
                     );
                 } else if self.countdown % 4 == 2 {
                     p.actor_adder.add_actor(
-                        ActorType::HostileShotLeft,
+                        ActorType::HostileShot(HorizontalDirection::Left),
                         self.position.top_left(),
                     );
                 }

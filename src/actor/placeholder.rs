@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -13,9 +13,11 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = ActorType;
+
+    fn create_with_details(
+        actor_type: ActorType,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -23,7 +25,7 @@ impl ActorCreateInterface for Specific {
         println!(
             "Warning: creating placeholder for unimplemented \
                 actor type {:?} at {:?}",
-            general.actor_type, pos
+            actor_type, pos
         );
         Specific {
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),

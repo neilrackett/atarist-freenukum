@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
+        ActParameters, ActorInterface, CreateActor,
         HeroInteractEndParameters, HeroInteractStartParameters,
         RenderParameters,
     },
@@ -24,9 +24,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,

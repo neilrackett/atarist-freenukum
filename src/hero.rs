@@ -1,10 +1,10 @@
 use crate::{
-    actor::{ActorAdder, ActorType},
+    actor::{ActorAdder, ActorType, SingleAnimationType},
     level::solids::LevelSolids,
     rendering::Renderer,
-    HorizontalDirection, Result, HALFTILE_HEIGHT, HALFTILE_WIDTH,
-    HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
-    HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
+    HorizontalDirection, KeyColor, Result, HALFTILE_HEIGHT,
+    HALFTILE_WIDTH, HERO_FALLING_LEFT, HERO_FALLING_RIGHT,
+    HERO_JUMPING_LEFT, HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
     HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
     HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
     HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
@@ -100,10 +100,10 @@ impl Hero {
 
     pub fn reset_for_level(&mut self) {
         self.direction = HorizontalDirection::Right;
-        self.inventory.unset(InventoryItem::KeyRed);
-        self.inventory.unset(InventoryItem::KeyGreen);
-        self.inventory.unset(InventoryItem::KeyBlue);
-        self.inventory.unset(InventoryItem::KeyPink);
+        self.inventory.unset(InventoryItem::Key(KeyColor::Red));
+        self.inventory.unset(InventoryItem::Key(KeyColor::Green));
+        self.inventory.unset(InventoryItem::Key(KeyColor::Blue));
+        self.inventory.unset(InventoryItem::Key(KeyColor::Pink));
         self.fetched_letter_state.reset();
         self.immunity.reset();
         self.hidden = false;
@@ -391,7 +391,9 @@ impl Hero {
         ) {
             if self.is_in_the_air {
                 actor_adder.add_actor(
-                    ActorType::DustCloud,
+                    ActorType::SingleAnimation(
+                        SingleAnimationType::DustCloud,
+                    ),
                     Point::new(
                         self.position.geometry.x(),
                         self.position.geometry.y() + TILE_HEIGHT as i32,
@@ -671,10 +673,7 @@ impl Firepower {
 
 #[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
 pub enum InventoryItem {
-    KeyRed,
-    KeyGreen,
-    KeyBlue,
-    KeyPink,
+    Key(KeyColor),
     Boot,
     Glove,
     Clamp,

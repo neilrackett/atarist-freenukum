@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, SOLID_START, TILE_HEIGHT, TILE_WIDTH,
@@ -17,9 +17,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -77,8 +76,12 @@ impl ActorInterface for Specific {
                     r.y() as u32 / TILE_HEIGHT,
                     false,
                 );
-                p.actor_adder
-                    .add_actor(ActorType::Explosion, r.top_left());
+                p.actor_adder.add_actor(
+                    ActorType::SingleAnimation(
+                        SingleAnimationType::Explosion,
+                    ),
+                    r.top_left(),
+                );
                 p.actor_adder.add_particle_firework(r.center(), 4);
                 r.offset(TILE_WIDTH as i32, 0);
             }

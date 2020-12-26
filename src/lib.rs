@@ -217,6 +217,26 @@ const HERO_JUMPING_RIGHT_SOMERSAULT: usize = HERO_START + 0x54;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum KeyColor {
+    Red,
+    Blue,
+    Pink,
+    Green,
+}
+
+impl std::string::ToString for KeyColor {
+    fn to_string(&self) -> String {
+        match *self {
+            KeyColor::Red => "red",
+            KeyColor::Blue => "blue",
+            KeyColor::Pink => "pink",
+            KeyColor::Green => "green",
+        }
+        .to_string()
+    }
+}
+
 fn directories() -> directories_next::ProjectDirs {
     directories_next::ProjectDirs::from("", "", "freenukum").unwrap()
 }

@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
@@ -18,9 +18,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -56,7 +55,7 @@ impl ActorInterface for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::Remove {
+        if p.message != ActorMessageType::RemoveElectricArc {
             return;
         }
         self.is_alive = false;

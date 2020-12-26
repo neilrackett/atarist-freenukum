@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
@@ -20,31 +20,47 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SingleAnimationType {
+    BombFire,
+    Explosion,
+    DustCloud,
+    Steam,
+    RobotDisappearing,
+}
+
+impl CreateActorWithDetails for Specific {
+    type Details = SingleAnimationType;
+
+    fn create_with_details(
+        animation_type: SingleAnimationType,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        let (tile, num_frames, can_hurt_hero, replaced_by) = match general
-            .actor_type
-        {
-            ActorType::BombFire => (ANIMATION_BOMBFIRE, 6, true, None),
-            ActorType::Explosion => (ANIMATION_EXPLOSION, 6, false, None),
-            ActorType::DustCloud => (OBJECT_DUSTCLOUD, 5, false, None),
-            ActorType::Steam => (OBJECT_STEAM, 5, false, None),
-            ActorType::RobotDisappearing => {
-                (ANIMATION_ROBOT + 3, 7, false, Some(ActorType::Explosion))
-            }
-            _ => {
-                unreachable!(
-                    "Actor type {:?} added as an animation \
-                    which is not an animation id",
-                    general.actor_type
-                );
-            }
-        };
+        let (tile, num_frames, can_hurt_hero, replaced_by) =
+            match animation_type {
+                SingleAnimationType::BombFire => {
+                    (ANIMATION_BOMBFIRE, 6, true, None)
+                }
+                SingleAnimationType::Explosion => {
+                    (ANIMATION_EXPLOSION, 6, false, None)
+                }
+                SingleAnimationType::DustCloud => {
+                    (OBJECT_DUSTCLOUD, 5, false, None)
+                }
+                SingleAnimationType::Steam => {
+                    (OBJECT_STEAM, 5, false, None)
+                }
+                SingleAnimationType::RobotDisappearing => (
+                    ANIMATION_ROBOT + 3,
+                    7,
+                    false,
+                    Some(ActorType::SingleAnimation(
+                        SingleAnimationType::Explosion,
+                    )),
+                ),
+            };
 
         Specific {
             tile,

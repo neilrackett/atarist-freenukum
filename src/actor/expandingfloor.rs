@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, SOLID_EXPANDINGFLOOR, TILE_HEIGHT, TILE_WIDTH,
@@ -15,9 +15,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -58,7 +57,7 @@ impl ActorInterface for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::Expand {
+        if p.message != ActorMessageType::ExpandFloor {
             return;
         }
         if !self.expanding && !self.finished {

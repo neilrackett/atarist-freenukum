@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
@@ -11,13 +11,23 @@ use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
-    tile: usize,
+    touching_hero: bool,
     position: Rect,
+    spike_type: SpikeType,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpikeType {
+    SpikesUp,
+    SpikesDown,
+    SingleSpikeUp,
+}
+
+impl CreateActorWithDetails for Specific {
+    type Details = SpikeType;
+
+    fn create_with_details(
+        spike_type: SpikeType,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -25,45 +35,39 @@ impl ActorCreateInterface for Specific {
         let x = pos.x as u32 / TILE_WIDTH;
         let y = pos.y as u32 / TILE_HEIGHT;
 
-        let tile = match general.actor_type {
-            ActorType::SpikesUp => OBJECT_SPIKES_UP,
-            ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
-            ActorType::Spike => OBJECT_SPIKE,
-            _ => unreachable!(),
-        };
-
-        match general.actor_type {
-            ActorType::SpikesUp | ActorType::Spike => {
+        match spike_type {
+            SpikeType::SpikesUp | SpikeType::SingleSpikeUp => {
                 tiles.copy_from_to(x, y - 1, x, y);
             }
-            ActorType::SpikesDown => {
+            SpikeType::SpikesDown => {
                 tiles.copy_from_to(x, y + 1, x, y);
             }
-            _ => unreachable!(),
         }
 
         Specific {
-            tile,
+            touching_hero: false,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            spike_type,
         }
     }
 }
 
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
-        let touching_hero =
+        self.touching_hero =
             self.position.has_intersection(p.hero.position.geometry);
-        self.tile = match p.general.actor_type {
-            ActorType::SpikesUp => OBJECT_SPIKES_UP,
-            ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
-            ActorType::Spike if touching_hero => OBJECT_SPIKE + 1,
-            ActorType::Spike => OBJECT_SPIKE,
-            _ => unreachable!(),
-        };
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer.place_tile(self.tile, self.position.top_left())?;
+        let tile = match self.spike_type {
+            SpikeType::SpikesUp => OBJECT_SPIKES_UP,
+            SpikeType::SpikesDown => OBJECT_SPIKES_DOWN,
+            SpikeType::SingleSpikeUp if self.touching_hero => {
+                OBJECT_SPIKE + 1
+            }
+            SpikeType::SingleSpikeUp => OBJECT_SPIKE,
+        };
+        p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())
     }
 

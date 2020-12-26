@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
@@ -19,9 +20,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -44,7 +44,7 @@ impl ActorInterface for Specific {
 
         if !self.is_alive() {
             p.actor_adder.add_actor(
-                ActorType::Explosion,
+                ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
             );
             p.actor_adder
@@ -98,24 +98,17 @@ impl ActorInterface for Specific {
                 self.position.offset(direction * HALFTILE_WIDTH as i32, 0);
                 self.tile = (self.tile as i32 + 4 * direction) as usize;
 
-                if direction > 0 {
-                    p.actor_adder.add_actor(
-                        ActorType::HostileShotRight,
-                        self.position.top_left().offset(0, -6),
-                    );
-                } else {
-                    p.actor_adder.add_actor(
-                        ActorType::HostileShotLeft,
-                        self.position.top_left().offset(0, -6),
-                    );
-                }
+                p.actor_adder.add_actor(
+                    ActorType::HostileShot(self.orientation),
+                    self.position.top_left().offset(0, -6),
+                );
             }
         }
         if self.was_shot == 1 {
             // create steam clouds
             if self.current_frame == 0 {
                 p.actor_adder.add_actor(
-                    ActorType::Steam,
+                    ActorType::SingleAnimation(SingleAnimationType::Steam),
                     self.position.top_left().offset(
                         HALFTILE_WIDTH as i32,
                         -(TILE_HEIGHT as i32),
@@ -136,7 +129,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _gerenal: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 

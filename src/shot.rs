@@ -1,5 +1,8 @@
 use crate::{
-    actor::{ActorAdder, ActorMessageQueue, ActorType, ActorsList},
+    actor::{
+        ActorAdder, ActorMessageQueue, ActorType, ActorsList,
+        SingleAnimationType,
+    },
     hero::Hero,
     level::{solids::LevelSolids, tiles::LevelTiles},
     rendering::Renderer,
@@ -152,7 +155,7 @@ impl Shot {
         if self.countdown >= 2 && solids.collides(self.position) {
             self.countdown = 1;
             actor_adder.add_actor(
-                ActorType::Explosion,
+                ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left().offset(
                     self.position.width() as i32 / 2
                         - HALFTILE_WIDTH as i32,

@@ -1,10 +1,10 @@
 use super::hero::{Firepower, Inventory, InventoryItem};
 use super::text;
-use crate::rendering::{MovePositionRenderer, Renderer, TileIndex};
 use crate::{
-    Result, BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, MAX_LIFE, OBJECT_ACCESS_CARD, OBJECT_BOOT,
-    OBJECT_CLAMP, OBJECT_GLOVE, OBJECT_GUN, OBJECT_HEALTH,
+    rendering::{MovePositionRenderer, Renderer, TileIndex},
+    KeyColor, Result, BORDER_GREY_START, FONT_HEIGHT, FONT_WIDTH,
+    HALFTILE_HEIGHT, HALFTILE_WIDTH, MAX_LIFE, OBJECT_ACCESS_CARD,
+    OBJECT_BOOT, OBJECT_CLAMP, OBJECT_GLOVE, OBJECT_GUN, OBJECT_HEALTH,
     OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
     OBJECT_NONHEALTH, OBJECT_SHOT, SCORE_DIGITS, TILE_HEIGHT, TILE_WIDTH,
     WINDOW_HEIGHT, WINDOW_WIDTH,
@@ -232,26 +232,30 @@ impl Borders {
         inventory: &Inventory,
         renderer: &mut dyn Renderer,
     ) -> Result<()> {
-        let red_key = if inventory.is_set(InventoryItem::KeyRed) {
-            Some(OBJECT_KEY_RED)
-        } else {
-            None
-        };
-        let green_key = if inventory.is_set(InventoryItem::KeyGreen) {
-            Some(OBJECT_KEY_GREEN)
-        } else {
-            None
-        };
-        let blue_key = if inventory.is_set(InventoryItem::KeyBlue) {
-            Some(OBJECT_KEY_BLUE)
-        } else {
-            None
-        };
-        let pink_key = if inventory.is_set(InventoryItem::KeyPink) {
-            Some(OBJECT_KEY_PINK)
-        } else {
-            None
-        };
+        let red_key =
+            if inventory.is_set(InventoryItem::Key(KeyColor::Red)) {
+                Some(OBJECT_KEY_RED)
+            } else {
+                None
+            };
+        let green_key =
+            if inventory.is_set(InventoryItem::Key(KeyColor::Green)) {
+                Some(OBJECT_KEY_GREEN)
+            } else {
+                None
+            };
+        let blue_key =
+            if inventory.is_set(InventoryItem::Key(KeyColor::Blue)) {
+                Some(OBJECT_KEY_BLUE)
+            } else {
+                None
+            };
+        let pink_key =
+            if inventory.is_set(InventoryItem::Key(KeyColor::Pink)) {
+                Some(OBJECT_KEY_PINK)
+            } else {
+                None
+            };
         let boot = if inventory.is_set(InventoryItem::Boot) {
             Some(OBJECT_BOOT)
         } else {

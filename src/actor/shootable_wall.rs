@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
@@ -15,9 +16,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -32,14 +32,16 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.hero.score.add(10);
-        p.actor_adder
-            .add_actor(ActorType::Explosion, self.position.top_left());
+        p.actor_adder.add_actor(
+            ActorType::SingleAnimation(SingleAnimationType::Explosion),
+            self.position.top_left(),
+        );
         self.is_alive = false;
         p.solids.set(
             self.position.x() as u32 / TILE_WIDTH,

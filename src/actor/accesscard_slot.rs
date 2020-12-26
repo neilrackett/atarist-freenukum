@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -18,9 +17,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -41,10 +39,8 @@ impl ActorInterface for Specific {
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         if p.hero.inventory.is_set(InventoryItem::AccessCard) {
-            p.actor_message_queue.push_back(
-                ActorType::AccessCardDoor,
-                ActorMessageType::OpenDoor,
-            );
+            p.actor_message_queue
+                .push_back(ActorMessageType::OpenDoorAccessCard);
             self.current_frame = 0;
             self.num_frames = 1;
             self.tile = OBJECT_ACCESS_CARD_SLOT + 8;

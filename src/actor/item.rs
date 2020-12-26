@@ -1,8 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorAdder, ActorCreateInterface, ActorData,
-        ActorInterface, ActorType, RenderParameters, ShotParameters,
-        ShotProcessing,
+        ActParameters, ActorAdder, ActorInterface, ActorType,
+        CreateActorWithDetails, RenderParameters, ScoreType,
+        ShotParameters, ShotProcessing,
     },
     hero::{FetchedLetter, InventoryItem},
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -16,6 +16,91 @@ use crate::{
 };
 use sdl2::rect::{Point, Rect};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BoxBlueContent {
+    Balloon,
+    Disk,
+    Flag,
+    Football,
+    Joystick,
+    Radio,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BoxRedContent {
+    Chicken,
+    Soda,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BoxGreyContent {
+    AccessCard,
+    Bomb,
+    Boots,
+    Clamps,
+    FullLife,
+    Glove,
+    Gun,
+    LetterD,
+    LetterE,
+    LetterK,
+    LetterU,
+    Nothing,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ItemType {
+    AccessCard,
+    Boots,
+    BoxBlue(BoxBlueContent),
+    BoxGrey(BoxGreyContent),
+    BoxRed(BoxRedContent),
+    ChickenDouble,
+    ChickenSingle,
+    Clamps,
+    Disk,
+    Flag,
+    Football,
+    FullLife,
+    Glove,
+    Gun,
+    Joystick,
+    LetterD,
+    LetterE,
+    LetterK,
+    LetterU,
+    Radio,
+    Soda,
+}
+
+impl ItemType {
+    fn tile_and_num_frames(&self) -> (usize, usize) {
+        match self {
+            ItemType::AccessCard => (OBJECT_ACCESS_CARD, 1),
+            ItemType::Boots => (OBJECT_BOOT, 1),
+            ItemType::BoxBlue(_) => (OBJECT_BOX_BLUE, 1),
+            ItemType::BoxGrey(_) => (OBJECT_BOX_GREY, 1),
+            ItemType::BoxRed(_) => (OBJECT_BOX_RED, 1),
+            ItemType::ChickenDouble => (OBJECT_CHICKEN_DOUBLE, 1),
+            ItemType::ChickenSingle => (OBJECT_CHICKEN_SINGLE, 1),
+            ItemType::Clamps => (OBJECT_CLAMP, 1),
+            ItemType::Disk => (OBJECT_DISK, 1),
+            ItemType::Flag => (OBJECT_FLAG, 3),
+            ItemType::Football => (OBJECT_FOOTBALL, 1),
+            ItemType::FullLife => (OBJECT_NUCLEARMOLECULE, 8),
+            ItemType::Glove => (OBJECT_GLOVE, 1),
+            ItemType::Gun => (OBJECT_GUN, 1),
+            ItemType::Joystick => (OBJECT_JOYSTICK, 1),
+            ItemType::LetterD => (OBJECT_LETTER_D, 1),
+            ItemType::LetterE => (OBJECT_LETTER_E, 1),
+            ItemType::LetterK => (OBJECT_LETTER_K, 1),
+            ItemType::LetterU => (OBJECT_LETTER_U, 1),
+            ItemType::Radio => (OBJECT_RADIO, 3),
+            ItemType::Soda => (ANIMATION_SODA, 4),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
@@ -23,60 +108,19 @@ pub(crate) struct Specific {
     num_frames: usize,
     position: Rect,
     is_alive: bool,
+    item_type: ItemType,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = ItemType;
+
+    fn create_with_details(
+        item_type: ItemType,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        let (tile, num_frames) = match general.actor_type {
-            ActorType::BoxRedSoda | ActorType::BoxRedChicken => {
-                (OBJECT_BOX_RED, 1)
-            }
-            ActorType::BoxBlueFootball
-            | ActorType::BoxBlueJoystick
-            | ActorType::BoxBlueDisk
-            | ActorType::BoxBlueBalloon
-            | ActorType::BoxBlueFlag
-            | ActorType::BoxBlueRadio => (OBJECT_BOX_BLUE, 1),
-            ActorType::BoxGreyEmpty
-            | ActorType::BoxGreyBoots
-            | ActorType::BoxGreyClamps
-            | ActorType::BoxGreyGun
-            | ActorType::BoxGreyBomb
-            | ActorType::BoxGreyGlove
-            | ActorType::BoxGreyFullLife
-            | ActorType::BoxGreyAccessCard
-            | ActorType::BoxGreyLetterD
-            | ActorType::BoxGreyLetterU
-            | ActorType::BoxGreyLetterK
-            | ActorType::BoxGreyLetterE => (OBJECT_BOX_GREY, 1),
-            ActorType::Joystick => (OBJECT_JOYSTICK, 1),
-            ActorType::Football => (OBJECT_FOOTBALL, 1),
-            ActorType::Flag => (OBJECT_FLAG, 3),
-            ActorType::Disk => (OBJECT_DISK, 1),
-            ActorType::Radio => (OBJECT_RADIO, 3),
-            ActorType::Soda => (ANIMATION_SODA, 4),
-            ActorType::Boots => (OBJECT_BOOT, 1),
-            ActorType::Gun => (OBJECT_GUN, 1),
-            ActorType::FullLife => (OBJECT_NUCLEARMOLECULE, 8),
-            ActorType::ChickenSingle => (OBJECT_CHICKEN_SINGLE, 1),
-            ActorType::ChickenDouble => (OBJECT_CHICKEN_DOUBLE, 1),
-            ActorType::LetterD => (OBJECT_LETTER_D, 1),
-            ActorType::LetterU => (OBJECT_LETTER_U, 1),
-            ActorType::LetterK => (OBJECT_LETTER_K, 1),
-            ActorType::LetterE => (OBJECT_LETTER_E, 1),
-            ActorType::AccessCard => (OBJECT_ACCESS_CARD, 1),
-            ActorType::Glove => (OBJECT_GLOVE, 1),
-            ActorType::Clamps => (OBJECT_CLAMP, 1),
-            _ => unreachable!(
-                "Attempted to load actor type {:?} as item",
-                general.actor_type
-            ),
-        };
+        let (tile, num_frames) = item_type.tile_and_num_frames();
 
         Specific {
             tile,
@@ -84,6 +128,7 @@ impl ActorCreateInterface for Specific {
             num_frames,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
             is_alive: true,
+            item_type,
         }
     }
 }
@@ -91,185 +136,185 @@ impl ActorCreateInterface for Specific {
 impl Specific {
     fn touched_by_hero(
         &mut self,
-        actor_type: ActorType,
+        item_type: ItemType,
         hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
     ) {
-        match actor_type {
-            ActorType::LetterD => {
+        match item_type {
+            ItemType::LetterD => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::D);
                 hero.score.add(500);
                 actor_adder.add_actor(
-                    ActorType::Score500,
+                    ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
             }
-            ActorType::LetterU => {
+            ItemType::LetterU => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::U);
                 hero.score.add(500);
                 actor_adder.add_actor(
-                    ActorType::Score500,
+                    ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
             }
-            ActorType::LetterK => {
+            ItemType::LetterK => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::K);
                 hero.score.add(500);
                 actor_adder.add_actor(
-                    ActorType::Score500,
+                    ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
             }
-            ActorType::LetterE => {
+            ItemType::LetterE => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::E);
                 hero.score.add(500);
                 if hero.fetched_letter_state.succeeded() {
                     actor_adder.add_actor(
-                        ActorType::Score10000,
+                        ActorType::Score(ScoreType::Score10000),
                         self.position.top_left(),
                     );
                     hero.score.add(10000);
                 } else {
                     actor_adder.add_actor(
-                        ActorType::Score500,
+                        ActorType::Score(ScoreType::Score500),
                         self.position.top_left(),
                     );
                     hero.score.add(500);
                 }
             }
-            ActorType::FullLife => {
+            ItemType::FullLife => {
                 hero.health.fill_max();
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Gun => {
+            ItemType::Gun => {
                 hero.firepower.increase(1);
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::AccessCard => {
+            ItemType::AccessCard => {
                 hero.inventory.set(InventoryItem::AccessCard);
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Glove => {
+            ItemType::Glove => {
                 hero.inventory.set(InventoryItem::Glove);
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Boots => {
+            ItemType::Boots => {
                 hero.inventory.set(InventoryItem::Boot);
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Clamps => {
+            ItemType::Clamps => {
                 hero.inventory.set(InventoryItem::Clamp);
                 self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
-                    ActorType::Score1000,
+                    ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Football => {
+            ItemType::Football => {
                 self.is_alive = false;
                 hero.score.add(100);
                 actor_adder.add_actor(
-                    ActorType::Score100,
+                    ActorType::Score(ScoreType::Score100),
                     self.position.top_left(),
                 );
             }
-            ActorType::Disk => {
+            ItemType::Disk => {
                 self.is_alive = false;
                 hero.score.add(5000);
                 actor_adder.add_actor(
-                    ActorType::Score5000,
+                    ActorType::Score(ScoreType::Score5000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Joystick => {
+            ItemType::Joystick => {
                 self.is_alive = false;
                 hero.score.add(2000);
                 actor_adder.add_actor(
-                    ActorType::Score2000,
+                    ActorType::Score(ScoreType::Score2000),
                     self.position.top_left(),
                 );
             }
-            ActorType::Radio | ActorType::Flag => {
+            ItemType::Radio | ItemType::Flag => {
                 self.is_alive = false;
                 match self.current_frame {
                     0 => {
                         hero.score.add(100);
                         actor_adder.add_actor(
-                            ActorType::Score100,
+                            ActorType::Score(ScoreType::Score100),
                             self.position.top_left(),
                         );
                     }
                     1 => {
                         hero.score.add(2000);
                         actor_adder.add_actor(
-                            ActorType::Score2000,
+                            ActorType::Score(ScoreType::Score2000),
                             self.position.top_left(),
                         );
                     }
                     2 => {
                         hero.score.add(5000);
                         actor_adder.add_actor(
-                            ActorType::Score5000,
+                            ActorType::Score(ScoreType::Score5000),
                             self.position.top_left(),
                         );
                     }
                     _ => unreachable!(),
                 }
             }
-            ActorType::Soda => {
+            ItemType::Soda => {
                 hero.health.increase(1);
                 self.is_alive = false;
                 hero.score.add(200);
                 actor_adder.add_actor(
-                    ActorType::Score200,
+                    ActorType::Score(ScoreType::Score200),
                     self.position.top_left(),
                 );
             }
-            ActorType::ChickenSingle => {
+            ItemType::ChickenSingle => {
                 hero.health.increase(1);
                 self.is_alive = false;
                 hero.score.add(100);
                 actor_adder.add_actor(
-                    ActorType::Score100,
+                    ActorType::Score(ScoreType::Score100),
                     self.position.top_left(),
                 );
             }
-            ActorType::ChickenDouble => {
+            ItemType::ChickenDouble => {
                 hero.health.increase(2);
                 self.is_alive = false;
                 hero.score.add(200);
                 actor_adder.add_actor(
-                    ActorType::Score200,
+                    ActorType::Score(ScoreType::Score200),
                     self.position.top_left(),
                 );
             }
@@ -292,11 +337,7 @@ impl ActorInterface for Specific {
         }
 
         if self.position.has_intersection(p.hero.position.geometry) {
-            self.touched_by_hero(
-                p.general.actor_type,
-                p.hero,
-                p.actor_adder,
-            );
+            self.touched_by_hero(self.item_type, p.hero, p.actor_adder);
         }
     }
 
@@ -308,56 +349,42 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         matches!(
-            general.actor_type,
-            ActorType::BoxBlueFootball
-                | ActorType::BoxBlueJoystick
-                | ActorType::BoxBlueDisk
-                | ActorType::BoxBlueBalloon
-                | ActorType::BoxBlueFlag
-                | ActorType::BoxBlueRadio
-                | ActorType::BoxRedSoda
-                | ActorType::BoxRedChicken
-                | ActorType::BoxGreyEmpty
-                | ActorType::BoxGreyBoots
-                | ActorType::BoxGreyClamps
-                | ActorType::BoxGreyGun
-                | ActorType::BoxGreyBomb
-                | ActorType::BoxGreyGlove
-                | ActorType::BoxGreyFullLife
-                | ActorType::BoxGreyAccessCard
-                | ActorType::BoxGreyLetterD
-                | ActorType::BoxGreyLetterU
-                | ActorType::BoxGreyLetterK
-                | ActorType::BoxGreyLetterE
-                | ActorType::ChickenSingle
-                | ActorType::Soda
+            self.item_type,
+            ItemType::BoxBlue(_)
+            | ItemType::BoxRed(_)
+            | ItemType::BoxGrey(_)
+            | ItemType::ChickenSingle
+            | ItemType::Soda
         )
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         let pos = self.position.top_left();
-        match p.general.actor_type {
-            ActorType::BoxBlueFootball => {
+        match self.item_type {
+            ItemType::BoxBlue(BoxBlueContent::Football) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Football, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Football), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxBlueJoystick => {
+            ItemType::BoxBlue(BoxBlueContent::Joystick) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Joystick, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Joystick), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxBlueDisk => {
+            ItemType::BoxBlue(BoxBlueContent::Disk) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Disk, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Disk), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxBlueBalloon => {
+            ItemType::BoxBlue(BoxBlueContent::Balloon) => {
                 self.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::Balloon,
@@ -366,107 +393,126 @@ impl ActorInterface for Specific {
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxBlueFlag => {
+            ItemType::BoxBlue(BoxBlueContent::Flag) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Flag, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Flag), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxBlueRadio => {
+            ItemType::BoxBlue(BoxBlueContent::Radio) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Radio, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Radio), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxRedSoda => {
+            ItemType::BoxRed(BoxRedContent::Soda) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Soda, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Soda), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxRedChicken => {
+            ItemType::BoxRed(BoxRedContent::Chicken) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::ChickenSingle, pos);
+                p.actor_adder.add_actor(
+                    ActorType::Item(ItemType::ChickenSingle),
+                    pos,
+                );
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyEmpty => {
+            ItemType::BoxGrey(BoxGreyContent::Nothing) => {
                 self.is_alive = false;
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyBoots => {
+            ItemType::BoxGrey(BoxGreyContent::Boots) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Boots, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Boots), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyClamps => {
+            ItemType::BoxGrey(BoxGreyContent::Clamps) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Clamps, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Clamps), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyGun => {
+            ItemType::BoxGrey(BoxGreyContent::Gun) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Gun, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Gun), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyBomb => {
+            ItemType::BoxGrey(BoxGreyContent::Bomb) => {
                 self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Bomb, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyGlove => {
+            ItemType::BoxGrey(BoxGreyContent::Glove) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Glove, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::Glove), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyFullLife => {
+            ItemType::BoxGrey(BoxGreyContent::FullLife) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::FullLife, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::FullLife), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyAccessCard => {
+            ItemType::BoxGrey(BoxGreyContent::AccessCard) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::AccessCard, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::AccessCard), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyLetterD => {
+            ItemType::BoxGrey(BoxGreyContent::LetterD) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterD, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::LetterD), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyLetterU => {
+            ItemType::BoxGrey(BoxGreyContent::LetterU) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterU, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::LetterU), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyLetterK => {
+            ItemType::BoxGrey(BoxGreyContent::LetterK) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterK, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::LetterK), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::BoxGreyLetterE => {
+            ItemType::BoxGrey(BoxGreyContent::LetterE) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::LetterE, pos);
+                p.actor_adder
+                    .add_actor(ActorType::Item(ItemType::LetterE), pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
-            ActorType::ChickenSingle => {
+            ItemType::ChickenSingle => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::ChickenDouble, pos);
+                p.actor_adder.add_actor(
+                    ActorType::Item(ItemType::ChickenDouble),
+                    pos,
+                );
                 ShotProcessing::Absorb
             }
-            ActorType::Soda => {
+            ItemType::Soda => {
                 self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::SodaFlying, pos);
                 ShotProcessing::Absorb

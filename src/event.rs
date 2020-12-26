@@ -1,7 +1,7 @@
-use crate::hero::InventoryItem;
-use crate::HorizontalDirection;
-use crate::UserEvent;
-use crate::{HALFTILE_HEIGHT, HALFTILE_WIDTH};
+use crate::{
+    hero::InventoryItem, HorizontalDirection, KeyColor, UserEvent,
+    HALFTILE_HEIGHT, HALFTILE_WIDTH,
+};
 use anyhow::{anyhow, Error, Result};
 use sdl2::{
     controller::{Axis, Button},
@@ -162,19 +162,27 @@ impl TryFrom<Event> for GameEvent {
             E::KeyDown {
                 keycode: Some(K::Num1),
                 ..
-            } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyRed)),
+            } => Ok(GameEvent::GetInventoryItem(InventoryItem::Key(
+                KeyColor::Red,
+            ))),
             E::KeyDown {
                 keycode: Some(K::Num2),
                 ..
-            } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyGreen)),
+            } => Ok(GameEvent::GetInventoryItem(InventoryItem::Key(
+                KeyColor::Green,
+            ))),
             E::KeyDown {
                 keycode: Some(K::Num3),
                 ..
-            } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyBlue)),
+            } => Ok(GameEvent::GetInventoryItem(InventoryItem::Key(
+                KeyColor::Blue,
+            ))),
             E::KeyDown {
                 keycode: Some(K::Num4),
                 ..
-            } => Ok(GameEvent::GetInventoryItem(InventoryItem::KeyPink)),
+            } => Ok(GameEvent::GetInventoryItem(InventoryItem::Key(
+                KeyColor::Pink,
+            ))),
             E::KeyDown {
                 keycode: Some(K::Num5),
                 ..

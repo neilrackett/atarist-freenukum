@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, HeroInteractStartParameters,
+        ActParameters, ActorInterface, ActorMessageType,
+        CreateActorWithDetails, HeroInteractStartParameters,
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -12,17 +12,36 @@ use sdl2::rect::{Point, Rect};
 #[derive(Debug)]
 pub(crate) struct Specific {
     position: Rect,
+    index: TeleporterIndex,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        _general: &mut ActorData,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TeleporterIndex {
+    First,
+    Second,
+}
+
+impl TeleporterIndex {
+    fn other(self) -> Self {
+        match self {
+            TeleporterIndex::First => TeleporterIndex::Second,
+            TeleporterIndex::Second => TeleporterIndex::First,
+        }
+    }
+}
+
+impl CreateActorWithDetails for Specific {
+    type Details = TeleporterIndex;
+
+    fn create_with_details(
+        index: TeleporterIndex,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            index,
         }
     }
 }
@@ -33,14 +52,8 @@ impl ActorInterface for Specific {
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
-        let other = if p.general.actor_type == ActorType::Teleporter1 {
-            ActorType::Teleporter2
-        } else {
-            ActorType::Teleporter1
-        };
-
         p.actor_message_queue
-            .push_back(other, ActorMessageType::Teleport);
+            .push_back(ActorMessageType::TeleportTo(self.index.other()))
     }
 
     fn act(&mut self, _p: ActParameters) {}
@@ -61,14 +74,15 @@ impl ActorInterface for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::Teleport {
-            return;
+        match p.message {
+            ActorMessageType::TeleportTo(index) if index == self.index => {
+                p.hero.position.move_to(
+                    self.position.x(),
+                    self.position.y() - TILE_HEIGHT as i32,
+                );
+            }
+            _ => {}
         }
-
-        p.hero.position.move_to(
-            self.position.x(),
-            self.position.y() - TILE_HEIGHT as i32,
-        );
     }
 
     fn position(&self) -> Rect {

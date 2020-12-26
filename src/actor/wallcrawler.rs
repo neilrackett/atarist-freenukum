@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, HorizontalDirection, Result, VerticalDirection,
@@ -21,9 +22,11 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = HorizontalDirection;
+
+    fn create_with_details(
+        orientation: HorizontalDirection,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -31,23 +34,19 @@ impl ActorCreateInterface for Specific {
         let x = pos.x as u32 / TILE_WIDTH;
         let y = pos.y as u32 / TILE_HEIGHT;
 
-        let (tile, orientation) = match general.actor_type {
-            ActorType::WallCrawlerBotLeft => {
+        let tile = match orientation {
+            HorizontalDirection::Left => {
                 if x < LEVEL_WIDTH + 1 {
                     tiles.copy_from_to(x + 1, y, x, y);
                 }
-                (ANIMATION_WALLCRAWLERBOT_LEFT, HorizontalDirection::Left)
+                ANIMATION_WALLCRAWLERBOT_LEFT
             }
-            ActorType::WallCrawlerBotRight => {
+            HorizontalDirection::Right => {
                 if x > 0 {
                     tiles.copy_from_to(x - 1, y, x, y);
                 }
-                (
-                    ANIMATION_WALLCRAWLERBOT_RIGHT,
-                    HorizontalDirection::Right,
-                )
+                ANIMATION_WALLCRAWLERBOT_RIGHT
             }
-            _ => unreachable!(),
         };
 
         Specific {
@@ -132,7 +131,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
@@ -140,10 +139,14 @@ impl ActorInterface for Specific {
         self.is_alive = false;
 
         p.hero.score.add(100);
-        p.actor_adder
-            .add_actor(ActorType::Steam, self.position.top_left());
-        p.actor_adder
-            .add_actor(ActorType::Explosion, self.position.top_left());
+        p.actor_adder.add_actor(
+            ActorType::SingleAnimation(SingleAnimationType::Steam),
+            self.position.top_left(),
+        );
+        p.actor_adder.add_actor(
+            ActorType::SingleAnimation(SingleAnimationType::Explosion),
+            self.position.top_left(),
+        );
 
         ShotProcessing::Absorb
     }

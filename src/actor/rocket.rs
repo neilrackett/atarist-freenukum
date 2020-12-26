@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, CreateActor, RenderParameters,
+        ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, HALFTILE_HEIGHT, OBJECT_ROCKET, TILE_HEIGHT, TILE_WIDTH,
@@ -20,9 +20,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -96,7 +95,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 

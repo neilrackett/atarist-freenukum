@@ -1,10 +1,11 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType,
+        CreateActorWithDetails, ReceiveMessageParameters,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH,
+    KeyColor, Result, OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -21,11 +22,14 @@ pub(crate) struct Specific {
     counter: usize,
     state: State,
     position: Rect,
+    color: KeyColor,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        _general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = KeyColor;
+
+    fn create_with_details(
+        color: KeyColor,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -35,6 +39,7 @@ impl ActorCreateInterface for Specific {
             counter: 0,
             state: State::Closed,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            color,
         }
     }
 }
@@ -69,7 +74,7 @@ impl ActorInterface for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::OpenDoor {
+        if p.message != ActorMessageType::OpenDoor(self.color) {
             return;
         }
         self.state = State::Opening;

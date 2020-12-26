@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH,
@@ -21,9 +21,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -64,7 +63,9 @@ impl ActorInterface for Specific {
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
-                        ActorType::BombFire,
+                        ActorType::SingleAnimation(
+                            SingleAnimationType::BombFire,
+                        ),
                         self.position
                             .top_left()
                             .offset(-((distance * TILE_WIDTH) as i32), 0),
@@ -85,7 +86,9 @@ impl ActorInterface for Specific {
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
-                        ActorType::BombFire,
+                        ActorType::SingleAnimation(
+                            SingleAnimationType::BombFire,
+                        ),
                         self.position
                             .top_left()
                             .offset((distance * TILE_WIDTH) as i32, 0),

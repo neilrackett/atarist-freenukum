@@ -1,12 +1,12 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, HeroInteractStartParameters,
+        ActParameters, ActorInterface, ActorMessageType,
+        CreateActorWithDetails, HeroInteractStartParameters,
         RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
+    Hero, KeyColor, Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
     OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED,
     TILE_HEIGHT, TILE_WIDTH,
 };
@@ -17,11 +17,14 @@ pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     position: Rect,
+    color: KeyColor,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        _general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = KeyColor;
+
+    fn create_with_details(
+        color: KeyColor,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -30,6 +33,7 @@ impl ActorCreateInterface for Specific {
             tile: OBJECT_KEYHOLE_BLACK,
             counter: 0,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            color,
         }
     }
 }
@@ -43,13 +47,12 @@ impl ActorInterface for Specific {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let tile = match (self.counter, p.general.actor_type) {
+        let tile = match (self.counter, self.color) {
             (0, _) => self.tile,
-            (_, ActorType::KeyholeRed) => OBJECT_KEYHOLE_RED,
-            (_, ActorType::KeyholeBlue) => OBJECT_KEYHOLE_BLUE,
-            (_, ActorType::KeyholePink) => OBJECT_KEYHOLE_PINK,
-            (_, ActorType::KeyholeGreen) => OBJECT_KEYHOLE_GREEN,
-            _ => unreachable!(),
+            (_, KeyColor::Red) => OBJECT_KEYHOLE_RED,
+            (_, KeyColor::Blue) => OBJECT_KEYHOLE_BLUE,
+            (_, KeyColor::Pink) => OBJECT_KEYHOLE_PINK,
+            (_, KeyColor::Green) => OBJECT_KEYHOLE_GREEN,
         };
 
         p.renderer.place_tile(tile, self.position.top_left())?;
@@ -61,37 +64,18 @@ impl ActorInterface for Specific {
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
-        let (required_item, door_actor_type) = match p.general.actor_type {
-            ActorType::KeyholeRed => {
-                (InventoryItem::KeyRed, ActorType::DoorRed)
-            }
-            ActorType::KeyholeBlue => {
-                (InventoryItem::KeyBlue, ActorType::DoorBlue)
-            }
-            ActorType::KeyholePink => {
-                (InventoryItem::KeyPink, ActorType::DoorPink)
-            }
-            ActorType::KeyholeGreen => {
-                (InventoryItem::KeyGreen, ActorType::DoorGreen)
-            }
-            _ => unreachable!(),
-        };
+        let required_item = InventoryItem::Key(self.color);
 
         if p.hero.inventory.is_set(required_item) {
             p.actor_message_queue
-                .push_back(door_actor_type, ActorMessageType::OpenDoor);
+                .push_back(ActorMessageType::OpenDoor(self.color));
             self.counter = 5;
             p.hero.inventory.unset(required_item);
         } else if self.counter < 5 {
-            let color = match required_item {
-                InventoryItem::KeyRed => "red",
-                InventoryItem::KeyBlue => "blue",
-                InventoryItem::KeyPink => "pink",
-                InventoryItem::KeyGreen => "green",
-                _ => unreachable!(),
-            };
-            p.info_message_queue
-                .push_back(format!("You don't have the {} key.", color));
+            p.info_message_queue.push_back(format!(
+                "You don't have the {} key.",
+                self.color.to_string()
+            ));
         }
     }
 

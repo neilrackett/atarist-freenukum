@@ -5,14 +5,16 @@ pub mod tiles;
 use crate::{
     actor::{
         ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
-        LevelActorAdder,
+        BoxBlueContent, BoxGreyContent, BoxRedContent, ItemType,
+        LevelActorAdder, SimpleAnimationType, SpikeType, TeleporterIndex,
     },
     hero::Hero,
     infobox::InfoMessageQueue,
     rendering::Renderer,
     shot::{Shot, ShotList},
-    Result, ANIMATION_START, HALFTILE_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH,
-    SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND, TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, KeyColor, Result, ANIMATION_START,
+    HALFTILE_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK,
+    SOLID_CONVEYORBELT_LEFTEND, TILE_HEIGHT, TILE_WIDTH,
 };
 use log::warn;
 use raw::LevelRaw;
@@ -92,67 +94,145 @@ impl LevelData {
                 0x0080 =>
                 /* written text on black screen */
                 {
-                    aa(ActorType::TextOnScreenBackground, tx, ty);
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::TextOnScreen,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x0100 =>
                 /* blue high voltage flash */
                 {
-                    aa(ActorType::HighVoltageFlashBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::HighVoltageFlash,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0180 =>
                 /* red flash light */
                 {
-                    aa(ActorType::RedFlashlightBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::RedFlashlight,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0200 =>
                 /* blue high voltage flash */
                 {
-                    aa(ActorType::BlueFlashlightBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BlueFlashlight,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0280 =>
                 /* key panel on the wall */
                 {
-                    aa(ActorType::KeypanelBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::Keypanel,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0300 =>
                 /* red rotation light */
                 {
-                    aa(ActorType::RedRotationLightBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::RedRotationLight,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0380 =>
                 /* flashing up arrow */
                 {
-                    aa(ActorType::UpArrowBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::UpArrow,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0400 =>
                 /* background blinking blue box */
                 {
-                    aa(ActorType::BlueLightBackground1, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BlueLight1,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0420 =>
                 /* background blinking blue box */
                 {
-                    aa(ActorType::BlueLightBackground2, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BlueLight2,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0440 =>
                 /* background blinking blue box */
                 {
-                    aa(ActorType::BlueLightBackground3, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BlueLight3,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0460 =>
                 /* background blinking blue box */
                 {
-                    aa(ActorType::BlueLightBackground4, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BlueLight4,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0500 =>
                 /* background green poison liquid */
                 {
-                    aa(ActorType::GreenPoisonBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::GreenPoison,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x0580 =>
                 /* background lava */
                 {
-                    aa(ActorType::LavaBackground, tx, ty)
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::Lava,
+                        ),
+                        tx,
+                        ty,
+                    )
                 }
                 0x1800 =>
                 /* solid wall which can be shot */
@@ -172,7 +252,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyEmpty, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Nothing,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3001 =>
                 /* lift */
@@ -191,7 +277,13 @@ impl LevelData {
                 {
                     tiles.set(x, y, SOLID_BLACK as u16);
                     solids.set(x, y, true);
-                    aa(ActorType::ConveyorLeftMovingRightEnd, tx, ty);
+                    aa(
+                        ActorType::ConveyorRightEnd(
+                            HorizontalDirection::Left,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3004 =>
                 /* left end of right-moving conveyor */
@@ -204,7 +296,13 @@ impl LevelData {
                 {
                     tiles.set(x, y, SOLID_BLACK as u16);
                     solids.set(x, y, true);
-                    aa(ActorType::ConveyorRightMovingRightEnd, tx, ty);
+                    aa(
+                        ActorType::ConveyorRightEnd(
+                            HorizontalDirection::Right,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3006 =>
                 /* grey box with boots inside */
@@ -212,7 +310,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyBoots, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Boots,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3007 =>
                 /* rocket which gets started if shot
@@ -226,7 +330,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyClamps, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Clamps,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3009 =>
                 /* fire burning to the right */
@@ -234,7 +344,11 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::FireRight, tx, ty);
+                    aa(
+                        ActorType::Fire(HorizontalDirection::Right),
+                        tx,
+                        ty,
+                    );
                 }
                 0x300A =>
                 /* fire burning to the left */
@@ -242,7 +356,7 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::FireLeft, tx, ty);
+                    aa(ActorType::Fire(HorizontalDirection::Left), tx, ty);
                 }
                 0x300b =>
                 /* flying techbot */
@@ -282,7 +396,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyGun, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Gun,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3010 =>
                 /* robot */
@@ -303,7 +423,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyBomb, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Bomb,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3013 =>
                 /* bot consisting of several white-blue balls */
@@ -325,7 +451,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxRedSoda, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxRed(
+                            BoxRedContent::Soda,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3016 =>
                 /* crab bot crawling along wall left of him */
@@ -333,7 +465,13 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::WallCrawlerBotLeft, tx, ty);
+                    aa(
+                        ActorType::WallCrawlerBot(
+                            HorizontalDirection::Left,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3017 =>
                 /* crab bot crawling along wall right of him */
@@ -341,7 +479,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::WallCrawlerBotRight, tx, ty);
+                    aa(
+                        ActorType::WallCrawlerBot(
+                            HorizontalDirection::Right,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3018 =>
                 /* red box with chicken inside */
@@ -349,7 +493,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxRedChicken, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxRed(
+                            BoxRedContent::Chicken,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3019 =>
                 /* floor that breaks on second jump onto it */
@@ -373,7 +523,7 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::FanLeft, tx, ty);
+                    aa(ActorType::Fan(HorizontalDirection::Left), tx, ty);
                 }
                 0x301c =>
                 /* fan wheel mounted on left wall blowing to the right*/
@@ -381,7 +531,7 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::FanRight, tx, ty);
+                    aa(ActorType::Fan(HorizontalDirection::Right), tx, ty);
                 }
                 0x301d =>
                 /* blue box with football insdie */
@@ -389,7 +539,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueFootball, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Football,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x301e =>
                 /* blue box with joystick inside */
@@ -397,7 +553,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueJoystick, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Joystick,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x301f =>
                 /* blue box with disk inside */
@@ -405,7 +567,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueDisk, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Disk,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3020 =>
                 /* grey box with glove inside */
@@ -413,7 +581,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyGlove, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::Glove,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3021 =>
                 /* laser beam which is deactivated by access card */
@@ -438,7 +612,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueBalloon, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Balloon,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3024 =>
                 /* camera */
@@ -452,7 +632,13 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::BrokenWallBackground, tx, ty);
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::BrokenWall,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3026 =>
                 /* left end of background stone wall */
@@ -463,7 +649,13 @@ impl LevelData {
                 0x3028 =>
                 /* window inside background stone wall */
                 {
-                    aa(ActorType::StoneWindowBackground, tx, ty);
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::StoneWindow,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3029 =>
                 /* grey box with full life */
@@ -471,7 +663,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyFullLife, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::FullLife,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x302a =>
                 /* "ACME" brick that comes falling down */
@@ -496,7 +694,11 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::Spike, tx, ty);
+                    aa(
+                        ActorType::Spikes(SpikeType::SingleSpikeUp),
+                        tx,
+                        ty,
+                    );
                 }
                 0x302d =>
                 /* blue box with flag inside */
@@ -504,7 +706,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueFlag, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Flag,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x302e =>
                 /* blue box with radio inside */
@@ -512,17 +720,31 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxBlueRadio, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxBlue(
+                            BoxBlueContent::Radio,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x302f =>
                 /* teleporter station */
                 {
-                    aa(ActorType::Teleporter1, tx, ty);
+                    aa(
+                        ActorType::Teleporter(TeleporterIndex::First),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3030 =>
                 /* teleporter station */
                 {
-                    aa(ActorType::Teleporter2, tx, ty);
+                    aa(
+                        ActorType::Teleporter(TeleporterIndex::Second),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3031 =>
                 /* jumping mines */
@@ -546,7 +768,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyAccessCard, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::AccessCard,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3034 =>
                 /* slot for access card */
@@ -570,7 +798,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyLetterD, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::LetterD,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3038 =>
                 /* grey box with a U inside */
@@ -578,7 +812,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyLetterU, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::LetterU,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3039 =>
                 /* grey box with a K inside */
@@ -586,7 +826,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyLetterK, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::LetterK,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x303a =>
                 /* grey box with a E inside */
@@ -594,7 +840,13 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::BoxGreyLetterE, tx, ty);
+                    aa(
+                        ActorType::Item(ItemType::BoxGrey(
+                            BoxGreyContent::LetterE,
+                        )),
+                        tx,
+                        ty,
+                    );
                 }
                 0x303b =>
                 /* bunny bot */
@@ -618,13 +870,25 @@ impl LevelData {
                 /* window - left part */
                 {
                     tiles.set(x, y, 0);
-                    aa(ActorType::WindowLeftBackground, tx, ty);
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::WindowLeft,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x303f =>
                 /* window - right part */
                 {
                     tiles.set(x, y, 0);
-                    aa(ActorType::WindowRightBackground, tx, ty);
+                    aa(
+                        ActorType::SimpleAnimation(
+                            SimpleAnimationType::WindowRight,
+                        ),
+                        tx,
+                        ty,
+                    );
                 }
                 0x3040 =>
                 /* the notebook */
@@ -656,7 +920,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::KeyRed, tx, ty);
+                    aa(ActorType::Key(KeyColor::Red), tx, ty);
                 }
                 0x3045 =>
                 /* green key */
@@ -664,7 +928,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::KeyGreen, tx, ty);
+                    aa(ActorType::Key(KeyColor::Green), tx, ty);
                 }
                 0x3046 =>
                 /* blue key */
@@ -672,7 +936,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::KeyBlue, tx, ty);
+                    aa(ActorType::Key(KeyColor::Blue), tx, ty);
                 }
                 0x3047 =>
                 /* pink key */
@@ -680,27 +944,27 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::KeyPink, tx, ty);
+                    aa(ActorType::Key(KeyColor::Pink), tx, ty);
                 }
                 0x3048 =>
                 /* red keyhole */
                 {
-                    aa(ActorType::KeyholeRed, tx, ty);
+                    aa(ActorType::Keyhole(KeyColor::Red), tx, ty);
                 }
                 0x3049 =>
                 /* green keyhole */
                 {
-                    aa(ActorType::KeyholeGreen, tx, ty);
+                    aa(ActorType::Keyhole(KeyColor::Green), tx, ty);
                 }
                 0x304a =>
                 /* blue keyhole */
                 {
-                    aa(ActorType::KeyholeBlue, tx, ty);
+                    aa(ActorType::Keyhole(KeyColor::Blue), tx, ty);
                 }
                 0x304b =>
                 /* pink keyhole */
                 {
-                    aa(ActorType::KeyholePink, tx, ty);
+                    aa(ActorType::Keyhole(KeyColor::Pink), tx, ty);
                 }
                 0x304c =>
                 /* red door */
@@ -709,7 +973,7 @@ impl LevelData {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
                     solids.set(x, y, true);
-                    aa(ActorType::DoorRed, tx, ty);
+                    aa(ActorType::Door(KeyColor::Red), tx, ty);
                 }
                 0x304d =>
                 /* green door */
@@ -718,7 +982,7 @@ impl LevelData {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
                     solids.set(x, y, true);
-                    aa(ActorType::DoorGreen, tx, ty);
+                    aa(ActorType::Door(KeyColor::Green), tx, ty);
                 }
                 0x304e =>
                 /* blue door */
@@ -727,7 +991,7 @@ impl LevelData {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
                     solids.set(x, y, true);
-                    aa(ActorType::DoorBlue, tx, ty);
+                    aa(ActorType::Door(KeyColor::Blue), tx, ty);
                 }
                 0x304f =>
                 /* pink door */
@@ -736,7 +1000,7 @@ impl LevelData {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
                     solids.set(x, y, true);
-                    aa(ActorType::DoorPink, tx, ty);
+                    aa(ActorType::Door(KeyColor::Pink), tx, ty);
                 }
                 0x3050 =>
                 /* football on its own */
@@ -744,7 +1008,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Football, tx, ty);
+                    aa(ActorType::Item(ItemType::Football), tx, ty);
                 }
                 0x3051 =>
                 /* single chicken on its own */
@@ -752,7 +1016,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::ChickenSingle, tx, ty);
+                    aa(ActorType::Item(ItemType::ChickenSingle), tx, ty);
                 }
                 0x3052 =>
                 /* soda on its own */
@@ -760,7 +1024,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Soda, tx, ty);
+                    aa(ActorType::Item(ItemType::Soda), tx, ty);
                 }
                 0x3053 =>
                 /* a disk on its own */
@@ -768,7 +1032,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Disk, tx, ty);
+                    aa(ActorType::Item(ItemType::Disk), tx, ty);
                 }
                 0x3054 =>
                 /* a joystick on its own */
@@ -776,7 +1040,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Joystick, tx, ty);
+                    aa(ActorType::Item(ItemType::Joystick), tx, ty);
                 }
                 0x3055 =>
                 /* a flag on its own */
@@ -784,7 +1048,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Flag, tx, ty);
+                    aa(ActorType::Item(ItemType::Flag), tx, ty);
                 }
                 0x3056 =>
                 /* a radio on its own */
@@ -792,7 +1056,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Radio, tx, ty);
+                    aa(ActorType::Item(ItemType::Radio), tx, ty);
                 }
                 0x3057 =>
                 /* the red mine lying on the ground */
@@ -808,7 +1072,7 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::SpikesUp, tx, ty);
+                    aa(ActorType::Spikes(SpikeType::SpikesUp), tx, ty);
                 }
                 0x3059 =>
                 /* spikes showing down */
@@ -816,7 +1080,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::SpikesDown, tx, ty);
+                    aa(ActorType::Spikes(SpikeType::SpikesDown), tx, ty);
                 }
                 t if t >= 4 && t <= 0x2fe0 => {}
                 t if (t as usize / 0x20 >= ANIMATION_START) => {
@@ -956,12 +1220,7 @@ impl LevelData {
         self.shots.retain(|s| s.is_alive);
 
         for message in actor_message_queue.messages.drain(..) {
-            self.actors.send_message(
-                message.receivers,
-                message.message,
-                hero,
-                &mut self.solids,
-            );
+            self.actors.send_message(message, hero, &mut self.solids);
         }
 
         self.actors.act(

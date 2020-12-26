@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, CreateActor, RenderParameters,
+        ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
@@ -16,9 +16,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -55,7 +54,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         /*
          * We don't need to do anything, this is just to absorb
          * the bullet when the actor is shot.

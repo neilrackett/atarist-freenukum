@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     HorizontalDirection, Result, HALFTILE_WIDTH, SOLID_BLACK,
@@ -18,23 +18,15 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = HorizontalDirection;
+
+    fn create_with_details(
+        direction: HorizontalDirection,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
-        let direction = match general.actor_type {
-            ActorType::ConveyorLeftMovingRightEnd => {
-                HorizontalDirection::Left
-            }
-            ActorType::ConveyorRightMovingRightEnd => {
-                HorizontalDirection::Right
-            }
-            _ => unreachable!(),
-        };
-
         // find the beginning of the conveyor belt
         let mut found_begin = false;
         let mut tile;

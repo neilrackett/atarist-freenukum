@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
@@ -16,9 +17,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -75,7 +75,9 @@ impl ActorInterface for Specific {
                     self.position.y() as u32 / TILE_HEIGHT + 1,
                 ) {
                     p.actor_adder.add_actor(
-                        ActorType::Steam,
+                        ActorType::SingleAnimation(
+                            SingleAnimationType::Steam,
+                        ),
                         self.position.top_left(),
                     );
                     p.actor_adder.add_particle_firework(
@@ -98,15 +100,17 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.counter > 0 {
             p.hero.score.add(500);
-            p.actor_adder
-                .add_actor(ActorType::Score500, self.position.top_left());
+            p.actor_adder.add_actor(
+                ActorType::Score(ScoreType::Score500),
+                self.position.top_left(),
+            );
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 4);
 

@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActor,
+        RenderParameters, ScoreType, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
@@ -14,9 +14,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -35,14 +34,18 @@ impl ActorInterface for Specific {
             self.position.x() as u32 / TILE_WIDTH,
             self.position.y() as u32 / TILE_HEIGHT,
         ) {
-            p.actor_adder
-                .add_actor(ActorType::Explosion, self.position.top_left());
+            p.actor_adder.add_actor(
+                ActorType::SingleAnimation(SingleAnimationType::Explosion),
+                self.position.top_left(),
+            );
             self.is_alive = false;
         } else if self.position.has_intersection(p.hero.position.geometry)
         {
             p.hero.score.add(1000);
-            p.actor_adder
-                .add_actor(ActorType::Score1000, self.position.top_left());
+            p.actor_adder.add_actor(
+                ActorType::Score(ScoreType::Score1000),
+                self.position.top_left(),
+            );
             self.is_alive = false;
         }
     }
@@ -61,5 +64,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

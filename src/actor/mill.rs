@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, RenderParameters, ShotParameters,
+        ActParameters, ActorInterface, ActorMessageType, ActorType,
+        CreateActor, RenderParameters, ScoreType, ShotParameters,
         ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -18,9 +18,8 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -69,7 +68,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
@@ -80,22 +79,20 @@ impl ActorInterface for Specific {
                 .add_particle_firework(self.position.center(), 4);
         } else {
             // TODO: add removal animation (destroyed body)
-            p.actor_message_queue.push_back(
-                ActorType::ElectricArc,
-                ActorMessageType::Remove,
-            );
+            p.actor_message_queue
+                .push_back(ActorMessageType::RemoveElectricArc);
             p.hero.score.add(20000);
             p.actor_adder
                 .add_particle_firework(self.position.center(), 20);
             p.actor_adder.add_actor(
-                ActorType::Score10000,
+                ActorType::Score(ScoreType::Score10000),
                 self.position.top_left().offset(
                     0,
                     (self.position.height() / 2 - TILE_HEIGHT) as i32,
                 ),
             );
             p.actor_adder.add_actor(
-                ActorType::Score10000,
+                ActorType::Score(ScoreType::Score10000),
                 self.position
                     .top_left()
                     .offset(0, self.position.height() as i32 / 2),

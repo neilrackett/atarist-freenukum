@@ -1,10 +1,11 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, Result, OBJECT_HOSTILESHOT, TILE_HEIGHT,
+    TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -15,23 +16,21 @@ pub(crate) struct Specific {
     num_frames: usize,
     position: Rect,
     is_alive: bool,
+    direction: HorizontalDirection,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = HorizontalDirection;
+
+    fn create_with_details(
+        direction: HorizontalDirection,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        let tile = match general.actor_type {
-            ActorType::HostileShotLeft => OBJECT_HOSTILESHOT,
-            ActorType::HostileShotRight => OBJECT_HOSTILESHOT + 2,
-            _ => unreachable!(
-                "Passed actor type {:?} to hostile shot actor \
-                which is not a shot actor id",
-                general.actor_type
-            ),
+        let tile = match direction {
+            HorizontalDirection::Left => OBJECT_HOSTILESHOT,
+            HorizontalDirection::Right => OBJECT_HOSTILESHOT + 2,
         };
 
         Specific {
@@ -40,17 +39,14 @@ impl ActorCreateInterface for Specific {
             num_frames: 2,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
             is_alive: true,
+            direction,
         }
     }
 }
 
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
-        let offset = match p.general.actor_type {
-            ActorType::HostileShotLeft => -(TILE_WIDTH as i32),
-            ActorType::HostileShotRight => TILE_WIDTH as i32,
-            _ => unreachable!(),
-        };
+        let offset = (TILE_WIDTH as i32) * self.direction.as_factor_i32();
         self.position.offset(offset, 0);
 
         if p.solids.get(

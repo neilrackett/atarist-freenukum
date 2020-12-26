@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ReceiveMessageParameters, RenderParameters,
+        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH,
@@ -17,9 +17,8 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
+impl CreateActor for Specific {
     fn create(
-        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -49,7 +48,7 @@ impl ActorInterface for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::OpenDoor {
+        if p.message != ActorMessageType::OpenDoorAccessCard {
             return;
         }
         let x = self.position.x() as u32 / TILE_WIDTH;

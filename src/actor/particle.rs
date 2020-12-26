@@ -1,13 +1,21 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
     OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
 use sdl2::rect::{Point, Rect};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ParticleColor {
+    Pink,
+    Blue,
+    White,
+    Green,
+}
 
 #[derive(Debug)]
 pub(crate) struct Specific {
@@ -19,9 +27,11 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = ParticleColor;
+
+    fn create_with_details(
+        color: ParticleColor,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -31,12 +41,11 @@ impl ActorCreateInterface for Specific {
         let vspeed = rng.gen_range(-12, 5);
         let hspeed = rng.gen_range(-8, 9);
 
-        let tile = match general.actor_type {
-            ActorType::ParticlePink => OBJECT_SPARK_PINK,
-            ActorType::ParticleBlue => OBJECT_SPARK_BLUE,
-            ActorType::ParticleWhite => OBJECT_SPARK_WHITE,
-            ActorType::ParticleGreen => OBJECT_SPARK_GREEN,
-            _ => unreachable!(),
+        let tile = match color {
+            ParticleColor::Pink => OBJECT_SPARK_PINK,
+            ParticleColor::Blue => OBJECT_SPARK_BLUE,
+            ParticleColor::White => OBJECT_SPARK_WHITE,
+            ParticleColor::Green => OBJECT_SPARK_GREEN,
         };
 
         Specific {

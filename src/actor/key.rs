@@ -1,11 +1,11 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        RenderParameters, ScoreType,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK,
+    KeyColor, Result, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN, OBJECT_KEY_PINK,
     OBJECT_KEY_RED, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
@@ -14,11 +14,14 @@ use sdl2::rect::{Point, Rect};
 pub struct Specific {
     position: Rect,
     is_alive: bool,
+    color: KeyColor,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        _general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = KeyColor;
+
+    fn create_with_details(
+        color: KeyColor,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -26,6 +29,7 @@ impl ActorCreateInterface for Specific {
         Specific {
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
             is_alive: true,
+            color,
         }
     }
 }
@@ -33,29 +37,24 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         if p.hero.position.geometry.has_intersection(self.position) {
-            let item = match p.general.actor_type {
-                ActorType::KeyRed => InventoryItem::KeyRed,
-                ActorType::KeyBlue => InventoryItem::KeyBlue,
-                ActorType::KeyPink => InventoryItem::KeyPink,
-                ActorType::KeyGreen => InventoryItem::KeyGreen,
-                _ => unreachable!(),
-            };
+            let item = InventoryItem::Key(self.color);
 
             p.hero.inventory.set(item);
             p.hero.score.add(1000);
-            p.actor_adder
-                .add_actor(ActorType::Score1000, self.position.top_left());
+            p.actor_adder.add_actor(
+                ActorType::Score(ScoreType::Score1000),
+                self.position.top_left(),
+            );
             self.is_alive = false;
         }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let tile = match p.general.actor_type {
-            ActorType::KeyRed => OBJECT_KEY_RED,
-            ActorType::KeyBlue => OBJECT_KEY_BLUE,
-            ActorType::KeyPink => OBJECT_KEY_PINK,
-            ActorType::KeyGreen => OBJECT_KEY_GREEN,
-            _ => unreachable!(),
+        let tile = match self.color {
+            KeyColor::Red => OBJECT_KEY_RED,
+            KeyColor::Blue => OBJECT_KEY_BLUE,
+            KeyColor::Pink => OBJECT_KEY_PINK,
+            KeyColor::Green => OBJECT_KEY_GREEN,
         };
         p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())

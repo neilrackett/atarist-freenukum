@@ -1,11 +1,13 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters, ShotParameters, ShotProcessing,
+        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     geometry::RectExt,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_FAN, HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, Result, ANIMATION_FAN, HALFTILE_WIDTH,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -16,11 +18,14 @@ pub(crate) struct Specific {
     num_frames: usize,
     running: usize,
     position: Rect,
+    direction: HorizontalDirection,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        _general: &mut ActorData,
+impl CreateActorWithDetails for Specific {
+    type Details = HorizontalDirection;
+
+    fn create_with_details(
+        direction: HorizontalDirection,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
@@ -36,6 +41,7 @@ impl ActorCreateInterface for Specific {
                 TILE_WIDTH,
                 TILE_HEIGHT * 2,
             ),
+            direction,
         }
     }
 }
@@ -76,11 +82,7 @@ impl ActorInterface for Specific {
                 .geometry
                 .horizontal_distance(self.position);
 
-            let fan_direction = match p.general.actor_type {
-                ActorType::FanLeft => -1,
-                ActorType::FanRight => 1,
-                _ => unreachable!(),
-            };
+            let fan_direction = self.direction.as_factor_i32();
 
             if (fan_direction * hdistance) < 0 {
                 return;
@@ -110,14 +112,16 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn can_get_shot(&self, _general: &ActorData) -> bool {
+    fn can_get_shot(&self) -> bool {
         true
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.running = 9;
-        p.actor_adder
-            .add_actor(ActorType::Steam, self.position.top_left());
+        p.actor_adder.add_actor(
+            ActorType::SingleAnimation(SingleAnimationType::Steam),
+            self.position.top_left(),
+        );
         ShotProcessing::Absorb
     }
 

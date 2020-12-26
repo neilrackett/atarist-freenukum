@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, RenderParameters,
+        ActParameters, ActorInterface, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
@@ -21,42 +21,62 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl ActorCreateInterface for Specific {
-    fn create(
-        general: &mut ActorData,
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScoreType {
+    Score100,
+    Score200,
+    Score500,
+    Score1000,
+    Score2000,
+    Score5000,
+    Score10000,
+    Bonus1Left,
+    Bonus1Right,
+    Bonus2Left,
+    Bonus2Right,
+    Bonus3Left,
+    Bonus3Right,
+    Bonus4Left,
+    Bonus4Right,
+    Bonus5Left,
+    Bonus5Right,
+    Bonus6Left,
+    Bonus6Right,
+    Bonus7Left,
+    Bonus7Right,
+}
+
+impl CreateActorWithDetails for Specific {
+    type Details = ScoreType;
+
+    fn create_with_details(
+        score_type: ScoreType,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        let tile = match general.actor_type {
-            ActorType::Score100 => NUMBER_100,
-            ActorType::Score200 => NUMBER_200,
-            ActorType::Score500 => NUMBER_500,
-            ActorType::Score1000 => NUMBER_1000,
-            ActorType::Score2000 => NUMBER_2000,
-            ActorType::Score5000 => NUMBER_5000,
-            ActorType::Score10000 => NUMBER_10000,
-            ActorType::ScoreBonus1Left => NUMBER_BONUS_1_LEFT,
-            ActorType::ScoreBonus1Right => NUMBER_BONUS_1_RIGHT,
-            ActorType::ScoreBonus2Left => NUMBER_BONUS_2_LEFT,
-            ActorType::ScoreBonus2Right => NUMBER_BONUS_2_RIGHT,
-            ActorType::ScoreBonus3Left => NUMBER_BONUS_3_LEFT,
-            ActorType::ScoreBonus3Right => NUMBER_BONUS_3_RIGHT,
-            ActorType::ScoreBonus4Left => NUMBER_BONUS_4_LEFT,
-            ActorType::ScoreBonus4Right => NUMBER_BONUS_4_RIGHT,
-            ActorType::ScoreBonus5Left => NUMBER_BONUS_5_LEFT,
-            ActorType::ScoreBonus5Right => NUMBER_BONUS_5_RIGHT,
-            ActorType::ScoreBonus6Left => NUMBER_BONUS_6_LEFT,
-            ActorType::ScoreBonus6Right => NUMBER_BONUS_6_RIGHT,
-            ActorType::ScoreBonus7Left => NUMBER_BONUS_7_LEFT,
-            ActorType::ScoreBonus7Right => NUMBER_BONUS_7_RIGHT,
-            _ => {
-                unreachable!(
-                    "Actor type {:?} added as an score \
-                    which is not a score id",
-                    general.actor_type
-                );
-            }
+        let tile = match score_type {
+            ScoreType::Score100 => NUMBER_100,
+            ScoreType::Score200 => NUMBER_200,
+            ScoreType::Score500 => NUMBER_500,
+            ScoreType::Score1000 => NUMBER_1000,
+            ScoreType::Score2000 => NUMBER_2000,
+            ScoreType::Score5000 => NUMBER_5000,
+            ScoreType::Score10000 => NUMBER_10000,
+            ScoreType::Bonus1Left => NUMBER_BONUS_1_LEFT,
+            ScoreType::Bonus1Right => NUMBER_BONUS_1_RIGHT,
+            ScoreType::Bonus2Left => NUMBER_BONUS_2_LEFT,
+            ScoreType::Bonus2Right => NUMBER_BONUS_2_RIGHT,
+            ScoreType::Bonus3Left => NUMBER_BONUS_3_LEFT,
+            ScoreType::Bonus3Right => NUMBER_BONUS_3_RIGHT,
+            ScoreType::Bonus4Left => NUMBER_BONUS_4_LEFT,
+            ScoreType::Bonus4Right => NUMBER_BONUS_4_RIGHT,
+            ScoreType::Bonus5Left => NUMBER_BONUS_5_LEFT,
+            ScoreType::Bonus5Right => NUMBER_BONUS_5_RIGHT,
+            ScoreType::Bonus6Left => NUMBER_BONUS_6_LEFT,
+            ScoreType::Bonus6Right => NUMBER_BONUS_6_RIGHT,
+            ScoreType::Bonus7Left => NUMBER_BONUS_7_LEFT,
+            ScoreType::Bonus7Right => NUMBER_BONUS_7_RIGHT,
         };
 
         Specific {
