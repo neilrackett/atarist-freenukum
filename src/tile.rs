@@ -21,7 +21,7 @@ impl TileHeader {
     }
 }
 
-pub fn load<'t, R: Read, P: Picture>(
+pub fn load<R: Read, P: Picture>(
     r: &mut R,
     header: TileHeader,
     has_transparency: bool,
