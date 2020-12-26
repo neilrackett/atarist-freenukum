@@ -34,10 +34,9 @@ impl ActorCreateInterface for Specific {
         general.is_in_foreground = true;
         general.acts_while_invisible = true;
 
-        // TODO: check whether we *really* need the double width
         Specific {
             state: State::Idle,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
