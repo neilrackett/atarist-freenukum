@@ -6,7 +6,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
+    Hero, Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
     OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED,
     TILE_HEIGHT, TILE_WIDTH,
 };
@@ -58,7 +58,7 @@ impl ActorInterface for Specific {
         Ok(())
     }
 
-    fn hero_can_interact(&self) -> bool {
+    fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }
 

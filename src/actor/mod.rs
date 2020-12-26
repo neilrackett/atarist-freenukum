@@ -326,17 +326,7 @@ impl Actor {
     }
 
     fn hero_can_interact(&self, hero: &Hero) -> bool {
-        if self.general.actor_type == ActorType::Lift {
-            /* This check needs to be done for elevator only because
-             * if there are two elevators next to each other, the leftmost
-             * elevator would be chosen for interaction instead of the one on
-             * which the hero stands.
-             */
-            // TODO: this should be moved into ActorInterface::hero_can_interact
-            self.position().x == hero.position.geometry.x
-        } else {
-            self.specific.hero_can_interact()
-        }
+        self.specific.hero_can_interact(hero)
     }
 
     pub fn can_get_shot(&self) -> bool {
@@ -1150,7 +1140,7 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
 
     fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {}
 
-    fn hero_can_interact(&self) -> bool {
+    fn hero_can_interact(&self, _hero: &Hero) -> bool {
         false
     }
 

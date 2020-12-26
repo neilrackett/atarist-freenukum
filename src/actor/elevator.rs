@@ -6,7 +6,7 @@ use crate::{
     },
     geometry::RectExt,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
+    Hero, Result, HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
     TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
@@ -111,8 +111,8 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn hero_can_interact(&self) -> bool {
-        true
+    fn hero_can_interact(&self, hero: &Hero) -> bool {
+        self.position.x() == hero.position.geometry.x()
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {

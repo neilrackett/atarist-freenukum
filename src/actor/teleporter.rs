@@ -5,7 +5,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_TELEPORTER1, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, ANIMATION_TELEPORTER1, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -30,7 +30,7 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_can_interact(&self) -> bool {
+    fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }
 

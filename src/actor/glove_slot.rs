@@ -6,7 +6,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -48,7 +48,7 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_can_interact(&self) -> bool {
+    fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }
 

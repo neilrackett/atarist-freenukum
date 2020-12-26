@@ -28,6 +28,7 @@ pub mod tilecache;
 pub mod tileprovider;
 
 use anyhow::Result;
+use hero::Hero;
 use tileprovider::TileProvider;
 
 pub const GAME_INTERVAL: u32 = 80;
