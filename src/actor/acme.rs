@@ -13,6 +13,7 @@ pub(crate) struct Specific {
     tile: usize,
     counter: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -26,6 +27,7 @@ impl ActorCreateInterface for Specific {
             tile: OBJECT_FALLINGBLOCK,
             counter: 0,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -80,7 +82,7 @@ impl ActorInterface for Specific {
                         self.position.top_left(),
                         4,
                     );
-                    p.general.is_alive = false;
+                    self.is_alive = false;
                 } else {
                     self.position.offset(0, TILE_HEIGHT as i32);
                 }
@@ -108,7 +110,7 @@ impl ActorInterface for Specific {
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 4);
 
-            p.general.is_alive = false;
+            self.is_alive = false;
         }
         ShotProcessing::Absorb
     }
@@ -124,5 +126,9 @@ impl ActorInterface for Specific {
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.counter > 10
             && self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

@@ -22,6 +22,7 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -82,6 +83,7 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -90,13 +92,12 @@ impl Specific {
     fn touched_by_hero(
         &mut self,
         actor_type: ActorType,
-        general: &mut ActorData,
         hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
     ) {
         match actor_type {
             ActorType::LetterD => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::D);
                 hero.score.add(500);
                 actor_adder.add_actor(
@@ -105,7 +106,7 @@ impl Specific {
                 );
             }
             ActorType::LetterU => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::U);
                 hero.score.add(500);
                 actor_adder.add_actor(
@@ -114,7 +115,7 @@ impl Specific {
                 );
             }
             ActorType::LetterK => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::K);
                 hero.score.add(500);
                 actor_adder.add_actor(
@@ -123,7 +124,7 @@ impl Specific {
                 );
             }
             ActorType::LetterE => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::E);
                 hero.score.add(500);
                 if hero.fetched_letter_state.succeeded() {
@@ -142,7 +143,7 @@ impl Specific {
             }
             ActorType::FullLife => {
                 hero.health.fill_max();
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -151,7 +152,7 @@ impl Specific {
             }
             ActorType::Gun => {
                 hero.firepower.increase(1);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -160,7 +161,7 @@ impl Specific {
             }
             ActorType::AccessCard => {
                 hero.inventory.set(InventoryItem::AccessCard);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -169,7 +170,7 @@ impl Specific {
             }
             ActorType::Glove => {
                 hero.inventory.set(InventoryItem::Glove);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -178,7 +179,7 @@ impl Specific {
             }
             ActorType::Boots => {
                 hero.inventory.set(InventoryItem::Boot);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -187,7 +188,7 @@ impl Specific {
             }
             ActorType::Clamps => {
                 hero.inventory.set(InventoryItem::Clamp);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(1000);
                 actor_adder.add_actor(
                     ActorType::Score1000,
@@ -195,7 +196,7 @@ impl Specific {
                 );
             }
             ActorType::Football => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(100);
                 actor_adder.add_actor(
                     ActorType::Score100,
@@ -203,7 +204,7 @@ impl Specific {
                 );
             }
             ActorType::Disk => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(5000);
                 actor_adder.add_actor(
                     ActorType::Score5000,
@@ -211,7 +212,7 @@ impl Specific {
                 );
             }
             ActorType::Joystick => {
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(2000);
                 actor_adder.add_actor(
                     ActorType::Score2000,
@@ -219,7 +220,7 @@ impl Specific {
                 );
             }
             ActorType::Radio | ActorType::Flag => {
-                general.is_alive = false;
+                self.is_alive = false;
                 match self.current_frame {
                     0 => {
                         hero.score.add(100);
@@ -247,7 +248,7 @@ impl Specific {
             }
             ActorType::Soda => {
                 hero.health.increase(1);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(200);
                 actor_adder.add_actor(
                     ActorType::Score200,
@@ -256,7 +257,7 @@ impl Specific {
             }
             ActorType::ChickenSingle => {
                 hero.health.increase(1);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(100);
                 actor_adder.add_actor(
                     ActorType::Score100,
@@ -265,7 +266,7 @@ impl Specific {
             }
             ActorType::ChickenDouble => {
                 hero.health.increase(2);
-                general.is_alive = false;
+                self.is_alive = false;
                 hero.score.add(200);
                 actor_adder.add_actor(
                     ActorType::Score200,
@@ -293,7 +294,6 @@ impl ActorInterface for Specific {
         if self.position.has_intersection(p.hero.position.geometry) {
             self.touched_by_hero(
                 p.general.actor_type,
-                p.general,
                 p.hero,
                 p.actor_adder,
             );
@@ -340,25 +340,25 @@ impl ActorInterface for Specific {
         let pos = self.position.top_left();
         match p.general.actor_type {
             ActorType::BoxBlueFootball => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Football, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxBlueJoystick => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Joystick, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxBlueDisk => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Disk, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxBlueBalloon => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::Balloon,
                     pos.offset(0, -(TILE_HEIGHT as i32)),
@@ -367,107 +367,107 @@ impl ActorInterface for Specific {
                 ShotProcessing::Absorb
             }
             ActorType::BoxBlueFlag => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Flag, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxBlueRadio => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Radio, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxRedSoda => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Soda, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxRedChicken => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::ChickenSingle, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyEmpty => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyBoots => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Boots, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyClamps => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Clamps, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyGun => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Gun, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyBomb => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Bomb, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyGlove => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::Glove, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyFullLife => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::FullLife, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyAccessCard => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::AccessCard, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterD => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterD, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterU => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterU, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterK => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterK, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::BoxGreyLetterE => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::LetterE, pos);
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb
             }
             ActorType::ChickenSingle => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::ChickenDouble, pos);
                 ShotProcessing::Absorb
             }
             ActorType::Soda => {
-                p.general.is_alive = false;
+                self.is_alive = false;
                 p.actor_adder.add_actor(ActorType::SodaFlying, pos);
                 ShotProcessing::Absorb
             }
@@ -481,5 +481,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

@@ -15,6 +15,7 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -29,6 +30,7 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames: 4,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -57,7 +59,7 @@ impl ActorInterface for Specific {
         if p.message != ActorMessageType::Remove {
             return;
         }
-        p.general.is_alive = false;
+        self.is_alive = false;
     }
 
     fn position(&self) -> Rect {
@@ -70,5 +72,9 @@ impl ActorInterface for Specific {
 
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

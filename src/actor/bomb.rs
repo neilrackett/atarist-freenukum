@@ -96,8 +96,6 @@ impl ActorInterface for Specific {
                     self.explode_right = false;
                 }
             }
-        } else {
-            p.general.is_alive = false;
         }
     }
 
@@ -117,5 +115,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.counter < self.explode_threshold + self.num_flames
     }
 }

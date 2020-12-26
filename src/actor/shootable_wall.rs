@@ -12,6 +12,7 @@ use sdl2::rect::{Point, Rect};
 #[derive(Debug)]
 pub(crate) struct Specific {
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -23,6 +24,7 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         Specific {
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -38,7 +40,7 @@ impl ActorInterface for Specific {
         p.hero.score.add(10);
         p.actor_adder
             .add_actor(ActorType::Explosion, self.position.top_left());
-        p.general.is_alive = false;
+        self.is_alive = false;
         p.solids.set(
             self.position.x() as u32 / TILE_WIDTH,
             self.position.y() as u32 / TILE_HEIGHT,
@@ -63,5 +65,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

@@ -25,7 +25,6 @@ impl ActorCreateInterface for Specific {
                 actor type {:?} at {:?}",
             general.actor_type, pos
         );
-        general.is_alive = false;
         Specific {
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
@@ -44,6 +43,10 @@ impl ActorInterface for Specific {
     }
 
     fn is_in_foreground(&self) -> bool {
+        false
+    }
+
+    fn is_alive(&self) -> bool {
         false
     }
 }

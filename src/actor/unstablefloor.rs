@@ -69,7 +69,7 @@ impl ActorInterface for Specific {
             self.touching_hero = false;
         }
 
-        if self.touch_count >= 2 {
+        if !self.is_alive() {
             let mut r = self.position;
             for _ in 0..self.floor_length {
                 p.solids.set(
@@ -82,7 +82,6 @@ impl ActorInterface for Specific {
                 p.actor_adder.add_particle_firework(r.center(), 4);
                 r.offset(TILE_WIDTH as i32, 0);
             }
-            p.general.is_alive = false;
         }
     }
 
@@ -101,5 +100,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.touch_count < 2
     }
 }

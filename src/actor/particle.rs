@@ -16,6 +16,7 @@ pub(crate) struct Specific {
     hspeed: i32,
     vspeed: i32,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -51,18 +52,19 @@ impl ActorCreateInterface for Specific {
                 HALFTILE_WIDTH,
                 HALFTILE_HEIGHT,
             ),
+            is_alive: true,
         }
     }
 }
 
 impl ActorInterface for Specific {
-    fn act(&mut self, p: ActParameters) {
+    fn act(&mut self, _p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;
             self.position.offset(self.hspeed, self.vspeed);
             self.vspeed += 2;
         } else {
-            p.general.is_alive = false;
+            self.is_alive = false;
         }
     }
 
@@ -77,5 +79,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

@@ -70,14 +70,9 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(&mut self, p: ActParameters) {
+    fn act(&mut self, _p: ActParameters) {
         self.countdown -= 1;
         self.position.y -= 1;
-        if self.countdown == 0
-            || self.position.y() == -(TILE_HEIGHT as i32)
-        {
-            p.general.is_alive = false;
-        }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
@@ -91,5 +86,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.countdown > 0 && self.position.y() > -(TILE_HEIGHT as i32)
     }
 }

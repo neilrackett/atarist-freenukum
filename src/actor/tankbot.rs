@@ -42,8 +42,7 @@ impl ActorInterface for Specific {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
 
-        if self.was_shot == 2 {
-            p.general.is_alive = false;
+        if !self.is_alive() {
             p.actor_adder.add_actor(
                 ActorType::Explosion,
                 self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
@@ -158,5 +157,9 @@ impl ActorInterface for Specific {
 
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.was_shot < 2
     }
 }

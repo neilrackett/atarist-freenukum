@@ -17,7 +17,7 @@ pub(crate) struct Specific {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
-    was_shot: bool,
+    is_alive: bool,
     position: Rect,
 }
 
@@ -56,7 +56,7 @@ impl ActorCreateInterface for Specific {
             tile,
             current_frame: 0,
             num_frames: 4,
-            was_shot: false,
+            is_alive: true,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
@@ -137,15 +137,14 @@ impl ActorInterface for Specific {
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        if !self.was_shot {
-            p.general.is_alive = false;
+        self.is_alive = false;
 
-            p.hero.score.add(100);
-            p.actor_adder
-                .add_actor(ActorType::Steam, self.position.top_left());
-            p.actor_adder
-                .add_actor(ActorType::Explosion, self.position.top_left());
-        }
+        p.hero.score.add(100);
+        p.actor_adder
+            .add_actor(ActorType::Steam, self.position.top_left());
+        p.actor_adder
+            .add_actor(ActorType::Explosion, self.position.top_left());
+
         ShotProcessing::Absorb
     }
 
@@ -159,5 +158,9 @@ impl ActorInterface for Specific {
 
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

@@ -62,8 +62,7 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
-        if self.current_frame == self.num_frames {
-            p.general.is_alive = false;
+        if !self.is_alive() {
             if let Some(successor) = self.replaced_by {
                 p.actor_adder
                     .add_actor(successor, self.position.top_left());
@@ -90,5 +89,9 @@ impl ActorInterface for Specific {
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.can_hurt_hero
             && self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.current_frame < self.num_frames
     }
 }

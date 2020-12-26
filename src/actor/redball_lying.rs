@@ -12,6 +12,7 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct Specific {
     tile: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -24,6 +25,7 @@ impl ActorCreateInterface for Specific {
         Specific {
             tile: ANIMATION_MINE,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -38,7 +40,7 @@ impl ActorInterface for Specific {
         }
 
         if p.hero.position.geometry.has_intersection(self.position) {
-            p.general.is_alive = false;
+            self.is_alive = false;
             p.actor_adder
                 .add_actor(ActorType::BombFire, self.position.top_left());
         }
@@ -55,5 +57,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

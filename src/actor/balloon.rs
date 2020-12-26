@@ -13,6 +13,7 @@ pub(crate) struct Specific {
     destroyed: bool,
     current_frame: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -26,6 +27,7 @@ impl ActorCreateInterface for Specific {
             destroyed: false,
             current_frame: 0,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT * 2),
+            is_alive: true,
         }
     }
 }
@@ -36,7 +38,7 @@ impl ActorInterface for Specific {
         self.current_frame %= 9;
 
         if self.position.has_intersection(p.hero.position.geometry) {
-            p.general.is_alive = false;
+            self.is_alive = false;
             p.hero.score.add(10000);
             p.actor_adder.add_actor(
                 ActorType::Score10000,

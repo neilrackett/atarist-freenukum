@@ -80,7 +80,6 @@ impl ActorInterface for Specific {
                 .add_particle_firework(self.position.center(), 4);
         } else {
             // TODO: add removal animation (destroyed body)
-            p.general.is_alive = false;
             p.actor_message_queue.push_back(
                 ActorType::ElectricArc,
                 ActorMessageType::Remove,
@@ -111,5 +110,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.lives > 0
     }
 }

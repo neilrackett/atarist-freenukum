@@ -45,7 +45,6 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
-            p.general.is_alive = false;
             p.actor_adder.add_actor(
                 ActorType::Explosion,
                 self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
@@ -139,5 +138,9 @@ impl ActorInterface for Specific {
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.was_shot < 2
             && self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.was_shot < 2
     }
 }

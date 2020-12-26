@@ -13,6 +13,7 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct Specific {
     tile: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -29,6 +30,7 @@ impl ActorCreateInterface for Specific {
         Specific {
             tile: ANIMATION_CAMERA_CENTER,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -55,7 +57,7 @@ impl ActorInterface for Specific {
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        p.general.is_alive = false;
+        self.is_alive = false;
         p.hero.score.add(100);
         p.actor_adder
             .add_actor(ActorType::Score100, self.position.top_left());
@@ -70,5 +72,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

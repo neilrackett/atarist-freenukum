@@ -54,7 +54,6 @@ impl ActorInterface for Specific {
                 self.counter += 1;
                 if self.counter == 8 {
                     self.state = State::Open;
-                    p.general.is_alive = false;
                 }
             }
             State::Open => {}
@@ -82,5 +81,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.state != State::Open
     }
 }

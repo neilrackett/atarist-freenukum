@@ -14,6 +14,7 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     position: Rect,
+    is_alive: bool,
 }
 
 impl ActorCreateInterface for Specific {
@@ -28,6 +29,7 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames: 4,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            is_alive: true,
         }
     }
 }
@@ -53,7 +55,7 @@ impl ActorInterface for Specific {
         let x = self.position.x() as u32 / TILE_WIDTH;
         let y = self.position.y() as u32 / TILE_HEIGHT;
         p.solids.set(x, y, false);
-        p.general.is_alive = false;
+        self.is_alive = false;
     }
 
     fn position(&self) -> Rect {
@@ -62,5 +64,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
     }
 }

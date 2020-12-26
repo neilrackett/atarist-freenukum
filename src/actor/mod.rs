@@ -80,7 +80,7 @@ impl ActorsList {
         let mut i = 0;
         while i < self.actors.len() {
             match self.actors.get(i) {
-                Some(a) if !a.general.is_alive => {
+                Some(a) if !a.is_alive() => {
                     self.actors.remove(i);
                     self.interaction_target = match self.interaction_target
                     {
@@ -205,7 +205,7 @@ impl ActorsList {
                 || actor.position().has_intersection(visible_rect)
             {
                 actor.act(solids, tiles, hero, actor_queue, play_state);
-                if actor.general.is_alive && actor.hurts_hero(hero) {
+                if actor.is_alive() && actor.hurts_hero(hero) {
                     actors_hurting_hero += 1;
                 }
             }
@@ -287,7 +287,7 @@ impl Actor {
             play_state,
         };
         self.specific.act(p);
-        self.general.is_alive
+        self.is_alive()
     }
 
     fn hero_can_interact(&self, hero: &Hero) -> bool {
@@ -318,7 +318,7 @@ impl Actor {
     }
 
     pub fn is_alive(&self) -> bool {
-        self.general.is_alive
+        self.specific.is_alive()
     }
 
     pub fn position(&self) -> Rect {
@@ -912,7 +912,6 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub is_alive: bool,
     pub acts_while_invisible: bool,
 }
 
@@ -920,7 +919,6 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            is_alive: true,
             acts_while_invisible: false,
         }
     }
@@ -1118,5 +1116,9 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
 
     fn hurts_hero(&self, _hero: &Hero) -> bool {
         false
+    }
+
+    fn is_alive(&self) -> bool {
+        true
     }
 }
