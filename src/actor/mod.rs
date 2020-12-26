@@ -915,7 +915,6 @@ impl ActorType {
 pub struct ActorData {
     pub actor_type: ActorType,
     pub is_alive: bool,
-    pub touches_hero: bool,
     pub is_visible: bool,
     pub acts_while_invisible: bool,
 }
@@ -925,7 +924,6 @@ impl ActorData {
         ActorData {
             actor_type,
             is_alive: true,
-            touches_hero: false,
             is_visible: false,
             acts_while_invisible: false,
         }
