@@ -329,6 +329,7 @@ fn start_in_level(
                     hero,
                     &mut actor_queue,
                     &mut actor_message_queue,
+                    srcrect,
                 )?;
                 do_update = true;
             }

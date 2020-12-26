@@ -913,15 +913,19 @@ impl LevelData {
             }
         }
 
-        self.actors.update_visibility(srcrect);
-
-        self.actors
-            .render_background_actors(renderer, draw_collision_bounds)?;
+        self.actors.render_background_actors(
+            renderer,
+            draw_collision_bounds,
+            srcrect,
+        )?;
 
         hero.render(renderer, &self.solids, draw_collision_bounds)?;
 
-        self.actors
-            .render_foreground_actors(renderer, draw_collision_bounds)?;
+        self.actors.render_foreground_actors(
+            renderer,
+            draw_collision_bounds,
+            srcrect,
+        )?;
 
         for shot in self.shots.iter() {
             shot.render(renderer, draw_collision_bounds)?;
@@ -934,6 +938,7 @@ impl LevelData {
         hero: &mut Hero,
         actor_queue: &mut ActorQueue,
         actor_message_queue: &mut ActorMessageQueue,
+        visible_rect: Rect,
     ) -> Result<()> {
         let animated_frames =
             self.animated_frames_since_last_act_increase();
@@ -965,6 +970,7 @@ impl LevelData {
             hero,
             actor_queue,
             &mut self.play_state,
+            visible_rect,
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {

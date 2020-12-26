@@ -197,11 +197,12 @@ impl ActorsList {
         hero: &mut Hero,
         actor_queue: &mut ActorQueue,
         play_state: &mut PlayState,
+        visible_rect: Rect,
     ) {
         let mut actors_hurting_hero = 0usize;
         for actor in self.actors.iter_mut() {
             if actor.general.acts_while_invisible
-                || actor.general.is_visible
+                || actor.position().has_intersection(visible_rect)
             {
                 actor.act(solids, tiles, hero, actor_queue, play_state);
                 if actor.general.is_alive && actor.hurts_hero(hero) {
@@ -221,23 +222,18 @@ impl ActorsList {
         hero.gets_hurt = actors_hurting_hero > 0;
     }
 
-    pub fn update_visibility(&mut self, visible_rect: Rect) {
-        self.actors.iter_mut().for_each(|actor| {
-            actor.general.is_visible =
-                actor.position().has_intersection(visible_rect);
-        });
-    }
-
     pub fn render_background_actors(
         &mut self,
         renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
+        visible_rect: Rect,
     ) -> Result<()> {
         Ok(self
             .actors
             .iter_mut()
             .filter(|actor| {
-                actor.general.is_visible && !actor.is_in_foreground()
+                !actor.is_in_foreground()
+                    && actor.position().has_intersection(visible_rect)
             })
             .map(|actor| actor.render(renderer, draw_collision_bounds))
             .collect::<Result<_>>()?)
@@ -247,12 +243,14 @@ impl ActorsList {
         &mut self,
         renderer: &mut dyn Renderer,
         draw_collision_bounds: bool,
+        visible_rect: Rect,
     ) -> Result<()> {
         Ok(self
             .actors
             .iter_mut()
             .filter(|actor| {
-                actor.general.is_visible && actor.is_in_foreground()
+                actor.is_in_foreground()
+                    && actor.position().has_intersection(visible_rect)
             })
             .map(|actor| actor.render(renderer, draw_collision_bounds))
             .collect::<Result<_>>()?)
@@ -915,7 +913,6 @@ impl ActorType {
 pub struct ActorData {
     pub actor_type: ActorType,
     pub is_alive: bool,
-    pub is_visible: bool,
     pub acts_while_invisible: bool,
 }
 
@@ -924,7 +921,6 @@ impl ActorData {
         ActorData {
             actor_type,
             is_alive: true,
-            is_visible: false,
             acts_while_invisible: false,
         }
     }
