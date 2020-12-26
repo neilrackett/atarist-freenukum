@@ -21,13 +21,11 @@ pub(crate) struct Specific {
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.is_in_foreground = true;
-
         Specific {
             tile: OBJECT_ELECTRIC_ARC,
             current_frame: 0,
@@ -70,5 +68,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        true
     }
 }

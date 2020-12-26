@@ -23,8 +23,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        general.is_in_foreground = true;
-
         let x = pos.x as u32 / TILE_WIDTH;
         let y = pos.y as u32 / TILE_HEIGHT;
 
@@ -73,5 +71,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        true
     }
 }

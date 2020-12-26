@@ -17,13 +17,11 @@ pub(crate) struct Specific {
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
-        general.is_in_foreground = false;
-
         let x = pos.x as u32 / TILE_WIDTH;
         let y = pos.y as u32 / TILE_HEIGHT;
         tiles.copy_from_to(x, y + 1, x, y);
@@ -68,5 +66,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        false
     }
 }

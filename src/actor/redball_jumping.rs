@@ -79,4 +79,8 @@ impl ActorInterface for Specific {
     fn position(&self) -> Rect {
         self.position
     }
+
+    fn is_in_foreground(&self) -> bool {
+        true
+    }
 }

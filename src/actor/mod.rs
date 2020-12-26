@@ -237,7 +237,7 @@ impl ActorsList {
             .actors
             .iter_mut()
             .filter(|actor| {
-                actor.general.is_visible && !actor.general.is_in_foreground
+                actor.general.is_visible && !actor.is_in_foreground()
             })
             .map(|actor| actor.render(renderer, draw_collision_bounds))
             .collect::<Result<_>>()?)
@@ -252,7 +252,7 @@ impl ActorsList {
             .actors
             .iter_mut()
             .filter(|actor| {
-                actor.general.is_visible && actor.general.is_in_foreground
+                actor.general.is_visible && actor.is_in_foreground()
             })
             .map(|actor| actor.render(renderer, draw_collision_bounds))
             .collect::<Result<_>>()?)
@@ -376,6 +376,10 @@ impl Actor {
             renderer.draw_rect(self.position(), color)?;
         }
         Ok(())
+    }
+
+    pub fn is_in_foreground(&self) -> bool {
+        self.specific.is_in_foreground()
     }
 }
 
@@ -939,7 +943,6 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub is_in_foreground: bool,
     pub hurts_hero: bool,
     pub is_alive: bool,
     pub touches_hero: bool,
@@ -951,7 +954,6 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            is_in_foreground: true,
             hurts_hero: false,
             is_alive: true,
             touches_hero: false,
@@ -1163,4 +1165,6 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn receive_message(&mut self, _p: ReceiveMessageParameters) {}
 
     fn position(&self) -> Rect;
+
+    fn is_in_foreground(&self) -> bool;
 }

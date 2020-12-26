@@ -24,8 +24,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.is_in_foreground = false;
-
         let (tile, num_frames) = match general.actor_type {
             ActorType::TextOnScreenBackground => (0x0004, 4),
             ActorType::HighVoltageFlashBackground => (0x0008, 4),
@@ -82,5 +80,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        false
     }
 }

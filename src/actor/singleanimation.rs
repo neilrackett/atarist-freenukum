@@ -27,7 +27,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.is_in_foreground = false;
         general.acts_while_invisible = true;
 
         let (tile, num_frames, can_hurt_hero, replaced_by) = match general
@@ -92,5 +91,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        false
     }
 }

@@ -31,8 +31,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.is_in_foreground = true;
-
         let (tile, num_frames) = match general.actor_type {
             ActorType::BoxRedSoda | ActorType::BoxRedChicken => {
                 (OBJECT_BOX_RED, 1)
@@ -462,5 +460,9 @@ impl ActorInterface for Specific {
 
     fn position(&self) -> Rect {
         self.position
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        true
     }
 }
