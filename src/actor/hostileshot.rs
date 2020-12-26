@@ -24,8 +24,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.acts_while_invisible = true;
-
         let tile = match general.actor_type {
             ActorType::HostileShotLeft => OBJECT_HOSTILESHOT,
             ActorType::HostileShotRight => OBJECT_HOSTILESHOT + 2,
@@ -88,5 +86,9 @@ impl ActorInterface for Specific {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

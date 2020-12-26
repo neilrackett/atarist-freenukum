@@ -26,13 +26,11 @@ pub(crate) struct Specific {
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.acts_while_invisible = true;
-
         Specific {
             state: State::Idle,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
@@ -150,5 +148,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

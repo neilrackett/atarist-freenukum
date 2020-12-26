@@ -27,8 +27,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.acts_while_invisible = true;
-
         let (tile, num_frames, can_hurt_hero, replaced_by) = match general
             .actor_type
         {
@@ -93,5 +91,9 @@ impl ActorInterface for Specific {
 
     fn is_alive(&self) -> bool {
         self.current_frame < self.num_frames
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

@@ -26,8 +26,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.acts_while_invisible = true;
-
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let vspeed = rng.gen_range(-12, 5);
@@ -83,5 +81,9 @@ impl ActorInterface for Specific {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

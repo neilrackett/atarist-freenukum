@@ -28,8 +28,6 @@ impl ActorCreateInterface for Specific {
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
-        general.acts_while_invisible = true;
-
         let tile = match general.actor_type {
             ActorType::Score100 => NUMBER_100,
             ActorType::Score200 => NUMBER_200,
@@ -90,5 +88,9 @@ impl ActorInterface for Specific {
 
     fn is_alive(&self) -> bool {
         self.countdown > 0 && self.position.y() > -(TILE_HEIGHT as i32)
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

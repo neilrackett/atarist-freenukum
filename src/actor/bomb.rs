@@ -23,13 +23,11 @@ pub(crate) struct Specific {
 
 impl ActorCreateInterface for Specific {
     fn create(
-        general: &mut ActorData,
+        _general: &mut ActorData,
         pos: Point,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        general.acts_while_invisible = true;
-
         Specific {
             tile: ANIMATION_BOMB,
             current_frame: 0,
@@ -119,5 +117,9 @@ impl ActorInterface for Specific {
 
     fn is_alive(&self) -> bool {
         self.counter < self.explode_threshold + self.num_flames
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
     }
 }

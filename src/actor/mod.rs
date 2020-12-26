@@ -201,7 +201,7 @@ impl ActorsList {
     ) {
         let mut actors_hurting_hero = 0usize;
         for actor in self.actors.iter_mut() {
-            if actor.general.acts_while_invisible
+            if actor.acts_while_invisible()
                 || actor.position().has_intersection(visible_rect)
             {
                 actor.act(solids, tiles, hero, actor_queue, play_state);
@@ -349,6 +349,10 @@ impl Actor {
 
     pub fn hurts_hero(&self, hero: &Hero) -> bool {
         self.specific.hurts_hero(hero)
+    }
+
+    pub fn acts_while_invisible(&self) -> bool {
+        self.specific.acts_while_invisible()
     }
 }
 
@@ -912,15 +916,11 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub acts_while_invisible: bool,
 }
 
 impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
-        ActorData {
-            actor_type,
-            acts_while_invisible: false,
-        }
+        ActorData { actor_type }
     }
 }
 
@@ -1120,5 +1120,9 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
 
     fn is_alive(&self) -> bool {
         true
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        false
     }
 }
