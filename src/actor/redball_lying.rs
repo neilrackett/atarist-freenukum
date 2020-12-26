@@ -11,7 +11,6 @@ use sdl2::rect::{Point, Rect};
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
-    touching_hero: u8,
     position: Rect,
 }
 
@@ -24,7 +23,6 @@ impl ActorCreateInterface for Specific {
     ) -> Specific {
         Specific {
             tile: ANIMATION_MINE,
-            touching_hero: 0,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
@@ -32,8 +30,9 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = true;
-        self.touching_hero = 1;
+        p.general.is_alive = false;
+        p.actor_adder
+            .add_actor(ActorType::BombFire, self.position.top_left());
     }
 
     fn act(&mut self, p: ActParameters) {
@@ -42,19 +41,6 @@ impl ActorInterface for Specific {
             self.position.y() as u32 / TILE_HEIGHT + 1,
         ) {
             self.position.offset(0, HALFTILE_HEIGHT as i32);
-        }
-
-        match self.touching_hero {
-            1 => self.touching_hero += 1,
-            2 => {
-                p.general.hurts_hero = false;
-                p.general.is_alive = false;
-                p.actor_adder.add_actor(
-                    ActorType::BombFire,
-                    self.position.top_left(),
-                );
-            }
-            _ => {}
         }
     }
 

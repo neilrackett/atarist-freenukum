@@ -204,7 +204,7 @@ impl ActorsList {
                 || actor.general.is_visible
             {
                 actor.act(solids, tiles, hero, actor_queue, play_state);
-                if actor.general.is_alive && actor.general.hurts_hero {
+                if actor.general.is_alive && actor.hurts_hero(hero) {
                     actors_hurting_hero += 1;
                 }
             }
@@ -380,6 +380,10 @@ impl Actor {
 
     pub fn is_in_foreground(&self) -> bool {
         self.specific.is_in_foreground()
+    }
+
+    pub fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.specific.hurts_hero(hero)
     }
 }
 
@@ -943,7 +947,6 @@ impl ActorType {
 #[derive(Debug)]
 pub struct ActorData {
     pub actor_type: ActorType,
-    pub hurts_hero: bool,
     pub is_alive: bool,
     pub touches_hero: bool,
     pub is_visible: bool,
@@ -954,7 +957,6 @@ impl ActorData {
     pub fn new(actor_type: ActorType) -> Self {
         ActorData {
             actor_type,
-            hurts_hero: false,
             is_alive: true,
             touches_hero: false,
             is_visible: false,
@@ -1167,4 +1169,8 @@ pub(crate) trait ActorInterface: std::fmt::Debug {
     fn position(&self) -> Rect;
 
     fn is_in_foreground(&self) -> bool;
+
+    fn hurts_hero(&self, _hero: &Hero) -> bool {
+        false
+    }
 }

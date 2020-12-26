@@ -1,18 +1,16 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters,
+        ActorType, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, OBJECT_HOSTILESHOT, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
     tile: usize,
-    touching_hero: bool,
     current_frame: usize,
     num_frames: usize,
     position: Rect,
@@ -39,7 +37,6 @@ impl ActorCreateInterface for Specific {
 
         Specific {
             tile,
-            touching_hero: false,
             current_frame: 0,
             num_frames: 2,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
@@ -48,16 +45,6 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        self.touching_hero = true;
-        p.general.hurts_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        self.touching_hero = false;
-        p.general.hurts_hero = false;
-    }
-
     fn act(&mut self, p: ActParameters) {
         let offset = match p.general.actor_type {
             ActorType::HostileShotLeft => -(TILE_WIDTH as i32),
@@ -71,9 +58,6 @@ impl ActorInterface for Specific {
             self.position.y() as u32 / TILE_HEIGHT,
         ) {
             p.general.is_alive = false;
-            if self.touching_hero {
-                p.general.hurts_hero = false;
-            }
         }
 
         self.current_frame += 1;
@@ -94,5 +78,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }

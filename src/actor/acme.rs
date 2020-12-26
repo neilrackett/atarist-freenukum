@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchStartParameters, RenderParameters,
-        ShotParameters, ShotProcessing,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -13,7 +12,6 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct Specific {
     tile: usize,
     counter: usize,
-    touching_hero: bool,
     position: Rect,
 }
 
@@ -27,7 +25,6 @@ impl ActorCreateInterface for Specific {
         Specific {
             tile: OBJECT_FALLINGBLOCK,
             counter: 0,
-            touching_hero: false,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
         }
     }
@@ -116,18 +113,16 @@ impl ActorInterface for Specific {
         ShotProcessing::Absorb
     }
 
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        if self.counter > 10 && !self.touching_hero {
-            self.touching_hero = true;
-            p.general.hurts_hero = true;
-        }
-    }
-
     fn position(&self) -> Rect {
         self.position
     }
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.counter > 10
+            && self.position.has_intersection(hero.position.geometry)
     }
 }

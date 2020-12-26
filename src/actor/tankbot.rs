@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
+    Hero, HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
     HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
@@ -17,7 +16,6 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     was_shot: usize,
-    touching_hero: bool,
     position: Rect,
 }
 
@@ -34,23 +32,12 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames: 4,
             was_shot: 0,
-            touching_hero: false,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
         }
     }
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = true;
-        self.touching_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
-        self.touching_hero = false;
-    }
-
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
@@ -154,11 +141,7 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        if self.was_shot == 1 && self.touching_hero {
-            p.general.hurts_hero = false;
-            self.touching_hero = false;
-        }
+    fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
         if self.was_shot != 2 {
             self.was_shot += 1;
         }
@@ -171,5 +154,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }

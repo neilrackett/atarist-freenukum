@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters,
+        ActorType, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
+    Hero, HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
     OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
@@ -23,7 +22,6 @@ pub(crate) struct Specific {
     direction: HorizontalDirection,
     state: State,
     counter: usize,
-    touching_hero: bool,
     position: Rect,
 }
 
@@ -61,24 +59,13 @@ impl ActorCreateInterface for Specific {
             direction,
             state: State::Off,
             counter: 0,
-            touching_hero: false,
             position,
         }
     }
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = self.state == State::Burning;
-        self.touching_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
-        self.touching_hero = false;
-    }
-
-    fn act(&mut self, p: ActParameters) {
+    fn act(&mut self, _p: ActParameters) {
         match self.state {
             State::Off => {
                 if self.counter == 40 {
@@ -90,18 +77,12 @@ impl ActorInterface for Specific {
                 if self.counter == 20 {
                     self.counter = 0;
                     self.state = State::Burning;
-                    if self.touching_hero {
-                        p.general.hurts_hero = true;
-                    }
                 }
             }
             State::Burning => {
                 if self.counter == 20 {
                     self.counter = 0;
                     self.state = State::Off;
-                    if self.touching_hero {
-                        p.general.hurts_hero = false;
-                    }
                 }
             }
         }
@@ -164,5 +145,10 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.state == State::Burning
+            && self.position.has_intersection(hero.position.geometry)
     }
 }

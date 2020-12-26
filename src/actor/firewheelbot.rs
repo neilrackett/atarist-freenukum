@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
+    Hero, HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
     ANIMATION_FIREWHEEL_ON, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
     TILE_WIDTH,
 };
@@ -20,7 +19,6 @@ pub(crate) struct Specific {
     was_shot: usize,
     fire_is_on: bool,
     counter: usize,
-    touching_hero: bool,
     position: Rect,
 }
 
@@ -35,7 +33,6 @@ impl ActorCreateInterface for Specific {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_FIREWHEEL_OFF,
             counter: 0,
-            touching_hero: false,
             current_frame: 0,
             num_frames: 4,
             was_shot: 0,
@@ -46,18 +43,6 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        if self.was_shot < 2 {
-            self.touching_hero = true;
-            p.general.hurts_hero = true;
-        }
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        self.touching_hero = false;
-        p.general.hurts_hero = false;
-    }
-
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
             p.general.is_alive = false;
@@ -136,15 +121,9 @@ impl ActorInterface for Specific {
         true
     }
 
-    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        if !self.fire_is_on {
-            if self.was_shot == 1 && self.touching_hero {
-                p.general.hurts_hero = false;
-                self.touching_hero = false;
-            }
-            if self.was_shot != 2 {
-                self.was_shot += 1;
-            }
+    fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
+        if !self.fire_is_on && self.was_shot < 2 {
+            self.was_shot += 1;
         }
         ShotProcessing::Absorb
     }
@@ -155,5 +134,10 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.was_shot < 2
+            && self.position.has_intersection(hero.position.geometry)
     }
 }

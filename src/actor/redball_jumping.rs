@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        HeroTouchEndParameters, HeroTouchStartParameters,
         RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -34,14 +33,6 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
-    }
-
     fn act(&mut self, _p: ActParameters) {
         let distance = match self.counter {
             0 => 0,
@@ -82,5 +73,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }

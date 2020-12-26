@@ -1,11 +1,10 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActorType, RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, VerticalDirection,
+    Hero, HorizontalDirection, Result, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
     LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
 };
@@ -19,7 +18,6 @@ pub(crate) struct Specific {
     current_frame: usize,
     num_frames: usize,
     was_shot: bool,
-    touching_hero: bool,
     position: Rect,
 }
 
@@ -59,23 +57,12 @@ impl ActorCreateInterface for Specific {
             current_frame: 0,
             num_frames: 4,
             was_shot: false,
-            touching_hero: false,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = true;
-        self.touching_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
-        self.touching_hero = false;
-    }
-
     fn act(&mut self, p: ActParameters) {
         let orientation = self.orientation.as_factor_i32();
 
@@ -151,11 +138,6 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if !self.was_shot {
-            if self.touching_hero {
-                p.general.hurts_hero = false;
-                self.touching_hero = false;
-                self.current_frame = 0;
-            }
             p.general.is_alive = false;
 
             p.hero.score.add(100);
@@ -173,5 +155,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }

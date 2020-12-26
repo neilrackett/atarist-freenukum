@@ -1,12 +1,12 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters,
+        ActorType, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
-    OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
+    ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT,
+    TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -71,16 +71,6 @@ impl ActorInterface for Specific {
         }
     }
 
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        if self.can_hurt_hero {
-            p.general.hurts_hero = true;
-        }
-    }
-
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
-    }
-
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
             self.tile + self.current_frame,
@@ -95,5 +85,10 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.can_hurt_hero
+            && self.position.has_intersection(hero.position.geometry)
     }
 }

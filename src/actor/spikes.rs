@@ -5,7 +5,7 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
+    Hero, Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
     TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
@@ -46,13 +46,11 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.general.hurts_hero = true;
+    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {
         self.touching_hero = true;
     }
 
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
-        p.general.hurts_hero = false;
+    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {
         self.touching_hero = false;
     }
 
@@ -75,5 +73,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }

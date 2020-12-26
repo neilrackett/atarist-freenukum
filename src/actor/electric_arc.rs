@@ -6,8 +6,8 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING, TILE_HEIGHT,
-    TILE_WIDTH,
+    Hero, Result, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
+    TILE_HEIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -41,14 +41,12 @@ impl ActorInterface for Specific {
         self.current_frame %= self.num_frames;
     }
 
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
+    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {
         self.tile = OBJECT_ELECTRIC_ARC_HURTING;
-        p.general.hurts_hero = true;
     }
 
-    fn hero_touch_end(&mut self, p: HeroTouchEndParameters) {
+    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {
         self.tile = OBJECT_ELECTRIC_ARC;
-        p.general.hurts_hero = false;
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
@@ -72,5 +70,9 @@ impl ActorInterface for Specific {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 }
