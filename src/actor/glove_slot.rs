@@ -55,7 +55,7 @@ impl ActorInterface for Specific {
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         match self.state {
             State::Idle => {
-                if p.hero_data.inventory.is_set(InventoryItem::Glove) {
+                if p.hero.inventory.is_set(InventoryItem::Glove) {
                     p.actor_message_queue.push_back(
                         ActorType::ExpandingFloor,
                         ActorMessageType::Expand,

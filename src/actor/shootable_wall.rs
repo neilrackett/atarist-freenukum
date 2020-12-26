@@ -37,7 +37,7 @@ impl ActorInterface for Specific {
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        p.hero_data.score.add(10);
+        p.hero.score.add(10);
         p.actor_adder
             .add_actor(ActorType::Explosion, self.position.top_left());
         p.general.is_alive = false;

@@ -63,7 +63,7 @@ impl ActorInterface for Specific {
             State::Opening => {
                 self.counter += 1;
                 if self.counter >= 4 {
-                    p.hero_data.hidden = true;
+                    p.hero.hidden = true;
                     self.state = State::Closing;
                     self.counter -= 1;
                 }
@@ -71,7 +71,7 @@ impl ActorInterface for Specific {
             State::Closing => {
                 if self.counter == 0 {
                     *p.play_state = PlayState::LevelFinished;
-                    p.hero_data.hidden = false;
+                    p.hero.hidden = false;
                 } else {
                     self.counter -= 1;
                 }

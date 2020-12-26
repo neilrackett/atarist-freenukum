@@ -67,7 +67,7 @@ impl ActorInterface for Specific {
             return;
         }
 
-        p.hero_data.position.move_to(
+        p.hero.position.move_to(
             self.position.x(),
             self.position.y() - TILE_HEIGHT as i32,
         );

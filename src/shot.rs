@@ -1,6 +1,6 @@
 use crate::{
     actor::{ActorAdder, ActorMessageQueue, ActorType, ActorsList},
-    hero::HeroData,
+    hero::Hero,
     level::{solids::LevelSolids, tiles::LevelTiles},
     rendering::Renderer,
     HorizontalDirection, Result, HALFTILE_WIDTH, LEVELWINDOW_WIDTH,
@@ -41,7 +41,7 @@ impl Shot {
     /// Returns whether the shot is still alive after acting.
     pub fn act(
         &mut self,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actors: &mut ActorsList,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -56,10 +56,10 @@ impl Shot {
             self.countdown -= 1;
         }
 
-        let x_start = hero_data.position.geometry.x()
+        let x_start = hero.position.geometry.x()
             - TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
-        let x_end = hero_data.position.geometry.x()
-            + hero_data.position.geometry.w as i32
+        let x_end = hero.position.geometry.x()
+            + hero.position.geometry.w as i32
             + TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
 
         if self.countdown >= 2 {
@@ -70,7 +70,7 @@ impl Shot {
             // also the intermediate position gets covered, not just the
             // end position.
             self.push(
-                hero_data,
+                hero,
                 actors,
                 solids,
                 tiles,
@@ -79,7 +79,7 @@ impl Shot {
                 actor_message_queue,
             );
             self.push(
-                hero_data,
+                hero,
                 actors,
                 solids,
                 tiles,
@@ -124,7 +124,7 @@ impl Shot {
 
     pub fn push(
         &mut self,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actors: &mut ActorsList,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
@@ -140,7 +140,7 @@ impl Shot {
                     solids,
                     tiles,
                     actor_adder,
-                    hero_data,
+                    hero,
                     actor_message_queue,
                 ) {
                     self.countdown = 1;

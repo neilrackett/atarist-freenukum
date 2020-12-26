@@ -42,7 +42,7 @@ impl ActorInterface for Specific {
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
-        if p.hero_data.inventory.is_set(InventoryItem::AccessCard) {
+        if p.hero.inventory.is_set(InventoryItem::AccessCard) {
             p.actor_message_queue.push_back(
                 ActorType::AccessCardDoor,
                 ActorMessageType::OpenDoor,
@@ -50,7 +50,7 @@ impl ActorInterface for Specific {
             self.current_frame = 0;
             self.num_frames = 1;
             self.tile = OBJECT_ACCESS_CARD_SLOT + 8;
-            p.hero_data.inventory.unset(InventoryItem::AccessCard);
+            p.hero.inventory.unset(InventoryItem::AccessCard);
         } else {
             p.info_message_queue
                 .push_back("You don't have the access card\n".to_string());

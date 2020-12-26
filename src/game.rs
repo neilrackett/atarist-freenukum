@@ -3,7 +3,7 @@ use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
-use crate::hero::{HeroData, Motion};
+use crate::hero::{Hero, Motion};
 use crate::infobox::{self, InfoMessageQueue};
 use crate::level::{LevelData, PlayState};
 use crate::picture::show_splash_with_message;
@@ -41,7 +41,7 @@ fn start_in_level(
     level_number: usize,
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
-    hero: &mut HeroData,
+    hero: &mut Hero,
     settings: &mut Settings,
     episodes: &Episodes,
     borders: &Borders,
@@ -349,7 +349,7 @@ fn start_in_level(
 pub fn start(
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
-    hero: &mut HeroData,
+    hero: &mut Hero,
     settings: &mut Settings,
     episodes: &Episodes,
     event_pump: &mut EventPump,

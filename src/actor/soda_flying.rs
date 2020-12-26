@@ -28,7 +28,7 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.hero_data.score.add(1000);
+        p.hero.score.add(1000);
         p.actor_adder
             .add_actor(ActorType::Score1000, self.position.top_left());
         p.general.is_alive = false;

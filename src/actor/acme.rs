@@ -37,7 +37,7 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
-        let hero_geometry = p.hero_data.position.geometry;
+        let hero_geometry = p.hero.position.geometry;
 
         match self.counter {
             0 => {
@@ -107,7 +107,7 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.counter > 0 {
-            p.hero_data.score.add(500);
+            p.hero.score.add(500);
             p.actor_adder
                 .add_actor(ActorType::Score500, self.position.top_left());
             p.actor_adder

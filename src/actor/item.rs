@@ -93,8 +93,8 @@ impl ActorInterface for Specific {
         match p.general.actor_type {
             ActorType::LetterD => {
                 p.general.is_alive = false;
-                p.hero_data.fetched_letter_state.picked(FetchedLetter::D);
-                p.hero_data.score.add(500);
+                p.hero.fetched_letter_state.picked(FetchedLetter::D);
+                p.hero.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
                     self.position.top_left(),
@@ -102,8 +102,8 @@ impl ActorInterface for Specific {
             }
             ActorType::LetterU => {
                 p.general.is_alive = false;
-                p.hero_data.fetched_letter_state.picked(FetchedLetter::U);
-                p.hero_data.score.add(500);
+                p.hero.fetched_letter_state.picked(FetchedLetter::U);
+                p.hero.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
                     self.position.top_left(),
@@ -111,8 +111,8 @@ impl ActorInterface for Specific {
             }
             ActorType::LetterK => {
                 p.general.is_alive = false;
-                p.hero_data.fetched_letter_state.picked(FetchedLetter::K);
-                p.hero_data.score.add(500);
+                p.hero.fetched_letter_state.picked(FetchedLetter::K);
+                p.hero.score.add(500);
                 p.actor_adder.add_actor(
                     ActorType::Score500,
                     self.position.top_left(),
@@ -120,71 +120,71 @@ impl ActorInterface for Specific {
             }
             ActorType::LetterE => {
                 p.general.is_alive = false;
-                p.hero_data.fetched_letter_state.picked(FetchedLetter::E);
-                p.hero_data.score.add(500);
-                if p.hero_data.fetched_letter_state.succeeded() {
+                p.hero.fetched_letter_state.picked(FetchedLetter::E);
+                p.hero.score.add(500);
+                if p.hero.fetched_letter_state.succeeded() {
                     p.actor_adder.add_actor(
                         ActorType::Score10000,
                         self.position.top_left(),
                     );
-                    p.hero_data.score.add(10000);
+                    p.hero.score.add(10000);
                 } else {
                     p.actor_adder.add_actor(
                         ActorType::Score500,
                         self.position.top_left(),
                     );
-                    p.hero_data.score.add(500);
+                    p.hero.score.add(500);
                 }
             }
             ActorType::FullLife => {
-                p.hero_data.health.fill_max();
+                p.hero.health.fill_max();
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
                 );
             }
             ActorType::Gun => {
-                p.hero_data.firepower.increase(1);
+                p.hero.firepower.increase(1);
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
                 );
             }
             ActorType::AccessCard => {
-                p.hero_data.inventory.set(InventoryItem::AccessCard);
+                p.hero.inventory.set(InventoryItem::AccessCard);
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
                 );
             }
             ActorType::Glove => {
-                p.hero_data.inventory.set(InventoryItem::Glove);
+                p.hero.inventory.set(InventoryItem::Glove);
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
                 );
             }
             ActorType::Boots => {
-                p.hero_data.inventory.set(InventoryItem::Boot);
+                p.hero.inventory.set(InventoryItem::Boot);
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
                 );
             }
             ActorType::Clamps => {
-                p.hero_data.inventory.set(InventoryItem::Clamp);
+                p.hero.inventory.set(InventoryItem::Clamp);
                 p.general.is_alive = false;
-                p.hero_data.score.add(1000);
+                p.hero.score.add(1000);
                 p.actor_adder.add_actor(
                     ActorType::Score1000,
                     self.position.top_left(),
@@ -192,7 +192,7 @@ impl ActorInterface for Specific {
             }
             ActorType::Football => {
                 p.general.is_alive = false;
-                p.hero_data.score.add(100);
+                p.hero.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
                     self.position.top_left(),
@@ -200,7 +200,7 @@ impl ActorInterface for Specific {
             }
             ActorType::Disk => {
                 p.general.is_alive = false;
-                p.hero_data.score.add(5000);
+                p.hero.score.add(5000);
                 p.actor_adder.add_actor(
                     ActorType::Score5000,
                     self.position.top_left(),
@@ -208,7 +208,7 @@ impl ActorInterface for Specific {
             }
             ActorType::Joystick => {
                 p.general.is_alive = false;
-                p.hero_data.score.add(2000);
+                p.hero.score.add(2000);
                 p.actor_adder.add_actor(
                     ActorType::Score2000,
                     self.position.top_left(),
@@ -218,21 +218,21 @@ impl ActorInterface for Specific {
                 p.general.is_alive = false;
                 match self.current_frame {
                     0 => {
-                        p.hero_data.score.add(100);
+                        p.hero.score.add(100);
                         p.actor_adder.add_actor(
                             ActorType::Score100,
                             self.position.top_left(),
                         );
                     }
                     1 => {
-                        p.hero_data.score.add(2000);
+                        p.hero.score.add(2000);
                         p.actor_adder.add_actor(
                             ActorType::Score2000,
                             self.position.top_left(),
                         );
                     }
                     2 => {
-                        p.hero_data.score.add(5000);
+                        p.hero.score.add(5000);
                         p.actor_adder.add_actor(
                             ActorType::Score5000,
                             self.position.top_left(),
@@ -242,27 +242,27 @@ impl ActorInterface for Specific {
                 }
             }
             ActorType::Soda => {
-                p.hero_data.health.increase(1);
+                p.hero.health.increase(1);
                 p.general.is_alive = false;
-                p.hero_data.score.add(200);
+                p.hero.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
                     self.position.top_left(),
                 );
             }
             ActorType::ChickenSingle => {
-                p.hero_data.health.increase(1);
+                p.hero.health.increase(1);
                 p.general.is_alive = false;
-                p.hero_data.score.add(100);
+                p.hero.score.add(100);
                 p.actor_adder.add_actor(
                     ActorType::Score100,
                     self.position.top_left(),
                 );
             }
             ActorType::ChickenDouble => {
-                p.hero_data.health.increase(2);
+                p.hero.health.increase(2);
                 p.general.is_alive = false;
-                p.hero_data.score.add(200);
+                p.hero.score.add(200);
                 p.actor_adder.add_actor(
                     ActorType::Score200,
                     self.position.top_left(),

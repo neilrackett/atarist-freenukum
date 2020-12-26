@@ -37,7 +37,7 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
-        let x = p.hero_data.position.geometry.x;
+        let x = p.hero.position.geometry.x;
         self.tile = if x - 1 > self.position.x {
             ANIMATION_CAMERA_RIGHT
         } else if x + 1 < self.position.x {
@@ -58,7 +58,7 @@ impl ActorInterface for Specific {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.general.is_alive = false;
-        p.hero_data.score.add(100);
+        p.hero.score.add(100);
         p.actor_adder
             .add_actor(ActorType::Score100, self.position.top_left());
         p.actor_adder

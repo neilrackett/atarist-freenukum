@@ -65,7 +65,7 @@ impl ActorInterface for Specific {
             );
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 4);
-            p.hero_data.score.add(2500);
+            p.hero.score.add(2500);
         } else if p.solids.get(
             self.position.x() as u32 / TILE_WIDTH,
             self.position.y() as u32 / TILE_HEIGHT + 1,

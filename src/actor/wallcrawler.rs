@@ -160,7 +160,7 @@ impl ActorInterface for Specific {
             }
             p.general.is_alive = false;
 
-            p.hero_data.score.add(100);
+            p.hero.score.add(100);
             p.actor_adder
                 .add_actor(ActorType::Steam, self.position.top_left());
             p.actor_adder

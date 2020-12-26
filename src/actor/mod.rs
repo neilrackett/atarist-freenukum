@@ -40,7 +40,7 @@ mod wallcrawler;
 
 use crate::{
     geometry::RectExt,
-    hero::HeroData,
+    hero::Hero,
     infobox::InfoMessageQueue,
     level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
     rendering::Renderer,
@@ -101,7 +101,7 @@ impl ActorsList {
         &mut self,
         receivers: ActorType,
         message: ActorMessageType,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         solids: &mut LevelSolids,
     ) {
         for actor in self
@@ -112,7 +112,7 @@ impl ActorsList {
             let p = ReceiveMessageParameters {
                 general: &mut actor.general,
                 message,
-                hero_data,
+                hero,
                 solids,
             };
             actor.specific.receive_message(p);
@@ -125,7 +125,7 @@ impl ActorsList {
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_message_queue: &mut ActorMessageQueue,
     ) -> bool {
         for actor in self.actors.iter_mut() {
@@ -135,7 +135,7 @@ impl ActorsList {
                     solids,
                     tiles,
                     actor_adder,
-                    hero_data,
+                    hero,
                     actor_message_queue,
                 ) == ShotProcessing::Absorb
             {
@@ -148,23 +148,23 @@ impl ActorsList {
     pub fn start_interaction(
         &mut self,
         play_state: &mut PlayState,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
         let new_interactor = self.actors.iter().position(|actor| {
-            actor.hero_can_interact(hero_data)
-                && hero_data.position.geometry.touches(actor.position())
+            actor.hero_can_interact(hero)
+                && hero.position.geometry.touches(actor.position())
         });
 
         if let Some(i) = new_interactor {
-            self.end_interaction(play_state, hero_data);
+            self.end_interaction(play_state, hero);
 
             let actor = self.actors.get_mut(i).unwrap();
             let p = HeroInteractStartParameters {
                 general: &mut actor.general,
                 play_state,
-                hero_data,
+                hero,
                 info_message_queue,
                 actor_message_queue,
             };
@@ -176,14 +176,14 @@ impl ActorsList {
     pub fn end_interaction(
         &mut self,
         play_state: &mut PlayState,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
     ) {
         if let Some(i) = self.interaction_target.take() {
             if let Some(actor) = self.actors.get_mut(i) {
                 let p = HeroInteractEndParameters {
                     general: &mut actor.general,
                     play_state,
-                    hero_data,
+                    hero,
                 };
                 actor.specific.hero_interact_end(p);
             }
@@ -194,7 +194,7 @@ impl ActorsList {
         &mut self,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_queue: &mut ActorQueue,
         play_state: &mut PlayState,
     ) {
@@ -203,13 +203,7 @@ impl ActorsList {
             if actor.general.acts_while_invisible
                 || actor.general.is_visible
             {
-                actor.act(
-                    solids,
-                    tiles,
-                    hero_data,
-                    actor_queue,
-                    play_state,
-                );
+                actor.act(solids, tiles, hero, actor_queue, play_state);
                 if actor.general.is_alive && actor.general.hurts_hero {
                     actors_hurting_hero += 1;
                 }
@@ -224,7 +218,7 @@ impl ActorsList {
 
         actor_queue.process(&mut adder);
         self.remove_dead();
-        hero_data.gets_hurt = actors_hurting_hero > 0;
+        hero.gets_hurt = actors_hurting_hero > 0;
     }
 
     pub fn update_visibility(&mut self, visible_rect: Rect) {
@@ -282,17 +276,17 @@ impl Actor {
         &mut self,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
         play_state: &mut PlayState,
     ) -> bool {
-        self.check_hero_touch(hero_data, actor_adder);
+        self.check_hero_touch(hero, actor_adder);
 
         let p = ActParameters {
             general: &mut self.general,
             solids,
             tiles,
-            hero_data,
+            hero,
             actor_adder,
             play_state,
         };
@@ -302,12 +296,11 @@ impl Actor {
 
     fn check_hero_touch(
         &mut self,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
     ) {
-        let touching_hero = self
-            .position()
-            .has_intersection(hero_data.position.geometry);
+        let touching_hero =
+            self.position().has_intersection(hero.position.geometry);
 
         if touching_hero {
             if !self.general.touches_hero {
@@ -315,7 +308,7 @@ impl Actor {
 
                 let p = HeroTouchStartParameters {
                     general: &mut self.general,
-                    hero_data,
+                    hero,
                     actor_adder,
                 };
 
@@ -326,13 +319,13 @@ impl Actor {
 
             let p = HeroTouchEndParameters {
                 general: &mut self.general,
-                hero_data,
+                hero,
             };
             self.specific.hero_touch_end(p);
         }
     }
 
-    fn hero_can_interact(&self, hero_data: &HeroData) -> bool {
+    fn hero_can_interact(&self, hero: &Hero) -> bool {
         if self.general.actor_type == ActorType::Lift {
             /* This check needs to be done for elevator only because
              * if there are two elevators next to each other, the leftmost
@@ -340,7 +333,7 @@ impl Actor {
              * which the hero stands.
              */
             // TODO: this should be moved into ActorInterface::hero_can_interact
-            self.position().x == hero_data.position.geometry.x
+            self.position().x == hero.position.geometry.x
         } else {
             self.specific.hero_can_interact()
         }
@@ -355,7 +348,7 @@ impl Actor {
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_message_queue: &mut ActorMessageQueue,
     ) -> ShotProcessing {
         let p = ShotParameters {
@@ -363,7 +356,7 @@ impl Actor {
             solids,
             tiles,
             actor_adder,
-            hero_data,
+            hero,
             actor_message_queue,
         };
         self.specific.shot(p)
@@ -1101,7 +1094,7 @@ pub struct ActParameters<'a> {
     pub general: &'a mut ActorData,
     pub solids: &'a mut LevelSolids,
     pub tiles: &'a mut LevelTiles,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub actor_adder: &'a mut dyn ActorAdder,
     pub play_state: &'a mut PlayState,
 }
@@ -1111,7 +1104,7 @@ pub struct ShotParameters<'a> {
     pub solids: &'a mut LevelSolids,
     pub tiles: &'a mut LevelTiles,
     pub actor_adder: &'a mut dyn ActorAdder,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub actor_message_queue: &'a mut ActorMessageQueue,
 }
 
@@ -1123,33 +1116,33 @@ pub struct RenderParameters<'a> {
 pub struct ReceiveMessageParameters<'a> {
     pub general: &'a mut ActorData,
     pub message: ActorMessageType,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub solids: &'a mut LevelSolids,
 }
 
 pub struct HeroInteractStartParameters<'a> {
     pub general: &'a mut ActorData,
     pub play_state: &'a mut PlayState,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub info_message_queue: &'a mut InfoMessageQueue,
     pub actor_message_queue: &'a mut ActorMessageQueue,
 }
 
 pub struct HeroInteractEndParameters<'a> {
     pub general: &'a mut ActorData,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub play_state: &'a mut PlayState,
 }
 
 pub struct HeroTouchStartParameters<'a> {
     pub general: &'a mut ActorData,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
     pub actor_adder: &'a mut dyn ActorAdder,
 }
 
 pub struct HeroTouchEndParameters<'a> {
     pub general: &'a mut ActorData,
-    pub hero_data: &'a mut HeroData,
+    pub hero: &'a mut Hero,
 }
 
 pub(crate) trait ActorInterface: std::fmt::Debug {

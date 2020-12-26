@@ -40,8 +40,8 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        p.hero_data.inventory.set(item);
-        p.hero_data.score.add(1000);
+        p.hero.inventory.set(item);
+        p.hero.score.add(1000);
         p.actor_adder
             .add_actor(ActorType::Score1000, self.position.top_left());
         p.general.is_alive = false;

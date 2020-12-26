@@ -7,7 +7,7 @@ use crate::{
         ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
         LevelActorAdder,
     },
-    hero::HeroData,
+    hero::Hero,
     infobox::InfoMessageQueue,
     rendering::Renderer,
     shot::{Shot, ShotList},
@@ -58,7 +58,7 @@ pub struct LevelData {
 impl LevelData {
     pub fn load<R: Read>(
         reader: &mut R,
-        hero: &mut HeroData,
+        hero: &mut Hero,
         raw: &mut Option<&mut LevelRaw>,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
@@ -852,7 +852,7 @@ impl LevelData {
 
     pub fn hero_interact_start(
         &mut self,
-        hero: &mut HeroData,
+        hero: &mut Hero,
         info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
@@ -864,7 +864,7 @@ impl LevelData {
         );
     }
 
-    pub fn hero_interact_end(&mut self, hero: &mut HeroData) {
+    pub fn hero_interact_end(&mut self, hero: &mut Hero) {
         self.actors.end_interaction(&mut self.play_state, hero);
     }
 
@@ -877,7 +877,7 @@ impl LevelData {
     pub fn render(
         &mut self,
         renderer: &mut dyn Renderer,
-        hero: &mut HeroData,
+        hero: &mut Hero,
         draw_collision_bounds: bool,
         srcrect: Rect,
         backdrop1: Option<&Surface>,
@@ -931,7 +931,7 @@ impl LevelData {
 
     pub fn act(
         &mut self,
-        hero_data: &mut HeroData,
+        hero: &mut Hero,
         actor_queue: &mut ActorQueue,
         actor_message_queue: &mut ActorMessageQueue,
     ) -> Result<()> {
@@ -940,7 +940,7 @@ impl LevelData {
 
         for shot in self.shots.iter_mut() {
             shot.act(
-                hero_data,
+                hero,
                 &mut self.actors,
                 &mut self.solids,
                 &mut self.tiles,
@@ -954,7 +954,7 @@ impl LevelData {
             self.actors.send_message(
                 message.receivers,
                 message.message,
-                hero_data,
+                hero,
                 &mut self.solids,
             );
         }
@@ -962,18 +962,18 @@ impl LevelData {
         self.actors.act(
             &mut self.solids,
             &mut self.tiles,
-            hero_data,
+            hero,
             actor_queue,
             &mut self.play_state,
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {
-            hero_data.act(&self.solids, actor_queue)?;
+            hero.act(&self.solids, actor_queue)?;
         }
-        hero_data.next_frame();
-        hero_data.update_animation();
+        hero.next_frame();
+        hero.update_animation();
 
-        if hero_data.health.life().is_none()
+        if hero.health.life().is_none()
             && self.play_state == PlayState::Playing
         {
             self.play_state = PlayState::KilledPlayingAnimation(80);
@@ -984,7 +984,7 @@ impl LevelData {
 
     pub fn fire_shot(
         &mut self,
-        hero: &mut HeroData,
+        hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
         actor_message_queue: &mut ActorMessageQueue,
     ) {

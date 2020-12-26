@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
-use freenukum::hero::HeroData;
+use freenukum::hero::Hero;
 use freenukum::level::raw::LevelRaw;
 use freenukum::level::LevelData;
 use freenukum::rendering::{CanvasRenderer, MovePositionRenderer};
@@ -92,7 +92,7 @@ fn main() -> Result<()> {
     let mut file = File::open(&original_data_dir().join(level_file))?;
 
     let mut level_raw = LevelRaw::new();
-    let mut hero = HeroData::new();
+    let mut hero = Hero::new();
     let mut level_data =
         LevelData::load(&mut file, &mut hero, &mut Some(&mut level_raw))?;
 

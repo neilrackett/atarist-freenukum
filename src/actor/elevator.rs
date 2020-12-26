@@ -44,7 +44,7 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
-        let hero_geometry = p.hero_data.position.geometry;
+        let hero_geometry = p.hero.position.geometry;
 
         if self.state == State::Ascending
             || self.state == State::Idle
@@ -68,11 +68,11 @@ impl ActorInterface for Specific {
                     self.state = State::Idle;
                 } else {
                     let offset = p
-                        .hero_data
+                        .hero
                         .position
                         .push_vertically(&p.solids, -(TILE_HEIGHT as i32));
                     if -offset < TILE_HEIGHT as i32 {
-                        p.hero_data
+                        p.hero
                             .position
                             .push_vertically(&p.solids, -offset);
                         self.state = State::Idle;
@@ -116,17 +116,16 @@ impl ActorInterface for Specific {
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
-        if p.hero_data.position.geometry.touches(self.position)
-            && p.hero_data.position.geometry.bottom()
-                == self.position.top()
+        if p.hero.position.geometry.touches(self.position)
+            && p.hero.position.geometry.bottom() == self.position.top()
         {
             self.state = State::Ascending;
         }
     }
 
     fn hero_interact_end(&mut self, p: HeroInteractEndParameters) {
-        if p.hero_data.position.geometry.touches(self.position)
-            && p.hero_data.position.geometry.x == self.position.x
+        if p.hero.position.geometry.touches(self.position)
+            && p.hero.position.geometry.x == self.position.x
         {
             self.state = State::Idle;
         } else {

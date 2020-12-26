@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
-use freenukum::hero::HeroData;
+use freenukum::hero::Hero;
 use freenukum::infobox;
 use freenukum::mainmenu::{mainmenu, MainMenuEntry};
 use freenukum::picture::show_splash;
@@ -83,7 +83,7 @@ fn main() -> Result<()> {
         &mut event_pump,
     )?;
 
-    let mut hero = HeroData::new();
+    let mut hero = Hero::new();
 
     'menu_loop: loop {
         match mainmenu(

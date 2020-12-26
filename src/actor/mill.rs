@@ -51,7 +51,7 @@ impl ActorCreateInterface for Specific {
 
 impl ActorInterface for Specific {
     fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.hero_data.health.kill();
+        p.hero.health.kill();
     }
 
     fn act(&mut self, _p: ActParameters) {
@@ -87,7 +87,7 @@ impl ActorInterface for Specific {
                 ActorType::ElectricArc,
                 ActorMessageType::Remove,
             );
-            p.hero_data.score.add(20000);
+            p.hero.score.add(20000);
             p.actor_adder
                 .add_particle_firework(self.position.center(), 20);
             p.actor_adder.add_actor(

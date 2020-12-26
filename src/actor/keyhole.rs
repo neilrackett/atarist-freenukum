@@ -79,11 +79,11 @@ impl ActorInterface for Specific {
             _ => unreachable!(),
         };
 
-        if p.hero_data.inventory.is_set(required_item) {
+        if p.hero.inventory.is_set(required_item) {
             p.actor_message_queue
                 .push_back(door_actor_type, ActorMessageType::OpenDoor);
             self.counter = 5;
-            p.hero_data.inventory.unset(required_item);
+            p.hero.inventory.unset(required_item);
         } else if self.counter < 5 {
             let color = match required_item {
                 InventoryItem::KeyRed => "red",

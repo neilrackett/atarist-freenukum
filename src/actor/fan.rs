@@ -68,13 +68,10 @@ impl ActorInterface for Specific {
         if self.running < 10 && self.running > 0 {
             self.running -= 1;
         } else if self.running == 10
-            && p.hero_data
-                .position
-                .geometry
-                .overlaps_vertically(self.position)
+            && p.hero.position.geometry.overlaps_vertically(self.position)
         {
             let mut hdistance = p
-                .hero_data
+                .hero
                 .position
                 .geometry
                 .horizontal_distance(self.position);
@@ -95,7 +92,7 @@ impl ActorInterface for Specific {
 
             let range = HALFTILE_WIDTH as i32 * 8;
             if hdistance.abs() < range {
-                p.hero_data.position.push_horizontally(
+                p.hero.position.push_horizontally(
                     &p.solids,
                     fan_direction * TILE_WIDTH as i32,
                 );

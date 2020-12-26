@@ -21,7 +21,7 @@ pub enum Motion {
 }
 
 #[derive(Debug)]
-pub struct HeroData {
+pub struct Hero {
     pub position: Position,
     pub score: Score,
     pub health: Health,
@@ -44,15 +44,15 @@ pub struct HeroData {
     pub gets_hurt: bool,
 }
 
-impl Default for HeroData {
+impl Default for Hero {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl HeroData {
+impl Hero {
     pub fn new() -> Self {
-        HeroData {
+        Hero {
             position: Position::new(),
             score: Score::new(),
             health: Health::new(),

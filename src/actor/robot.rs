@@ -112,7 +112,7 @@ impl ActorInterface for Specific {
     }
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
-        p.hero_data.score.add(100);
+        p.hero.score.add(100);
         if self.touching_hero {
             p.general.hurts_hero = false;
             self.touching_hero = false;

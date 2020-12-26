@@ -67,7 +67,7 @@ impl ActorInterface for Specific {
             );
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 8);
-            p.hero_data.score.add(2500);
+            p.hero.score.add(2500);
         } else {
             self.counter += 1;
             if self.counter % 2 == 1 {

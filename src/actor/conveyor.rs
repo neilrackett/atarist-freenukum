@@ -86,13 +86,13 @@ impl ActorInterface for Specific {
             }
         };
 
-        let hero_geometry = p.hero_data.position.geometry;
+        let hero_geometry = p.hero.position.geometry;
 
         if hero_geometry.right() > self.position.left()
             && hero_geometry.left() < self.position.right()
             && hero_geometry.bottom() == self.position.top()
         {
-            p.hero_data
+            p.hero
                 .position
                 .push_horizontally(p.solids, hero_push_offset);
         }

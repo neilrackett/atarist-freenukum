@@ -4,7 +4,7 @@ use freenukum::{
     data::original_data_dir,
     game,
     graphics::load_default_font,
-    hero::{HeroData, Motion},
+    hero::{Hero, Motion},
     level::solids::LevelSolids,
     rendering::{CanvasRenderer, Renderer},
     settings::Settings,
@@ -60,7 +60,7 @@ fn main() -> Result<()> {
     )?;
     let tilecache = TileCache::load_from_path(&original_data_dir())?;
 
-    let mut hero = HeroData::new();
+    let mut hero = Hero::new();
 
     hero.position.geometry.x =
         (win_width as i32 - hero.position.geometry.width() as i32) / 2;
