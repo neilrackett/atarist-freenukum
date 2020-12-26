@@ -1,8 +1,8 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, ActorType, HeroTouchStartParameters,
-        RenderParameters, ShotParameters, ShotProcessing,
+        ActorMessageType, ActorType, RenderParameters, ShotParameters,
+        ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
@@ -48,14 +48,14 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.hero.health.kill();
-    }
-
-    fn act(&mut self, _p: ActParameters) {
+    fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
             self.current_frame += 1;
             self.current_frame %= self.num_frames;
+
+            if self.position.has_intersection(p.hero.position.geometry) {
+                p.hero.health.kill();
+            }
         }
     }
 

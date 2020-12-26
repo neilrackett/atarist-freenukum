@@ -1,9 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorMessageType, HeroTouchEndParameters,
-        HeroTouchStartParameters, ReceiveMessageParameters,
-        RenderParameters,
+        ActorMessageType, ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
@@ -36,17 +34,15 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn act(&mut self, _p: ActParameters) {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
-    }
-
-    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {
-        self.tile = OBJECT_ELECTRIC_ARC_HURTING;
-    }
-
-    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {
-        self.tile = OBJECT_ELECTRIC_ARC;
+        self.tile =
+            if p.hero.position.geometry.has_intersection(self.position) {
+                OBJECT_ELECTRIC_ARC
+            } else {
+                OBJECT_ELECTRIC_ARC_HURTING
+            }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {

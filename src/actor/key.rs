@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchStartParameters, RenderParameters,
+        ActorType, RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -29,23 +29,23 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        let item = match p.general.actor_type {
-            ActorType::KeyRed => InventoryItem::KeyRed,
-            ActorType::KeyBlue => InventoryItem::KeyBlue,
-            ActorType::KeyPink => InventoryItem::KeyPink,
-            ActorType::KeyGreen => InventoryItem::KeyGreen,
-            _ => unreachable!(),
-        };
+    fn act(&mut self, p: ActParameters) {
+        if p.hero.position.geometry.has_intersection(self.position) {
+            let item = match p.general.actor_type {
+                ActorType::KeyRed => InventoryItem::KeyRed,
+                ActorType::KeyBlue => InventoryItem::KeyBlue,
+                ActorType::KeyPink => InventoryItem::KeyPink,
+                ActorType::KeyGreen => InventoryItem::KeyGreen,
+                _ => unreachable!(),
+            };
 
-        p.hero.inventory.set(item);
-        p.hero.score.add(1000);
-        p.actor_adder
-            .add_actor(ActorType::Score1000, self.position.top_left());
-        p.general.is_alive = false;
+            p.hero.inventory.set(item);
+            p.hero.score.add(1000);
+            p.actor_adder
+                .add_actor(ActorType::Score1000, self.position.top_left());
+            p.general.is_alive = false;
+        }
     }
-
-    fn act(&mut self, _p: ActParameters) {}
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = match p.general.actor_type {

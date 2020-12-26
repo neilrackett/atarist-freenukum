@@ -1,7 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchStartParameters, RenderParameters,
+        ActorType, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
@@ -27,13 +27,6 @@ impl ActorCreateInterface for Specific {
 }
 
 impl ActorInterface for Specific {
-    fn hero_touch_start(&mut self, p: HeroTouchStartParameters) {
-        p.hero.score.add(1000);
-        p.actor_adder
-            .add_actor(ActorType::Score1000, self.position.top_left());
-        p.general.is_alive = false;
-    }
-
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(HALFTILE_HEIGHT as i32));
         if p.solids.get(
@@ -42,6 +35,12 @@ impl ActorInterface for Specific {
         ) {
             p.actor_adder
                 .add_actor(ActorType::Explosion, self.position.top_left());
+            p.general.is_alive = false;
+        } else if self.position.has_intersection(p.hero.position.geometry)
+        {
+            p.hero.score.add(1000);
+            p.actor_adder
+                .add_actor(ActorType::Score1000, self.position.top_left());
             p.general.is_alive = false;
         }
     }

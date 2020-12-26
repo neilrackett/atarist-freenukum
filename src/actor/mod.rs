@@ -280,8 +280,6 @@ impl Actor {
         actor_adder: &mut dyn ActorAdder,
         play_state: &mut PlayState,
     ) -> bool {
-        self.check_hero_touch(hero, actor_adder);
-
         let p = ActParameters {
             general: &mut self.general,
             solids,
@@ -292,37 +290,6 @@ impl Actor {
         };
         self.specific.act(p);
         self.general.is_alive
-    }
-
-    fn check_hero_touch(
-        &mut self,
-        hero: &mut Hero,
-        actor_adder: &mut dyn ActorAdder,
-    ) {
-        let touching_hero =
-            self.position().has_intersection(hero.position.geometry);
-
-        if touching_hero {
-            if !self.general.touches_hero {
-                self.general.touches_hero = true;
-
-                let p = HeroTouchStartParameters {
-                    general: &mut self.general,
-                    hero,
-                    actor_adder,
-                };
-
-                self.specific.hero_touch_start(p);
-            }
-        } else if self.general.touches_hero {
-            self.general.touches_hero = false;
-
-            let p = HeroTouchEndParameters {
-                general: &mut self.general,
-                hero,
-            };
-            self.specific.hero_touch_end(p);
-        }
     }
 
     fn hero_can_interact(&self, hero: &Hero) -> bool {
@@ -1128,22 +1095,7 @@ pub struct HeroInteractEndParameters<'a> {
     pub play_state: &'a mut PlayState,
 }
 
-pub struct HeroTouchStartParameters<'a> {
-    pub general: &'a mut ActorData,
-    pub hero: &'a mut Hero,
-    pub actor_adder: &'a mut dyn ActorAdder,
-}
-
-pub struct HeroTouchEndParameters<'a> {
-    pub general: &'a mut ActorData,
-    pub hero: &'a mut Hero,
-}
-
 pub(crate) trait ActorInterface: std::fmt::Debug {
-    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {}
-
-    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {}
-
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         false
     }

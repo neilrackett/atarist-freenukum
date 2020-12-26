@@ -54,9 +54,6 @@ impl ActorCreateInterface for Specific {
 impl ActorInterface for Specific {
     fn act(&mut self, p: ActParameters) {
         // Detect whether the hero is standing upon the floor.
-        // We can't use the hero_touch_start functionality here
-        // because it only gets triggered when the hero geometry
-        // overlaps with the part, which is not the case here.
         let hero_geometry = p.hero.position.geometry;
         let hero_center = hero_geometry.x() + (hero_geometry.w as i32) / 2;
         let stands_upon = hero_center >= self.position.left()

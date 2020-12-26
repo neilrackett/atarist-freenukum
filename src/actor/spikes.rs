@@ -1,8 +1,7 @@
 use crate::{
     actor::{
         ActParameters, ActorCreateInterface, ActorData, ActorInterface,
-        ActorType, HeroTouchEndParameters, HeroTouchStartParameters,
-        RenderParameters,
+        ActorType, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
@@ -12,7 +11,7 @@ use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Specific {
-    touching_hero: bool,
+    tile: usize,
     position: Rect,
 }
 
@@ -26,6 +25,13 @@ impl ActorCreateInterface for Specific {
         let x = pos.x as u32 / TILE_WIDTH;
         let y = pos.y as u32 / TILE_HEIGHT;
 
+        let tile = match general.actor_type {
+            ActorType::SpikesUp => OBJECT_SPIKES_UP,
+            ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
+            ActorType::Spike => OBJECT_SPIKE,
+            _ => unreachable!(),
+        };
+
         match general.actor_type {
             ActorType::SpikesUp | ActorType::Spike => {
                 tiles.copy_from_to(x, y - 1, x, y);
@@ -37,33 +43,27 @@ impl ActorCreateInterface for Specific {
         }
 
         Specific {
-            touching_hero: false,
+            tile,
             position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
         }
     }
 }
 
 impl ActorInterface for Specific {
-    fn act(&mut self, _p: ActParameters) {}
-
-    fn hero_touch_start(&mut self, _p: HeroTouchStartParameters) {
-        self.touching_hero = true;
-    }
-
-    fn hero_touch_end(&mut self, _p: HeroTouchEndParameters) {
-        self.touching_hero = false;
-    }
-
-    fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let tile = match p.general.actor_type {
+    fn act(&mut self, p: ActParameters) {
+        let touching_hero =
+            self.position.has_intersection(p.hero.position.geometry);
+        self.tile = match p.general.actor_type {
             ActorType::SpikesUp => OBJECT_SPIKES_UP,
             ActorType::SpikesDown => OBJECT_SPIKES_DOWN,
-            ActorType::Spike if self.touching_hero => OBJECT_SPIKE + 1,
+            ActorType::Spike if touching_hero => OBJECT_SPIKE + 1,
             ActorType::Spike => OBJECT_SPIKE,
             _ => unreachable!(),
         };
+    }
 
-        p.renderer.place_tile(tile, self.position.top_left())?;
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        p.renderer.place_tile(self.tile, self.position.top_left())?;
         Ok(())
     }
 
