@@ -4,7 +4,7 @@ use crate::{
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_BALLOON, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, OBJECT_BALLOON,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,13 +19,19 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Specific {
             destroyed: false,
             current_frame: 0,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT * 2),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height() * 2,
+            ),
             is_alive: true,
         }
     }
@@ -46,8 +52,8 @@ impl Actor for Specific {
         } else {
             self.position.y -= 1;
             if p.solids.get(
-                self.position.x() as u32 / TILE_WIDTH,
-                self.position.y() as u32 / TILE_WIDTH,
+                self.position.x() as u32 / p.sizes.width(),
+                self.position.y() as u32 / p.sizes.height(),
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;
@@ -69,7 +75,7 @@ impl Actor for Specific {
         };
         p.renderer.place_tile(tile, pos)?;
 
-        pos.y += TILE_HEIGHT as i32;
+        pos.y += p.sizes.height() as i32;
         p.renderer.place_tile(
             OBJECT_BALLOON + 1 + self.current_frame / 3,
             pos,

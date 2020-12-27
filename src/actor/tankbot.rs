@@ -1,12 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor,
-        RenderParameters, ShotParameters, ShotProcessing,
-        SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, ANIMATION_CARBOT, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, ANIMATION_CARBOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -23,6 +21,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -32,7 +31,12 @@ impl CreateActor for Specific {
             current_frame: 0,
             num_frames: 4,
             was_shot: 0,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width() * 2,
+                sizes.height(),
+            ),
         }
     }
 }
@@ -45,20 +49,22 @@ impl Actor for Specific {
         if !self.is_alive() {
             p.actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
-                self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
+                self.position
+                    .top_left()
+                    .offset(p.sizes.half_width() as i32, 0),
             );
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 4);
             p.hero.score.add(2500);
         } else if p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height() + 1,
         ) && !p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH + 1,
-            self.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / p.sizes.width() + 1,
+            self.position.y() as u32 / p.sizes.height() + 1,
         ) {
             // still in the air, falling down
-            self.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, p.sizes.half_height() as i32);
         } else {
             // on the floor, walking
             let mut direction = match self.orientation {
@@ -68,23 +74,25 @@ impl Actor for Specific {
 
             if !p.solids.get(
                 // check if the place next ot the bot is free
-                (self.position.x() + direction * HALFTILE_WIDTH as i32)
+                (self.position.x()
+                    + direction * p.sizes.half_width() as i32)
                     as u32
-                    / TILE_WIDTH,
-                self.position.y() as u32 / TILE_HEIGHT,
+                    / p.sizes.width(),
+                self.position.y() as u32 / p.sizes.height(),
             ) && p.solids.get(
                 // check if the tile below is solid
                 (self.position.x() as i32
-                    + direction * HALFTILE_WIDTH as i32)
+                    + direction * p.sizes.half_width() as i32)
                     as u32
-                    / TILE_WIDTH,
-                (self.position.y() as u32 + TILE_HEIGHT) / TILE_HEIGHT,
+                    / p.sizes.width(),
+                (self.position.y() as u32 + p.sizes.height())
+                    / p.sizes.height(),
             ) {
                 if direction > 0 {
                     direction = 1;
                 }
                 self.position.offset(
-                    (direction as f64 * HALFTILE_WIDTH as f64 * 0.7)
+                    (direction as f64 * p.sizes.half_width() as f64 * 0.7)
                         as i32,
                     0,
                 );
@@ -95,7 +103,8 @@ impl Actor for Specific {
                     direction = 1;
                 }
                 direction *= -1;
-                self.position.offset(direction * HALFTILE_WIDTH as i32, 0);
+                self.position
+                    .offset(direction * p.sizes.half_width() as i32, 0);
                 self.tile = (self.tile as i32 + 4 * direction) as usize;
 
                 p.actor_adder.add_actor(
@@ -110,8 +119,8 @@ impl Actor for Specific {
                 p.actor_adder.add_actor(
                     ActorType::SingleAnimation(SingleAnimationType::Steam),
                     self.position.top_left().offset(
-                        HALFTILE_WIDTH as i32,
-                        -(TILE_HEIGHT as i32),
+                        p.sizes.half_width() as i32,
+                        -(p.sizes.height() as i32),
                     ),
                 );
             }
@@ -124,7 +133,7 @@ impl Actor for Specific {
         p.renderer.place_tile(tile, pos)?;
 
         let tile = self.tile + (self.current_frame / 2) * 2 + 1;
-        pos = pos.offset(TILE_WIDTH as i32, 0);
+        pos = pos.offset(p.sizes.width() as i32, 0);
         p.renderer.place_tile(tile, pos)?;
         Ok(())
     }

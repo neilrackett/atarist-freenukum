@@ -1,10 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor,
-        RenderParameters, SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_MINE, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -18,12 +18,18 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
             tile: ANIMATION_MINE,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }
@@ -32,10 +38,10 @@ impl CreateActor for Specific {
 impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if !p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height() + 1,
         ) {
-            self.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, p.sizes.half_height() as i32);
         }
 
         if p.hero.position.geometry.has_intersection(self.position) {

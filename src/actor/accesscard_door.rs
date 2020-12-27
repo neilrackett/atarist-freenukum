@@ -4,7 +4,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_LASERBEAM, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, OBJECT_LASERBEAM,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -20,6 +20,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
@@ -27,7 +28,12 @@ impl CreateActor for Specific {
             tile: OBJECT_LASERBEAM,
             current_frame: 0,
             num_frames: 4,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }
@@ -51,8 +57,8 @@ impl Actor for Specific {
         if p.message != ActorMessageType::OpenDoorAccessCard {
             return;
         }
-        let x = self.position.x() as u32 / TILE_WIDTH;
-        let y = self.position.y() as u32 / TILE_HEIGHT;
+        let x = self.position.x() as u32 / p.sizes.width();
+        let y = self.position.y() as u32 / p.sizes.height();
         p.solids.set(x, y, false);
         self.is_alive = false;
     }

@@ -4,7 +4,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, SOLID_EXPANDINGFLOOR, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, SOLID_EXPANDINGFLOOR,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -18,13 +18,19 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
             expanding: false,
             finished: false,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -32,13 +38,13 @@ impl CreateActor for Specific {
 impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
-            let x = self.position.right() as u32 / TILE_WIDTH;
-            let y = self.position.top() as u32 / TILE_HEIGHT;
+            let x = self.position.right() as u32 / p.sizes.width();
+            let y = self.position.top() as u32 / p.sizes.height();
             let can_expand = !p.solids.get(x, y);
             if can_expand {
                 p.solids.set(x, y, true);
                 self.position
-                    .set_width(self.position.width() + TILE_WIDTH);
+                    .set_width(self.position.width() + p.sizes.width());
             } else {
                 self.expanding = false;
                 self.finished = true;
@@ -49,9 +55,9 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = SOLID_EXPANDINGFLOOR;
         let mut pos = self.position.top_left();
-        for _ in 0..self.position.width() as u32 / TILE_WIDTH {
+        for _ in 0..self.position.width() as u32 / p.sizes.width() {
             p.renderer.place_tile(tile, pos)?;
-            pos.x += TILE_WIDTH as i32;
+            pos.x += p.sizes.width() as i32;
         }
         Ok(())
     }

@@ -1,10 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor,
-        HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, CreateActor, HeroInteractStartParameters,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_NOTEBOOK, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, OBJECT_NOTEBOOK,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -16,11 +16,17 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

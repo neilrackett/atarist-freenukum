@@ -3,9 +3,9 @@ use crate::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, HALFTILE_WIDTH, SOLID_BLACK,
+    HorizontalDirection, Result, Sizes, SOLID_BLACK,
     SOLID_CONVEYORBELT_CENTER, SOLID_CONVEYORBELT_LEFTEND,
-    SOLID_CONVEYORBELT_RIGHTEND, TILE_HEIGHT, TILE_WIDTH,
+    SOLID_CONVEYORBELT_RIGHTEND,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -23,6 +23,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         direction: HorizontalDirection,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
@@ -30,13 +31,13 @@ impl CreateActorWithDetails for Specific {
         let mut found_begin = false;
         let mut tile;
         let mut position =
-            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
+            Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while !found_begin {
-            position.offset(-(TILE_WIDTH as i32), 0);
-            position.set_width(position.width() + TILE_WIDTH);
+            position.offset(-(sizes.width() as i32), 0);
+            position.set_width(position.width() + sizes.width());
             tile = tiles.get(
-                position.x() as u32 / TILE_WIDTH,
-                position.y() as u32 / TILE_HEIGHT,
+                position.x() as u32 / sizes.width(),
+                position.y() as u32 / sizes.height(),
             );
             if tile as usize == SOLID_CONVEYORBELT_LEFTEND
                 || position.x() <= 0
@@ -44,8 +45,8 @@ impl CreateActorWithDetails for Specific {
             {
                 found_begin = true;
                 tiles.set(
-                    position.x() as u32 / TILE_WIDTH,
-                    position.y() as u32 / TILE_HEIGHT,
+                    position.x() as u32 / sizes.width(),
+                    position.y() as u32 / sizes.height(),
                     SOLID_BLACK as u16,
                 );
             }
@@ -68,12 +69,12 @@ impl Actor for Specific {
                     self.current_frame = self.num_frames;
                 }
                 self.current_frame -= 1;
-                -(HALFTILE_WIDTH as i32)
+                -(p.sizes.half_width() as i32)
             }
             HorizontalDirection::Right => {
                 self.current_frame += 1;
                 self.current_frame %= self.num_frames;
-                HALFTILE_WIDTH as i32
+                p.sizes.half_width() as i32
             }
         };
 
@@ -83,9 +84,11 @@ impl Actor for Specific {
             && hero_geometry.left() < self.position.right()
             && hero_geometry.bottom() == self.position.top()
         {
-            p.hero
-                .position
-                .push_horizontally(p.solids, hero_push_offset);
+            p.hero.position.push_horizontally(
+                p.sizes,
+                p.solids,
+                hero_push_offset,
+            );
         }
     }
 
@@ -93,7 +96,7 @@ impl Actor for Specific {
         let mut tile = SOLID_CONVEYORBELT_LEFTEND + self.current_frame;
         let mut pos = self.position.top_left();
 
-        let num_elements = self.position.width() / TILE_WIDTH;
+        let num_elements = self.position.width() / p.sizes.width();
         for i in 0..num_elements {
             if i == num_elements - 1 {
                 // right end of the conveyor
@@ -103,7 +106,7 @@ impl Actor for Specific {
                 tile = SOLID_CONVEYORBELT_CENTER + self.current_frame % 2;
             }
             p.renderer.place_tile(tile, pos)?;
-            pos.x += TILE_WIDTH as i32;
+            pos.x += p.sizes.width() as i32;
         }
         Ok(())
     }

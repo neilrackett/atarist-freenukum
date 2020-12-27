@@ -9,8 +9,8 @@ use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
 use freenukum::UserEvent;
 use freenukum::{
-    game, LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
-    WINDOW_HEIGHT, WINDOW_WIDTH,
+    game, DefaultSizes, Sizes, LEVEL_HEIGHT, LEVEL_WIDTH, WINDOW_HEIGHT,
+    WINDOW_WIDTH,
 };
 use sdl2::{
     event::{Event, WindowEvent},
@@ -90,18 +90,23 @@ fn main() -> Result<()> {
     );
 
     let mut file = File::open(&original_data_dir().join(level_file))?;
+    let sizes = DefaultSizes;
 
     let mut level_raw = LevelRaw::new();
-    let mut hero = Hero::new();
-    let mut level_data =
-        LevelData::load(&mut file, &mut hero, &mut Some(&mut level_raw))?;
+    let mut hero = Hero::new(&sizes);
+    let mut level_data = LevelData::load(
+        &mut file,
+        &mut hero,
+        &mut Some(&mut level_raw),
+        &sizes,
+    )?;
 
     let mut r = Rect::new(0, 0, win_w, win_h);
     let level_rect = Rect::new(
         0,
         0,
-        TILE_WIDTH * LEVEL_WIDTH,
-        TILE_HEIGHT * LEVEL_HEIGHT,
+        sizes.width() * LEVEL_WIDTH,
+        sizes.height() * LEVEL_HEIGHT,
     );
 
     event_sender
@@ -171,8 +176,8 @@ fn main() -> Result<()> {
             } => {
                 let global_x = r.x() + x;
                 let global_y = r.y() + y;
-                let tile_x = global_x as u32 / TILE_WIDTH;
-                let tile_y = global_y as u32 / TILE_HEIGHT;
+                let tile_x = global_x as u32 / sizes.width();
+                let tile_y = global_y as u32 / sizes.height();
 
                 let tilenr = level_raw.get(tile_x, tile_y);
                 let is_solid = level_data.solids.get(tile_x, tile_y);
@@ -215,6 +220,7 @@ fn main() -> Result<()> {
                     };
                     level_data.render(
                         &mut renderer,
+                        &sizes,
                         &mut hero,
                         settings.draw_collision_bounds,
                         r,

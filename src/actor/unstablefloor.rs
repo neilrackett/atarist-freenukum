@@ -1,10 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor,
-        RenderParameters, SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, SOLID_START, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, SOLID_START,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -20,25 +20,26 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         let mut floor_length = 0;
         let mut position =
-            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
+            Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while !solids.get(
-            position.x() as u32 / TILE_WIDTH + floor_length,
-            position.y() as u32 / TILE_HEIGHT,
+            position.x() as u32 / sizes.width() + floor_length,
+            position.y() as u32 / sizes.height(),
         ) {
             solids.set(
-                position.x() as u32 / TILE_WIDTH + floor_length,
-                position.y() as u32 / TILE_HEIGHT,
+                position.x() as u32 / sizes.width() + floor_length,
+                position.y() as u32 / sizes.height(),
                 true,
             );
             floor_length += 1;
         }
 
-        position.resize(TILE_WIDTH * floor_length, TILE_HEIGHT);
+        position.resize(sizes.width() * floor_length, sizes.height());
 
         Specific {
             tile: SOLID_START + 77,
@@ -72,8 +73,8 @@ impl Actor for Specific {
             let mut r = self.position;
             for _ in 0..self.floor_length {
                 p.solids.set(
-                    r.x() as u32 / TILE_WIDTH,
-                    r.y() as u32 / TILE_HEIGHT,
+                    r.x() as u32 / p.sizes.width(),
+                    r.y() as u32 / p.sizes.height(),
                     false,
                 );
                 p.actor_adder.add_actor(
@@ -83,7 +84,7 @@ impl Actor for Specific {
                     r.top_left(),
                 );
                 p.actor_adder.add_particle_firework(r.center(), 4);
-                r.offset(TILE_WIDTH as i32, 0);
+                r.offset(p.sizes.width() as i32, 0);
             }
         }
     }
@@ -92,7 +93,7 @@ impl Actor for Specific {
         let mut pos = self.position.top_left();
         for _ in 0..self.floor_length {
             p.renderer.place_tile(self.tile, pos)?;
-            pos.x += TILE_WIDTH as i32;
+            pos.x += p.sizes.width() as i32;
         }
         Ok(())
     }

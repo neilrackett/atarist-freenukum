@@ -12,9 +12,8 @@ use crate::{
     infobox::InfoMessageQueue,
     rendering::Renderer,
     shot::{Shot, ShotList},
-    HorizontalDirection, KeyColor, Result, ANIMATION_START,
-    HALFTILE_WIDTH, LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK,
-    SOLID_CONVEYORBELT_LEFTEND, TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, KeyColor, Result, Sizes, ANIMATION_START,
+    LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND,
 };
 use log::warn;
 use raw::LevelRaw;
@@ -62,6 +61,7 @@ impl LevelData {
         reader: &mut R,
         hero: &mut Hero,
         raw: &mut Option<&mut LevelRaw>,
+        sizes: &dyn Sizes,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
         let mut solids = LevelSolids::new();
@@ -74,8 +74,8 @@ impl LevelData {
             let mut tile_buf = [0u8; 2];
             reader.read_exact(&mut tile_buf)?;
 
-            let tx = (x * TILE_WIDTH) as i32;
-            let ty = (y * TILE_HEIGHT) as i32;
+            let tx = (x * sizes.width()) as i32;
+            let ty = (y * sizes.height()) as i32;
 
             let mut aa = |actor_type, x, y| {
                 actor_queue.add_actor(actor_type, Point::new(x, y));
@@ -415,7 +415,11 @@ impl LevelData {
                 0x3011 =>
                 /* exit door */
                 {
-                    aa(ActorType::ExitDoor, tx, ty - TILE_HEIGHT as i32);
+                    aa(
+                        ActorType::ExitDoor,
+                        tx,
+                        ty - sizes.height() as i32,
+                    );
                 }
                 0x3012 =>
                 /* grey box with bomb inside */
@@ -757,7 +761,7 @@ impl LevelData {
                 0x3032 =>
                 /* we found our hero! */
                 {
-                    hero.enter_level(tx, ty - TILE_HEIGHT as i32);
+                    hero.enter_level(tx, ty - sizes.height() as i32);
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
@@ -1099,6 +1103,7 @@ impl LevelData {
         let mut actors = ActorsList::new();
         let mut actor_adder = LevelActorAdder {
             solids: &mut solids,
+            sizes,
             tiles: &mut tiles,
             actors: &mut actors,
         };
@@ -1141,6 +1146,7 @@ impl LevelData {
     pub fn render(
         &mut self,
         renderer: &mut dyn Renderer,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         draw_collision_bounds: bool,
         srcrect: Rect,
@@ -1153,15 +1159,15 @@ impl LevelData {
             renderer.fill_rect(srcrect, Color::RGB(0, 0, 0))?;
         }
 
-        let start_x =
-            u32::try_from(srcrect.left()).unwrap_or_default() / TILE_WIDTH;
+        let start_x = u32::try_from(srcrect.left()).unwrap_or_default()
+            / sizes.width();
         let end_x = (u32::try_from(srcrect.right()).unwrap_or_default()
-            / TILE_WIDTH)
+            / sizes.width())
             + 1;
-        let start_y =
-            u32::try_from(srcrect.top()).unwrap_or_default() / TILE_HEIGHT;
+        let start_y = u32::try_from(srcrect.top()).unwrap_or_default()
+            / sizes.height();
         let end_y = (u32::try_from(srcrect.bottom()).unwrap_or_default()
-            / TILE_HEIGHT)
+            / sizes.height())
             + 1;
 
         for y in start_y..std::cmp::min(end_y, LEVEL_HEIGHT) {
@@ -1169,8 +1175,8 @@ impl LevelData {
                 let tilenr = self.tiles.get(x, y);
                 if tilenr > 1 && tilenr < (48 * 8) {
                     let point = Point::new(
-                        (TILE_WIDTH * x) as i32,
-                        (TILE_HEIGHT * y) as i32,
+                        (sizes.width() * x) as i32,
+                        (sizes.height() * y) as i32,
                     );
                     renderer.place_tile(tilenr as usize, point)?;
                 }
@@ -1179,26 +1185,29 @@ impl LevelData {
 
         self.actors.render_background_actors(
             renderer,
+            sizes,
             draw_collision_bounds,
             srcrect,
         )?;
 
-        hero.render(renderer, &self.solids, draw_collision_bounds)?;
+        hero.render(renderer, sizes, &self.solids, draw_collision_bounds)?;
 
         self.actors.render_foreground_actors(
             renderer,
+            sizes,
             draw_collision_bounds,
             srcrect,
         )?;
 
         for shot in self.shots.iter() {
-            shot.render(renderer, draw_collision_bounds)?;
+            shot.render(renderer, sizes, draw_collision_bounds)?;
         }
         Ok(())
     }
 
     pub fn act(
         &mut self,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         actor_queue: &mut ActorQueue,
         actor_message_queue: &mut ActorMessageQueue,
@@ -1209,6 +1218,7 @@ impl LevelData {
 
         for shot in self.shots.iter_mut() {
             shot.act(
+                sizes,
                 hero,
                 &mut self.actors,
                 &mut self.solids,
@@ -1220,10 +1230,16 @@ impl LevelData {
         self.shots.retain(|s| s.is_alive);
 
         for message in actor_message_queue.messages.drain(..) {
-            self.actors.send_message(message, hero, &mut self.solids);
+            self.actors.send_message(
+                message,
+                sizes,
+                hero,
+                &mut self.solids,
+            );
         }
 
         self.actors.act(
+            sizes,
             &mut self.solids,
             &mut self.tiles,
             hero,
@@ -1233,7 +1249,7 @@ impl LevelData {
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {
-            hero.act(&self.solids, actor_queue)?;
+            hero.act(sizes, &self.solids, actor_queue)?;
         }
         hero.next_frame();
         hero.update_animation();
@@ -1249,6 +1265,7 @@ impl LevelData {
 
     pub fn fire_shot(
         &mut self,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         actor_adder: &mut dyn ActorAdder,
         actor_message_queue: &mut ActorMessageQueue,
@@ -1257,15 +1274,17 @@ impl LevelData {
             && self.play_state.hero_can_act()
         {
             let heropos = hero.position.geometry;
-            let mut shot = Shot::new(heropos.x, heropos.y, hero.direction);
+            let mut shot =
+                Shot::new(sizes, heropos.x, heropos.y, hero.direction);
 
             let distance =
-                HALFTILE_WIDTH as i32 * shot.direction.as_factor_i32();
+                sizes.half_width() as i32 * shot.direction.as_factor_i32();
 
             // we only push half of the distance, but do it twice, so that
             // also the intermediate position gets covered, not just the
             // end position.
             shot.push(
+                sizes,
                 hero,
                 &mut self.actors,
                 &mut self.solids,

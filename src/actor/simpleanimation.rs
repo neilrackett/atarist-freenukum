@@ -1,11 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
-    ANIMATION_WINDOWBG, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
+    ANIMATION_WINDOWBG,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -72,6 +71,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         animation_type: SimpleAnimationType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -81,7 +81,12 @@ impl CreateActorWithDetails for Specific {
             tile,
             current_frame: 0,
             num_frames,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

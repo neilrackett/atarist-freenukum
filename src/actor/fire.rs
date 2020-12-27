@@ -3,8 +3,8 @@ use crate::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
-    OBJECT_FIRERIGHT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, LEVEL_WIDTH,
+    OBJECT_FIRELEFT, OBJECT_FIRERIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -30,14 +30,15 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         direction: HorizontalDirection,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        let x = pos.x as u32 / TILE_WIDTH;
-        let y = pos.y as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / sizes.width();
+        let y = pos.y as u32 / sizes.height();
 
         let mut position =
-            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
+            Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         let tile = match direction {
             HorizontalDirection::Right => {
                 if x < LEVEL_WIDTH + 1 {
@@ -49,7 +50,7 @@ impl CreateActorWithDetails for Specific {
                 if x > 0 {
                     tiles.copy_from_to(x - 1, y, x, y);
                 }
-                position.offset(-2 * TILE_WIDTH as i32, 0);
+                position.offset(-2 * sizes.width() as i32, 0);
                 OBJECT_FIRELEFT
             }
         };
@@ -128,11 +129,11 @@ impl Actor for Specific {
         if let Some(tile) = tile0 {
             p.renderer.place_tile(tile, pos)?;
         }
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         if let Some(tile) = tile1 {
             p.renderer.place_tile(tile, pos)?;
         }
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         if let Some(tile) = tile2 {
             p.renderer.place_tile(tile, pos)?;
         }

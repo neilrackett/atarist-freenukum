@@ -1,12 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor,
-        RenderParameters, ShotParameters, ShotProcessing,
-        SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, ANIMATION_ROBOT, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -23,6 +21,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -31,7 +30,12 @@ impl CreateActor for Specific {
             tile: ANIMATION_ROBOT,
             current_frame: 0,
             num_frames: 3,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }
@@ -43,11 +47,11 @@ impl Actor for Specific {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height() + 1,
         ) {
             // In the air, falling down.
-            self.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, p.sizes.half_height() as i32);
         } else {
             // On the floor, walking.
             if self.current_frame == 0 {
@@ -59,31 +63,35 @@ impl Actor for Specific {
                 if !p.solids.get(
                 (
                     self.position.x() +
-                    direction * HALFTILE_WIDTH as i32
-                ) as u32/ TILE_WIDTH,
-                self.position.y() as u32 / TILE_HEIGHT
+                    direction * p.sizes.half_width()as i32
+                ) as u32/ p.sizes.width(),
+                self.position.y() as u32 / p.sizes.height()
             ) &&
             // Check if the tile below this free place is solid
             p.solids.get(
                 (
                     self.position.x() +
-                    direction * HALFTILE_WIDTH as i32
-                ) as u32 / TILE_WIDTH,
-                (self.position.y() as u32 + TILE_HEIGHT) / TILE_HEIGHT
+                    direction * p.sizes.half_width() as i32
+                ) as u32 / p.sizes.width(),
+                (self.position.y() as u32 + p.sizes.height()) / p.sizes.height()
             ) {
                     if direction == 2 {
                         direction = 1;
                     }
-                    self.position
-                        .offset(direction * HALFTILE_WIDTH as i32, 0);
+                    self.position.offset(
+                        direction * p.sizes.half_width() as i32,
+                        0,
+                    );
                 } else {
                     self.direction.reverse();
                     if direction == 2 {
                         direction = 1
                     };
                     direction *= -1;
-                    self.position
-                        .offset(direction * HALFTILE_WIDTH as i32, 0);
+                    self.position.offset(
+                        direction * p.sizes.half_width() as i32,
+                        0,
+                    );
                 }
             }
         }

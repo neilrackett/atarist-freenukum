@@ -7,7 +7,7 @@ use freenukum::rendering::{
 use freenukum::settings::Settings;
 use freenukum::text;
 use freenukum::tilecache::{FileProperties, TileCache};
-use freenukum::{game, TILE_HEIGHT, TILE_WIDTH};
+use freenukum::{game, DefaultSizes, Sizes};
 use sdl2::{
     event::{Event, WindowEvent},
     keyboard::Keycode,
@@ -29,9 +29,10 @@ fn main() -> Result<()> {
     let mut event_pump =
         sdl_context.event_pump().map_err(|s| anyhow!(s))?;
 
+    let sizes = DefaultSizes;
     let window = game::create_window(
-        (max_tiles + 2) as u32 * TILE_WIDTH,
-        (file_properties.len() as u32 + 2) * TILE_HEIGHT,
+        (max_tiles + 2) as u32 * sizes.width(),
+        (file_properties.len() as u32 + 2) * sizes.height(),
         settings.fullscreen,
         &format!("Freenukum {} tilecache example", VERSION),
         &video_subsystem,
@@ -51,7 +52,7 @@ fn main() -> Result<()> {
     )?;
     let tilecache = TileCache::load_from_path(&original_data_dir())?;
 
-    let mut dest = Point::new(TILE_WIDTH as i32, 0);
+    let mut dest = Point::new(sizes.width() as i32, 0);
 
     let mut renderer = CanvasRenderer {
         canvas: &mut canvas,
@@ -73,29 +74,29 @@ fn main() -> Result<()> {
 
     for x in 0..max_tiles {
         blithex(x, dest, &mut renderer)?;
-        dest.x += TILE_WIDTH as i32;
+        dest.x += sizes.width() as i32;
     }
     dest.x = 0;
-    dest.y += TILE_HEIGHT as i32;
+    dest.y += sizes.height() as i32;
 
     let mut i = 0;
     for (row, file) in FileProperties::get_all().iter().enumerate() {
         blithex(row, dest, &mut renderer)?;
-        dest.x += TILE_WIDTH as i32;
+        dest.x += sizes.width() as i32;
         for _ in 0..file.num_tiles {
             renderer.place_tile(i, dest)?;
-            dest.x += TILE_WIDTH as i32;
+            dest.x += sizes.width() as i32;
             i += 1;
         }
-        dest.x = (TILE_WIDTH * (max_tiles as u32 + 1)) as i32;
+        dest.x = (sizes.width() * (max_tiles as u32 + 1)) as i32;
         blithex(row, dest, &mut renderer)?;
         dest.x = 0;
-        dest.y += TILE_HEIGHT as i32;
+        dest.y += sizes.height() as i32;
     }
-    dest.x += TILE_WIDTH as i32;
+    dest.x += sizes.width() as i32;
     for x in 0..max_tiles {
         blithex(x, dest, &mut renderer)?;
-        dest.x += TILE_WIDTH as i32;
+        dest.x += sizes.width() as i32;
     }
 
     canvas.present();

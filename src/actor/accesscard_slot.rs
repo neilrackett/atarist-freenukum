@@ -5,7 +5,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_ACCESS_CARD_SLOT, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, OBJECT_ACCESS_CARD_SLOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -20,6 +20,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
@@ -27,7 +28,12 @@ impl CreateActor for Specific {
             tile: OBJECT_ACCESS_CARD_SLOT,
             current_frame: 0,
             num_frames: 8,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

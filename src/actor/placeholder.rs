@@ -4,7 +4,7 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,6 +19,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         actor_type: ActorType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -28,7 +29,12 @@ impl CreateActorWithDetails for Specific {
             actor_type, pos
         );
         Specific {
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

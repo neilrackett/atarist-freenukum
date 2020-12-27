@@ -6,8 +6,7 @@ use crate::{
     },
     geometry::RectExt,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    HorizontalDirection, Result, ANIMATION_FAN, HALFTILE_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, Result, Sizes, ANIMATION_FAN,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -27,6 +26,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         direction: HorizontalDirection,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -37,9 +37,9 @@ impl CreateActorWithDetails for Specific {
             running: 10,
             position: Rect::new(
                 pos.x,
-                pos.y - TILE_HEIGHT as i32,
-                TILE_WIDTH,
-                TILE_HEIGHT * 2,
+                pos.y - sizes.height() as i32,
+                sizes.width(),
+                sizes.height() * 2,
             ),
             direction,
         }
@@ -89,14 +89,15 @@ impl Actor for Specific {
             }
 
             if hdistance == 0 {
-                hdistance = HALFTILE_WIDTH as i32 * fan_direction;
+                hdistance = p.sizes.half_width() as i32 * fan_direction;
             }
 
-            let range = HALFTILE_WIDTH as i32 * 8;
+            let range = p.sizes.half_width() as i32 * 8;
             if hdistance.abs() < range {
                 p.hero.position.push_horizontally(
+                    p.sizes,
                     &p.solids,
-                    fan_direction * TILE_WIDTH as i32,
+                    fan_direction * p.sizes.width() as i32,
                 );
             }
         }
@@ -106,7 +107,7 @@ impl Actor for Specific {
         let mut pos = self.position.top_left();
         p.renderer
             .place_tile(self.tile + self.current_frame * 2, pos)?;
-        pos.y += TILE_HEIGHT as i32;
+        pos.y += p.sizes.height() as i32;
         p.renderer
             .place_tile(self.tile + self.current_frame * 2 + 1, pos)?;
         Ok(())

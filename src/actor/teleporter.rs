@@ -1,11 +1,11 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType,
-        CreateActorWithDetails, HeroInteractStartParameters,
-        ReceiveMessageParameters, RenderParameters,
+        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
+        HeroInteractStartParameters, ReceiveMessageParameters,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, ANIMATION_TELEPORTER1, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, ANIMATION_TELEPORTER1,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -36,11 +36,17 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         index: TeleporterIndex,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             index,
         }
     }
@@ -62,8 +68,8 @@ impl Actor for Specific {
         for i in 0..3 {
             for j in 0..3 {
                 let pos = self.position.top_left().offset(
-                    (j - 1) * TILE_WIDTH as i32,
-                    (i - 2) * TILE_HEIGHT as i32,
+                    (j - 1) * p.sizes.width() as i32,
+                    (i - 2) * p.sizes.height() as i32,
                 );
                 let tile =
                     ANIMATION_TELEPORTER1 + i as usize * 3 + j as usize;
@@ -77,8 +83,9 @@ impl Actor for Specific {
         match p.message {
             ActorMessageType::TeleportTo(index) if index == self.index => {
                 p.hero.position.move_to(
+                    p.sizes,
                     self.position.x(),
-                    self.position.y() - TILE_HEIGHT as i32,
+                    self.position.y() - p.sizes.height() as i32,
                 );
             }
             _ => {}

@@ -44,7 +44,7 @@ use crate::{
     infobox::InfoMessageQueue,
     level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
     rendering::Renderer,
-    HorizontalDirection, KeyColor, Result,
+    HorizontalDirection, KeyColor, Result, Sizes,
 };
 pub(crate) use item::{
     BoxBlueContent, BoxGreyContent, BoxRedContent, ItemType,
@@ -105,6 +105,7 @@ impl ActorsList {
     pub fn send_message(
         &mut self,
         message: ActorMessageType,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         solids: &mut LevelSolids,
     ) {
@@ -115,6 +116,7 @@ impl ActorsList {
         {
             let p = ReceiveMessageParameters {
                 message,
+                sizes,
                 hero,
                 solids,
             };
@@ -125,6 +127,7 @@ impl ActorsList {
     pub fn process_shot(
         &mut self,
         shot_position: Rect,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
@@ -133,6 +136,7 @@ impl ActorsList {
     ) -> bool {
         for actor in self.actors.iter_mut() {
             let p = ShotParameters {
+                sizes,
                 solids,
                 tiles,
                 actor_adder,
@@ -191,6 +195,7 @@ impl ActorsList {
 
     pub fn act(
         &mut self,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         hero: &mut Hero,
@@ -204,6 +209,7 @@ impl ActorsList {
                 || actor.position().has_intersection(visible_rect)
             {
                 let p = ActParameters {
+                    sizes,
                     solids,
                     tiles,
                     hero,
@@ -220,6 +226,7 @@ impl ActorsList {
 
         let mut adder = LevelActorAdder {
             solids,
+            sizes,
             tiles,
             actors: self,
         };
@@ -231,6 +238,7 @@ impl ActorsList {
     pub fn render_background_actors(
         &mut self,
         renderer: &mut dyn Renderer,
+        sizes: &dyn Sizes,
         draw_collision_bounds: bool,
         visible_rect: Rect,
     ) -> Result<()> {
@@ -242,13 +250,11 @@ impl ActorsList {
                     && actor.position().has_intersection(visible_rect)
             })
             .map(|actor| {
-                let p = RenderParameters { renderer };
+                let p = RenderParameters { renderer, sizes };
                 let res = actor.render(p);
-                if res.is_ok() {
-                    if draw_collision_bounds {
-                        let color = crate::collision_bounds_color();
-                        renderer.draw_rect(actor.position(), color)?;
-                    }
+                if res.is_ok() && draw_collision_bounds {
+                    let color = crate::collision_bounds_color();
+                    renderer.draw_rect(actor.position(), color)?;
                 }
                 res
             })
@@ -258,6 +264,7 @@ impl ActorsList {
     pub fn render_foreground_actors(
         &mut self,
         renderer: &mut dyn Renderer,
+        sizes: &dyn Sizes,
         draw_collision_bounds: bool,
         visible_rect: Rect,
     ) -> Result<()> {
@@ -269,13 +276,11 @@ impl ActorsList {
                     && actor.position().has_intersection(visible_rect)
             })
             .map(|actor| {
-                let p = RenderParameters { renderer };
+                let p = RenderParameters { renderer, sizes };
                 let res = actor.render(p);
-                if res.is_ok() {
-                    if draw_collision_bounds {
-                        let color = crate::collision_bounds_color();
-                        renderer.draw_rect(actor.position(), color)?;
-                    }
+                if res.is_ok() && draw_collision_bounds {
+                    let color = crate::collision_bounds_color();
+                    renderer.draw_rect(actor.position(), color)?;
                 }
                 res
             })
@@ -346,179 +351,196 @@ impl ActorType {
     pub(crate) fn create_actor_boxed(
         &self,
         p: Point,
+        sz: &dyn Sizes,
         s: &mut LevelSolids,
         t: &mut LevelTiles,
     ) -> Box<dyn Actor> {
         match self {
             ActorType::FireWheelBot => {
-                firewheelbot::Specific::create_boxed(p, s, t)
+                firewheelbot::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::FlameGnomeBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::FlyingBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::FootBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::HelicopterBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::RabbitoidBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::RedBallJumping => {
-                redball_jumping::Specific::create_boxed(p, s, t)
+                redball_jumping::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::RedBallLying => {
-                redball_lying::Specific::create_boxed(p, s, t)
+                redball_lying::Specific::create_boxed(p, sz, s, t)
             }
-            ActorType::Robot => robot::Specific::create_boxed(p, s, t),
+            ActorType::Robot => robot::Specific::create_boxed(p, sz, s, t),
             ActorType::SingleAnimation(animation_type) => {
                 singleanimation::Specific::create_boxed_with_details(
                     *animation_type,
                     p,
+                    sz,
                     s,
                     t,
                 )
             }
             ActorType::SnakeBot => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
-            ActorType::TankBot => tankbot::Specific::create_boxed(p, s, t),
+            ActorType::TankBot => {
+                tankbot::Specific::create_boxed(p, sz, s, t)
+            }
             ActorType::WallCrawlerBot(direction) => {
                 wallcrawler::Specific::create_boxed_with_details(
-                    *direction, p, s, t,
+                    *direction, p, sz, s, t,
                 )
             }
             ActorType::DrProton => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
-            ActorType::Camera => camera::Specific::create_boxed(p, s, t),
+            ActorType::Camera => {
+                camera::Specific::create_boxed(p, sz, s, t)
+            }
             ActorType::Particle(color) => {
                 particle::Specific::create_boxed_with_details(
-                    *color, p, s, t,
+                    *color, p, sz, s, t,
                 )
             }
-            ActorType::Rocket => rocket::Specific::create_boxed(p, s, t),
-            ActorType::Bomb => bomb::Specific::create_boxed(p, s, t),
+            ActorType::Rocket => {
+                rocket::Specific::create_boxed(p, sz, s, t)
+            }
+            ActorType::Bomb => bomb::Specific::create_boxed(p, sz, s, t),
             ActorType::Water => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::ExitDoor => {
-                exitdoor::Specific::create_boxed(p, s, t)
+                exitdoor::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::Notebook => {
-                notebook::Specific::create_boxed(p, s, t)
+                notebook::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::SurveillanceScreen => {
-                surveillancescreen::Specific::create_boxed(p, s, t)
+                surveillancescreen::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::HostileShot(direction) => {
                 hostileshot::Specific::create_boxed_with_details(
-                    *direction, p, s, t,
+                    *direction, p, sz, s, t,
                 )
             }
             ActorType::SodaFlying => {
-                soda_flying::Specific::create_boxed(p, s, t)
+                soda_flying::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::UnstableFloor => {
-                unstablefloor::Specific::create_boxed(p, s, t)
+                unstablefloor::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::ExpandingFloor => {
-                expandingfloor::Specific::create_boxed(p, s, t)
+                expandingfloor::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::ConveyorRightEnd(direction) => {
                 conveyor::Specific::create_boxed_with_details(
-                    *direction, p, s, t,
+                    *direction, p, sz, s, t,
                 )
             }
             ActorType::Fan(direction) => {
                 fan::Specific::create_boxed_with_details(
-                    *direction, p, s, t,
+                    *direction, p, sz, s, t,
                 )
             }
             ActorType::StoneBackground => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::Teleporter(index) => {
                 teleporter::Specific::create_boxed_with_details(
-                    *index, p, s, t,
+                    *index, p, sz, s, t,
                 )
             }
             ActorType::FenceBackground => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::Screen => {
                 placeholder::Specific::create_boxed_with_details(
-                    *self, p, s, t,
+                    *self, p, sz, s, t,
                 )
             }
             ActorType::Item(item_type) => {
                 item::Specific::create_boxed_with_details(
-                    *item_type, p, s, t,
+                    *item_type, p, sz, s, t,
                 )
             }
-            ActorType::Balloon => balloon::Specific::create_boxed(p, s, t),
+            ActorType::Balloon => {
+                balloon::Specific::create_boxed(p, sz, s, t)
+            }
             ActorType::AccessCardSlot => {
-                accesscard_slot::Specific::create_boxed(p, s, t)
+                accesscard_slot::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::GloveSlot => {
-                glove_slot::Specific::create_boxed(p, s, t)
+                glove_slot::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::Key(color) => {
-                key::Specific::create_boxed_with_details(*color, p, s, t)
+                key::Specific::create_boxed_with_details(
+                    *color, p, sz, s, t,
+                )
             }
             ActorType::Keyhole(color) => {
                 keyhole::Specific::create_boxed_with_details(
-                    *color, p, s, t,
+                    *color, p, sz, s, t,
                 )
             }
             ActorType::Door(color) => {
-                door::Specific::create_boxed_with_details(*color, p, s, t)
-            }
-            ActorType::ShootableWall => {
-                shootable_wall::Specific::create_boxed(p, s, t)
-            }
-            ActorType::Lift => elevator::Specific::create_boxed(p, s, t),
-            ActorType::Acme => acme::Specific::create_boxed(p, s, t),
-            ActorType::Fire(direction) => {
-                fire::Specific::create_boxed_with_details(
-                    *direction, p, s, t,
+                door::Specific::create_boxed_with_details(
+                    *color, p, sz, s, t,
                 )
             }
-            ActorType::Mill => mill::Specific::create_boxed(p, s, t),
+            ActorType::ShootableWall => {
+                shootable_wall::Specific::create_boxed(p, sz, s, t)
+            }
+            ActorType::Lift => {
+                elevator::Specific::create_boxed(p, sz, s, t)
+            }
+            ActorType::Acme => acme::Specific::create_boxed(p, sz, s, t),
+            ActorType::Fire(direction) => {
+                fire::Specific::create_boxed_with_details(
+                    *direction, p, sz, s, t,
+                )
+            }
+            ActorType::Mill => mill::Specific::create_boxed(p, sz, s, t),
             ActorType::ElectricArc => {
-                electric_arc::Specific::create_boxed(p, s, t)
+                electric_arc::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::AccessCardDoor => {
-                accesscard_door::Specific::create_boxed(p, s, t)
+                accesscard_door::Specific::create_boxed(p, sz, s, t)
             }
             ActorType::Spikes(spike_type) => {
                 spikes::Specific::create_boxed_with_details(
                     *spike_type,
                     p,
+                    sz,
                     s,
                     t,
                 )
@@ -527,6 +549,7 @@ impl ActorType {
                 score::Specific::create_boxed_with_details(
                     *score_type,
                     p,
+                    sz,
                     s,
                     t,
                 )
@@ -535,6 +558,7 @@ impl ActorType {
                 simpleanimation::Specific::create_boxed_with_details(
                     *animation_type,
                     p,
+                    sz,
                     s,
                     t,
                 )
@@ -597,13 +621,18 @@ impl ActorQueue {
 
 pub struct LevelActorAdder<'a> {
     pub solids: &'a mut LevelSolids,
+    pub sizes: &'a dyn Sizes,
     pub tiles: &'a mut LevelTiles,
     pub actors: &'a mut ActorsList,
 }
 impl<'a> ActorAdder for LevelActorAdder<'a> {
     fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
-        let actor =
-            actor_type.create_actor_boxed(pos, self.solids, self.tiles);
+        let actor = actor_type.create_actor_boxed(
+            pos,
+            self.sizes,
+            self.solids,
+            self.tiles,
+        );
         self.actors.actors.push(actor);
     }
 }
@@ -640,6 +669,7 @@ trait CreateActorWithDetails: Sized {
     fn create_with_details(
         details: Self::Details,
         position: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self;
@@ -647,11 +677,12 @@ trait CreateActorWithDetails: Sized {
     fn create_boxed_with_details(
         details: Self::Details,
         position: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Box<Self> {
         Box::new(Self::create_with_details(
-            details, position, solids, tiles,
+            details, position, sizes, solids, tiles,
         ))
     }
 }
@@ -659,16 +690,18 @@ trait CreateActorWithDetails: Sized {
 trait CreateActor: Sized {
     fn create(
         position: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self;
 
     fn create_boxed(
         position: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Box<Self> {
-        Box::new(Self::create(position, solids, tiles))
+        Box::new(Self::create(position, sizes, solids, tiles))
     }
 }
 
@@ -678,6 +711,7 @@ pub struct ActParameters<'a> {
     pub hero: &'a mut Hero,
     pub actor_adder: &'a mut dyn ActorAdder,
     pub play_state: &'a mut PlayState,
+    pub sizes: &'a dyn Sizes,
 }
 
 pub struct ShotParameters<'a> {
@@ -686,16 +720,19 @@ pub struct ShotParameters<'a> {
     pub actor_adder: &'a mut dyn ActorAdder,
     pub hero: &'a mut Hero,
     pub actor_message_queue: &'a mut ActorMessageQueue,
+    pub sizes: &'a dyn Sizes,
 }
 
 pub struct RenderParameters<'a> {
     pub renderer: &'a mut dyn Renderer,
+    pub sizes: &'a dyn Sizes,
 }
 
 pub struct ReceiveMessageParameters<'a> {
     pub message: ActorMessageType,
     pub hero: &'a mut Hero,
     pub solids: &'a mut LevelSolids,
+    pub sizes: &'a dyn Sizes,
 }
 
 pub struct HeroInteractStartParameters<'a> {

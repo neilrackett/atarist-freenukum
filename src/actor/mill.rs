@@ -1,11 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, ActorType,
-        CreateActor, RenderParameters, ScoreType, ShotParameters,
-        ShotProcessing,
+        ActParameters, Actor, ActorMessageType, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, OBJECT_ROTATINGCYLINDER, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, OBJECT_ROTATINGCYLINDER,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -21,19 +20,20 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         let mut position =
-            Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT);
+            Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while position.y > 0
             && !solids.get(
-                position.x() as u32 / TILE_WIDTH,
-                position.y() as u32 / TILE_HEIGHT - 1,
+                position.x() as u32 / sizes.width(),
+                position.y() as u32 / sizes.height() - 1,
             )
         {
-            position.offset(0, -(TILE_HEIGHT as i32));
-            position.set_height(position.height() + TILE_HEIGHT);
+            position.offset(0, -(sizes.height() as i32));
+            position.set_height(position.height() + sizes.height());
         }
 
         Specific {
@@ -61,9 +61,9 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
 
-        for _ in 0..self.position.height() / TILE_WIDTH {
+        for _ in 0..self.position.height() / p.sizes.width() {
             p.renderer.place_tile(self.tile + self.current_frame, pos)?;
-            pos.y += TILE_HEIGHT as i32;
+            pos.y += p.sizes.height() as i32;
         }
         Ok(())
     }
@@ -88,7 +88,7 @@ impl Actor for Specific {
                 ActorType::Score(ScoreType::Score10000),
                 self.position.top_left().offset(
                     0,
-                    (self.position.height() / 2 - TILE_HEIGHT) as i32,
+                    (self.position.height() / 2 - p.sizes.height()) as i32,
                 ),
             );
             p.actor_adder.add_actor(

@@ -1,16 +1,15 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
+    Result, Sizes, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
     NUMBER_2000, NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT,
     NUMBER_BONUS_1_RIGHT, NUMBER_BONUS_2_LEFT, NUMBER_BONUS_2_RIGHT,
     NUMBER_BONUS_3_LEFT, NUMBER_BONUS_3_RIGHT, NUMBER_BONUS_4_LEFT,
     NUMBER_BONUS_4_RIGHT, NUMBER_BONUS_5_LEFT, NUMBER_BONUS_5_RIGHT,
     NUMBER_BONUS_6_LEFT, NUMBER_BONUS_6_RIGHT, NUMBER_BONUS_7_LEFT,
-    NUMBER_BONUS_7_RIGHT, TILE_HEIGHT, TILE_WIDTH,
+    NUMBER_BONUS_7_RIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -52,6 +51,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         score_type: ScoreType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -82,7 +82,12 @@ impl CreateActorWithDetails for Specific {
         Specific {
             tile,
             countdown: 40,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -107,7 +112,8 @@ impl Actor for Specific {
     }
 
     fn is_alive(&self) -> bool {
-        self.countdown > 0 && self.position.y() > -(TILE_HEIGHT as i32)
+        self.countdown > 0
+            && self.position.y() > -(self.position.height() as i32)
     }
 
     fn acts_while_invisible(&self) -> bool {

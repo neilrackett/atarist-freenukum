@@ -4,9 +4,8 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
-    ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM, TILE_HEIGHT,
-    TILE_WIDTH,
+    Hero, Result, Sizes, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
+    ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -35,6 +34,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         animation_type: SingleAnimationType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -68,7 +68,12 @@ impl CreateActorWithDetails for Specific {
             num_frames,
             can_hurt_hero,
             replaced_by,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

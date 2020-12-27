@@ -1,11 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, HALFTILE_HEIGHT, HALFTILE_WIDTH, OBJECT_SPARK_BLUE,
-    OBJECT_SPARK_GREEN, OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
+    Result, Sizes, OBJECT_SPARK_BLUE, OBJECT_SPARK_GREEN,
+    OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -33,6 +32,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         color: ParticleColor,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -56,8 +56,8 @@ impl CreateActorWithDetails for Specific {
             position: Rect::new(
                 pos.x,
                 pos.y,
-                HALFTILE_WIDTH,
-                HALFTILE_HEIGHT,
+                sizes.half_width(),
+                sizes.half_height(),
             ),
             is_alive: true,
         }

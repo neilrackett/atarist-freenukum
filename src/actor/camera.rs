@@ -4,8 +4,8 @@ use crate::{
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
-    ANIMATION_CAMERA_RIGHT, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
+    ANIMATION_CAMERA_RIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,16 +19,22 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
-        let x = pos.x as u32 / TILE_WIDTH;
-        let y = pos.y as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / sizes.width();
+        let y = pos.y as u32 / sizes.height();
         tiles.copy_from_to(x, y + 1, x, y);
 
         Specific {
             tile: ANIMATION_CAMERA_CENTER,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }

@@ -1,14 +1,16 @@
 use anyhow::{anyhow, Result};
-use freenukum::data::original_data_dir;
-use freenukum::graphics::load_default_font;
-use freenukum::hero::Hero;
-use freenukum::infobox;
-use freenukum::mainmenu::{mainmenu, MainMenuEntry};
-use freenukum::picture::show_splash;
-use freenukum::settings::Settings;
-use freenukum::tilecache::TileCache;
-use freenukum::{game, UserEvent};
-use freenukum::{WINDOW_HEIGHT, WINDOW_WIDTH};
+use freenukum::{
+    data::original_data_dir,
+    game,
+    graphics::load_default_font,
+    hero::Hero,
+    infobox,
+    mainmenu::{mainmenu, MainMenuEntry},
+    picture::show_splash,
+    settings::Settings,
+    tilecache::TileCache,
+    DefaultSizes, UserEvent, WINDOW_HEIGHT, WINDOW_WIDTH,
+};
 use sdl2::pixels::Color;
 use std::fs::File;
 
@@ -41,6 +43,8 @@ fn main() -> Result<()> {
     event_subsystem
         .register_custom_event::<UserEvent>()
         .map_err(|s| anyhow!(s))?;
+
+    let sizes = DefaultSizes;
 
     let window = game::create_window(
         WINDOW_WIDTH,
@@ -83,7 +87,7 @@ fn main() -> Result<()> {
         &mut event_pump,
     )?;
 
-    let mut hero = Hero::new();
+    let mut hero = Hero::new(&sizes);
 
     'menu_loop: loop {
         match mainmenu(
@@ -103,6 +107,7 @@ fn main() -> Result<()> {
                     &mut event_pump,
                     &event_sender,
                     &timer_subsystem,
+                    &sizes,
                 )?;
                 let mut file = File::open(&bg_filepath)?;
                 show_splash(

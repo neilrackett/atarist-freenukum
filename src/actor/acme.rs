@@ -4,7 +4,7 @@ use crate::{
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, OBJECT_FALLINGBLOCK,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,13 +19,19 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Specific {
             tile: OBJECT_FALLINGBLOCK,
             counter: 0,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width() * 2,
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }
@@ -46,10 +52,10 @@ impl Actor for Specific {
 
                 if y < hy && xl < hxr && xr > hxl {
                     let mut solid_between = false;
-                    for i in (y as u32 / TILE_HEIGHT) + 1
-                        ..hy as u32 / TILE_HEIGHT
+                    for i in (y as u32 / p.sizes.height()) + 1
+                        ..hy as u32 / p.sizes.height()
                     {
-                        let x = xl as u32 / TILE_WIDTH;
+                        let x = xl as u32 / p.sizes.width();
                         if p.solids.get(x, i) || p.solids.get(x + 1, i) {
                             solid_between = true;
                             break;
@@ -70,8 +76,8 @@ impl Actor for Specific {
             }
             _ => {
                 if p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH,
-                    self.position.y() as u32 / TILE_HEIGHT + 1,
+                    self.position.x() as u32 / p.sizes.width(),
+                    self.position.y() as u32 / p.sizes.height() + 1,
                 ) {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
@@ -85,7 +91,7 @@ impl Actor for Specific {
                     );
                     self.is_alive = false;
                 } else {
-                    self.position.offset(0, TILE_HEIGHT as i32);
+                    self.position.offset(0, p.sizes.height() as i32);
                 }
             }
         }
@@ -94,7 +100,7 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile, pos)?;
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         p.renderer.place_tile(self.tile + 1, pos)?;
         Ok(())
     }

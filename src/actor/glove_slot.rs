@@ -5,8 +5,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, OBJECT_GLOVE_SLOT, TILE_HEIGHT,
-    TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, OBJECT_GLOVE_SLOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -30,6 +29,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -39,7 +39,12 @@ impl CreateActor for Specific {
             num_frames: 4,
             state: State::Idle,
             countdown: 0,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -100,10 +105,10 @@ impl Actor for Specific {
         let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile + adder, pos)?;
 
-        pos.x -= TILE_WIDTH as i32;
+        pos.x -= p.sizes.width() as i32;
         p.renderer.place_tile(self.tile + 2, pos)?;
 
-        pos.x += 2 * TILE_WIDTH as i32;
+        pos.x += 2 * p.sizes.width() as i32;
         p.renderer.place_tile(self.tile + 3, pos)?;
         Ok(())
     }

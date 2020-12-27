@@ -12,8 +12,8 @@ use crate::settings::Settings;
 use crate::tile::TileHeader;
 use crate::{backdrop, HorizontalDirection, TileProvider, UserEvent};
 use crate::{
-    Result, GAME_INTERVAL, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH,
-    LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, GAME_INTERVAL, LEVELWINDOW_HEIGHT, LEVELWINDOW_WIDTH,
+    LEVEL_HEIGHT, LEVEL_WIDTH,
 };
 
 use anyhow::anyhow;
@@ -48,6 +48,7 @@ fn start_in_level(
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
+    sizes: &dyn Sizes,
 ) -> Result<NextAction> {
     let backdrop = {
         let backdrop_number = match level_number {
@@ -79,22 +80,22 @@ fn start_in_level(
         );
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
-        LevelData::load(&mut file, hero, &mut None)?
+        LevelData::load(&mut file, hero, &mut None, sizes)?
     };
 
     let destrect = Rect::new(
-        TILE_WIDTH as i32,
-        TILE_HEIGHT as i32,
-        (LEVELWINDOW_WIDTH) * TILE_WIDTH,
-        (LEVELWINDOW_HEIGHT) * TILE_HEIGHT,
+        sizes.width() as i32,
+        sizes.height() as i32,
+        (LEVELWINDOW_WIDTH) * sizes.width(),
+        (LEVELWINDOW_HEIGHT) * sizes.height(),
     );
     let heropos = hero.position.geometry;
     let mut srcrect = Rect::new(
-        (heropos.x() as u32 + TILE_WIDTH)
+        (heropos.x() as u32 + sizes.width())
             .saturating_sub(destrect.width() / 2) as i32,
         (heropos.y() as u32).saturating_sub(destrect.height() / 2) as i32,
-        LEVELWINDOW_WIDTH * TILE_WIDTH,
-        LEVELWINDOW_HEIGHT * TILE_HEIGHT,
+        LEVELWINDOW_WIDTH * sizes.width(),
+        LEVELWINDOW_HEIGHT * sizes.height(),
     );
 
     let timer = timer_subsystem.add_timer(
@@ -149,13 +150,14 @@ fn start_in_level(
 
             srcrect.x = std::cmp::min(
                 (heropos.center().x as u32)
-                    .saturating_sub(LEVELWINDOW_WIDTH * TILE_WIDTH / 2),
-                LEVEL_WIDTH * TILE_WIDTH - srcrect.width(),
+                    .saturating_sub(LEVELWINDOW_WIDTH * sizes.width() / 2),
+                LEVEL_WIDTH * sizes.height() - srcrect.width(),
             ) as i32;
             srcrect.y = std::cmp::min(
-                (heropos.y() as u32)
-                    .saturating_sub(LEVELWINDOW_HEIGHT * TILE_HEIGHT / 2),
-                LEVEL_HEIGHT * TILE_HEIGHT - srcrect.height(),
+                (heropos.y() as u32).saturating_sub(
+                    LEVELWINDOW_HEIGHT * sizes.height() / 2,
+                ),
+                LEVEL_HEIGHT * sizes.height() - srcrect.height(),
             ) as i32;
 
             borders.render(&mut renderer)?;
@@ -169,13 +171,14 @@ fn start_in_level(
 
             renderer.canvas.set_clip_rect(destrect);
             let mut level_renderer = MovePositionRenderer {
-                offset_x: -srcrect.x() + TILE_WIDTH as i32,
-                offset_y: -srcrect.y() + TILE_HEIGHT as i32,
+                offset_x: -srcrect.x() + sizes.width() as i32,
+                offset_y: -srcrect.y() + sizes.height() as i32,
                 upstream: &mut renderer,
             };
 
             level_data.render(
                 &mut level_renderer,
+                sizes,
                 hero,
                 settings.draw_collision_bounds,
                 srcrect,
@@ -231,12 +234,16 @@ fn start_in_level(
                 if srcrect.y() < 0 {
                     srcrect.set_y(0);
                 }
-                if srcrect.right() > (LEVEL_WIDTH * TILE_WIDTH) as i32 {
-                    srcrect.set_right((LEVEL_WIDTH * TILE_WIDTH) as i32);
-                }
-                if srcrect.bottom() > (LEVEL_HEIGHT * TILE_HEIGHT) as i32 {
+                if srcrect.right() > (LEVEL_WIDTH * sizes.width()) as i32 {
                     srcrect
-                        .set_bottom((LEVEL_HEIGHT * TILE_HEIGHT) as i32);
+                        .set_right((LEVEL_WIDTH * sizes.width()) as i32);
+                }
+                if srcrect.bottom()
+                    > (LEVEL_HEIGHT * sizes.height()) as i32
+                {
+                    srcrect.set_bottom(
+                        (LEVEL_HEIGHT * sizes.height()) as i32,
+                    );
                 }
                 do_update = true;
             }
@@ -314,6 +321,7 @@ fn start_in_level(
             GameEvent::HeroStartFiring => {
                 hero.is_shooting = true;
                 level_data.fire_shot(
+                    sizes,
                     hero,
                     &mut actor_queue,
                     &mut actor_message_queue,
@@ -326,6 +334,7 @@ fn start_in_level(
             }
             GameEvent::TimerTriggered => {
                 level_data.act(
+                    sizes,
                     hero,
                     &mut actor_queue,
                     &mut actor_message_queue,
@@ -356,6 +365,7 @@ pub fn start(
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
+    sizes: &dyn Sizes,
 ) -> Result<()> {
     {
         let filename = format!("badguy.{}", episodes.file_extension());
@@ -396,7 +406,7 @@ pub fn start(
         )?;
     }
 
-    hero.reset();
+    hero.reset(sizes);
 
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
@@ -431,6 +441,7 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
+                sizes,
             )? {
                 NextAction::NextLevel => {
                     initial_lives = hero.health.life().unwrap();
@@ -458,6 +469,7 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
+                sizes,
             )? {
                 NextAction::NextLevel => {
                     if level == 13 {

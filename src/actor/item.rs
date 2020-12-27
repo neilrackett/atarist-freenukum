@@ -6,13 +6,12 @@ use crate::{
     },
     hero::{FetchedLetter, InventoryItem},
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, ANIMATION_SODA, HALFTILE_HEIGHT, OBJECT_ACCESS_CARD,
-    OBJECT_BOOT, OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
+    Hero, Result, Sizes, ANIMATION_SODA, OBJECT_ACCESS_CARD, OBJECT_BOOT,
+    OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
     OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE, OBJECT_CLAMP,
     OBJECT_DISK, OBJECT_FLAG, OBJECT_FOOTBALL, OBJECT_GLOVE, OBJECT_GUN,
     OBJECT_JOYSTICK, OBJECT_LETTER_D, OBJECT_LETTER_E, OBJECT_LETTER_K,
-    OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE, OBJECT_RADIO, TILE_HEIGHT,
-    TILE_WIDTH,
+    OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE, OBJECT_RADIO,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -117,6 +116,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         item_type: ItemType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -126,7 +126,12 @@ impl CreateActorWithDetails for Specific {
             tile,
             current_frame: 0,
             num_frames,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
             item_type,
         }
@@ -329,11 +334,11 @@ impl Actor for Specific {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT + 1,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height() + 1,
         ) {
             // fall down until the actor lands on solid ground
-            self.position.offset(0, HALFTILE_HEIGHT as i32);
+            self.position.offset(0, p.sizes.half_height() as i32);
         }
 
         if self.position.has_intersection(p.hero.position.geometry) {
@@ -388,7 +393,7 @@ impl Actor for Specific {
                 self.is_alive = false;
                 p.actor_adder.add_actor(
                     ActorType::Balloon,
-                    pos.offset(0, -(TILE_HEIGHT as i32)),
+                    pos.offset(0, -(p.sizes.height() as i32)),
                 );
                 p.actor_adder.add_particle_firework(pos, 4);
                 ShotProcessing::Absorb

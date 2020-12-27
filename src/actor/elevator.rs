@@ -5,8 +5,7 @@ use crate::{
     },
     geometry::RectExt,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, HALFTILE_HEIGHT, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
-    TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -26,12 +25,18 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
             state: State::Idle,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -42,7 +47,7 @@ impl Actor for Specific {
 
         if self.state == State::Ascending
             || self.state == State::Idle
-                && self.position.height() as u32 > TILE_HEIGHT
+                && self.position.height() as u32 > p.sizes.height()
         {
             // check if hero leaves elevator
             if !hero_geometry.touches(self.position)
@@ -55,20 +60,21 @@ impl Actor for Specific {
         match self.state {
             State::Ascending => {
                 if p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH,
-                    self.position.y() as u32 / TILE_HEIGHT - 3,
+                    self.position.x() as u32 / p.sizes.width(),
+                    self.position.y() as u32 / p.sizes.height() - 3,
                 ) {
                     // hero touches solid with head
                     self.state = State::Idle;
                 } else {
-                    let offset = p
-                        .hero
-                        .position
-                        .push_vertically(&p.solids, -(TILE_HEIGHT as i32));
-                    if -offset < TILE_HEIGHT as i32 {
+                    let offset = p.hero.position.push_vertically(
+                        p.sizes,
+                        &p.solids,
+                        -(p.sizes.height() as i32),
+                    );
+                    if -offset < p.sizes.height() as i32 {
                         p.hero
                             .position
-                            .push_vertically(&p.solids, -offset);
+                            .push_vertically(p.sizes, &p.solids, -offset);
                         self.state = State::Idle;
                     } else {
                         self.position.offset(0, offset);
@@ -77,8 +83,8 @@ impl Actor for Specific {
                         );
 
                         p.solids.set(
-                            self.position.x() as u32 / TILE_WIDTH,
-                            self.position.y() as u32 / TILE_HEIGHT,
+                            self.position.x() as u32 / p.sizes.width(),
+                            self.position.y() as u32 / p.sizes.height(),
                             true,
                         );
                     }
@@ -86,15 +92,15 @@ impl Actor for Specific {
             }
             State::Descending => {
                 for _ in 0..2 {
-                    if self.position.height() as u32 > TILE_HEIGHT {
+                    if self.position.height() as u32 > p.sizes.height() {
                         p.solids.set(
-                            self.position.x() as u32 / TILE_WIDTH,
-                            self.position.y() as u32 / TILE_HEIGHT,
+                            self.position.x() as u32 / p.sizes.width(),
+                            self.position.y() as u32 / p.sizes.height(),
                             false,
                         );
-                        self.position.offset(0, TILE_HEIGHT as i32);
+                        self.position.offset(0, p.sizes.height() as i32);
                         self.position.set_height(
-                            self.position.height() - TILE_HEIGHT,
+                            self.position.height() - p.sizes.height(),
                         );
                     } else {
                         self.state = State::Idle;
@@ -130,8 +136,8 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = SOLID_ELEVATOR;
         let mut pos = self.position.top_left();
-        for _ in 0..(self.position.height() / TILE_HEIGHT - 1) * 2 {
-            pos.y += HALFTILE_HEIGHT as i32;
+        for _ in 0..(self.position.height() / p.sizes.height() - 1) * 2 {
+            pos.y += p.sizes.half_height() as i32;
             p.renderer.place_tile(tile, pos)?;
         }
         pos = self.position.top_left();

@@ -4,7 +4,7 @@ use crate::{
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
-    Hero, Result, ANIMATION_EXITDOOR, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, ANIMATION_EXITDOOR,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -26,6 +26,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -36,8 +37,8 @@ impl CreateActor for Specific {
             position: Rect::new(
                 pos.x,
                 pos.y,
-                TILE_WIDTH * 2,
-                TILE_HEIGHT * 2,
+                sizes.width() * 2,
+                sizes.height() * 2,
             ),
         }
     }
@@ -79,14 +80,14 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile + self.counter * 4, pos)?;
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         p.renderer
             .place_tile(self.tile + self.counter * 4 + 1, pos)?;
-        pos.x -= TILE_WIDTH as i32;
-        pos.y += TILE_HEIGHT as i32;
+        pos.x -= p.sizes.width() as i32;
+        pos.y += p.sizes.height() as i32;
         p.renderer
             .place_tile(self.tile + self.counter * 4 + 2, pos)?;
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         p.renderer
             .place_tile(self.tile + self.counter * 4 + 3, pos)?;
         Ok(())

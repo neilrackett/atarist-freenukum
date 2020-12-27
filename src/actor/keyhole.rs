@@ -5,9 +5,9 @@ use crate::{
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, KeyColor, Result, OBJECT_KEYHOLE_BLACK, OBJECT_KEYHOLE_BLUE,
-    OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK, OBJECT_KEYHOLE_RED,
-    TILE_HEIGHT, TILE_WIDTH,
+    Hero, KeyColor, Result, Sizes, OBJECT_KEYHOLE_BLACK,
+    OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK,
+    OBJECT_KEYHOLE_RED,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -25,13 +25,19 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         color: KeyColor,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
             tile: OBJECT_KEYHOLE_BLACK,
             counter: 0,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             color,
         }
     }

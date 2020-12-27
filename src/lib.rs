@@ -37,7 +37,7 @@ pub const HALFTILE_WIDTH: u32 = 8;
 pub const HALFTILE_HEIGHT: u32 = 8;
 pub const TILE_WIDTH: u32 = HALFTILE_WIDTH * 2;
 pub const TILE_HEIGHT: u32 = HALFTILE_HEIGHT * 2;
-pub const MAX_TILES_PER_FILE: usize = 50;
+pub const MATILES_PER_FILE: usize = 50;
 pub const HEALTH_COUNT: usize = 8;
 pub const INVENTORY_WIDTH: usize = HEALTH_COUNT / 2;
 pub const FONT_WIDTH: u32 = 8;
@@ -296,4 +296,28 @@ pub enum VerticalDirection {
 pub enum UserEvent {
     Timer,
     Redraw,
+}
+
+pub trait Sizes {
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
+    fn half_width(&self) -> u32;
+    fn half_height(&self) -> u32;
+}
+
+pub struct DefaultSizes;
+
+impl Sizes for DefaultSizes {
+    fn width(&self) -> u32 {
+        TILE_WIDTH
+    }
+    fn height(&self) -> u32 {
+        TILE_HEIGHT
+    }
+    fn half_width(&self) -> u32 {
+        HALFTILE_WIDTH
+    }
+    fn half_height(&self) -> u32 {
+        HALFTILE_HEIGHT
+    }
 }

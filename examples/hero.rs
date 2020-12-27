@@ -9,8 +9,8 @@ use freenukum::{
     rendering::{CanvasRenderer, Renderer},
     settings::Settings,
     tilecache::TileCache,
-    HorizontalDirection, UserEvent, BACKDROP_HEIGHT, BACKDROP_WIDTH,
-    GAME_INTERVAL, TILE_HEIGHT, TILE_WIDTH,
+    DefaultSizes, HorizontalDirection, Sizes, UserEvent, BACKDROP_HEIGHT,
+    BACKDROP_WIDTH, GAME_INTERVAL,
 };
 use sdl2::{
     event::{Event, WindowEvent},
@@ -36,8 +36,10 @@ fn main() -> Result<()> {
         .register_custom_event::<UserEvent>()
         .map_err(|s| anyhow!(s))?;
 
-    let win_width = BACKDROP_WIDTH * TILE_WIDTH;
-    let win_height = BACKDROP_HEIGHT * TILE_HEIGHT;
+    let sizes = DefaultSizes;
+
+    let win_width = BACKDROP_WIDTH * sizes.width();
+    let win_height = BACKDROP_HEIGHT * sizes.height();
     let window = game::create_window(
         win_width,
         win_height,
@@ -60,7 +62,7 @@ fn main() -> Result<()> {
     )?;
     let tilecache = TileCache::load_from_path(&original_data_dir())?;
 
-    let mut hero = Hero::new();
+    let mut hero = Hero::new(&sizes);
 
     hero.position.geometry.x =
         (win_width as i32 - hero.position.geometry.width() as i32) / 2;
@@ -74,7 +76,12 @@ fn main() -> Result<()> {
     };
 
     let solids = LevelSolids::new_all_solid();
-    hero.render(&mut renderer, &solids, settings.draw_collision_bounds)?;
+    hero.render(
+        &mut renderer,
+        &sizes,
+        &solids,
+        settings.draw_collision_bounds,
+    )?;
     renderer.canvas.present();
 
     let mut directions = HashSet::new();
@@ -204,9 +211,10 @@ fn main() -> Result<()> {
                     renderer.fill(Color::RGB(0, 0, 0))?;
                     hero.next_frame();
                     hero.update_animation();
-                    hero.act(&solids, &mut actor_adder)?;
+                    hero.act(&sizes, &solids, &mut actor_adder)?;
                     hero.render(
                         &mut renderer,
+                        &sizes,
                         &solids,
                         settings.draw_collision_bounds,
                     )?;

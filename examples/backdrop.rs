@@ -3,7 +3,7 @@ use freenukum::backdrop;
 use freenukum::settings::Settings;
 use freenukum::tile::TileHeader;
 use freenukum::{
-    game, BACKDROP_HEIGHT, BACKDROP_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    game, DefaultSizes, Sizes, BACKDROP_HEIGHT, BACKDROP_WIDTH,
 };
 use sdl2::{
     event::{Event, WindowEvent},
@@ -35,9 +35,11 @@ fn main() -> Result<()> {
     let mut event_pump =
         sdl_context.event_pump().map_err(|s| anyhow!(s))?;
 
+    let sizes = DefaultSizes;
+
     let window = game::create_window(
-        BACKDROP_WIDTH * TILE_WIDTH,
-        BACKDROP_HEIGHT * TILE_HEIGHT,
+        BACKDROP_WIDTH * sizes.width(),
+        BACKDROP_HEIGHT * sizes.height(),
         settings.fullscreen,
         &format!("Freenukum {} backdrop example", VERSION),
         &video_subsystem,

@@ -5,9 +5,9 @@ use crate::{
         SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, VerticalDirection,
+    Hero, HorizontalDirection, Result, Sizes, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
-    LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH,
+    LEVEL_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -28,11 +28,12 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         orientation: HorizontalDirection,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        let x = pos.x as u32 / TILE_WIDTH;
-        let y = pos.y as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / sizes.width();
+        let y = pos.y as u32 / sizes.height();
 
         let tile = match orientation {
             HorizontalDirection::Left => {
@@ -56,7 +57,12 @@ impl CreateActorWithDetails for Specific {
             current_frame: 0,
             num_frames: 4,
             is_alive: true,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -74,16 +80,16 @@ impl Actor for Specific {
                 if
                 // bot collides with solid tile
                 p.solids.get(
-                self.position.x as u32 / TILE_WIDTH,
-                (self.position.y as u32 - 1) / TILE_WIDTH) ||
+                self.position.x as u32 / p.sizes.width(),
+                (self.position.y as u32 - 1) / p.sizes.width()) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
                     self.position.x +
                     orientation *
-                    TILE_WIDTH as i32
-                ) as u32 / TILE_WIDTH,
-                (self.position.y - 1) as u32 / TILE_HEIGHT)
+                    p.sizes.width() as i32
+                ) as u32 / p.sizes.width(),
+                (self.position.y - 1) as u32 / p.sizes.height())
                 {
                     self.position.y += 1;
                     self.direction = VerticalDirection::Down;
@@ -101,18 +107,18 @@ impl Actor for Specific {
                 if
                 // bot collides with solid tile
                 p.solids.get(
-                    self.position.x as u32 / TILE_WIDTH,
+                    self.position.x as u32 / p.sizes.width(),
                     (
-                        self.position.y as u32 + TILE_HEIGHT
-                    ) / TILE_HEIGHT) ||
+                        self.position.y as u32 + p.sizes.height()
+                    ) / p.sizes.height()) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
                     self.position.x +
                     orientation *
-                    TILE_WIDTH as i32) as u32 /
-                TILE_WIDTH,
-                (self.position.y as u32 + TILE_HEIGHT) / TILE_HEIGHT)
+                    p.sizes.width() as i32) as u32 /
+                p.sizes.width(),
+                (self.position.y as u32 + p.sizes.height()) / p.sizes.height())
                 {
                     self.position.y -= 1;
                     self.direction = VerticalDirection::Up;

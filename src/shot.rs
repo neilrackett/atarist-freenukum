@@ -6,8 +6,7 @@ use crate::{
     hero::Hero,
     level::{solids::LevelSolids, tiles::LevelTiles},
     rendering::Renderer,
-    HorizontalDirection, Result, HALFTILE_WIDTH, LEVELWINDOW_WIDTH,
-    OBJECT_SHOT, TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, Result, Sizes, LEVELWINDOW_WIDTH, OBJECT_SHOT,
 };
 use sdl2::rect::Rect;
 
@@ -23,14 +22,19 @@ pub struct Shot {
 }
 
 impl Shot {
-    pub fn new(x: i32, y: i32, direction: HorizontalDirection) -> Self {
-        let w = 4;
-        let h = TILE_HEIGHT - 4;
+    pub fn new(
+        sizes: &dyn Sizes,
+        x: i32,
+        y: i32,
+        direction: HorizontalDirection,
+    ) -> Self {
+        let w = sizes.width() / 4;
+        let h = sizes.height() / 4 * 3;
         Shot {
             position: Rect::new(
-                x + HALFTILE_WIDTH as i32 - w as i32 / 2
+                x + sizes.width() as i32 - w as i32 / 2
                     + direction.as_factor_i32() * w as i32,
-                y + TILE_HEIGHT as i32 - h as i32,
+                y + sizes.height() as i32 - h as i32,
                 w,
                 h,
             ),
@@ -44,6 +48,7 @@ impl Shot {
     /// Returns whether the shot is still alive after acting.
     pub fn act(
         &mut self,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         actors: &mut ActorsList,
         solids: &mut LevelSolids,
@@ -60,19 +65,20 @@ impl Shot {
         }
 
         let x_start = hero.position.geometry.x()
-            - TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
+            - sizes.width() as i32 * LEVELWINDOW_WIDTH as i32 / 2;
         let x_end = hero.position.geometry.x()
             + hero.position.geometry.w as i32
-            + TILE_WIDTH as i32 * LEVELWINDOW_WIDTH as i32 / 2;
+            + sizes.width() as i32 * LEVELWINDOW_WIDTH as i32 / 2;
 
         if self.countdown >= 2 {
             let distance =
-                HALFTILE_WIDTH as i32 * self.direction.as_factor_i32();
+                sizes.half_width() as i32 * self.direction.as_factor_i32();
 
             // we only push half of the distance, but do it twice, so that
             // also the intermediate position gets covered, not just the
             // end position.
             self.push(
+                sizes,
                 hero,
                 actors,
                 solids,
@@ -82,6 +88,7 @@ impl Shot {
                 actor_message_queue,
             );
             self.push(
+                sizes,
                 hero,
                 actors,
                 solids,
@@ -103,15 +110,16 @@ impl Shot {
     pub fn render(
         &self,
         renderer: &mut dyn Renderer,
+        sizes: &dyn Sizes,
         draw_collision_bounds: bool,
     ) -> Result<()> {
         if self.is_alive {
             let mut destrect = self.position;
             destrect.set_x(
                 destrect.x() + destrect.width() as i32 / 2
-                    - HALFTILE_WIDTH as i32,
+                    - sizes.half_width() as i32,
             );
-            destrect.set_width(TILE_WIDTH);
+            destrect.set_width(sizes.width());
 
             renderer.place_tile(
                 OBJECT_SHOT + self.counter,
@@ -127,6 +135,7 @@ impl Shot {
 
     pub fn push(
         &mut self,
+        sizes: &dyn Sizes,
         hero: &mut Hero,
         actors: &mut ActorsList,
         solids: &mut LevelSolids,
@@ -140,6 +149,7 @@ impl Shot {
             if self.countdown == 2 {
                 if actors.process_shot(
                     self.position,
+                    sizes,
                     solids,
                     tiles,
                     actor_adder,
@@ -152,13 +162,13 @@ impl Shot {
                 self.countdown -= 1;
             }
         }
-        if self.countdown >= 2 && solids.collides(self.position) {
+        if self.countdown >= 2 && solids.collides(sizes, self.position) {
             self.countdown = 1;
             actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left().offset(
                     self.position.width() as i32 / 2
-                        - HALFTILE_WIDTH as i32,
+                        - sizes.half_width() as i32,
                     0,
                 ),
             );

@@ -1,10 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor,
-        RenderParameters, ScoreType, SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ScoreType, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_SODAFLY, HALFTILE_HEIGHT, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, ANIMATION_SODAFLY,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -17,11 +17,17 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
         }
     }
@@ -29,10 +35,10 @@ impl CreateActor for Specific {
 
 impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
-        self.position.offset(0, -(HALFTILE_HEIGHT as i32));
+        self.position.offset(0, -(p.sizes.half_height() as i32));
         if p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height(),
         ) {
             p.actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
@@ -52,7 +58,8 @@ impl Actor for Specific {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let tile = ANIMATION_SODAFLY
-            + ((self.position.y() as usize / HALFTILE_HEIGHT as usize)
+            + ((self.position.y() as usize
+                / p.sizes.half_height() as usize)
                 % 4);
         p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())

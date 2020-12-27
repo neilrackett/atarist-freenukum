@@ -2,14 +2,13 @@ use crate::{
     actor::{ActorAdder, ActorType, SingleAnimationType},
     level::solids::LevelSolids,
     rendering::Renderer,
-    HorizontalDirection, KeyColor, Result, HALFTILE_HEIGHT,
-    HALFTILE_WIDTH, HERO_FALLING_LEFT, HERO_FALLING_RIGHT,
-    HERO_JUMPING_LEFT, HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
-    HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
-    HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
-    HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
-    HERO_WALKING_LEFT, HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
-    TILE_HEIGHT, TILE_WIDTH,
+    HorizontalDirection, KeyColor, Result, Sizes, HERO_FALLING_LEFT,
+    HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_LEFT_SOMERSAULT,
+    HERO_JUMPING_RIGHT, HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING,
+    HERO_NUM_JUMPING, HERO_NUM_STANDING, HERO_NUM_WALKING,
+    HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT, HERO_STANDING_LEFT,
+    HERO_STANDING_RIGHT, HERO_WALKING_LEFT, HERO_WALKING_RIGHT,
+    LEVEL_HEIGHT, LEVEL_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 use std::convert::TryFrom;
@@ -44,16 +43,10 @@ pub struct Hero {
     pub gets_hurt: bool,
 }
 
-impl Default for Hero {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Hero {
-    pub fn new() -> Self {
+    pub fn new(sizes: &dyn Sizes) -> Self {
         Hero {
-            position: Position::new(),
+            position: Position::new(sizes),
             score: Score::new(),
             health: Health::new(),
             firepower: Firepower::new(),
@@ -76,8 +69,8 @@ impl Hero {
         }
     }
 
-    pub fn reset(&mut self) {
-        self.position.reset();
+    pub fn reset(&mut self, sizes: &dyn Sizes) {
+        self.position.reset(sizes);
         self.score.reset();
         self.health.reset();
         self.firepower.reset();
@@ -127,6 +120,7 @@ impl Hero {
     pub fn render(
         &self,
         renderer: &mut dyn Renderer,
+        sizes: &dyn Sizes,
         solids: &LevelSolids,
         draw_collision_bounds: bool,
     ) -> Result<()> {
@@ -135,7 +129,7 @@ impl Hero {
         }
 
         let mut point = self.position.geometry.top_left();
-        point.x -= HALFTILE_WIDTH as i32;
+        point.x -= sizes.half_width() as i32;
 
         let base_tile_number = if self.immunity.hero_skeleton() {
             match self.direction {
@@ -147,12 +141,12 @@ impl Hero {
         };
 
         renderer.place_tile(base_tile_number, point)?;
-        point.x += TILE_WIDTH as i32;
+        point.x += sizes.width() as i32;
         renderer.place_tile(base_tile_number + 1, point)?;
-        point.x -= TILE_WIDTH as i32;
-        point.y += TILE_HEIGHT as i32;
+        point.x -= sizes.width() as i32;
+        point.y += sizes.height() as i32;
         renderer.place_tile(base_tile_number + 2, point)?;
-        point.x += TILE_WIDTH as i32;
+        point.x += sizes.width() as i32;
         renderer.place_tile(base_tile_number + 3, point)?;
 
         if draw_collision_bounds {
@@ -161,18 +155,18 @@ impl Hero {
 
             renderer.draw_rect(g, color)?;
 
-            for i in (g.x / TILE_WIDTH as i32) - 1
-                ..(g.x / TILE_WIDTH as i32) + 2
+            for i in (g.x / sizes.width() as i32) - 1
+                ..(g.x / sizes.width() as i32) + 2
             {
-                for j in (g.y / TILE_HEIGHT as i32) - 1
-                    ..(g.y / TILE_HEIGHT as i32) + 3
+                for j in (g.y / sizes.height() as i32) - 1
+                    ..(g.y / sizes.height() as i32) + 3
                 {
                     if i > 0 && j > 0 && solids.get(i as u32, j as u32) {
                         let obstacle = Rect::new(
-                            i * TILE_WIDTH as i32,
-                            j * TILE_HEIGHT as i32,
-                            TILE_WIDTH,
-                            TILE_HEIGHT,
+                            i * sizes.width() as i32,
+                            j * sizes.height() as i32,
+                            sizes.width(),
+                            sizes.height(),
                         );
                         renderer.draw_rect(obstacle, color)?;
                     }
@@ -190,6 +184,7 @@ impl Hero {
 
     pub fn would_collide(
         &self,
+        sizes: &dyn Sizes,
         solids: &LevelSolids,
         x: i32,
         y: i32,
@@ -197,7 +192,7 @@ impl Hero {
         let mut destination = self.position.geometry;
         destination.x = x;
         destination.y = y;
-        solids.collides(destination)
+        solids.collides(sizes, destination)
     }
 
     pub fn update_animation(&mut self) {
@@ -291,6 +286,7 @@ impl Hero {
     /// Returns the remaining health
     pub fn act(
         &mut self,
+        sizes: &dyn Sizes,
         solids: &LevelSolids,
         actor_adder: &mut dyn ActorAdder,
     ) -> Result<()> {
@@ -317,19 +313,23 @@ impl Hero {
                 let mut new_position = self.position.geometry;
                 match self.direction {
                     HorizontalDirection::Left => {
-                        new_position.x -= HALFTILE_WIDTH as i32;
+                        new_position.x -= sizes.half_width() as i32;
                     }
                     HorizontalDirection::Right => {
-                        new_position.x += HALFTILE_WIDTH as i32;
+                        new_position.x += sizes.half_width() as i32;
                     }
                 }
                 if !self.would_collide(
+                    sizes,
                     solids,
                     new_position.x,
                     new_position.y,
                 ) {
-                    self.position
-                        .move_to(new_position.x(), new_position.y());
+                    self.position.move_to(
+                        sizes,
+                        new_position.x(),
+                        new_position.y(),
+                    );
                 }
             }
         }
@@ -351,12 +351,14 @@ impl Hero {
                 for _ in 0..self.vertical_speed {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
+                        sizes,
                         solids,
                         geometry.x,
-                        geometry.y - HALFTILE_HEIGHT as i32,
+                        geometry.y - sizes.half_height() as i32,
                     ) {
                         self.position.move_y_to(
-                            geometry.y() - HALFTILE_HEIGHT as i32,
+                            sizes,
+                            geometry.y() - sizes.half_height() as i32,
                         );
                     } else {
                         // hero bumped against the ceiling
@@ -371,12 +373,14 @@ impl Hero {
                 for _ in 0..self.vertical_speed / 2 {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
+                        sizes,
                         solids,
                         geometry.x,
-                        geometry.y + HALFTILE_HEIGHT as i32,
+                        geometry.y + sizes.half_height() as i32,
                     ) {
                         self.position.move_y_to(
-                            geometry.y() + HALFTILE_HEIGHT as i32,
+                            sizes,
+                            geometry.y() + sizes.half_height() as i32,
                         );
                     }
                 }
@@ -385,9 +389,10 @@ impl Hero {
 
         let geometry = self.position.geometry;
         if self.would_collide(
+            sizes,
             solids,
             geometry.x,
-            geometry.y + HALFTILE_HEIGHT as i32,
+            geometry.y + sizes.half_height() as i32,
         ) {
             if self.is_in_the_air {
                 actor_adder.add_actor(
@@ -396,7 +401,7 @@ impl Hero {
                     ),
                     Point::new(
                         self.position.geometry.x(),
-                        self.position.geometry.y() + TILE_HEIGHT as i32,
+                        self.position.geometry.y() + sizes.height() as i32,
                     ),
                 );
             }
@@ -419,44 +424,39 @@ pub struct Position {
     pub geometry: Rect,
 }
 
-impl Default for Position {
-    fn default() -> Self {
-        Position {
-            geometry: Self::default_geometry(),
+impl Position {
+    pub fn new(sizes: &dyn Sizes) -> Self {
+        Self {
+            geometry: Self::default_geometry(sizes),
         }
     }
-}
 
-impl Position {
-    pub fn new() -> Self {
-        Self::default()
+    pub fn reset(&mut self, sizes: &dyn Sizes) {
+        self.geometry = Self::default_geometry(sizes);
     }
 
-    pub fn reset(&mut self) {
-        self.geometry = Self::default_geometry();
+    fn default_geometry(sizes: &dyn Sizes) -> Rect {
+        Rect::new(0, 0, sizes.width(), sizes.height() * 2)
     }
 
-    fn default_geometry() -> Rect {
-        Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT * 2)
-    }
-
-    pub fn move_to(&mut self, x: i32, y: i32) {
+    pub fn move_to(&mut self, sizes: &dyn Sizes, x: i32, y: i32) {
         self.geometry.x =
-            std::cmp::min(x, LEVEL_WIDTH as i32 * TILE_WIDTH as i32);
+            std::cmp::min(x, LEVEL_WIDTH as i32 * sizes.width() as i32);
         self.geometry.y =
-            std::cmp::min(y, LEVEL_HEIGHT as i32 * TILE_HEIGHT as i32);
+            std::cmp::min(y, LEVEL_HEIGHT as i32 * sizes.height() as i32);
     }
 
-    pub fn move_x_to(&mut self, x: i32) {
-        self.move_to(x, self.geometry.y())
+    pub fn move_x_to(&mut self, sizes: &dyn Sizes, x: i32) {
+        self.move_to(sizes, x, self.geometry.y())
     }
 
-    pub fn move_y_to(&mut self, y: i32) {
-        self.move_to(self.geometry.x(), y)
+    pub fn move_y_to(&mut self, sizes: &dyn Sizes, y: i32) {
+        self.move_to(sizes, self.geometry.x(), y)
     }
 
     pub fn push_vertically(
         &mut self,
+        sizes: &dyn Sizes,
         solids: &LevelSolids,
         offset: i32,
     ) -> i32 {
@@ -466,8 +466,8 @@ impl Position {
         let mut geometry = self.geometry;
         geometry.y += offset;
 
-        if !solids.collides(geometry) {
-            self.move_y_to(geometry.y());
+        if !solids.collides(sizes, geometry) {
+            self.move_y_to(sizes, geometry.y());
             return offset;
         }
 
@@ -476,8 +476,8 @@ impl Position {
 
         for i in 0..offset_absolute {
             geometry.offset(0, -direction);
-            if !solids.collides(geometry) {
-                self.move_y_to(geometry.y());
+            if !solids.collides(sizes, geometry) {
+                self.move_y_to(sizes, geometry.y());
                 return i * direction;
             }
         }
@@ -486,6 +486,7 @@ impl Position {
 
     pub fn push_horizontally(
         &mut self,
+        sizes: &dyn Sizes,
         solids: &LevelSolids,
         offset: i32,
     ) -> i32 {
@@ -495,8 +496,8 @@ impl Position {
         let mut geometry = self.geometry;
         geometry.offset(offset, 0);
 
-        if !solids.collides(geometry) {
-            self.move_x_to(geometry.x());
+        if !solids.collides(sizes, geometry) {
+            self.move_x_to(sizes, geometry.x());
             return offset;
         }
 
@@ -505,8 +506,8 @@ impl Position {
 
         for i in 0..offset_absolute {
             geometry.offset(-direction, 0);
-            if !solids.collides(geometry) {
-                self.move_x_to(geometry.x());
+            if !solids.collides(sizes, geometry) {
+                self.move_x_to(sizes, geometry.x());
                 return i * direction;
             }
         }

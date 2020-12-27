@@ -3,8 +3,7 @@ use crate::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, OBJECT_HOSTILESHOT, TILE_HEIGHT,
-    TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, OBJECT_HOSTILESHOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -24,6 +23,7 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         direction: HorizontalDirection,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -36,7 +36,12 @@ impl CreateActorWithDetails for Specific {
             tile,
             current_frame: 0,
             num_frames: 2,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             is_alive: true,
             direction,
         }
@@ -45,12 +50,13 @@ impl CreateActorWithDetails for Specific {
 
 impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
-        let offset = (TILE_WIDTH as i32) * self.direction.as_factor_i32();
+        let offset =
+            (p.sizes.width() as i32) * self.direction.as_factor_i32();
         self.position.offset(offset, 0);
 
         if p.solids.get(
-            self.position.x() as u32 / TILE_WIDTH,
-            self.position.y() as u32 / TILE_HEIGHT,
+            self.position.x() as u32 / p.sizes.width(),
+            self.position.y() as u32 / p.sizes.height(),
         ) {
             self.is_alive = false;
         }

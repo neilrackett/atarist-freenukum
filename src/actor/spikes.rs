@@ -1,11 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, OBJECT_SPIKE, OBJECT_SPIKES_DOWN, OBJECT_SPIKES_UP,
-    TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, OBJECT_SPIKE, OBJECT_SPIKES_DOWN,
+    OBJECT_SPIKES_UP,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -29,11 +28,12 @@ impl CreateActorWithDetails for Specific {
     fn create_with_details(
         spike_type: SpikeType,
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Specific {
-        let x = pos.x as u32 / TILE_WIDTH;
-        let y = pos.y as u32 / TILE_HEIGHT;
+        let x = pos.x as u32 / sizes.width();
+        let y = pos.y as u32 / sizes.height();
 
         match spike_type {
             SpikeType::SpikesUp | SpikeType::SingleSpikeUp => {
@@ -46,7 +46,12 @@ impl CreateActorWithDetails for Specific {
 
         Specific {
             touching_hero: false,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
             spike_type,
         }
     }

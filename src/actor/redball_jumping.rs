@@ -4,7 +4,7 @@ use crate::{
         ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, ANIMATION_MINE, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,6 +19,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -26,7 +27,12 @@ impl CreateActor for Specific {
             tile: ANIMATION_MINE,
             counter: 0,
             base_y: pos.y,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }

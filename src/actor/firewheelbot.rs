@@ -4,9 +4,8 @@ use crate::{
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
-    ANIMATION_FIREWHEEL_ON, HALFTILE_HEIGHT, HALFTILE_WIDTH, TILE_HEIGHT,
-    TILE_WIDTH,
+    Hero, HorizontalDirection, Result, Sizes, ANIMATION_FIREWHEEL_OFF,
+    ANIMATION_FIREWHEEL_ON,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -25,6 +24,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
@@ -36,7 +36,12 @@ impl CreateActor for Specific {
             num_frames: 4,
             was_shot: 0,
             fire_is_on: false,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -46,7 +51,9 @@ impl Actor for Specific {
         if self.was_shot == 2 {
             p.actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
-                self.position.top_left().offset(HALFTILE_WIDTH as i32, 0),
+                self.position
+                    .top_left()
+                    .offset(p.sizes.half_width() as i32, 0),
             );
             p.actor_adder
                 .add_particle_firework(self.position.top_left(), 8);
@@ -71,9 +78,10 @@ impl Actor for Specific {
             let direction = self.direction.as_factor_i32();
 
             if !p.solids.push_rect_standing_on_ground(
+                p.sizes,
                 &mut self.position,
-                direction * HALFTILE_WIDTH as i32 / 2,
-                HALFTILE_HEIGHT as u8,
+                direction * p.sizes.half_width() as i32 / 2,
+                p.sizes.half_height() as u8,
             ) {
                 // push was not successful, so we reverse the direction
                 self.direction.reverse();
@@ -87,8 +95,8 @@ impl Actor for Specific {
                             SingleAnimationType::Steam,
                         ),
                         self.position.top_left().offset(
-                            HALFTILE_WIDTH as i32,
-                            -(TILE_HEIGHT as i32),
+                            p.sizes.half_width() as i32,
+                            -(p.sizes.height() as i32),
                         ),
                     );
                 }
@@ -99,19 +107,19 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let r = self.position;
         let mut pos = r.top_left();
-        pos.x = pos.x + r.width() as i32 / 2 - TILE_WIDTH as i32;
-        pos.y -= TILE_HEIGHT as i32;
+        pos.x = pos.x + r.width() as i32 / 2 - p.sizes.width() as i32;
+        pos.y -= p.sizes.height() as i32;
 
         p.renderer
             .place_tile(self.tile + self.current_frame * 4, pos)?;
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         p.renderer
             .place_tile(self.tile + self.current_frame * 4 + 1, pos)?;
-        pos.x -= TILE_WIDTH as i32;
-        pos.y += TILE_HEIGHT as i32;
+        pos.x -= p.sizes.width() as i32;
+        pos.y += p.sizes.height() as i32;
         p.renderer
             .place_tile(self.tile + self.current_frame * 4 + 2, pos)?;
-        pos.x += TILE_WIDTH as i32;
+        pos.x += p.sizes.width() as i32;
         p.renderer
             .place_tile(self.tile + self.current_frame * 4 + 3, pos)?;
         Ok(())

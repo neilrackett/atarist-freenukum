@@ -4,7 +4,7 @@ use crate::{
         SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, ANIMATION_BOMB, TILE_HEIGHT, TILE_WIDTH,
+    Result, Sizes, ANIMATION_BOMB,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -24,6 +24,7 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
@@ -36,7 +37,12 @@ impl CreateActor for Specific {
             explode_right: true,
             explode_threshold: 12,
             num_flames: 4,
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width(),
+                sizes.height(),
+            ),
         }
     }
 }
@@ -54,21 +60,22 @@ impl Actor for Specific {
             if self.explode_left {
                 // explode to the left if possible
                 let space_is_free = !p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH - distance,
-                    self.position.y() as u32 / TILE_HEIGHT,
+                    self.position.x() as u32 / p.sizes.width() - distance,
+                    self.position.y() as u32 / p.sizes.height(),
                 );
                 let space_has_solid_below = p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH - distance,
-                    self.position.y() as u32 / TILE_HEIGHT + 1,
+                    self.position.x() as u32 / p.sizes.width() - distance,
+                    self.position.y() as u32 / p.sizes.height() + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::BombFire,
                         ),
-                        self.position
-                            .top_left()
-                            .offset(-((distance * TILE_WIDTH) as i32), 0),
+                        self.position.top_left().offset(
+                            -((distance * p.sizes.width()) as i32),
+                            0,
+                        ),
                     );
                 } else {
                     self.explode_left = false;
@@ -77,21 +84,22 @@ impl Actor for Specific {
             if self.explode_right {
                 // explode to the right if possible
                 let space_is_free = !p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH + distance,
-                    self.position.y() as u32 / TILE_HEIGHT,
+                    self.position.x() as u32 / p.sizes.width() + distance,
+                    self.position.y() as u32 / p.sizes.height(),
                 );
                 let space_has_solid_below = p.solids.get(
-                    self.position.x() as u32 / TILE_WIDTH + distance,
-                    self.position.y() as u32 / TILE_HEIGHT + 1,
+                    self.position.x() as u32 / p.sizes.width() + distance,
+                    self.position.y() as u32 / p.sizes.height() + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::BombFire,
                         ),
-                        self.position
-                            .top_left()
-                            .offset((distance * TILE_WIDTH) as i32, 0),
+                        self.position.top_left().offset(
+                            (distance * p.sizes.width()) as i32,
+                            0,
+                        ),
                     );
                 } else {
                     self.explode_right = false;

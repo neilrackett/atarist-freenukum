@@ -1,4 +1,4 @@
-use crate::{LEVEL_HEIGHT, LEVEL_WIDTH, TILE_HEIGHT, TILE_WIDTH};
+use crate::{Sizes, LEVEL_HEIGHT, LEVEL_WIDTH};
 use sdl2::rect::Rect;
 
 #[derive(Debug)]
@@ -85,18 +85,18 @@ impl LevelSolids {
         self.solids[y as usize][x as usize]
     }
 
-    pub fn collides(&self, rect: Rect) -> bool {
-        let mut solidrect = Rect::new(0, 0, TILE_WIDTH, TILE_HEIGHT);
-        let left_edge = rect.left() as u32 / TILE_WIDTH;
-        let right_edge = rect.right() as u32 / TILE_WIDTH + 1;
-        let top_edge = rect.top() as u32 / TILE_HEIGHT;
-        let bottom_edge = rect.bottom() as u32 / TILE_HEIGHT + 1;
+    pub fn collides(&self, sizes: &dyn Sizes, rect: Rect) -> bool {
+        let mut solidrect = Rect::new(0, 0, sizes.width(), sizes.height());
+        let left_edge = rect.left() as u32 / sizes.width();
+        let right_edge = rect.right() as u32 / sizes.width() + 1;
+        let top_edge = rect.top() as u32 / sizes.height();
+        let bottom_edge = rect.bottom() as u32 / sizes.height() + 1;
 
         for i in left_edge..right_edge {
             for j in top_edge..bottom_edge {
                 if self.get(i, j) {
-                    solidrect.x = (i * TILE_WIDTH) as i32;
-                    solidrect.y = (j * TILE_HEIGHT) as i32;
+                    solidrect.x = (i * sizes.width()) as i32;
+                    solidrect.y = (j * sizes.height()) as i32;
                     if rect.has_intersection(solidrect) {
                         return true;
                     }
@@ -108,27 +108,29 @@ impl LevelSolids {
 
     pub fn push_rect_standing_on_ground(
         &self,
+        sizes: &dyn Sizes,
         rect: &mut Rect,
         offset: i32,
         gravity: u8,
     ) -> bool {
-        if self.collides(*rect) {
+        if self.collides(sizes, *rect) {
             // locked in, can't move at all.
             return false;
         }
         // fall down as far as possible
-        self.rect_fall_down(rect, gravity);
+        self.rect_fall_down(sizes, rect, gravity);
 
         // check if we stand on solid ground before movement
-        let stood_solid = self.rect_stands_on_ground_completely(*rect);
+        let stood_solid =
+            self.rect_stands_on_ground_completely(sizes, *rect);
 
         rect.offset(offset, 0);
 
-        if self.collides(*rect) {
+        if self.collides(sizes, *rect) {
             rect.offset(-offset, 0);
             false
         } else if stood_solid
-            && self.rect_stands_on_ground_completely(*rect)
+            && self.rect_stands_on_ground_completely(sizes, *rect)
         {
             // stood on solid ground before, still does.
             true
@@ -142,32 +144,41 @@ impl LevelSolids {
         }
     }
 
-    fn rect_fall_down(&self, rect: &mut Rect, distance: u8) -> u8 {
-        if self.collides(*rect) {
+    fn rect_fall_down(
+        &self,
+        sizes: &dyn Sizes,
+        rect: &mut Rect,
+        distance: u8,
+    ) -> u8 {
+        if self.collides(sizes, *rect) {
             // can't fall down because collides with solid ground.
             return 0;
         }
-        if self.rect_stands_on_ground_partially(*rect) {
+        if self.rect_stands_on_ground_partially(sizes, *rect) {
             // partially stands on solid ground, can't fall down.
             return 0;
         }
         for i in 0..distance {
             // check how far we can fall down.
             rect.y += 1;
-            if self.rect_stands_on_ground_partially(*rect) {
+            if self.rect_stands_on_ground_partially(sizes, *rect) {
                 return i;
             }
         }
         distance
     }
 
-    fn rect_stands_on_ground_partially(&self, rect: Rect) -> bool {
-        if (rect.bottom() as u32 % TILE_HEIGHT) > 0 {
+    fn rect_stands_on_ground_partially(
+        &self,
+        sizes: &dyn Sizes,
+        rect: Rect,
+    ) -> bool {
+        if (rect.bottom() as u32 % sizes.height()) > 0 {
             return false;
         }
-        let j = rect.bottom() as u32 / TILE_HEIGHT;
-        for i in (rect.left() as u32 / TILE_WIDTH)
-            ..(rect.right() as u32 + 1) / TILE_WIDTH + 1
+        let j = rect.bottom() as u32 / sizes.height();
+        for i in (rect.left() as u32 / sizes.width())
+            ..(rect.right() as u32 + 1) / sizes.width() + 1
         {
             if self.get(i, j) {
                 return true;
@@ -176,13 +187,17 @@ impl LevelSolids {
         false
     }
 
-    fn rect_stands_on_ground_completely(&self, rect: Rect) -> bool {
-        if (rect.bottom() % TILE_HEIGHT as i32) > 0 {
+    fn rect_stands_on_ground_completely(
+        &self,
+        sizes: &dyn Sizes,
+        rect: Rect,
+    ) -> bool {
+        if (rect.bottom() % sizes.height() as i32) > 0 {
             return false;
         }
-        let j = rect.bottom() as u32 / TILE_HEIGHT;
-        for i in (rect.left() as u32 / TILE_WIDTH)
-            ..(rect.right() as u32 + 1) / TILE_WIDTH + 1
+        let j = rect.bottom() as u32 / sizes.height();
+        for i in (rect.left() as u32 / sizes.width())
+            ..(rect.right() as u32 + 1) / sizes.width() + 1
         {
             if !self.get(i, j) {
                 return false;

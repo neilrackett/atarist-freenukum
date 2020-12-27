@@ -1,10 +1,10 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor,
-        HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, CreateActor, HeroInteractStartParameters,
+        RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, Result, ANIMATION_BADGUYSCREEN, TILE_HEIGHT, TILE_WIDTH,
+    Hero, Result, Sizes, ANIMATION_BADGUYSCREEN,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -16,11 +16,17 @@ pub(crate) struct Specific {
 impl CreateActor for Specific {
     fn create(
         pos: Point,
+        sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Specific {
         Specific {
-            position: Rect::new(pos.x, pos.y, TILE_WIDTH * 2, TILE_HEIGHT),
+            position: Rect::new(
+                pos.x,
+                pos.y,
+                sizes.width() * 2,
+                sizes.height(),
+            ),
         }
     }
 }
@@ -41,7 +47,7 @@ impl Actor for Specific {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
         p.renderer.place_tile(ANIMATION_BADGUYSCREEN, pos)?;
-        pos = pos.offset(TILE_WIDTH as i32, 0);
+        pos = pos.offset(p.sizes.width() as i32, 0);
         p.renderer.place_tile(ANIMATION_BADGUYSCREEN + 1, pos)?;
         Ok(())
     }
