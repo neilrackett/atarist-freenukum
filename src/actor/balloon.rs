@@ -98,4 +98,8 @@ impl ActorInterface for Specific {
     fn is_in_foreground(&self) -> bool {
         true
     }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
+    }
 }
