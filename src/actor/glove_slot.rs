@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType, ActorType,
-        CreateActor, HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, ActorMessageType, ActorType, CreateActor,
+        HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -44,7 +44,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

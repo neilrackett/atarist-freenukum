@@ -59,7 +59,7 @@ pub(crate) use teleporter::TeleporterIndex;
 
 #[derive(Debug)]
 pub struct ActorsList {
-    actors: Vec<Box<dyn ActorInterface>>,
+    actors: Vec<Box<dyn Actor>>,
     interaction_target: Option<usize>,
 }
 
@@ -348,7 +348,7 @@ impl ActorType {
         p: Point,
         s: &mut LevelSolids,
         t: &mut LevelTiles,
-    ) -> Box<dyn ActorInterface> {
+    ) -> Box<dyn Actor> {
         match self {
             ActorType::FireWheelBot => {
                 firewheelbot::Specific::create_boxed(p, s, t)
@@ -710,7 +710,7 @@ pub struct HeroInteractEndParameters<'a> {
     pub play_state: &'a mut PlayState,
 }
 
-pub(crate) trait ActorInterface: std::fmt::Debug {
+pub(crate) trait Actor: std::fmt::Debug {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         false
     }

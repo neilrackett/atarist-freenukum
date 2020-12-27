@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActor,
+        ActParameters, Actor, CreateActor,
         HeroInteractStartParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -25,7 +25,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
     fn hero_can_interact(&self, _hero: &Hero) -> bool {

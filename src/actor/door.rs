@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType,
-        CreateActorWithDetails, ReceiveMessageParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
+        ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     KeyColor, Result, OBJECT_DOOR, TILE_HEIGHT, TILE_WIDTH,
@@ -44,7 +43,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Closed => {}

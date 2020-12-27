@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActor, RenderParameters,
+        ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -31,7 +31,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {
         let distance = match self.counter {
             0 => 0,

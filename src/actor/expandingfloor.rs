@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -29,7 +29,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
             let x = self.position.right() as u32 / TILE_WIDTH;

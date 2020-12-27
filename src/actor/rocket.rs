@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActor, RenderParameters,
+        ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -37,7 +37,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Idle => {}

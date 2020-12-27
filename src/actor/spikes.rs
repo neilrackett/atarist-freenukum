@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActorWithDetails,
+        ActParameters, Actor, CreateActorWithDetails,
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -52,7 +52,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         self.touching_hero =
             self.position.has_intersection(p.hero.position.geometry);

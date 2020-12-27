@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
@@ -46,7 +46,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         match self.running {
             0 => {}

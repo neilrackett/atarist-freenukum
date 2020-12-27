@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
+        ActParameters, Actor, ActorType, CreateActor,
         RenderParameters, ScoreType, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -27,7 +27,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(HALFTILE_HEIGHT as i32));
         if p.solids.get(

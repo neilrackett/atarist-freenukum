@@ -1,7 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, HorizontalDirection, Result, LEVEL_WIDTH, OBJECT_FIRELEFT,
@@ -65,7 +64,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {
         match self.state {
             State::Off => {

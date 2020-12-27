@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
-        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
-        SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, Result, OBJECT_FALLINGBLOCK, TILE_HEIGHT, TILE_WIDTH,
@@ -32,7 +31,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         let hero_geometry = p.hero.position.geometry;
 

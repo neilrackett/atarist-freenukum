@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType, ActorType,
+        ActParameters, Actor, ActorMessageType, ActorType,
         CreateActor, RenderParameters, ScoreType, ShotParameters,
         ShotProcessing,
     },
@@ -46,7 +46,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
             self.current_frame += 1;

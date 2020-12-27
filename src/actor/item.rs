@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorAdder, ActorInterface, ActorType,
+        ActParameters, Actor, ActorAdder, ActorType,
         CreateActorWithDetails, RenderParameters, ScoreType,
         ShotParameters, ShotProcessing,
     },
@@ -323,7 +323,7 @@ impl Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

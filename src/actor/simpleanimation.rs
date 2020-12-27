@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActorWithDetails,
+        ActParameters, Actor, CreateActorWithDetails,
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -86,7 +86,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

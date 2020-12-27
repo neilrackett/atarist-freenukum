@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
-        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
-        SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Result, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
@@ -35,7 +34,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         let x = p.hero.position.geometry.x;
         self.tile = if x - 1 > self.position.x {

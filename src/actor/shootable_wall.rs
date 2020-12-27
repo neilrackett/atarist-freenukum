@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
+        ActParameters, Actor, ActorType, CreateActor,
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
@@ -29,7 +29,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {}
 
     fn can_get_shot(&self) -> bool {

@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
-        RenderParameters, ShotParameters, ShotProcessing,
-        SingleAnimationType,
+        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
+        ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     Hero, HorizontalDirection, Result, ANIMATION_FIREWHEEL_OFF,
@@ -42,7 +41,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
             p.actor_adder.add_actor(

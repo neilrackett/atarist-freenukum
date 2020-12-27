@@ -1,7 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, CreateActorWithDetails,
-        RenderParameters,
+        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
     HorizontalDirection, Result, HALFTILE_WIDTH, SOLID_BLACK,
@@ -61,7 +60,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         let hero_push_offset = match self.direction {
             HorizontalDirection::Left => {

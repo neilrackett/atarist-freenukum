@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
+        ActParameters, Actor, ActorType, CreateActor,
         RenderParameters, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -50,7 +50,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         // Detect whether the hero is standing upon the floor.
         let hero_geometry = p.hero.position.geometry;

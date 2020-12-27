@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActor,
+        ActParameters, Actor, ActorType, CreateActor,
         RenderParameters, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -29,7 +29,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if !p.solids.get(
             self.position.x() as u32 / TILE_WIDTH,

@@ -1,8 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType,
-        CreateActorWithDetails, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
+        HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -38,7 +37,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, _p: ActParameters) {
         if self.counter < 5 {
             self.counter += 1;

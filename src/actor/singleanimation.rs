@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
@@ -73,7 +73,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         if !self.is_alive() {

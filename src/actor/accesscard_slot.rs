@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorMessageType, CreateActor,
+        ActParameters, Actor, ActorMessageType, CreateActor,
         HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
@@ -32,7 +32,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

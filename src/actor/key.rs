@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, ActorInterface, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters, ScoreType,
     },
     hero::InventoryItem,
@@ -34,7 +34,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl ActorInterface for Specific {
+impl Actor for Specific {
     fn act(&mut self, p: ActParameters) {
         if p.hero.position.geometry.has_intersection(self.position) {
             let item = InventoryItem::Key(self.color);
