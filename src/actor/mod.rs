@@ -552,8 +552,11 @@ pub trait ActorAdder {
     fn add_actor(&mut self, actor_type: ActorType, pos: Point);
 
     fn add_particle_firework(&mut self, pos: Point, count: usize) {
-        for i in 0..count {
-            let color = match i % 4 {
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..count {
+            let color = match rng.gen_range(0, 4) {
                 0 => ParticleColor::Pink,
                 1 => ParticleColor::Blue,
                 2 => ParticleColor::White,
