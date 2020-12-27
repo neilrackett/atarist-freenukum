@@ -259,7 +259,7 @@ impl Hero {
                     (
                         7,
                         if self.motion == Motion::Walking
-                            && rng.gen_range(0, 5) == 0
+                            && rng.gen_range(0..5) == 0
                         {
                             Some(0)
                         } else {

@@ -556,7 +556,7 @@ pub trait ActorAdder {
         let mut rng = rand::thread_rng();
 
         for _ in 0..count {
-            let color = match rng.gen_range(0, 4) {
+            let color = match rng.gen_range(0..4) {
                 0 => ParticleColor::Pink,
                 1 => ParticleColor::Blue,
                 2 => ParticleColor::White,

@@ -38,8 +38,8 @@ impl CreateActorWithDetails for Specific {
     ) -> Specific {
         use rand::Rng;
         let mut rng = rand::thread_rng();
-        let vspeed = rng.gen_range(-12, 5);
-        let hspeed = rng.gen_range(-8, 9);
+        let vspeed = rng.gen_range(-12..5);
+        let hspeed = rng.gen_range(-8..9);
 
         let tile = match color {
             ParticleColor::Pink => OBJECT_SPARK_PINK,
