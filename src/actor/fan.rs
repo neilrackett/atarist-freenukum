@@ -5,7 +5,9 @@ use crate::{
         SingleAnimationType,
     },
     geometry::RectExt,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     HorizontalDirection, Result, Sizes, ANIMATION_FAN,
 };
 use sdl2::rect::{Point, Rect};
@@ -132,5 +134,9 @@ impl Actor for Fan {
 
     fn is_in_foreground(&self) -> bool {
         true
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

@@ -37,8 +37,8 @@ impl Actor for SodaFlying {
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(p.sizes.half_height() as i32));
         if p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height(),
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32,
         ) {
             p.actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),

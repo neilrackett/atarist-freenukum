@@ -57,11 +57,11 @@ impl Actor for TankBot {
                 .add_particle_firework(self.position.top_left(), 4);
             p.hero.score.add(2500);
         } else if p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32 + 1,
         ) && !p.solids.get(
-            self.position.x() as u32 / p.sizes.width() + 1,
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.x() / p.sizes.width() as i32 + 1,
+            self.position.y() / p.sizes.height() as i32 + 1,
         ) {
             // still in the air, falling down
             self.position.offset(0, p.sizes.half_height() as i32);
@@ -76,17 +76,15 @@ impl Actor for TankBot {
                 // check if the place next ot the bot is free
                 (self.position.x()
                     + direction * p.sizes.half_width() as i32)
-                    as u32
-                    / p.sizes.width(),
-                self.position.y() as u32 / p.sizes.height(),
+                    / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32,
             ) && p.solids.get(
                 // check if the tile below is solid
-                (self.position.x() as i32
+                (self.position.x()
                     + direction * p.sizes.half_width() as i32)
-                    as u32
-                    / p.sizes.width(),
-                (self.position.y() as u32 + p.sizes.height())
-                    / p.sizes.height(),
+                    / p.sizes.width() as i32,
+                (self.position.y() + p.sizes.height() as i32)
+                    / p.sizes.height() as i32,
             ) {
                 if direction > 0 {
                     direction = 1;

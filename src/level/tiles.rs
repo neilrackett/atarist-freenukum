@@ -18,26 +18,34 @@ impl LevelTiles {
         }
     }
 
-    pub fn set(&mut self, x: u32, y: u32, value: u16) {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.tiles[y as usize][x as usize] = value;
+    pub fn set(&mut self, x: i32, y: i32, value: u16) {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.tiles[y as usize][x as usize] = value;
+        }
     }
 
-    pub fn get(&self, x: u32, y: u32) -> u16 {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.tiles[y as usize][x as usize]
+    pub fn get(&self, x: i32, y: i32) -> u16 {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.tiles[y as usize][x as usize]
+        } else {
+            0
+        }
     }
 
     pub fn copy_from_to(
         &mut self,
-        x_from: u32,
-        y_from: u32,
-        x_to: u32,
-        y_to: u32,
+        x_from: i32,
+        y_from: i32,
+        x_to: i32,
+        y_to: i32,
     ) {
         self.set(x_to, y_to, self.get(x_from, y_from));
     }

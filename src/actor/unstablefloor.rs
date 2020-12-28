@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, SOLID_START,
 };
 use sdl2::rect::{Point, Rect};
@@ -24,16 +26,16 @@ impl CreateActor for UnstableFloor {
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        let mut floor_length = 0;
+        let mut floor_length = 0u32;
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while !solids.get(
-            position.x() as u32 / sizes.width() + floor_length,
-            position.y() as u32 / sizes.height(),
+            position.x() / sizes.width() as i32 + floor_length as i32,
+            position.y() / sizes.height() as i32,
         ) {
             solids.set(
-                position.x() as u32 / sizes.width() + floor_length,
-                position.y() as u32 / sizes.height(),
+                position.x() / sizes.width() as i32 + floor_length as i32,
+                position.y() / sizes.height() as i32,
                 true,
             );
             floor_length += 1;
@@ -73,8 +75,8 @@ impl Actor for UnstableFloor {
             let mut r = self.position;
             for _ in 0..self.floor_length {
                 p.solids.set(
-                    r.x() as u32 / p.sizes.width(),
-                    r.y() as u32 / p.sizes.height(),
+                    r.x() / p.sizes.width() as i32,
+                    r.y() / p.sizes.height() as i32,
                     false,
                 );
                 p.actor_adder.add_actor(
@@ -108,5 +110,9 @@ impl Actor for UnstableFloor {
 
     fn is_alive(&self) -> bool {
         self.touch_count < 2
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

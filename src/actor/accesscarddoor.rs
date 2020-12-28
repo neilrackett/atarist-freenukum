@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, OBJECT_LASERBEAM,
 };
 use sdl2::rect::{Point, Rect};
@@ -57,8 +59,8 @@ impl Actor for AccessCardDoor {
         if p.message != ActorMessageType::OpenDoorAccessCard {
             return;
         }
-        let x = self.position.x() as u32 / p.sizes.width();
-        let y = self.position.y() as u32 / p.sizes.height();
+        let x = self.position.x() / p.sizes.width() as i32;
+        let y = self.position.y() / p.sizes.height() as i32;
         p.solids.set(x, y, false);
         self.is_alive = false;
     }
@@ -73,5 +75,9 @@ impl Actor for AccessCardDoor {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

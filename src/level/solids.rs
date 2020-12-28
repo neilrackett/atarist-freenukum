@@ -71,32 +71,40 @@ impl LevelSolids {
         println!();
     }
 
-    pub fn set(&mut self, x: u32, y: u32, value: bool) {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.solids[y as usize][x as usize] = value;
+    pub fn set(&mut self, x: i32, y: i32, value: bool) {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.solids[y as usize][x as usize] = value;
+        }
     }
 
-    pub fn get(&self, x: u32, y: u32) -> bool {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.solids[y as usize][x as usize]
+    pub fn get(&self, x: i32, y: i32) -> bool {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.solids[y as usize][x as usize]
+        } else {
+            true
+        }
     }
 
     pub fn collides(&self, sizes: &dyn Sizes, rect: Rect) -> bool {
         let mut solidrect = Rect::new(0, 0, sizes.width(), sizes.height());
-        let left_edge = rect.left() as u32 / sizes.width();
-        let right_edge = rect.right() as u32 / sizes.width() + 1;
-        let top_edge = rect.top() as u32 / sizes.height();
-        let bottom_edge = rect.bottom() as u32 / sizes.height() + 1;
+        let left_edge = rect.left() / sizes.width() as i32;
+        let right_edge = rect.right() / sizes.width() as i32 + 1;
+        let top_edge = rect.top() / sizes.height() as i32;
+        let bottom_edge = rect.bottom() / sizes.height() as i32 + 1;
 
         for i in left_edge..right_edge {
             for j in top_edge..bottom_edge {
                 if self.get(i, j) {
-                    solidrect.x = (i * sizes.width()) as i32;
-                    solidrect.y = (j * sizes.height()) as i32;
+                    solidrect.x = i * sizes.width() as i32;
+                    solidrect.y = j * sizes.height() as i32;
                     if rect.has_intersection(solidrect) {
                         return true;
                     }
@@ -176,9 +184,9 @@ impl LevelSolids {
         if (rect.bottom() as u32 % sizes.height()) > 0 {
             return false;
         }
-        let j = rect.bottom() as u32 / sizes.height();
-        for i in (rect.left() as u32 / sizes.width())
-            ..(rect.right() as u32 + 1) / sizes.width() + 1
+        let j = rect.bottom() / sizes.height() as i32;
+        for i in (rect.left() / sizes.width() as i32)
+            ..(rect.right() + 1) / sizes.width() as i32 + 1
         {
             if self.get(i, j) {
                 return true;
@@ -195,9 +203,9 @@ impl LevelSolids {
         if (rect.bottom() % sizes.height() as i32) > 0 {
             return false;
         }
-        let j = rect.bottom() as u32 / sizes.height();
-        for i in (rect.left() as u32 / sizes.width())
-            ..(rect.right() as u32 + 1) / sizes.width() + 1
+        let j = rect.bottom() / sizes.height() as i32;
+        for i in (rect.left() / sizes.width() as i32)
+            ..(rect.right() + 1) / sizes.width() as i32 + 1
         {
             if !self.get(i, j) {
                 return false;

@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes,
 };
 use sdl2::rect::{Point, Rect};
@@ -56,5 +58,9 @@ impl Actor for PlaceHolder {
 
     fn is_alive(&self) -> bool {
         false
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

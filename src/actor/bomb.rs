@@ -56,16 +56,17 @@ impl Actor for Bomb {
 
         if self.counter < self.explode_threshold {
         } else if self.counter < self.explode_threshold + self.num_flames {
-            let distance = self.counter - self.explode_threshold;
+            let distance =
+                self.counter as i32 - self.explode_threshold as i32;
             if self.explode_left {
                 // explode to the left if possible
                 let space_is_free = !p.solids.get(
-                    self.position.x() as u32 / p.sizes.width() - distance,
-                    self.position.y() as u32 / p.sizes.height(),
+                    self.position.x() / p.sizes.width() as i32 - distance,
+                    self.position.y() / p.sizes.height() as i32,
                 );
                 let space_has_solid_below = p.solids.get(
-                    self.position.x() as u32 / p.sizes.width() - distance,
-                    self.position.y() as u32 / p.sizes.height() + 1,
+                    self.position.x() / p.sizes.width() as i32 - distance,
+                    self.position.y() / p.sizes.height() as i32 + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
@@ -73,7 +74,7 @@ impl Actor for Bomb {
                             SingleAnimationType::BombFire,
                         ),
                         self.position.top_left().offset(
-                            -((distance * p.sizes.width()) as i32),
+                            -(distance * p.sizes.width() as i32),
                             0,
                         ),
                     );
@@ -84,22 +85,21 @@ impl Actor for Bomb {
             if self.explode_right {
                 // explode to the right if possible
                 let space_is_free = !p.solids.get(
-                    self.position.x() as u32 / p.sizes.width() + distance,
-                    self.position.y() as u32 / p.sizes.height(),
+                    self.position.x() / p.sizes.width() as i32 + distance,
+                    self.position.y() / p.sizes.height() as i32,
                 );
                 let space_has_solid_below = p.solids.get(
-                    self.position.x() as u32 / p.sizes.width() + distance,
-                    self.position.y() as u32 / p.sizes.height() + 1,
+                    self.position.x() / p.sizes.width() as i32 + distance,
+                    self.position.y() / p.sizes.height() as i32 + 1,
                 );
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::BombFire,
                         ),
-                        self.position.top_left().offset(
-                            (distance * p.sizes.width()) as i32,
-                            0,
-                        ),
+                        self.position
+                            .top_left()
+                            .offset(distance * p.sizes.width() as i32, 0),
                     );
                 } else {
                     self.explode_right = false;

@@ -52,8 +52,8 @@ impl Actor for Balloon {
         } else {
             self.position.y -= 1;
             if p.solids.get(
-                self.position.x() as u32 / p.sizes.width(),
-                self.position.y() as u32 / p.sizes.height(),
+                self.position.x() / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32,
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;

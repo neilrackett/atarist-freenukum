@@ -161,7 +161,7 @@ impl Hero {
                 for j in (g.y / sizes.height() as i32) - 1
                     ..(g.y / sizes.height() as i32) + 3
                 {
-                    if i > 0 && j > 0 && solids.get(i as u32, j as u32) {
+                    if i > 0 && j > 0 && solids.get(i, j) {
                         let obstacle = Rect::new(
                             i * sizes.width() as i32,
                             j * sizes.height() as i32,

@@ -42,7 +42,10 @@ use crate::{
     geometry::RectExt,
     hero::Hero,
     infobox::InfoMessageQueue,
-    level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+        PlayState,
+    },
     rendering::Renderer,
     HorizontalDirection, KeyColor, Result, Sizes,
 };
@@ -263,6 +266,7 @@ impl ActorsList {
             sizes,
             tiles,
             actors: self,
+            copy_background: false,
         };
 
         actor_queue.process(&mut adder);
@@ -588,7 +592,9 @@ pub struct LevelActorAdder<'a> {
     pub sizes: &'a dyn Sizes,
     pub tiles: &'a mut LevelTiles,
     pub actors: &'a mut ActorsList,
+    pub copy_background: bool,
 }
+
 impl<'a> ActorAdder for LevelActorAdder<'a> {
     fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
         let actor = actor_type.create_actor_boxed(
@@ -597,6 +603,34 @@ impl<'a> ActorAdder for LevelActorAdder<'a> {
             self.solids,
             self.tiles,
         );
+        if self.copy_background {
+            let x = pos.x / self.sizes.width() as i32;
+            let y = pos.y / self.sizes.height() as i32;
+            println!(
+                "ACTOR {:?} at {}/{} - strategy={:?}",
+                actor_type,
+                x,
+                y,
+                actor.background_tile_strategy()
+            );
+            match actor.background_tile_strategy() {
+                BackgroundTileStrategy::KeepEmpty => {
+                    self.tiles.set(x, y, 0);
+                }
+                BackgroundTileStrategy::CopyFromAbove => {
+                    self.tiles.copy_from_to(x, y - 1, x, y);
+                }
+                BackgroundTileStrategy::CopyFromLeft => {
+                    self.tiles.copy_from_to(x - 1, y, x, y);
+                }
+                BackgroundTileStrategy::CopyFromRight => {
+                    self.tiles.copy_from_to(x + 1, y, x, y);
+                }
+                BackgroundTileStrategy::CopyFromBelow => {
+                    self.tiles.copy_from_to(x, y + 1, x, y);
+                }
+            }
+        }
         self.actors.actors.push(actor);
     }
 }
@@ -756,4 +790,8 @@ pub(crate) trait Actor: std::fmt::Debug {
     }
 
     fn receive_message(&mut self, _p: ReceiveMessageParameters) {}
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::KeepEmpty
+    }
 }

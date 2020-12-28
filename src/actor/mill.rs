@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorMessageType, ActorType, CreateActor,
         RenderParameters, ScoreType, ShotParameters, ShotProcessing,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, OBJECT_ROTATINGCYLINDER,
 };
 use sdl2::rect::{Point, Rect};
@@ -28,8 +30,8 @@ impl CreateActor for Mill {
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while position.y > 0
             && !solids.get(
-                position.x() as u32 / sizes.width(),
-                position.y() as u32 / sizes.height() - 1,
+                position.x() / sizes.width() as i32,
+                position.y() / sizes.height() as i32 - 1,
             )
         {
             position.offset(0, -(sizes.height() as i32));
@@ -111,5 +113,9 @@ impl Actor for Mill {
 
     fn is_alive(&self) -> bool {
         self.lives > 0
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

@@ -48,8 +48,8 @@ impl Actor for ShootableWall {
         );
         self.is_alive = false;
         p.solids.set(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height(),
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32,
             false,
         );
         ShotProcessing::Absorb

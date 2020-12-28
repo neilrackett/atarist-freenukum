@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     KeyColor, Result, Sizes, OBJECT_DOOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -56,8 +58,8 @@ impl Actor for Door {
             State::Opening => {
                 if self.counter == 0 {
                     p.solids.set(
-                        self.position.x() as u32 / p.sizes.width(),
-                        self.position.y() as u32 / p.sizes.height(),
+                        self.position.x() / p.sizes.width() as i32,
+                        self.position.y() / p.sizes.height() as i32,
                         false,
                     );
                 }
@@ -95,5 +97,9 @@ impl Actor for Door {
 
     fn is_alive(&self) -> bool {
         self.state != State::Open
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

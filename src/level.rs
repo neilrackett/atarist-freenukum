@@ -24,7 +24,6 @@ use sdl2::{
     surface::Surface,
 };
 use solids::LevelSolids;
-use std::convert::TryFrom;
 use std::io::Read;
 use tiles::LevelTiles;
 
@@ -45,6 +44,15 @@ impl PlayState {
     pub fn hero_can_act(&self) -> bool {
         matches!(self, PlayState::Playing)
     }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum BackgroundTileStrategy {
+    KeepEmpty,
+    CopyFromAbove,
+    CopyFromLeft,
+    CopyFromRight,
+    CopyFromBelow,
 }
 
 #[derive(Debug)]
@@ -69,14 +77,14 @@ impl Level {
         let mut actor_queue = ActorQueue::new();
 
         for i in 0..LEVEL_HEIGHT * LEVEL_WIDTH {
-            let x = i % LEVEL_WIDTH;
-            let y = i / LEVEL_WIDTH;
+            let x = (i % LEVEL_WIDTH) as i32;
+            let y = (i / LEVEL_WIDTH) as i32;
 
             let mut tile_buf = [0u8; 2];
             reader.read_exact(&mut tile_buf)?;
 
-            let tx = (x * sizes.width()) as i32;
-            let ty = (y * sizes.height()) as i32;
+            let tx = x * sizes.width() as i32;
+            let ty = y * sizes.height() as i32;
 
             let mut aa = |actor_type, x, y| {
                 actor_queue.add_actor(actor_type, Point::new(x, y));
@@ -250,9 +258,6 @@ impl Level {
                 0x3000 =>
                 /* grey box, empty */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Nothing,
@@ -308,9 +313,6 @@ impl Level {
                 0x3006 =>
                 /* grey box with boots inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Boots,
@@ -328,9 +330,6 @@ impl Level {
                 0x3008 =>
                 /* grey box with clamps inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Clamps,
@@ -342,9 +341,6 @@ impl Level {
                 0x3009 =>
                 /* fire burning to the right */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(
                         ActorType::Fire(HorizontalDirection::Right),
                         tx,
@@ -354,49 +350,31 @@ impl Level {
                 0x300A =>
                 /* fire burning to the left */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::Fire(HorizontalDirection::Left), tx, ty);
                 }
                 0x300b =>
                 /* flying techbot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::FlyingBot, tx, ty);
                 }
                 0x300c =>
                 /* footbot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::FootBot, tx, ty);
                 }
                 0x300d =>
                 /* tankbot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::TankBot, tx, ty);
                 }
                 0x300e =>
                 /* fire wheel bot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::FireWheelBot, tx, ty);
                 }
                 0x300F =>
                 /* grey box with gun inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Gun,
@@ -408,9 +386,6 @@ impl Level {
                 0x3010 =>
                 /* robot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Robot, tx, ty);
                 }
                 0x3011 =>
@@ -425,9 +400,6 @@ impl Level {
                 0x3012 =>
                 /* grey box with bomb inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Bomb,
@@ -444,18 +416,12 @@ impl Level {
                 0x3014 =>
                 /* water mirroring everything that is above */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Water, tx, ty);
                 }
                 0x3015 =>
                 /* red box with soda inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxRed(
                             BoxRedContent::Soda,
@@ -467,9 +433,6 @@ impl Level {
                 0x3016 =>
                 /* crab bot crawling along wall left of him */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(
                         ActorType::WallCrawler(HorizontalDirection::Left),
                         tx,
@@ -479,9 +442,6 @@ impl Level {
                 0x3017 =>
                 /* crab bot crawling along wall right of him */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::WallCrawler(HorizontalDirection::Right),
                         tx,
@@ -491,9 +451,6 @@ impl Level {
                 0x3018 =>
                 /* red box with chicken inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxRed(
                             BoxRedContent::Chicken,
@@ -505,41 +462,26 @@ impl Level {
                 0x3019 =>
                 /* floor that breaks on second jump onto it */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::UnstableFloor, tx, ty);
                 }
                 0x301a =>
                 /* horizontal electric arc which gets deactivated when mill is shot */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::ElectricArc, tx, ty);
                 }
                 0x301b =>
                 /* fan wheel mounted on right wall blowing to the left */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::Fan(HorizontalDirection::Left), tx, ty);
                 }
                 0x301c =>
                 /* fan wheel mounted on left wall blowing to the right*/
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::Fan(HorizontalDirection::Right), tx, ty);
                 }
                 0x301d =>
                 /* blue box with football insdie */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Football,
@@ -551,9 +493,6 @@ impl Level {
                 0x301e =>
                 /* blue box with joystick inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Joystick,
@@ -565,9 +504,6 @@ impl Level {
                 0x301f =>
                 /* blue box with disk inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Disk,
@@ -579,9 +515,6 @@ impl Level {
                 0x3020 =>
                 /* grey box with glove inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::Glove,
@@ -593,26 +526,17 @@ impl Level {
                 0x3021 =>
                 /* laser beam which is deactivated by access card */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::AccessCardDoor, tx, ty);
                 }
                 0x3022 =>
                 /* helicopter */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::HelicopterBot, tx, ty);
                 }
                 0x3023 =>
                 /* blue box with balloon inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Balloon,
@@ -629,10 +553,6 @@ impl Level {
                 0x3025 =>
                 /* broken wall background */
                 {
-                    /* take the part from one above */
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(
                         ActorType::BackgroundAnimation(
                             BackgroundAnimationType::BrokenWall,
@@ -661,9 +581,6 @@ impl Level {
                 0x3029 =>
                 /* grey box with full life */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::FullLife,
@@ -675,26 +592,17 @@ impl Level {
                 0x302a =>
                 /* "ACME" brick that comes falling down */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Acme, tx, ty);
                 }
                 0x302b =>
-                /* rotating mill that can kill duke on touch */
+                /* rotating mill that can kill the hero on touch */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::Mill, tx, ty);
                 }
                 0x302c =>
                 /* single spike standing out of the floor */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(
                         ActorType::Spikes(SpikeType::SingleSpikeUp),
                         tx,
@@ -704,9 +612,6 @@ impl Level {
                 0x302d =>
                 /* blue box with flag inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Flag,
@@ -718,9 +623,6 @@ impl Level {
                 0x302e =>
                 /* blue box with radio inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxBlue(
                             BoxBlueContent::Radio,
@@ -750,25 +652,24 @@ impl Level {
                 0x3031 =>
                 /* jumping mines */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::MineJumping, tx, ty);
                 }
                 0x3032 =>
                 /* we found our hero! */
                 {
                     hero.enter_level(tx, ty - sizes.height() as i32);
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
+                    if x > 1 {
+                        tiles.copy_from_to(
+                            x as i32 - 1,
+                            y as i32,
+                            x as i32,
+                            y as i32,
+                        );
                     }
                 }
                 0x3033 =>
                 /* grey box with the access card inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::AccessCard,
@@ -796,9 +697,6 @@ impl Level {
                 0x3037 =>
                 /* grey box with a D inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::LetterD,
@@ -810,9 +708,6 @@ impl Level {
                 0x3038 =>
                 /* grey box with a U inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::LetterU,
@@ -824,9 +719,6 @@ impl Level {
                 0x3039 =>
                 /* grey box with a K inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::LetterK,
@@ -838,9 +730,6 @@ impl Level {
                 0x303a =>
                 /* grey box with a E inside */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(
                         ActorType::Item(ItemType::BoxGrey(
                             BoxGreyContent::LetterE,
@@ -852,9 +741,6 @@ impl Level {
                 0x303b =>
                 /* bunny bot */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::RabbitoidBot, tx, ty);
                 }
                 0x303c =>
@@ -870,7 +756,6 @@ impl Level {
                 0x303e =>
                 /* window - left part */
                 {
-                    tiles.set(x, y, 0);
                     aa(
                         ActorType::BackgroundAnimation(
                             BackgroundAnimationType::WindowLeft,
@@ -882,7 +767,6 @@ impl Level {
                 0x303f =>
                 /* window - right part */
                 {
-                    tiles.set(x, y, 0);
                     aa(
                         ActorType::BackgroundAnimation(
                             BackgroundAnimationType::WindowRight,
@@ -894,57 +778,36 @@ impl Level {
                 0x3040 =>
                 /* the notebook */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::NoteBook, tx, ty);
                 }
                 0x3041 =>
                 /* the surveillance screen */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::SurveillanceScreen, tx, ty);
                 }
                 0x3043 =>
                 /* dr proton -the final opponent */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::DrProton, tx, ty);
                 }
                 0x3044 =>
                 /* red key */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Key(KeyColor::Red), tx, ty);
                 }
                 0x3045 =>
                 /* green key */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Key(KeyColor::Green), tx, ty);
                 }
                 0x3046 =>
                 /* blue key */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Key(KeyColor::Blue), tx, ty);
                 }
                 0x3047 =>
                 /* pink key */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Key(KeyColor::Pink), tx, ty);
                 }
                 0x3048 =>
@@ -970,117 +833,75 @@ impl Level {
                 0x304c =>
                 /* red door */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Door(KeyColor::Red), tx, ty);
                 }
                 0x304d =>
                 /* green door */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Door(KeyColor::Green), tx, ty);
                 }
                 0x304e =>
                 /* blue door */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Door(KeyColor::Blue), tx, ty);
                 }
                 0x304f =>
                 /* pink door */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     solids.set(x, y, true);
                     aa(ActorType::Door(KeyColor::Pink), tx, ty);
                 }
                 0x3050 =>
                 /* football on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Football), tx, ty);
                 }
                 0x3051 =>
                 /* single chicken on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::ChickenSingle), tx, ty);
                 }
                 0x3052 =>
                 /* soda on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Soda), tx, ty);
                 }
                 0x3053 =>
                 /* a disk on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Disk), tx, ty);
                 }
                 0x3054 =>
                 /* a joystick on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Joystick), tx, ty);
                 }
                 0x3055 =>
                 /* a flag on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Flag), tx, ty);
                 }
                 0x3056 =>
                 /* a radio on its own */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Item(ItemType::Radio), tx, ty);
                 }
                 0x3057 =>
                 /* the red mine lying on the ground */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::MineLying, tx, ty);
                 }
                 0x3058 =>
                 /* spikes showing up */
                 {
-                    if y > 0 {
-                        tiles.copy_from_to(x, y - 1, x, y);
-                    }
                     aa(ActorType::Spikes(SpikeType::SpikesUp), tx, ty);
                 }
                 0x3059 =>
                 /* spikes showing down */
                 {
-                    if x > 0 {
-                        tiles.copy_from_to(x - 1, y, x, y);
-                    }
                     aa(ActorType::Spikes(SpikeType::SpikesDown), tx, ty);
                 }
                 t if t >= 4 && t <= 0x2fe0 => {}
@@ -1103,6 +924,7 @@ impl Level {
             sizes,
             tiles: &mut tiles,
             actors: &mut actors,
+            copy_background: true,
         };
         actor_queue.process(&mut actor_adder);
 
@@ -1156,24 +978,18 @@ impl Level {
             renderer.fill_rect(srcrect, Color::RGB(0, 0, 0))?;
         }
 
-        let start_x = u32::try_from(srcrect.left()).unwrap_or_default()
-            / sizes.width();
-        let end_x = (u32::try_from(srcrect.right()).unwrap_or_default()
-            / sizes.width())
-            + 1;
-        let start_y = u32::try_from(srcrect.top()).unwrap_or_default()
-            / sizes.height();
-        let end_y = (u32::try_from(srcrect.bottom()).unwrap_or_default()
-            / sizes.height())
-            + 1;
+        let start_x = srcrect.left() / sizes.width() as i32;
+        let end_x = (srcrect.right() / sizes.width() as i32) + 1;
+        let start_y = srcrect.top() / sizes.height() as i32;
+        let end_y = (srcrect.bottom() / sizes.height() as i32) + 1;
 
-        for y in start_y..std::cmp::min(end_y, LEVEL_HEIGHT) {
-            for x in start_x..std::cmp::min(end_x, LEVEL_WIDTH) {
+        for y in start_y..end_y {
+            for x in start_x..end_x {
                 let tilenr = self.tiles.get(x, y);
                 if tilenr > 1 && tilenr < (48 * 8) {
                     let point = Point::new(
-                        (sizes.width() * x) as i32,
-                        (sizes.height() * y) as i32,
+                        sizes.width() as i32 * x,
+                        sizes.height() as i32 * y,
                     );
                     renderer.place_tile(tilenr as usize, point)?;
                 }

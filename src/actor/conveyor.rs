@@ -36,8 +36,8 @@ impl CreateActorWithDetails for Conveyor {
             position.offset(-(sizes.width() as i32), 0);
             position.set_width(position.width() + sizes.width());
             tile = tiles.get(
-                position.x() as u32 / sizes.width(),
-                position.y() as u32 / sizes.height(),
+                position.x() / sizes.width() as i32,
+                position.y() / sizes.height() as i32,
             );
             if tile as usize == SOLID_CONVEYORBELT_LEFTEND
                 || position.x() <= 0
@@ -45,8 +45,8 @@ impl CreateActorWithDetails for Conveyor {
             {
                 found_begin = true;
                 tiles.set(
-                    position.x() as u32 / sizes.width(),
-                    position.y() as u32 / sizes.height(),
+                    position.x() / sizes.width() as i32,
+                    position.y() / sizes.height() as i32,
                     SOLID_BLACK as u16,
                 );
             }

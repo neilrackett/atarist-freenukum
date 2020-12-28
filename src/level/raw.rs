@@ -18,17 +18,25 @@ impl LevelRaw {
         }
     }
 
-    pub fn set(&mut self, x: u32, y: u32, tile: u16) {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.raw[y as usize][x as usize] = tile;
+    pub fn set(&mut self, x: i32, y: i32, tile: u16) {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.raw[y as usize][x as usize] = tile;
+        }
     }
 
-    pub fn get(&self, x: u32, y: u32) -> u16 {
-        assert!(x < LEVEL_WIDTH);
-        assert!(y < LEVEL_HEIGHT);
-
-        self.raw[y as usize][x as usize]
+    pub fn get(&self, x: i32, y: i32) -> u16 {
+        if x >= 0
+            && x < LEVEL_WIDTH as i32
+            && y >= 0
+            && y < LEVEL_HEIGHT as i32
+        {
+            self.raw[y as usize][x as usize]
+        } else {
+            0
+        }
     }
 }

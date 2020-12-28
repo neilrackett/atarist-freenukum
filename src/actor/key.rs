@@ -4,7 +4,9 @@ use crate::{
         RenderParameters, ScoreType,
     },
     hero::InventoryItem,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     KeyColor, Result, Sizes, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN,
     OBJECT_KEY_PINK, OBJECT_KEY_RED,
 };
@@ -72,5 +74,9 @@ impl Actor for Key {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

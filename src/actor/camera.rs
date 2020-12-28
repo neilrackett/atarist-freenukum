@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
     ANIMATION_CAMERA_RIGHT,
 };
@@ -21,12 +23,8 @@ impl CreateActor for Camera {
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
+        _tiles: &mut LevelTiles,
     ) -> Self {
-        let x = pos.x as u32 / sizes.width();
-        let y = pos.y as u32 / sizes.height();
-        tiles.copy_from_to(x, y + 1, x, y);
-
         Self {
             tile: ANIMATION_CAMERA_CENTER,
             position: Rect::new(
@@ -85,5 +83,9 @@ impl Actor for Camera {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromBelow
     }
 }

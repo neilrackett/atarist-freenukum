@@ -60,8 +60,8 @@ impl Actor for Elevator {
         match self.state {
             State::Ascending => {
                 if p.solids.get(
-                    self.position.x() as u32 / p.sizes.width(),
-                    self.position.y() as u32 / p.sizes.height() - 3,
+                    self.position.x() / p.sizes.width() as i32,
+                    self.position.y() / p.sizes.height() as i32 - 3,
                 ) {
                     // hero touches solid with head
                     self.state = State::Idle;
@@ -83,8 +83,8 @@ impl Actor for Elevator {
                         );
 
                         p.solids.set(
-                            self.position.x() as u32 / p.sizes.width(),
-                            self.position.y() as u32 / p.sizes.height(),
+                            self.position.x() / p.sizes.width() as i32,
+                            self.position.y() / p.sizes.height() as i32,
                             true,
                         );
                     }
@@ -92,10 +92,10 @@ impl Actor for Elevator {
             }
             State::Descending => {
                 for _ in 0..2 {
-                    if self.position.height() as u32 > p.sizes.height() {
+                    if self.position.height() > p.sizes.height() {
                         p.solids.set(
-                            self.position.x() as u32 / p.sizes.width(),
-                            self.position.y() as u32 / p.sizes.height(),
+                            self.position.x() / p.sizes.width() as i32,
+                            self.position.y() / p.sizes.height() as i32,
                             false,
                         );
                         self.position.offset(0, p.sizes.height() as i32);

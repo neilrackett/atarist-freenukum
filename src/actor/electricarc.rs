@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
 };
 use sdl2::rect::{Point, Rect};
@@ -80,5 +82,9 @@ impl Actor for ElectricArc {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

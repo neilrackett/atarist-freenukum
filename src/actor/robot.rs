@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -47,8 +49,8 @@ impl Actor for Robot {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32 + 1,
         ) {
             // In the air, falling down.
             self.position.offset(0, p.sizes.half_height() as i32);
@@ -63,17 +65,17 @@ impl Actor for Robot {
                 if !p.solids.get(
                 (
                     self.position.x() +
-                    direction * p.sizes.half_width()as i32
-                ) as u32/ p.sizes.width(),
-                self.position.y() as u32 / p.sizes.height()
+                    direction * p.sizes.half_width() as i32
+                ) / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32
             ) &&
             // Check if the tile below this free place is solid
             p.solids.get(
                 (
                     self.position.x() +
                     direction * p.sizes.half_width() as i32
-                ) as u32 / p.sizes.width(),
-                (self.position.y() as u32 + p.sizes.height()) / p.sizes.height()
+                ) / p.sizes.width() as i32,
+                (self.position.y() + p.sizes.height() as i32) / p.sizes.height() as i32
             ) {
                     if direction == 2 {
                         direction = 1;
@@ -132,5 +134,9 @@ impl Actor for Robot {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

@@ -5,7 +5,9 @@ use crate::{
         ShotParameters, ShotProcessing,
     },
     hero::{FetchedLetter, InventoryItem},
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, ANIMATION_SODA, OBJECT_ACCESS_CARD, OBJECT_BOOT,
     OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
     OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE, OBJECT_CLAMP,
@@ -334,8 +336,8 @@ impl Actor for Item {
         self.current_frame %= self.num_frames;
 
         if !p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32 + 1,
         ) {
             // fall down until the actor lands on solid ground
             self.position.offset(0, p.sizes.half_height() as i32);
@@ -536,5 +538,9 @@ impl Actor for Item {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
@@ -38,8 +40,8 @@ impl CreateActor for MineLying {
 impl Actor for MineLying {
     fn act(&mut self, p: ActParameters) {
         if !p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32 + 1,
         ) {
             self.position.offset(0, p.sizes.half_height() as i32);
         }
@@ -68,5 +70,9 @@ impl Actor for MineLying {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

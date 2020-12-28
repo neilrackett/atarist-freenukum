@@ -176,8 +176,8 @@ fn main() -> Result<()> {
             } => {
                 let global_x = r.x() + x;
                 let global_y = r.y() + y;
-                let tile_x = global_x as u32 / sizes.width();
-                let tile_y = global_y as u32 / sizes.height();
+                let tile_x = global_x / sizes.width() as i32;
+                let tile_y = global_y / sizes.height() as i32;
 
                 let tilenr = level_raw.get(tile_x, tile_y);
                 let is_solid = level.solids.get(tile_x, tile_y);

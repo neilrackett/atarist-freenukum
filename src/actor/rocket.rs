@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Result, Sizes, OBJECT_ROCKET,
 };
 use sdl2::rect::{Point, Rect};
@@ -25,12 +27,8 @@ impl CreateActor for Rocket {
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
+        _tiles: &mut LevelTiles,
     ) -> Self {
-        let tile_x = pos.x as u32 / sizes.width();
-        let tile_y = pos.y as u32 / sizes.height();
-        tiles.copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
-
         Self {
             state: State::Idle,
             position: Rect::new(
@@ -51,11 +49,12 @@ impl Actor for Rocket {
                 self.position.offset(0, -(p.sizes.half_height() as i32));
                 if p.solids.collides(p.sizes, self.position) {
                     let tile_x =
-                        self.position.x() as u32 / p.sizes.width();
+                        self.position.x() / p.sizes.width() as i32;
                     let tile_y =
-                        self.position.y() as u32 / p.sizes.height();
-                    p.solids.set(tile_x, tile_y + 1, false);
-                    // TODO: trigger a re-rendering of the affected tiles
+                        self.position.y() / p.sizes.height() as i32;
+                    if tile_x >= 0 && tile_y >= -1 {
+                        p.solids.set(tile_x, tile_y + 1, false);
+                    }
                     p.tiles.copy_from_to(
                         tile_x,
                         tile_y - 1,
@@ -111,13 +110,14 @@ impl Actor for Rocket {
         if self.state == State::Idle {
             // TODO: create animation
             self.state = State::Flying;
-            let tile_x = self.position.x() as u32 / p.sizes.width();
-            let tile_y = (self.position.y() as u32
-                + self.position.height())
-                / p.sizes.height();
+            let tile_x = self.position.x() / p.sizes.width() as i32;
+            let tile_y = (self.position.y()
+                + self.position.height() as i32)
+                / p.sizes.height() as i32;
 
-            p.solids.set(tile_x, tile_y, false);
-            // TODO: trigger a re-rendering of the affected tiles
+            if tile_x >= 0 && tile_y >= 0 {
+                p.solids.set(tile_x, tile_y, false);
+            }
             p.tiles.copy_from_to(tile_x, tile_y + 1, tile_x, tile_y);
         }
         ShotProcessing::Absorb
@@ -129,5 +129,9 @@ impl Actor for Rocket {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

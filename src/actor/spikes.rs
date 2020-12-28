@@ -2,7 +2,9 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, OBJECT_SPIKE, OBJECT_SPIKES_DOWN,
     OBJECT_SPIKES_UP,
 };
@@ -30,20 +32,8 @@ impl CreateActorWithDetails for Spikes {
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
+        _tiles: &mut LevelTiles,
     ) -> Self {
-        let x = pos.x as u32 / sizes.width();
-        let y = pos.y as u32 / sizes.height();
-
-        match spike_type {
-            SpikeType::SpikesUp | SpikeType::SingleSpikeUp => {
-                tiles.copy_from_to(x, y - 1, x, y);
-            }
-            SpikeType::SpikesDown => {
-                tiles.copy_from_to(x, y + 1, x, y);
-            }
-        }
-
         Self {
             touching_hero: false,
             position: Rect::new(
@@ -86,5 +76,14 @@ impl Actor for Spikes {
 
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        match self.spike_type {
+            SpikeType::SpikesUp | SpikeType::SingleSpikeUp => {
+                BackgroundTileStrategy::CopyFromAbove
+            }
+            SpikeType::SpikesDown => BackgroundTileStrategy::CopyFromBelow,
+        }
     }
 }

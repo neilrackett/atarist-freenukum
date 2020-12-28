@@ -55,8 +55,8 @@ impl Actor for HostileShot {
         self.position.offset(offset, 0);
 
         if p.solids.get(
-            self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height(),
+            self.position.x() / p.sizes.width() as i32,
+            self.position.y() / p.sizes.height() as i32,
         ) {
             self.is_alive = false;
         }

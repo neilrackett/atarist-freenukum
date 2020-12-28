@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, CreateActor, HeroInteractStartParameters,
         RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, OBJECT_NOTEBOOK,
 };
 use sdl2::rect::{Point, Rect};
@@ -56,5 +58,9 @@ impl Actor for NoteBook {
 
     fn is_in_foreground(&self) -> bool {
         false
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

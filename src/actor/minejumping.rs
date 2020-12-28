@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
@@ -84,5 +86,9 @@ impl Actor for MineJumping {
 
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromAbove
     }
 }

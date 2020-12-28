@@ -2,9 +2,11 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
-    Hero, HorizontalDirection, Result, Sizes, LEVEL_WIDTH,
-    OBJECT_FIRELEFT, OBJECT_FIRERIGHT,
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
+    Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
+    OBJECT_FIRERIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -32,27 +34,13 @@ impl CreateActorWithDetails for Fire {
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
+        _tiles: &mut LevelTiles,
     ) -> Self {
-        let x = pos.x as u32 / sizes.width();
-        let y = pos.y as u32 / sizes.height();
-
-        let mut position =
+        let position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         let tile = match direction {
-            HorizontalDirection::Right => {
-                if x < LEVEL_WIDTH + 1 {
-                    tiles.copy_from_to(x + 1, y, x, y);
-                }
-                OBJECT_FIRERIGHT
-            }
-            HorizontalDirection::Left => {
-                if x > 0 {
-                    tiles.copy_from_to(x - 1, y, x, y);
-                }
-                position.offset(-2 * sizes.width() as i32, 0);
-                OBJECT_FIRELEFT
-            }
+            HorizontalDirection::Right => OBJECT_FIRERIGHT,
+            HorizontalDirection::Left => OBJECT_FIRELEFT,
         };
 
         Self {
@@ -151,5 +139,16 @@ impl Actor for Fire {
     fn hurts_hero(&self, hero: &Hero) -> bool {
         self.state == State::Burning
             && self.position.has_intersection(hero.position.geometry)
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        match self.direction {
+            HorizontalDirection::Right => {
+                BackgroundTileStrategy::CopyFromRight
+            }
+            HorizontalDirection::Left => {
+                BackgroundTileStrategy::CopyFromLeft
+            }
+        }
     }
 }

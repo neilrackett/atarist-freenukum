@@ -38,8 +38,8 @@ impl CreateActor for ExpandingFloor {
 impl Actor for ExpandingFloor {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
-            let x = self.position.right() as u32 / p.sizes.width();
-            let y = self.position.top() as u32 / p.sizes.height();
+            let x = self.position.right() / p.sizes.width() as i32;
+            let y = self.position.top() / p.sizes.height() as i32;
             let can_expand = !p.solids.get(x, y);
             if can_expand {
                 p.solids.set(x, y, true);

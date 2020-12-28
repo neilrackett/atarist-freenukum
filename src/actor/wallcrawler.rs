@@ -4,10 +4,11 @@ use crate::{
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, HorizontalDirection, Result, Sizes, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
-    LEVEL_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -30,24 +31,11 @@ impl CreateActorWithDetails for WallCrawler {
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
-        tiles: &mut LevelTiles,
+        _tiles: &mut LevelTiles,
     ) -> Self {
-        let x = pos.x as u32 / sizes.width();
-        let y = pos.y as u32 / sizes.height();
-
         let tile = match orientation {
-            HorizontalDirection::Left => {
-                if x < LEVEL_WIDTH + 1 {
-                    tiles.copy_from_to(x + 1, y, x, y);
-                }
-                ANIMATION_WALLCRAWLERBOT_LEFT
-            }
-            HorizontalDirection::Right => {
-                if x > 0 {
-                    tiles.copy_from_to(x - 1, y, x, y);
-                }
-                ANIMATION_WALLCRAWLERBOT_RIGHT
-            }
+            HorizontalDirection::Left => ANIMATION_WALLCRAWLERBOT_LEFT,
+            HorizontalDirection::Right => ANIMATION_WALLCRAWLERBOT_RIGHT,
         };
 
         Self {
@@ -80,16 +68,16 @@ impl Actor for WallCrawler {
                 if
                 // bot collides with solid tile
                 p.solids.get(
-                self.position.x as u32 / p.sizes.width(),
-                (self.position.y as u32 - 1) / p.sizes.width()) ||
+                self.position.x / p.sizes.width() as i32,
+                (self.position.y - 1) / p.sizes.width()as i32) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
                     self.position.x +
                     orientation *
                     p.sizes.width() as i32
-                ) as u32 / p.sizes.width(),
-                (self.position.y - 1) as u32 / p.sizes.height())
+                ) / p.sizes.width()as i32,
+                (self.position.y - 1) / p.sizes.height() as i32)
                 {
                     self.position.y += 1;
                     self.direction = VerticalDirection::Down;
@@ -107,18 +95,18 @@ impl Actor for WallCrawler {
                 if
                 // bot collides with solid tile
                 p.solids.get(
-                    self.position.x as u32 / p.sizes.width(),
+                    self.position.x / p.sizes.width() as i32,
                     (
-                        self.position.y as u32 + p.sizes.height()
-                    ) / p.sizes.height()) ||
+                        self.position.y + p.sizes.height() as i32
+                    ) / p.sizes.height() as i32) ||
             // bot has no more wall to stick upon
             !p.solids.get(
                 (
                     self.position.x +
                     orientation *
-                    p.sizes.width() as i32) as u32 /
-                p.sizes.width(),
-                (self.position.y as u32 + p.sizes.height()) / p.sizes.height())
+                    p.sizes.width() as i32)/
+                p.sizes.width() as i32,
+                (self.position.y + p.sizes.height()as i32) / p.sizes.height() as i32)
                 {
                     self.position.y -= 1;
                     self.direction = VerticalDirection::Up;
@@ -171,5 +159,16 @@ impl Actor for WallCrawler {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        match self.orientation {
+            HorizontalDirection::Left => {
+                BackgroundTileStrategy::CopyFromRight
+            }
+            HorizontalDirection::Right => {
+                BackgroundTileStrategy::CopyFromLeft
+            }
+        }
     }
 }

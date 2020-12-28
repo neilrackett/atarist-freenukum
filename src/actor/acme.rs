@@ -3,7 +3,9 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{
+        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+    },
     Hero, Result, Sizes, OBJECT_FALLINGBLOCK,
 };
 use sdl2::rect::{Point, Rect};
@@ -52,10 +54,10 @@ impl Actor for Acme {
 
                 if y < hy && xl < hxr && xr > hxl {
                     let mut solid_between = false;
-                    for i in (y as u32 / p.sizes.height()) + 1
-                        ..hy as u32 / p.sizes.height()
+                    for i in (y / p.sizes.height() as i32) + 1
+                        ..hy / p.sizes.height() as i32
                     {
-                        let x = xl as u32 / p.sizes.width();
+                        let x = xl / p.sizes.width() as i32;
                         if p.solids.get(x, i) || p.solids.get(x + 1, i) {
                             solid_between = true;
                             break;
@@ -76,8 +78,8 @@ impl Actor for Acme {
             }
             _ => {
                 if p.solids.get(
-                    self.position.x() as u32 / p.sizes.width(),
-                    self.position.y() as u32 / p.sizes.height() + 1,
+                    self.position.x() / p.sizes.width() as i32,
+                    self.position.y() / p.sizes.height() as i32 + 1,
                 ) {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
@@ -139,5 +141,9 @@ impl Actor for Acme {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }
