@@ -61,10 +61,11 @@ impl Actor for ElectricArc {
         Ok(())
     }
 
-    fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::RemoveElectricArc {
-            return;
-        }
+    fn can_receive_message(&self, message: ActorMessageType) -> bool {
+        message == ActorMessageType::RemoveElectricArc
+    }
+
+    fn receive_message(&mut self, _p: ReceiveMessageParameters) {
         self.is_alive = false;
     }
 

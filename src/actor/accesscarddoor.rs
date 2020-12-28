@@ -55,10 +55,11 @@ impl Actor for AccessCardDoor {
         Ok(())
     }
 
+    fn can_receive_message(&self, message: ActorMessageType) -> bool {
+        message == ActorMessageType::OpenDoorAccessCard
+    }
+
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::OpenDoorAccessCard {
-            return;
-        }
         let x = self.position.x() / p.sizes.width() as i32;
         let y = self.position.y() / p.sizes.height() as i32;
         p.solids.set(x, y, false);

@@ -79,17 +79,16 @@ impl Actor for Teleporter {
         Ok(())
     }
 
+    fn can_receive_message(&self, message: ActorMessageType) -> bool {
+        message == ActorMessageType::TeleportTo(self.index)
+    }
+
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        match p.message {
-            ActorMessageType::TeleportTo(index) if index == self.index => {
-                p.hero.position.move_to(
-                    p.sizes,
-                    self.position.x(),
-                    self.position.y() - p.sizes.height() as i32,
-                );
-            }
-            _ => {}
-        }
+        p.hero.position.move_to(
+            p.sizes,
+            self.position.x(),
+            self.position.y() - p.sizes.height() as i32,
+        );
     }
 
     fn position(&self) -> Rect {

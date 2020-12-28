@@ -606,13 +606,6 @@ impl<'a> ActorAdder for LevelActorAdder<'a> {
         if self.copy_background {
             let x = pos.x / self.sizes.width() as i32;
             let y = pos.y / self.sizes.height() as i32;
-            println!(
-                "ACTOR {:?} at {}/{} - strategy={:?}",
-                actor_type,
-                x,
-                y,
-                actor.background_tile_strategy()
-            );
             match actor.background_tile_strategy() {
                 BackgroundTileStrategy::KeepEmpty => {
                     self.tiles.set(x, y, 0);

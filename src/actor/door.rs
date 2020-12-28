@@ -80,10 +80,11 @@ impl Actor for Door {
         Ok(())
     }
 
-    fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::OpenDoor(self.color) {
-            return;
-        }
+    fn can_receive_message(&self, message: ActorMessageType) -> bool {
+        message == ActorMessageType::OpenDoor(self.color)
+    }
+
+    fn receive_message(&mut self, _p: ReceiveMessageParameters) {
         self.state = State::Opening;
     }
 

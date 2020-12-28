@@ -62,10 +62,11 @@ impl Actor for ExpandingFloor {
         Ok(())
     }
 
-    fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::ExpandFloor {
-            return;
-        }
+    fn can_receive_message(&self, message: ActorMessageType) -> bool {
+        message == ActorMessageType::ExpandFloor
+    }
+
+    fn receive_message(&mut self, _p: ReceiveMessageParameters) {
         if !self.expanding && !self.finished {
             self.expanding = true;
         }
