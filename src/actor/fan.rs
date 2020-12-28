@@ -11,7 +11,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Fan {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -20,7 +20,7 @@ pub(crate) struct Specific {
     direction: HorizontalDirection,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Fan {
     type Details = HorizontalDirection;
 
     fn create_with_details(
@@ -29,8 +29,8 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: ANIMATION_FAN,
             current_frame: 0,
             num_frames: 4,
@@ -46,7 +46,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Fan {
     fn act(&mut self, p: ActParameters) {
         match self.running {
             0 => {}

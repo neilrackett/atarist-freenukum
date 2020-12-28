@@ -9,19 +9,19 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct ShootableWall {
     position: Rect,
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for ShootableWall {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -33,7 +33,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for ShootableWall {
     fn act(&mut self, _p: ActParameters) {}
 
     fn can_get_shot(&self) -> bool {

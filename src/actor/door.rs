@@ -16,7 +16,7 @@ enum State {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Door {
     tile: usize,
     counter: usize,
     state: State,
@@ -24,7 +24,7 @@ pub(crate) struct Specific {
     color: KeyColor,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Door {
     type Details = KeyColor;
 
     fn create_with_details(
@@ -33,8 +33,8 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: OBJECT_DOOR,
             counter: 0,
             state: State::Closed,
@@ -49,7 +49,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Door {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Closed => {}

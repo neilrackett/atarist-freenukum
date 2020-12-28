@@ -9,7 +9,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Spikes {
     touching_hero: bool,
     position: Rect,
     spike_type: SpikeType,
@@ -22,7 +22,7 @@ pub enum SpikeType {
     SingleSpikeUp,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Spikes {
     type Details = SpikeType;
 
     fn create_with_details(
@@ -31,7 +31,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let x = pos.x as u32 / sizes.width();
         let y = pos.y as u32 / sizes.height();
 
@@ -44,7 +44,7 @@ impl CreateActorWithDetails for Specific {
             }
         }
 
-        Specific {
+        Self {
             touching_hero: false,
             position: Rect::new(
                 pos.x,
@@ -57,7 +57,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Spikes {
     fn act(&mut self, p: ActParameters) {
         self.touching_hero =
             self.position.has_intersection(p.hero.position.geometry);

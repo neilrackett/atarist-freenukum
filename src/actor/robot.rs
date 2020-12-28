@@ -9,7 +9,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Robot {
     direction: HorizontalDirection,
     tile: usize,
     current_frame: usize,
@@ -18,14 +18,14 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Robot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_ROBOT,
             current_frame: 0,
@@ -41,7 +41,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Robot {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

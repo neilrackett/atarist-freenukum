@@ -10,7 +10,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct FireWheelBot {
     direction: HorizontalDirection,
     tile: usize,
     current_frame: usize,
@@ -21,14 +21,14 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for FireWheelBot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_FIREWHEEL_OFF,
             counter: 0,
@@ -46,7 +46,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for FireWheelBot {
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
             p.actor_adder.add_actor(

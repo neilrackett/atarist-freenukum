@@ -9,7 +9,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct UnstableFloor {
     tile: usize,
     touch_count: usize,
     touching_hero: bool,
@@ -17,13 +17,13 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for UnstableFloor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let mut floor_length = 0;
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
@@ -41,7 +41,7 @@ impl CreateActor for Specific {
 
         position.resize(sizes.width() * floor_length, sizes.height());
 
-        Specific {
+        Self {
             tile: SOLID_START + 77,
             touch_count: 0,
             touching_hero: false,
@@ -51,7 +51,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for UnstableFloor {
     fn act(&mut self, p: ActParameters) {
         // Detect whether the hero is standing upon the floor.
         let hero_geometry = p.hero.position.geometry;

@@ -17,7 +17,7 @@ pub enum ParticleColor {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Particle {
     tile: usize,
     countdown: usize,
     hspeed: i32,
@@ -26,7 +26,7 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Particle {
     type Details = ParticleColor;
 
     fn create_with_details(
@@ -35,7 +35,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let vspeed = rng.gen_range(-12..5);
@@ -48,7 +48,7 @@ impl CreateActorWithDetails for Specific {
             ParticleColor::Green => OBJECT_SPARK_GREEN,
         };
 
-        Specific {
+        Self {
             tile,
             countdown: 20,
             hspeed,
@@ -64,7 +64,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Particle {
     fn act(&mut self, _p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;

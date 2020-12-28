@@ -9,18 +9,18 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct SurveillanceScreen {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for SurveillanceScreen {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -31,7 +31,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for SurveillanceScreen {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

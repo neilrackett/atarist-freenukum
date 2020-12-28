@@ -10,13 +10,13 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Camera {
     tile: usize,
     position: Rect,
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Camera {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
@@ -27,7 +27,7 @@ impl CreateActor for Specific {
         let y = pos.y as u32 / sizes.height();
         tiles.copy_from_to(x, y + 1, x, y);
 
-        Specific {
+        Self {
             tile: ANIMATION_CAMERA_CENTER,
             position: Rect::new(
                 pos.x,
@@ -40,7 +40,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Camera {
     fn act(&mut self, p: ActParameters) {
         let x = p.hero.position.geometry.x;
         self.tile = if x - 1 > self.position.x {

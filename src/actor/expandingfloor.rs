@@ -9,20 +9,20 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct ExpandingFloor {
     expanding: bool,
     finished: bool,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for ExpandingFloor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             expanding: false,
             finished: false,
             position: Rect::new(
@@ -35,7 +35,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for ExpandingFloor {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
             let x = self.position.right() as u32 / p.sizes.width();

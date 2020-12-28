@@ -10,21 +10,21 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct AccessCardSlot {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for AccessCardSlot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        Specific {
+        Self {
             tile: OBJECT_ACCESS_CARD_SLOT,
             current_frame: 0,
             num_frames: 8,
@@ -38,7 +38,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for AccessCardSlot {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

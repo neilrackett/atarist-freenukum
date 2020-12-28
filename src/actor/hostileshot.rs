@@ -8,7 +8,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct HostileShot {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -17,7 +17,7 @@ pub(crate) struct Specific {
     direction: HorizontalDirection,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for HostileShot {
     type Details = HorizontalDirection;
 
     fn create_with_details(
@@ -26,13 +26,13 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let tile = match direction {
             HorizontalDirection::Left => OBJECT_HOSTILESHOT,
             HorizontalDirection::Right => OBJECT_HOSTILESHOT + 2,
         };
 
-        Specific {
+        Self {
             tile,
             current_frame: 0,
             num_frames: 2,
@@ -48,7 +48,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for HostileShot {
     fn act(&mut self, p: ActParameters) {
         let offset =
             (p.sizes.width() as i32) * self.direction.as_factor_i32();

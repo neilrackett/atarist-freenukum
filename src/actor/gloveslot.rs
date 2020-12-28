@@ -17,7 +17,7 @@ enum State {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct GloveSlot {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -26,14 +26,14 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for GloveSlot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: OBJECT_GLOVE_SLOT,
             current_frame: 0,
             num_frames: 4,
@@ -49,7 +49,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for GloveSlot {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

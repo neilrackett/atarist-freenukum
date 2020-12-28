@@ -9,7 +9,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Mill {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -17,13 +17,13 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Mill {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while position.y > 0
@@ -36,7 +36,7 @@ impl CreateActor for Specific {
             position.set_height(position.height() + sizes.height());
         }
 
-        Specific {
+        Self {
             tile: OBJECT_ROTATINGCYLINDER,
             current_frame: 0,
             num_frames: 5,
@@ -46,7 +46,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Mill {
     fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
             self.current_frame += 1;

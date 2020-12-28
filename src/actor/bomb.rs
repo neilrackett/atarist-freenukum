@@ -9,7 +9,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct Specific {
+pub(crate) struct Bomb {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -21,14 +21,14 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Bomb {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        Specific {
+        Self {
             tile: ANIMATION_BOMB,
             current_frame: 0,
             num_frames: 2,
@@ -47,7 +47,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Bomb {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

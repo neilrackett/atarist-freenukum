@@ -1,36 +1,36 @@
-mod accesscard_door;
-mod accesscard_slot;
+mod accesscarddoor;
+mod accesscardslot;
 mod acme;
+mod backgroundanimation;
 mod balloon;
 mod bomb;
 mod camera;
 mod conveyor;
 mod door;
-mod electric_arc;
+mod electricarc;
 mod elevator;
 mod exitdoor;
 mod expandingfloor;
 mod fan;
 mod fire;
 mod firewheelbot;
-mod glove_slot;
+mod gloveslot;
 mod hostileshot;
 mod item;
 mod key;
 mod keyhole;
 mod mill;
+mod minejumping;
+mod minelying;
 mod notebook;
 mod particle;
 mod placeholder;
-mod redball_jumping;
-mod redball_lying;
 mod robot;
 mod rocket;
 mod score;
-mod shootable_wall;
-mod simpleanimation;
+mod shootablewall;
 mod singleanimation;
-mod soda_flying;
+mod sodaflying;
 mod spikes;
 mod surveillancescreen;
 mod tankbot;
@@ -46,16 +46,50 @@ use crate::{
     rendering::Renderer,
     HorizontalDirection, KeyColor, Result, Sizes,
 };
-pub(crate) use item::{
-    BoxBlueContent, BoxGreyContent, BoxRedContent, ItemType,
-};
-use particle::ParticleColor;
-use score::ScoreType;
 use sdl2::rect::{Point, Rect};
-pub(crate) use simpleanimation::SimpleAnimationType;
-pub(crate) use singleanimation::SingleAnimationType;
-pub(crate) use spikes::SpikeType;
-pub(crate) use teleporter::TeleporterIndex;
+pub(crate) use {
+    accesscarddoor::AccessCardDoor,
+    accesscardslot::AccessCardSlot,
+    acme::Acme,
+    backgroundanimation::{BackgroundAnimation, BackgroundAnimationType},
+    balloon::Balloon,
+    bomb::Bomb,
+    camera::Camera,
+    conveyor::Conveyor,
+    door::Door,
+    electricarc::ElectricArc,
+    elevator::Elevator,
+    exitdoor::ExitDoor,
+    expandingfloor::ExpandingFloor,
+    fan::Fan,
+    fire::Fire,
+    firewheelbot::FireWheelBot,
+    gloveslot::GloveSlot,
+    hostileshot::HostileShot,
+    item::{
+        BoxBlueContent, BoxGreyContent, BoxRedContent, Item, ItemType,
+    },
+    key::Key,
+    keyhole::KeyHole,
+    mill::Mill,
+    minejumping::MineJumping,
+    minelying::MineLying,
+    notebook::NoteBook,
+    particle::{Particle, ParticleColor},
+    placeholder::PlaceHolder,
+    robot::Robot,
+    rocket::Rocket,
+    score::{Score, ScoreType},
+    shootablewall::ShootableWall,
+    singleanimation::{SingleAnimation, SingleAnimationType},
+    sodaflying::SodaFlying,
+    spikes::{SpikeType, Spikes},
+    surveillancescreen::SurveillanceScreen,
+    tankbot::TankBot,
+    teleporter::{Teleporter, TeleporterIndex},
+    unstablefloor::UnstableFloor,
+    wallcrawler::WallCrawler,
+};
 
 #[derive(Debug)]
 pub struct ActorsList {
@@ -302,13 +336,13 @@ pub enum ActorType {
     FootBot,
     HelicopterBot,
     RabbitoidBot,
-    RedBallJumping,
-    RedBallLying,
+    MineJumping,
+    MineLying,
     Robot,
     SingleAnimation(SingleAnimationType),
     SnakeBot,
     TankBot,
-    WallCrawlerBot(HorizontalDirection),
+    WallCrawler(HorizontalDirection),
     DrProton,
     Camera,
     Particle(ParticleColor),
@@ -316,7 +350,7 @@ pub enum ActorType {
     Bomb,
     Water,
     ExitDoor,
-    Notebook,
+    NoteBook,
     SurveillanceScreen,
     HostileShot(HorizontalDirection),
     SodaFlying,
@@ -336,7 +370,7 @@ pub enum ActorType {
     Keyhole(KeyColor),
     Door(KeyColor),
     ShootableWall,
-    Lift,
+    Elevator,
     Acme,
     Fire(HorizontalDirection),
     Mill,
@@ -344,7 +378,7 @@ pub enum ActorType {
     AccessCardDoor,
     Spikes(SpikeType),
     Score(ScoreType),
-    SimpleAnimation(SimpleAnimationType),
+    BackgroundAnimation(BackgroundAnimationType),
 }
 
 impl ActorType {
@@ -357,42 +391,30 @@ impl ActorType {
     ) -> Box<dyn Actor> {
         match self {
             ActorType::FireWheelBot => {
-                firewheelbot::Specific::create_boxed(p, sz, s, t)
+                FireWheelBot::create_boxed(p, sz, s, t)
             }
             ActorType::FlameGnomeBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::FlyingBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::FootBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::HelicopterBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::RabbitoidBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
-            ActorType::RedBallJumping => {
-                redball_jumping::Specific::create_boxed(p, sz, s, t)
+            ActorType::MineJumping => {
+                MineJumping::create_boxed(p, sz, s, t)
             }
-            ActorType::RedBallLying => {
-                redball_lying::Specific::create_boxed(p, sz, s, t)
-            }
-            ActorType::Robot => robot::Specific::create_boxed(p, sz, s, t),
+            ActorType::MineLying => MineLying::create_boxed(p, sz, s, t),
+            ActorType::Robot => Robot::create_boxed(p, sz, s, t),
             ActorType::SingleAnimation(animation_type) => {
-                singleanimation::Specific::create_boxed_with_details(
+                SingleAnimation::create_boxed_with_details(
                     *animation_type,
                     p,
                     sz,
@@ -401,161 +423,103 @@ impl ActorType {
                 )
             }
             ActorType::SnakeBot => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
-            ActorType::TankBot => {
-                tankbot::Specific::create_boxed(p, sz, s, t)
-            }
-            ActorType::WallCrawlerBot(direction) => {
-                wallcrawler::Specific::create_boxed_with_details(
+            ActorType::TankBot => TankBot::create_boxed(p, sz, s, t),
+            ActorType::WallCrawler(direction) => {
+                WallCrawler::create_boxed_with_details(
                     *direction, p, sz, s, t,
                 )
             }
             ActorType::DrProton => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
-            ActorType::Camera => {
-                camera::Specific::create_boxed(p, sz, s, t)
-            }
+            ActorType::Camera => Camera::create_boxed(p, sz, s, t),
             ActorType::Particle(color) => {
-                particle::Specific::create_boxed_with_details(
-                    *color, p, sz, s, t,
-                )
+                Particle::create_boxed_with_details(*color, p, sz, s, t)
             }
-            ActorType::Rocket => {
-                rocket::Specific::create_boxed(p, sz, s, t)
-            }
-            ActorType::Bomb => bomb::Specific::create_boxed(p, sz, s, t),
+            ActorType::Rocket => Rocket::create_boxed(p, sz, s, t),
+            ActorType::Bomb => Bomb::create_boxed(p, sz, s, t),
             ActorType::Water => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
-            ActorType::ExitDoor => {
-                exitdoor::Specific::create_boxed(p, sz, s, t)
-            }
-            ActorType::Notebook => {
-                notebook::Specific::create_boxed(p, sz, s, t)
-            }
+            ActorType::ExitDoor => ExitDoor::create_boxed(p, sz, s, t),
+            ActorType::NoteBook => NoteBook::create_boxed(p, sz, s, t),
             ActorType::SurveillanceScreen => {
-                surveillancescreen::Specific::create_boxed(p, sz, s, t)
+                SurveillanceScreen::create_boxed(p, sz, s, t)
             }
             ActorType::HostileShot(direction) => {
-                hostileshot::Specific::create_boxed_with_details(
+                HostileShot::create_boxed_with_details(
                     *direction, p, sz, s, t,
                 )
             }
-            ActorType::SodaFlying => {
-                soda_flying::Specific::create_boxed(p, sz, s, t)
-            }
+            ActorType::SodaFlying => SodaFlying::create_boxed(p, sz, s, t),
             ActorType::UnstableFloor => {
-                unstablefloor::Specific::create_boxed(p, sz, s, t)
+                UnstableFloor::create_boxed(p, sz, s, t)
             }
             ActorType::ExpandingFloor => {
-                expandingfloor::Specific::create_boxed(p, sz, s, t)
+                ExpandingFloor::create_boxed(p, sz, s, t)
             }
             ActorType::ConveyorRightEnd(direction) => {
-                conveyor::Specific::create_boxed_with_details(
+                Conveyor::create_boxed_with_details(
                     *direction, p, sz, s, t,
                 )
             }
             ActorType::Fan(direction) => {
-                fan::Specific::create_boxed_with_details(
-                    *direction, p, sz, s, t,
-                )
+                Fan::create_boxed_with_details(*direction, p, sz, s, t)
             }
             ActorType::StoneBackground => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::Teleporter(index) => {
-                teleporter::Specific::create_boxed_with_details(
-                    *index, p, sz, s, t,
-                )
+                Teleporter::create_boxed_with_details(*index, p, sz, s, t)
             }
             ActorType::FenceBackground => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::Screen => {
-                placeholder::Specific::create_boxed_with_details(
-                    *self, p, sz, s, t,
-                )
+                PlaceHolder::create_boxed_with_details(*self, p, sz, s, t)
             }
             ActorType::Item(item_type) => {
-                item::Specific::create_boxed_with_details(
-                    *item_type, p, sz, s, t,
-                )
+                Item::create_boxed_with_details(*item_type, p, sz, s, t)
             }
-            ActorType::Balloon => {
-                balloon::Specific::create_boxed(p, sz, s, t)
-            }
+            ActorType::Balloon => Balloon::create_boxed(p, sz, s, t),
             ActorType::AccessCardSlot => {
-                accesscard_slot::Specific::create_boxed(p, sz, s, t)
+                AccessCardSlot::create_boxed(p, sz, s, t)
             }
-            ActorType::GloveSlot => {
-                glove_slot::Specific::create_boxed(p, sz, s, t)
-            }
+            ActorType::GloveSlot => GloveSlot::create_boxed(p, sz, s, t),
             ActorType::Key(color) => {
-                key::Specific::create_boxed_with_details(
-                    *color, p, sz, s, t,
-                )
+                Key::create_boxed_with_details(*color, p, sz, s, t)
             }
             ActorType::Keyhole(color) => {
-                keyhole::Specific::create_boxed_with_details(
-                    *color, p, sz, s, t,
-                )
+                KeyHole::create_boxed_with_details(*color, p, sz, s, t)
             }
             ActorType::Door(color) => {
-                door::Specific::create_boxed_with_details(
-                    *color, p, sz, s, t,
-                )
+                Door::create_boxed_with_details(*color, p, sz, s, t)
             }
             ActorType::ShootableWall => {
-                shootable_wall::Specific::create_boxed(p, sz, s, t)
+                ShootableWall::create_boxed(p, sz, s, t)
             }
-            ActorType::Lift => {
-                elevator::Specific::create_boxed(p, sz, s, t)
-            }
-            ActorType::Acme => acme::Specific::create_boxed(p, sz, s, t),
+            ActorType::Elevator => Elevator::create_boxed(p, sz, s, t),
+            ActorType::Acme => Acme::create_boxed(p, sz, s, t),
             ActorType::Fire(direction) => {
-                fire::Specific::create_boxed_with_details(
-                    *direction, p, sz, s, t,
-                )
+                Fire::create_boxed_with_details(*direction, p, sz, s, t)
             }
-            ActorType::Mill => mill::Specific::create_boxed(p, sz, s, t),
+            ActorType::Mill => Mill::create_boxed(p, sz, s, t),
             ActorType::ElectricArc => {
-                electric_arc::Specific::create_boxed(p, sz, s, t)
+                ElectricArc::create_boxed(p, sz, s, t)
             }
             ActorType::AccessCardDoor => {
-                accesscard_door::Specific::create_boxed(p, sz, s, t)
+                AccessCardDoor::create_boxed(p, sz, s, t)
             }
             ActorType::Spikes(spike_type) => {
-                spikes::Specific::create_boxed_with_details(
-                    *spike_type,
-                    p,
-                    sz,
-                    s,
-                    t,
-                )
+                Spikes::create_boxed_with_details(*spike_type, p, sz, s, t)
             }
             ActorType::Score(score_type) => {
-                score::Specific::create_boxed_with_details(
-                    *score_type,
-                    p,
-                    sz,
-                    s,
-                    t,
-                )
+                Score::create_boxed_with_details(*score_type, p, sz, s, t)
             }
-            ActorType::SimpleAnimation(animation_type) => {
-                simpleanimation::Specific::create_boxed_with_details(
+            ActorType::BackgroundAnimation(animation_type) => {
+                BackgroundAnimation::create_boxed_with_details(
                     *animation_type,
                     p,
                     sz,

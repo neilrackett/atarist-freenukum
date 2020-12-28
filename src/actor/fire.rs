@@ -16,7 +16,7 @@ enum State {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Fire {
     tile: usize,
     direction: HorizontalDirection,
     state: State,
@@ -24,7 +24,7 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Fire {
     type Details = HorizontalDirection;
 
     fn create_with_details(
@@ -33,7 +33,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let x = pos.x as u32 / sizes.width();
         let y = pos.y as u32 / sizes.height();
 
@@ -55,7 +55,7 @@ impl CreateActorWithDetails for Specific {
             }
         };
 
-        Specific {
+        Self {
             tile,
             direction,
             state: State::Off,
@@ -65,7 +65,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Fire {
     fn act(&mut self, _p: ActParameters) {
         match self.state {
             State::Off => {

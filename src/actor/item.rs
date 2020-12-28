@@ -101,7 +101,7 @@ impl ItemType {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Item {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -110,7 +110,7 @@ pub(crate) struct Specific {
     item_type: ItemType,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Item {
     type Details = ItemType;
 
     fn create_with_details(
@@ -119,10 +119,10 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let (tile, num_frames) = item_type.tile_and_num_frames();
 
-        Specific {
+        Self {
             tile,
             current_frame: 0,
             num_frames,
@@ -138,7 +138,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Specific {
+impl Item {
     fn touched_by_hero(
         &mut self,
         item_type: ItemType,
@@ -328,7 +328,7 @@ impl Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Item {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

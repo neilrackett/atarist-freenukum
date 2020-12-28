@@ -9,21 +9,21 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Balloon {
     destroyed: bool,
     current_frame: usize,
     position: Rect,
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Balloon {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        Specific {
+        Self {
             destroyed: false,
             current_frame: 0,
             position: Rect::new(
@@ -37,7 +37,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Balloon {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= 9;

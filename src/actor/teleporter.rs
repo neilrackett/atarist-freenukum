@@ -10,7 +10,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Teleporter {
     position: Rect,
     index: TeleporterIndex,
 }
@@ -30,7 +30,7 @@ impl TeleporterIndex {
     }
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Teleporter {
     type Details = TeleporterIndex;
 
     fn create_with_details(
@@ -39,8 +39,8 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -52,7 +52,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Teleporter {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

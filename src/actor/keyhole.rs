@@ -12,14 +12,14 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct KeyHole {
     tile: usize,
     counter: usize,
     position: Rect,
     color: KeyColor,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for KeyHole {
     type Details = KeyColor;
 
     fn create_with_details(
@@ -28,8 +28,8 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: OBJECT_KEYHOLE_BLACK,
             counter: 0,
             position: Rect::new(
@@ -43,7 +43,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for KeyHole {
     fn act(&mut self, _p: ActParameters) {
         if self.counter < 5 {
             self.counter += 1;

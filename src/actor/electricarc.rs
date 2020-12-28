@@ -4,12 +4,12 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, Sizes, OBJECT_LASERBEAM,
+    Hero, Result, Sizes, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct ElectricArc {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -17,15 +17,15 @@ pub(crate) struct Specific {
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for ElectricArc {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        Specific {
-            tile: OBJECT_LASERBEAM,
+        Self {
+            tile: OBJECT_ELECTRIC_ARC,
             current_frame: 0,
             num_frames: 4,
             position: Rect::new(
@@ -39,10 +39,16 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
-    fn act(&mut self, _p: ActParameters) {
+impl Actor for ElectricArc {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
+        self.tile =
+            if p.hero.position.geometry.has_intersection(self.position) {
+                OBJECT_ELECTRIC_ARC
+            } else {
+                OBJECT_ELECTRIC_ARC_HURTING
+            }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
@@ -54,12 +60,9 @@ impl Actor for Specific {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
-        if p.message != ActorMessageType::OpenDoorAccessCard {
+        if p.message != ActorMessageType::RemoveElectricArc {
             return;
         }
-        let x = self.position.x() as u32 / p.sizes.width();
-        let y = self.position.y() as u32 / p.sizes.height();
-        p.solids.set(x, y, false);
         self.is_alive = false;
     }
 
@@ -68,7 +71,11 @@ impl Actor for Specific {
     }
 
     fn is_in_foreground(&self) -> bool {
-        false
+        true
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.position.has_intersection(hero.position.geometry)
     }
 
     fn is_alive(&self) -> bool {

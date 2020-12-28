@@ -9,21 +9,21 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct MineJumping {
     tile: usize,
     counter: u16,
     base_y: i32,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for MineJumping {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: ANIMATION_MINE,
             counter: 0,
             base_y: pos.y,
@@ -37,7 +37,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for MineJumping {
     fn act(&mut self, _p: ActParameters) {
         let distance = match self.counter {
             0 => 0,

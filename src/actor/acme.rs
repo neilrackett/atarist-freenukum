@@ -9,21 +9,21 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Acme {
     tile: usize,
     counter: usize,
     position: Rect,
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Acme {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
-        Specific {
+        Self {
             tile: OBJECT_FALLINGBLOCK,
             counter: 0,
             position: Rect::new(
@@ -37,7 +37,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Acme {
     fn act(&mut self, p: ActParameters) {
         let hero_geometry = p.hero.position.geometry;
 

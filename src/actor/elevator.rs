@@ -17,19 +17,19 @@ enum State {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Elevator {
     state: State,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Elevator {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             state: State::Idle,
             position: Rect::new(
                 pos.x,
@@ -41,7 +41,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Elevator {
     fn act(&mut self, p: ActParameters) {
         let hero_geometry = p.hero.position.geometry;
 

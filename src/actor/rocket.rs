@@ -15,23 +15,23 @@ enum State {
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct Specific {
+pub(crate) struct Rocket {
     state: State,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for Rocket {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let tile_x = pos.x as u32 / sizes.width();
         let tile_y = pos.y as u32 / sizes.height();
         tiles.copy_from_to(tile_x, tile_y - 1, tile_x, tile_y);
 
-        Specific {
+        Self {
             state: State::Idle,
             position: Rect::new(
                 pos.x,
@@ -43,7 +43,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Rocket {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Idle => {}

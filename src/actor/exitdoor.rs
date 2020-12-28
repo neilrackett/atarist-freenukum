@@ -16,21 +16,21 @@ enum State {
 }
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct ExitDoor {
     tile: usize,
     counter: usize,
     state: State,
     position: Rect,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for ExitDoor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             tile: ANIMATION_EXITDOOR,
             counter: 0,
             state: State::Closed,
@@ -44,7 +44,7 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for ExitDoor {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

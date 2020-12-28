@@ -11,13 +11,13 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub struct Specific {
+pub struct Key {
     position: Rect,
     is_alive: bool,
     color: KeyColor,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Key {
     type Details = KeyColor;
 
     fn create_with_details(
@@ -26,8 +26,8 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
+    ) -> Self {
+        Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -40,7 +40,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Key {
     fn act(&mut self, p: ActParameters) {
         if p.hero.position.geometry.has_intersection(self.position) {
             let item = InventoryItem::Key(self.color);

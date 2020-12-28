@@ -14,7 +14,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Score {
     tile: usize,
     countdown: usize,
     position: Rect,
@@ -45,7 +45,7 @@ pub enum ScoreType {
     Bonus7Right,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Score {
     type Details = ScoreType;
 
     fn create_with_details(
@@ -54,7 +54,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let tile = match score_type {
             ScoreType::Score100 => NUMBER_100,
             ScoreType::Score200 => NUMBER_200,
@@ -79,7 +79,7 @@ impl CreateActorWithDetails for Specific {
             ScoreType::Bonus7Right => NUMBER_BONUS_7_RIGHT,
         };
 
-        Specific {
+        Self {
             tile,
             countdown: 40,
             position: Rect::new(
@@ -92,7 +92,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Score {
     fn act(&mut self, _p: ActParameters) {
         self.countdown -= 1;
         self.position.y -= 1;

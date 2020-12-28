@@ -1,29 +1,27 @@
 use crate::{
     actor::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        SingleAnimationType,
+        ScoreType, SingleAnimationType,
     },
     level::{solids::LevelSolids, tiles::LevelTiles},
-    Result, Sizes, ANIMATION_MINE,
+    Result, Sizes, ANIMATION_SODAFLY,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
-    tile: usize,
+pub(crate) struct SodaFlying {
     position: Rect,
     is_alive: bool,
 }
 
-impl CreateActor for Specific {
+impl CreateActor for SodaFlying {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
-        Specific {
-            tile: ANIMATION_MINE,
+    ) -> Self {
+        Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -35,26 +33,35 @@ impl CreateActor for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for SodaFlying {
     fn act(&mut self, p: ActParameters) {
-        if !p.solids.get(
+        self.position.offset(0, -(p.sizes.half_height() as i32));
+        if p.solids.get(
             self.position.x() as u32 / p.sizes.width(),
-            self.position.y() as u32 / p.sizes.height() + 1,
+            self.position.y() as u32 / p.sizes.height(),
         ) {
-            self.position.offset(0, p.sizes.half_height() as i32);
-        }
-
-        if p.hero.position.geometry.has_intersection(self.position) {
-            self.is_alive = false;
             p.actor_adder.add_actor(
-                ActorType::SingleAnimation(SingleAnimationType::BombFire),
+                ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left(),
             );
+            self.is_alive = false;
+        } else if self.position.has_intersection(p.hero.position.geometry)
+        {
+            p.hero.score.add(1000);
+            p.actor_adder.add_actor(
+                ActorType::Score(ScoreType::Score1000),
+                self.position.top_left(),
+            );
+            self.is_alive = false;
         }
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        p.renderer.place_tile(self.tile, self.position.top_left())?;
+        let tile = ANIMATION_SODAFLY
+            + ((self.position.y() as usize
+                / p.sizes.half_height() as usize)
+                % 4);
+        p.renderer.place_tile(tile, self.position.top_left())?;
         Ok(())
     }
 

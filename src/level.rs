@@ -5,8 +5,9 @@ pub mod tiles;
 use crate::{
     actor::{
         ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
-        BoxBlueContent, BoxGreyContent, BoxRedContent, ItemType,
-        LevelActorAdder, SimpleAnimationType, SpikeType, TeleporterIndex,
+        BackgroundAnimationType, BoxBlueContent, BoxGreyContent,
+        BoxRedContent, ItemType, LevelActorAdder, SpikeType,
+        TeleporterIndex,
     },
     hero::Hero,
     infobox::InfoMessageQueue,
@@ -95,8 +96,8 @@ impl LevelData {
                 /* written text on black screen */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::TextOnScreen,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::TextOnScreen,
                         ),
                         tx,
                         ty,
@@ -106,8 +107,8 @@ impl LevelData {
                 /* blue high voltage flash */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::HighVoltageFlash,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::HighVoltageFlash,
                         ),
                         tx,
                         ty,
@@ -117,8 +118,8 @@ impl LevelData {
                 /* red flash light */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::RedFlashlight,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::RedFlashlight,
                         ),
                         tx,
                         ty,
@@ -128,8 +129,8 @@ impl LevelData {
                 /* blue high voltage flash */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BlueFlashlight,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BlueFlashlight,
                         ),
                         tx,
                         ty,
@@ -139,8 +140,8 @@ impl LevelData {
                 /* key panel on the wall */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::Keypanel,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::Keypanel,
                         ),
                         tx,
                         ty,
@@ -150,8 +151,8 @@ impl LevelData {
                 /* red rotation light */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::RedRotationLight,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::RedRotationLight,
                         ),
                         tx,
                         ty,
@@ -161,8 +162,8 @@ impl LevelData {
                 /* flashing up arrow */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::UpArrow,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::UpArrow,
                         ),
                         tx,
                         ty,
@@ -172,8 +173,8 @@ impl LevelData {
                 /* background blinking blue box */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BlueLight1,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BlueLight1,
                         ),
                         tx,
                         ty,
@@ -183,8 +184,8 @@ impl LevelData {
                 /* background blinking blue box */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BlueLight2,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BlueLight2,
                         ),
                         tx,
                         ty,
@@ -194,8 +195,8 @@ impl LevelData {
                 /* background blinking blue box */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BlueLight3,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BlueLight3,
                         ),
                         tx,
                         ty,
@@ -205,8 +206,8 @@ impl LevelData {
                 /* background blinking blue box */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BlueLight4,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BlueLight4,
                         ),
                         tx,
                         ty,
@@ -216,8 +217,8 @@ impl LevelData {
                 /* background green poison liquid */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::GreenPoison,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::GreenPoison,
                         ),
                         tx,
                         ty,
@@ -227,8 +228,8 @@ impl LevelData {
                 /* background lava */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::Lava,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::Lava,
                         ),
                         tx,
                         ty,
@@ -261,10 +262,10 @@ impl LevelData {
                     );
                 }
                 0x3001 =>
-                /* lift */
+                /* elevator */
                 {
                     solids.set(x, y, true);
-                    aa(ActorType::Lift, tx, ty);
+                    aa(ActorType::Elevator, tx, ty);
                 }
                 0x3002 =>
                 /* left end of left-moving conveyor */
@@ -470,9 +471,7 @@ impl LevelData {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
                     aa(
-                        ActorType::WallCrawlerBot(
-                            HorizontalDirection::Left,
-                        ),
+                        ActorType::WallCrawler(HorizontalDirection::Left),
                         tx,
                         ty,
                     );
@@ -484,9 +483,7 @@ impl LevelData {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
                     aa(
-                        ActorType::WallCrawlerBot(
-                            HorizontalDirection::Right,
-                        ),
+                        ActorType::WallCrawler(HorizontalDirection::Right),
                         tx,
                         ty,
                     );
@@ -637,8 +634,8 @@ impl LevelData {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::BrokenWall,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::BrokenWall,
                         ),
                         tx,
                         ty,
@@ -654,8 +651,8 @@ impl LevelData {
                 /* window inside background stone wall */
                 {
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::StoneWindow,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::StoneWindow,
                         ),
                         tx,
                         ty,
@@ -756,7 +753,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::RedBallJumping, tx, ty);
+                    aa(ActorType::MineJumping, tx, ty);
                 }
                 0x3032 =>
                 /* we found our hero! */
@@ -875,8 +872,8 @@ impl LevelData {
                 {
                     tiles.set(x, y, 0);
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::WindowLeft,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::WindowLeft,
                         ),
                         tx,
                         ty,
@@ -887,8 +884,8 @@ impl LevelData {
                 {
                     tiles.set(x, y, 0);
                     aa(
-                        ActorType::SimpleAnimation(
-                            SimpleAnimationType::WindowRight,
+                        ActorType::BackgroundAnimation(
+                            BackgroundAnimationType::WindowRight,
                         ),
                         tx,
                         ty,
@@ -900,7 +897,7 @@ impl LevelData {
                     if x > 0 {
                         tiles.copy_from_to(x - 1, y, x, y);
                     }
-                    aa(ActorType::Notebook, tx, ty);
+                    aa(ActorType::NoteBook, tx, ty);
                 }
                 0x3041 =>
                 /* the surveillance screen */
@@ -1068,7 +1065,7 @@ impl LevelData {
                     if y > 0 {
                         tiles.copy_from_to(x, y - 1, x, y);
                     }
-                    aa(ActorType::RedBallLying, tx, ty);
+                    aa(ActorType::MineLying, tx, ty);
                 }
                 0x3058 =>
                 /* spikes showing up */

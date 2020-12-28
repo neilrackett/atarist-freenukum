@@ -10,14 +10,14 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct Conveyor {
     current_frame: usize,
     num_frames: usize,
     direction: HorizontalDirection,
     position: Rect,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for Conveyor {
     type Details = HorizontalDirection;
 
     fn create_with_details(
@@ -52,7 +52,7 @@ impl CreateActorWithDetails for Specific {
             }
         }
 
-        Specific {
+        Self {
             current_frame: 0,
             num_frames: 4,
             direction,
@@ -61,7 +61,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for Conveyor {
     fn act(&mut self, p: ActParameters) {
         let hero_push_offset = match self.direction {
             HorizontalDirection::Left => {

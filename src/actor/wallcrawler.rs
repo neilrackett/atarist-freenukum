@@ -12,7 +12,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct WallCrawler {
     direction: VerticalDirection,
     orientation: HorizontalDirection,
     tile: usize,
@@ -22,7 +22,7 @@ pub(crate) struct Specific {
     position: Rect,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for WallCrawler {
     type Details = HorizontalDirection;
 
     fn create_with_details(
@@ -31,7 +31,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let x = pos.x as u32 / sizes.width();
         let y = pos.y as u32 / sizes.height();
 
@@ -50,7 +50,7 @@ impl CreateActorWithDetails for Specific {
             }
         };
 
-        Specific {
+        Self {
             direction: VerticalDirection::Up,
             orientation,
             tile,
@@ -67,7 +67,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for WallCrawler {
     fn act(&mut self, p: ActParameters) {
         let orientation = self.orientation.as_factor_i32();
 

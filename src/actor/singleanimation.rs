@@ -10,7 +10,7 @@ use crate::{
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
-pub(crate) struct Specific {
+pub(crate) struct SingleAnimation {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
@@ -28,7 +28,7 @@ pub enum SingleAnimationType {
     RobotDisappearing,
 }
 
-impl CreateActorWithDetails for Specific {
+impl CreateActorWithDetails for SingleAnimation {
     type Details = SingleAnimationType;
 
     fn create_with_details(
@@ -37,7 +37,7 @@ impl CreateActorWithDetails for Specific {
         sizes: &dyn Sizes,
         _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
-    ) -> Specific {
+    ) -> Self {
         let (tile, num_frames, can_hurt_hero, replaced_by) =
             match animation_type {
                 SingleAnimationType::BombFire => {
@@ -62,7 +62,7 @@ impl CreateActorWithDetails for Specific {
                 ),
             };
 
-        Specific {
+        Self {
             tile,
             current_frame: 0,
             num_frames,
@@ -78,7 +78,7 @@ impl CreateActorWithDetails for Specific {
     }
 }
 
-impl Actor for Specific {
+impl Actor for SingleAnimation {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         if !self.is_alive() {
