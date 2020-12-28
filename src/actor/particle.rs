@@ -20,8 +20,8 @@ pub enum ParticleColor {
 pub(crate) struct Particle {
     tile: usize,
     countdown: usize,
-    hspeed: i32,
-    vspeed: i32,
+    hspeed: f32,
+    vspeed: f32,
     position: Rect,
     is_alive: bool,
 }
@@ -38,8 +38,8 @@ impl CreateActorWithDetails for Particle {
     ) -> Self {
         use rand::Rng;
         let mut rng = rand::thread_rng();
-        let vspeed = rng.gen_range(-12..5);
-        let hspeed = rng.gen_range(-8..9);
+        let vspeed = rng.gen_range(-0.75f32..0.3f32);
+        let hspeed = rng.gen_range(-0.5f32..=0.5f32);
 
         let tile = match color {
             ParticleColor::Pink => OBJECT_SPARK_PINK,
@@ -65,11 +65,13 @@ impl CreateActorWithDetails for Particle {
 }
 
 impl Actor for Particle {
-    fn act(&mut self, _p: ActParameters) {
+    fn act(&mut self, p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;
-            self.position.offset(self.hspeed, self.vspeed);
-            self.vspeed += 2;
+            let vspeed = (p.sizes.height() as f32 * self.vspeed) as i32;
+            let hspeed = (p.sizes.width() as f32 * self.hspeed) as i32;
+            self.position.offset(hspeed, vspeed);
+            self.vspeed += 0.1f32;
         } else {
             self.is_alive = false;
         }
