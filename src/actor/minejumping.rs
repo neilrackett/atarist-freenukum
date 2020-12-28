@@ -38,17 +38,19 @@ impl CreateActor for MineJumping {
 }
 
 impl Actor for MineJumping {
-    fn act(&mut self, _p: ActParameters) {
-        let distance = match self.counter {
-            0 => 0,
-            1 | 11 => 16,
-            2 | 10 => 28,
-            3 | 9 => 36,
-            4 | 8 => 40,
-            5 | 7 => 41,
-            6 => 42,
+    fn act(&mut self, p: ActParameters) {
+        let relative_distance = match self.counter {
+            0 => 0f32,
+            1 | 11 => 1f32,
+            2 | 10 => 1.75f32,
+            3 | 9 => 2.25f32,
+            4 | 8 => 2.5f32,
+            5 | 7 => 2.56f32,
+            6 => 2.64f32,
             _ => unreachable!(),
         };
+        let distance =
+            ((p.sizes.height() as f32) * relative_distance) as i32;
         self.position.set_y(self.base_y - distance);
 
         self.counter += 1;
