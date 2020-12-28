@@ -48,7 +48,7 @@ impl PlayState {
 }
 
 #[derive(Debug)]
-pub struct LevelData {
+pub struct Level {
     pub tiles: LevelTiles,
     pub solids: LevelSolids,
     pub play_state: PlayState,
@@ -57,7 +57,7 @@ pub struct LevelData {
     pub shots: ShotList,
 }
 
-impl LevelData {
+impl Level {
     pub fn load<R: Read>(
         reader: &mut R,
         hero: &mut Hero,
@@ -1106,7 +1106,7 @@ impl LevelData {
         };
         actor_queue.process(&mut actor_adder);
 
-        Ok(LevelData {
+        Ok(Self {
             tiles,
             solids,
             play_state: PlayState::Playing,

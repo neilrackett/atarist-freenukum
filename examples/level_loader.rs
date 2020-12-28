@@ -3,7 +3,7 @@ use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
 use freenukum::hero::Hero;
 use freenukum::level::raw::LevelRaw;
-use freenukum::level::LevelData;
+use freenukum::level::Level;
 use freenukum::rendering::{CanvasRenderer, MovePositionRenderer};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
@@ -94,7 +94,7 @@ fn main() -> Result<()> {
 
     let mut level_raw = LevelRaw::new();
     let mut hero = Hero::new(&sizes);
-    let mut level_data = LevelData::load(
+    let mut level = Level::load(
         &mut file,
         &mut hero,
         &mut Some(&mut level_raw),
@@ -180,7 +180,7 @@ fn main() -> Result<()> {
                 let tile_y = global_y as u32 / sizes.height();
 
                 let tilenr = level_raw.get(tile_x, tile_y);
-                let is_solid = level_data.solids.get(tile_x, tile_y);
+                let is_solid = level.solids.get(tile_x, tile_y);
 
                 println!(
                     "Tile at (x={}, y={}): 0x{:04x}. Solid: {}",
@@ -218,7 +218,7 @@ fn main() -> Result<()> {
                         offset_y: -r.y(),
                         upstream: &mut renderer,
                     };
-                    level_data.render(
+                    level.render(
                         &mut renderer,
                         &sizes,
                         &mut hero,

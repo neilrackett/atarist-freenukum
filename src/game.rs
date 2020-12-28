@@ -5,7 +5,7 @@ use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
 use crate::hero::{Hero, Motion};
 use crate::infobox::{self, InfoMessageQueue};
-use crate::level::{LevelData, PlayState};
+use crate::level::{Level, PlayState};
 use crate::picture::show_splash_with_message;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::settings::Settings;
@@ -72,7 +72,7 @@ fn start_in_level(
         backdrop::load(&mut file)?
     };
 
-    let mut level_data = {
+    let mut level = {
         let filename = format!(
             "worldal{:x}.{}",
             level_number,
@@ -80,7 +80,7 @@ fn start_in_level(
         );
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
-        LevelData::load(&mut file, hero, &mut None, sizes)?
+        Level::load(&mut file, hero, &mut None, sizes)?
     };
 
     let destrect = Rect::new(
@@ -114,7 +114,7 @@ fn start_in_level(
     let mut walking_left = BTreeSet::new();
     let mut walking_right = BTreeSet::new();
 
-    while level_data.play_state.keep_acting() {
+    while level.play_state.keep_acting() {
         let texture_creator = canvas.texture_creator();
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
@@ -127,9 +127,9 @@ fn start_in_level(
         if do_update {
             let heropos = hero.position.geometry;
 
-            match level_data.play_state {
+            match level.play_state {
                 PlayState::KilledPlayingAnimation(0) => {
-                    level_data.play_state = PlayState::RestartLevel;
+                    level.play_state = PlayState::RestartLevel;
                     info_message_queue.push_back(
                         "You died.\nRestarting level.".to_string(),
                     );
@@ -142,7 +142,7 @@ fn start_in_level(
                         actor_queue
                             .add_particle_firework(heropos.center(), 4);
                     }
-                    level_data.play_state =
+                    level.play_state =
                         PlayState::KilledPlayingAnimation(i - 1);
                 }
                 _ => {}
@@ -176,7 +176,7 @@ fn start_in_level(
                 upstream: &mut renderer,
             };
 
-            level_data.render(
+            level.render(
                 &mut level_renderer,
                 sizes,
                 hero,
@@ -194,7 +194,7 @@ fn start_in_level(
 
         match GameEvent::wait(event_pump)? {
             GameEvent::Escape => {
-                level_data.play_state = PlayState::GoToMainScreen;
+                level.play_state = PlayState::GoToMainScreen;
             }
             GameEvent::GetInventoryItem(item) => {
                 hero.inventory.set(item);
@@ -203,7 +203,7 @@ fn start_in_level(
                 hero.firepower.increase(1);
             }
             GameEvent::FinishLevel => {
-                level_data.play_state = PlayState::LevelFinished
+                level.play_state = PlayState::LevelFinished
             }
             GameEvent::ToggleFullscreen => {
                 use sdl2::video::FullscreenType;
@@ -248,7 +248,7 @@ fn start_in_level(
                 do_update = true;
             }
             GameEvent::HeroInteractionStart => {
-                level_data.hero_interact_start(
+                level.hero_interact_start(
                     hero,
                     &mut info_message_queue,
                     &mut actor_message_queue,
@@ -256,7 +256,7 @@ fn start_in_level(
                 do_update = true;
             }
             GameEvent::HeroInteractionEnd => {
-                level_data.hero_interact_end(hero);
+                level.hero_interact_end(hero);
                 do_update = true;
             }
             GameEvent::HeroSetWalkingDirectionEnabled {
@@ -320,7 +320,7 @@ fn start_in_level(
             }
             GameEvent::HeroStartFiring => {
                 hero.is_shooting = true;
-                level_data.fire_shot(
+                level.fire_shot(
                     sizes,
                     hero,
                     &mut actor_queue,
@@ -333,7 +333,7 @@ fn start_in_level(
                 hero.update_animation();
             }
             GameEvent::TimerTriggered => {
-                level_data.act(
+                level.act(
                     sizes,
                     hero,
                     &mut actor_queue,
@@ -346,7 +346,7 @@ fn start_in_level(
     }
     drop(timer);
 
-    let next_action = match level_data.play_state {
+    let next_action = match level.play_state {
         PlayState::LevelFinished => NextAction::NextLevel,
         PlayState::GoToMainScreen => NextAction::GoToMainScreen,
         PlayState::RestartLevel => NextAction::RestartLevel,
