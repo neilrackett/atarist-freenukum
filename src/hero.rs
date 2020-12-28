@@ -39,7 +39,7 @@ pub struct Hero {
     base_tile_number: usize,
     current_frame: usize,
     num_frames: usize,
-    vertical_speed: usize,
+    vertical_speed: f32,
     pub gets_hurt: bool,
 }
 
@@ -64,7 +64,7 @@ impl Hero {
             base_tile_number: HERO_STANDING_RIGHT,
             current_frame: 0,
             num_frames: 1,
-            vertical_speed: 0,
+            vertical_speed: 0f32,
             gets_hurt: false,
         }
     }
@@ -87,7 +87,7 @@ impl Hero {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
-        self.vertical_speed = 0;
+        self.vertical_speed = 0f32;
         self.gets_hurt = false;
     }
 
@@ -108,7 +108,7 @@ impl Hero {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
-        self.vertical_speed = 0;
+        self.vertical_speed = 0f32;
         self.gets_hurt = false;
     }
 
@@ -266,13 +266,13 @@ impl Hero {
                 };
             self.counter = counter;
             self.somersault = somersault;
-            self.vertical_speed = 2;
+            self.vertical_speed = 1f32;
             self.is_in_the_air = true;
         }
     }
 
     pub fn land(&mut self) {
-        self.vertical_speed = 0;
+        self.vertical_speed = 0f32;
         self.is_in_the_air = false;
         self.somersault = None;
         self.counter = 0;
@@ -336,30 +336,29 @@ impl Hero {
 
         if !self.is_in_the_air {
             // the hero is standing or walking
-            self.vertical_speed = 0;
+            self.vertical_speed = 0f32;
         } else {
             // the hero is jumping or falling
             if self.counter > 0 {
                 // the hero is jumping
                 self.counter -= 1;
                 self.vertical_speed = match self.counter {
-                    3 | 2 => 1,
-                    1 | 0 => 0,
-                    _ => 2,
+                    3 | 2 => 0.5f32,
+                    1 | 0 => 0f32,
+                    _ => 1f32,
                 };
 
-                for _ in 0..self.vertical_speed {
+                let vertical_distance =
+                    (self.vertical_speed * sizes.height() as f32) as i32;
+                for _ in 0..vertical_distance {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
                         solids,
                         geometry.x,
-                        geometry.y - sizes.half_height() as i32,
+                        geometry.y - 1,
                     ) {
-                        self.position.move_y_to(
-                            sizes,
-                            geometry.y() - sizes.half_height() as i32,
-                        );
+                        self.position.move_y_to(sizes, geometry.y() - 1);
                     } else {
                         // hero bumped against the ceiling
                         self.counter = 0;
@@ -367,21 +366,23 @@ impl Hero {
                 }
             } else {
                 // the hero is falling
-                self.vertical_speed =
-                    std::cmp::min(self.vertical_speed + 1, 6);
+                self.vertical_speed += 0.5f32;
+                if self.vertical_speed > 3f32 {
+                    self.vertical_speed = 3f32;
+                }
 
-                for _ in 0..self.vertical_speed / 2 {
+                let vertical_distance =
+                    (self.vertical_speed * sizes.height() as f32) as i32;
+
+                for _ in 0..vertical_distance {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
                         solids,
                         geometry.x,
-                        geometry.y + sizes.half_height() as i32,
+                        geometry.y + 1,
                     ) {
-                        self.position.move_y_to(
-                            sizes,
-                            geometry.y() + sizes.half_height() as i32,
-                        );
+                        self.position.move_y_to(sizes, geometry.y() + 1);
                     }
                 }
             }
