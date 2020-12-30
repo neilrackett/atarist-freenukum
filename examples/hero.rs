@@ -5,7 +5,7 @@ use freenukum::{
     game,
     graphics::load_default_font,
     hero::{Hero, Motion},
-    level::solids::LevelSolids,
+    level::tiles::LevelTiles,
     rendering::{CanvasRenderer, Renderer},
     settings::Settings,
     tilecache::TileCache,
@@ -75,11 +75,11 @@ fn main() -> Result<()> {
         tileprovider: &tilecache,
     };
 
-    let solids = LevelSolids::new_all_solid();
+    let tiles = LevelTiles::new_all_solid();
     hero.render(
         &mut renderer,
         &sizes,
-        &solids,
+        &tiles,
         settings.draw_collision_bounds,
     )?;
     renderer.canvas.present();
@@ -211,11 +211,11 @@ fn main() -> Result<()> {
                     renderer.fill(Color::RGB(0, 0, 0))?;
                     hero.next_frame();
                     hero.update_animation();
-                    hero.act(&sizes, &solids, &mut actor_adder)?;
+                    hero.act(&sizes, &tiles, &mut actor_adder)?;
                     hero.render(
                         &mut renderer,
                         &sizes,
-                        &solids,
+                        &tiles,
                         settings.draw_collision_bounds,
                     )?;
                     renderer.canvas.present();

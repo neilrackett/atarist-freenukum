@@ -1,6 +1,6 @@
 use crate::{
     actor::{ActorAdder, ActorType, SingleAnimationType},
-    level::solids::LevelSolids,
+    level::tiles::LevelTiles,
     rendering::Renderer,
     HorizontalDirection, KeyColor, Result, Sizes, HERO_FALLING_LEFT,
     HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_LEFT_SOMERSAULT,
@@ -121,7 +121,7 @@ impl Hero {
         &self,
         renderer: &mut dyn Renderer,
         sizes: &dyn Sizes,
-        solids: &LevelSolids,
+        tiles: &LevelTiles,
         draw_collision_bounds: bool,
     ) -> Result<()> {
         if self.hidden || self.immunity.hero_invisible() {
@@ -161,7 +161,13 @@ impl Hero {
                 for j in (g.y / sizes.height() as i32) - 1
                     ..(g.y / sizes.height() as i32) + 3
                 {
-                    if i > 0 && j > 0 && solids.get(i, j) {
+                    if i > 0
+                        && j > 0
+                        && tiles
+                            .get(i, j)
+                            .map(|t| t.solid)
+                            .unwrap_or(false)
+                    {
                         let obstacle = Rect::new(
                             i * sizes.width() as i32,
                             j * sizes.height() as i32,
@@ -185,14 +191,14 @@ impl Hero {
     pub fn would_collide(
         &self,
         sizes: &dyn Sizes,
-        solids: &LevelSolids,
+        tiles: &LevelTiles,
         x: i32,
         y: i32,
     ) -> bool {
         let mut destination = self.position.geometry;
         destination.x = x;
         destination.y = y;
-        solids.collides(sizes, destination)
+        tiles.collides(sizes, destination)
     }
 
     pub fn update_animation(&mut self) {
@@ -287,7 +293,7 @@ impl Hero {
     pub fn act(
         &mut self,
         sizes: &dyn Sizes,
-        solids: &LevelSolids,
+        tiles: &LevelTiles,
         actor_adder: &mut dyn ActorAdder,
     ) -> Result<()> {
         self.immunity.count_down();
@@ -321,7 +327,7 @@ impl Hero {
                 }
                 if !self.would_collide(
                     sizes,
-                    solids,
+                    tiles,
                     new_position.x,
                     new_position.y,
                 ) {
@@ -354,7 +360,7 @@ impl Hero {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
-                        solids,
+                        tiles,
                         geometry.x,
                         geometry.y - 1,
                     ) {
@@ -378,7 +384,7 @@ impl Hero {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
-                        solids,
+                        tiles,
                         geometry.x,
                         geometry.y + 1,
                     ) {
@@ -391,7 +397,7 @@ impl Hero {
         let geometry = self.position.geometry;
         if self.would_collide(
             sizes,
-            solids,
+            tiles,
             geometry.x,
             geometry.y + sizes.half_height() as i32,
         ) {
@@ -458,7 +464,7 @@ impl Position {
     pub fn push_vertically(
         &mut self,
         sizes: &dyn Sizes,
-        solids: &LevelSolids,
+        tiles: &LevelTiles,
         offset: i32,
     ) -> i32 {
         if offset == 0 {
@@ -467,7 +473,7 @@ impl Position {
         let mut geometry = self.geometry;
         geometry.y += offset;
 
-        if !solids.collides(sizes, geometry) {
+        if !tiles.collides(sizes, geometry) {
             self.move_y_to(sizes, geometry.y());
             return offset;
         }
@@ -477,7 +483,7 @@ impl Position {
 
         for i in 0..offset_absolute {
             geometry.offset(0, -direction);
-            if !solids.collides(sizes, geometry) {
+            if !tiles.collides(sizes, geometry) {
                 self.move_y_to(sizes, geometry.y());
                 return i * direction;
             }
@@ -488,7 +494,7 @@ impl Position {
     pub fn push_horizontally(
         &mut self,
         sizes: &dyn Sizes,
-        solids: &LevelSolids,
+        tiles: &LevelTiles,
         offset: i32,
     ) -> i32 {
         if offset == 0 {
@@ -497,7 +503,7 @@ impl Position {
         let mut geometry = self.geometry;
         geometry.offset(offset, 0);
 
-        if !solids.collides(sizes, geometry) {
+        if !tiles.collides(sizes, geometry) {
             self.move_x_to(sizes, geometry.x());
             return offset;
         }
@@ -507,7 +513,7 @@ impl Position {
 
         for i in 0..offset_absolute {
             geometry.offset(-direction, 0);
-            if !solids.collides(sizes, geometry) {
+            if !tiles.collides(sizes, geometry) {
                 self.move_x_to(sizes, geometry.x());
                 return i * direction;
             }

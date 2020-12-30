@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, OBJECT_LASERBEAM,
 };
 use sdl2::rect::{Point, Rect};
@@ -23,7 +21,6 @@ impl CreateActor for AccessCardDoor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -62,7 +59,9 @@ impl Actor for AccessCardDoor {
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
         let x = self.position.x() / p.sizes.width() as i32;
         let y = self.position.y() / p.sizes.height() as i32;
-        p.solids.set(x, y, false);
+        if let Ok(ref mut t) = p.tiles.get_mut(x, y) {
+            t.solid = false;
+        }
         self.is_alive = false;
     }
 

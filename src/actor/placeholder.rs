@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes,
 };
 use sdl2::rect::{Point, Rect};
@@ -22,7 +20,6 @@ impl CreateActorWithDetails for PlaceHolder {
         actor_type: ActorType,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         println!(

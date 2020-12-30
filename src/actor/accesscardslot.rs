@@ -4,7 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, Result, Sizes, OBJECT_ACCESS_CARD_SLOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -21,7 +21,6 @@ impl CreateActor for AccessCardSlot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

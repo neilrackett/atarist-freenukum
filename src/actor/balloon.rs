@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::{LevelTiles, Tile},
     Result, Sizes, OBJECT_BALLOON,
 };
 use sdl2::rect::{Point, Rect};
@@ -20,7 +20,6 @@ impl CreateActor for Balloon {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -51,7 +50,7 @@ impl Actor for Balloon {
             );
         } else {
             self.position.y -= 1;
-            if p.solids.get(
+            if let Ok(Tile { solid: true, .. }) = p.tiles.get(
                 self.position.x() / p.sizes.width() as i32,
                 self.position.y() / p.sizes.height() as i32,
             ) {

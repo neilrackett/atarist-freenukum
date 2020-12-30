@@ -1,5 +1,3 @@
-pub mod raw;
-pub mod solids;
 pub mod tiles;
 
 use crate::{
@@ -17,13 +15,11 @@ use crate::{
     LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND,
 };
 use log::warn;
-use raw::LevelRaw;
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
     surface::Surface,
 };
-use solids::LevelSolids;
 use std::io::Read;
 use tiles::LevelTiles;
 
@@ -49,6 +45,7 @@ impl PlayState {
 #[derive(Debug, Eq, PartialEq)]
 pub enum BackgroundTileStrategy {
     KeepEmpty,
+    SetTile(u16),
     CopyFromAbove,
     CopyFromLeft,
     CopyFromRight,
@@ -58,7 +55,6 @@ pub enum BackgroundTileStrategy {
 #[derive(Debug)]
 pub struct Level {
     pub tiles: LevelTiles,
-    pub solids: LevelSolids,
     pub play_state: PlayState,
     pub actors: ActorsList,
     pub animated_frames_since_last_act: usize,
@@ -69,11 +65,9 @@ impl Level {
     pub fn load<R: Read>(
         reader: &mut R,
         hero: &mut Hero,
-        raw: &mut Option<&mut LevelRaw>,
         sizes: &dyn Sizes,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
-        let mut solids = LevelSolids::new();
         let mut actor_queue = ActorQueue::new();
 
         for i in 0..LEVEL_HEIGHT * LEVEL_WIDTH {
@@ -91,12 +85,11 @@ impl Level {
             };
 
             let tile = u16::from_le_bytes(tile_buf);
-            if let Some(raw) = raw {
-                raw.set(x, y, tile);
-            }
+            let mut t = tiles.get_mut(x, y)?;
+            t.raw_number = tile;
             if tile >= 4 && tile <= 0x2fe0 {
-                tiles.set(x, y, tile / 0x20);
-                solids.set(x, y, tile >= 0x1800);
+                t.solid = tile >= 0x1800;
+                t.effective_number = tile / 0x20;
             }
             match tile {
                 0x0000 => {}
@@ -246,14 +239,18 @@ impl Level {
                 0x1800 =>
                 /* solid wall which can be shot */
                 {
-                    tiles.set(x, y, 0x17E0 / 0x20);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = 0x17E0 / 0x20;
+                    }
                     aa(ActorType::ShootableWall, tx, ty);
                 }
                 0x1C00 =>
                 /* center conveyor */
                 {
-                    tiles.set(x, y, SOLID_BLACK as u16);
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = SOLID_BLACK as u16;
+                        t.solid = true;
+                    }
                 }
                 0x3000 =>
                 /* grey box, empty */
@@ -269,20 +266,27 @@ impl Level {
                 0x3001 =>
                 /* elevator */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Elevator, tx, ty);
                 }
                 0x3002 =>
                 /* left end of left-moving conveyor */
                 {
-                    tiles.set(x, y, SOLID_CONVEYORBELT_LEFTEND as u16);
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number =
+                            SOLID_CONVEYORBELT_LEFTEND as u16;
+                        t.solid = true;
+                    }
                 }
                 0x3003 =>
                 /* right end of left-moving conveyor */
                 {
-                    tiles.set(x, y, SOLID_BLACK as u16);
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = SOLID_BLACK as u16;
+                        t.solid = true;
+                    }
                     aa(
                         ActorType::ConveyorRightEnd(
                             HorizontalDirection::Left,
@@ -294,14 +298,19 @@ impl Level {
                 0x3004 =>
                 /* left end of right-moving conveyor */
                 {
-                    tiles.set(x, y, SOLID_CONVEYORBELT_LEFTEND as u16);
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number =
+                            SOLID_CONVEYORBELT_LEFTEND as u16;
+                        t.solid = true;
+                    }
                 }
                 0x3005 =>
                 /* right end of right-moving conveyor */
                 {
-                    tiles.set(x, y, SOLID_BLACK as u16);
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = SOLID_BLACK as u16;
+                        t.solid = true;
+                    }
                     aa(
                         ActorType::ConveyorRightEnd(
                             HorizontalDirection::Right,
@@ -416,7 +425,9 @@ impl Level {
                 0x3014 =>
                 /* water mirroring everything that is above */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Water, tx, ty);
                 }
                 0x3015 =>
@@ -526,7 +537,9 @@ impl Level {
                 0x3021 =>
                 /* laser beam which is deactivated by access card */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::AccessCardDoor, tx, ty);
                 }
                 0x3022 =>
@@ -592,7 +605,9 @@ impl Level {
                 0x302a =>
                 /* "ACME" brick that comes falling down */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Acme, tx, ty);
                 }
                 0x302b =>
@@ -658,13 +673,12 @@ impl Level {
                 /* we found our hero! */
                 {
                     hero.enter_level(tx, ty - sizes.height() as i32);
-                    if x > 1 {
-                        tiles.copy_from_to(
-                            x as i32 - 1,
-                            y as i32,
-                            x as i32,
-                            y as i32,
-                        );
+                    let source = tiles
+                        .get(x as i32 - 1, y as i32)
+                        .map(|t| t.effective_number)
+                        .unwrap_or(0);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = source;
                     }
                 }
                 0x3033 =>
@@ -691,7 +705,9 @@ impl Level {
                 0x3036 =>
                 /* floor which expands to right by access of glove slot */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::ExpandingFloor, tx, ty);
                 }
                 0x3037 =>
@@ -833,25 +849,33 @@ impl Level {
                 0x304c =>
                 /* red door */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Door(KeyColor::Red), tx, ty);
                 }
                 0x304d =>
                 /* green door */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Door(KeyColor::Green), tx, ty);
                 }
                 0x304e =>
                 /* blue door */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Door(KeyColor::Blue), tx, ty);
                 }
                 0x304f =>
                 /* pink door */
                 {
-                    solids.set(x, y, true);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.solid = true;
+                    }
                     aa(ActorType::Door(KeyColor::Pink), tx, ty);
                 }
                 0x3050 =>
@@ -910,7 +934,9 @@ impl Level {
                         "Unknown tile 0x{:04x} at x: {}, y: {}\n",
                         t, x, y
                     );
-                    tiles.set(x, y, 2);
+                    if let Ok(ref mut t) = tiles.get_mut(x, y) {
+                        t.effective_number = 2;
+                    }
                 }
                 t => {
                     unreachable!("Unknown tile code: 0x{:04x}", t);
@@ -920,7 +946,6 @@ impl Level {
 
         let mut actors = ActorsList::new();
         let mut actor_adder = LevelActorAdder {
-            solids: &mut solids,
             sizes,
             tiles: &mut tiles,
             actors: &mut actors,
@@ -930,7 +955,6 @@ impl Level {
 
         Ok(Self {
             tiles,
-            solids,
             play_state: PlayState::Playing,
             actors,
             animated_frames_since_last_act: 0,
@@ -985,7 +1009,11 @@ impl Level {
 
         for y in start_y..end_y {
             for x in start_x..end_x {
-                let tilenr = self.tiles.get(x, y);
+                let tilenr = self
+                    .tiles
+                    .get(x, y)
+                    .map(|t| t.effective_number)
+                    .unwrap_or(0);
                 if tilenr > 1 && tilenr < (48 * 8) {
                     let point = Point::new(
                         sizes.width() as i32 * x,
@@ -1003,7 +1031,7 @@ impl Level {
             srcrect,
         )?;
 
-        hero.render(renderer, sizes, &self.solids, draw_collision_bounds)?;
+        hero.render(renderer, sizes, &self.tiles, draw_collision_bounds)?;
 
         self.actors.render_foreground_actors(
             renderer,
@@ -1034,7 +1062,6 @@ impl Level {
                 sizes,
                 hero,
                 &mut self.actors,
-                &mut self.solids,
                 &mut self.tiles,
                 actor_queue,
                 actor_message_queue,
@@ -1047,13 +1074,12 @@ impl Level {
                 message,
                 sizes,
                 hero,
-                &mut self.solids,
+                &mut self.tiles,
             );
         }
 
         self.actors.act(
             sizes,
-            &mut self.solids,
             &mut self.tiles,
             hero,
             actor_queue,
@@ -1062,7 +1088,7 @@ impl Level {
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {
-            hero.act(sizes, &self.solids, actor_queue)?;
+            hero.act(sizes, &self.tiles, actor_queue)?;
         }
         hero.next_frame();
         hero.update_animation();
@@ -1100,7 +1126,6 @@ impl Level {
                 sizes,
                 hero,
                 &mut self.actors,
-                &mut self.solids,
                 &mut self.tiles,
                 distance,
                 actor_adder,

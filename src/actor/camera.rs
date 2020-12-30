@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
     ANIMATION_CAMERA_RIGHT,
 };
@@ -22,7 +20,6 @@ impl CreateActor for Camera {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

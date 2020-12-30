@@ -2,8 +2,7 @@ use anyhow::{anyhow, Result};
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
 use freenukum::hero::Hero;
-use freenukum::level::raw::LevelRaw;
-use freenukum::level::Level;
+use freenukum::level::{tiles::Tile, Level};
 use freenukum::rendering::{CanvasRenderer, MovePositionRenderer};
 use freenukum::settings::Settings;
 use freenukum::tilecache::TileCache;
@@ -92,14 +91,8 @@ fn main() -> Result<()> {
     let mut file = File::open(&original_data_dir().join(level_file))?;
     let sizes = DefaultSizes;
 
-    let mut level_raw = LevelRaw::new();
     let mut hero = Hero::new(&sizes);
-    let mut level = Level::load(
-        &mut file,
-        &mut hero,
-        &mut Some(&mut level_raw),
-        &sizes,
-    )?;
+    let mut level = Level::load(&mut file, &mut hero, &sizes)?;
 
     let mut r = Rect::new(0, 0, win_w, win_h);
     let level_rect = Rect::new(
@@ -179,13 +172,17 @@ fn main() -> Result<()> {
                 let tile_x = global_x / sizes.width() as i32;
                 let tile_y = global_y / sizes.height() as i32;
 
-                let tilenr = level_raw.get(tile_x, tile_y);
-                let is_solid = level.solids.get(tile_x, tile_y);
-
-                println!(
-                    "Tile at (x={}, y={}): 0x{:04x}. Solid: {}",
-                    tile_x, tile_y, tilenr, is_solid
+                if let Ok(Tile {
+                    raw_number,
+                    effective_number,
+                    solid,
+                }) = level.tiles.get(tile_x, tile_y)
+                {
+                    println!(
+                    "Tile at (x={}, y={}): (Raw: 0x{:04x}, Effective: 0x{:04x}). Solid: {}.",
+                    tile_x, tile_y, raw_number, effective_number,solid
                 );
+                }
             }
             Event::Quit { .. }
             | Event::KeyDown {

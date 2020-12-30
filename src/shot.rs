@@ -4,7 +4,7 @@ use crate::{
         SingleAnimationType,
     },
     hero::Hero,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     rendering::Renderer,
     HorizontalDirection, Result, Sizes, LEVELWINDOW_WIDTH, OBJECT_SHOT,
 };
@@ -51,7 +51,6 @@ impl Shot {
         sizes: &dyn Sizes,
         hero: &mut Hero,
         actors: &mut ActorsList,
-        solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         actor_adder: &mut dyn ActorAdder,
         actor_message_queue: &mut ActorMessageQueue,
@@ -81,7 +80,6 @@ impl Shot {
                 sizes,
                 hero,
                 actors,
-                solids,
                 tiles,
                 distance,
                 actor_adder,
@@ -91,7 +89,6 @@ impl Shot {
                 sizes,
                 hero,
                 actors,
-                solids,
                 tiles,
                 distance,
                 actor_adder,
@@ -138,7 +135,6 @@ impl Shot {
         sizes: &dyn Sizes,
         hero: &mut Hero,
         actors: &mut ActorsList,
-        solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
         offset: i32,
         actor_adder: &mut dyn ActorAdder,
@@ -150,7 +146,6 @@ impl Shot {
                 if actors.process_shot(
                     self.position,
                     sizes,
-                    solids,
                     tiles,
                     actor_adder,
                     hero,
@@ -162,7 +157,7 @@ impl Shot {
                 self.countdown -= 1;
             }
         }
-        if self.countdown >= 2 && solids.collides(sizes, self.position) {
+        if self.countdown >= 2 && tiles.collides(sizes, self.position) {
             self.countdown = 1;
             actor_adder.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),

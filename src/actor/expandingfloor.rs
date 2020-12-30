@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Result, Sizes, SOLID_EXPANDINGFLOOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -19,7 +19,6 @@ impl CreateActor for ExpandingFloor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -40,9 +39,13 @@ impl Actor for ExpandingFloor {
         if self.expanding {
             let x = self.position.right() / p.sizes.width() as i32;
             let y = self.position.top() / p.sizes.height() as i32;
-            let can_expand = !p.solids.get(x, y);
+
+            let can_expand =
+                p.tiles.get(x, y).map(|t| !t.solid).unwrap_or(false);
             if can_expand {
-                p.solids.set(x, y, true);
+                if let Ok(ref mut t) = p.tiles.get_mut(x, y) {
+                    t.solid = true;
+                }
                 self.position
                     .set_width(self.position.width() + p.sizes.width());
             } else {

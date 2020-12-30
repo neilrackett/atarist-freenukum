@@ -4,9 +4,7 @@ use crate::{
         RenderParameters, ScoreType,
     },
     hero::InventoryItem,
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     KeyColor, Result, Sizes, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN,
     OBJECT_KEY_PINK, OBJECT_KEY_RED,
 };
@@ -26,7 +24,6 @@ impl CreateActorWithDetails for Key {
         color: KeyColor,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

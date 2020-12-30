@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, CreateActor, HeroInteractStartParameters,
         RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, OBJECT_NOTEBOOK,
 };
 use sdl2::rect::{Point, Rect};
@@ -19,7 +17,6 @@ impl CreateActor for NoteBook {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

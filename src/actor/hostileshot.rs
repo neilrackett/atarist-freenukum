@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, OBJECT_HOSTILESHOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -24,7 +24,6 @@ impl CreateActorWithDetails for HostileShot {
         direction: HorizontalDirection,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let tile = match direction {
@@ -54,12 +53,14 @@ impl Actor for HostileShot {
             (p.sizes.width() as i32) * self.direction.as_factor_i32();
         self.position.offset(offset, 0);
 
-        if p.solids.get(
-            self.position.x() / p.sizes.width() as i32,
-            self.position.y() / p.sizes.height() as i32,
-        ) {
-            self.is_alive = false;
-        }
+        self.is_alive = p
+            .tiles
+            .get(
+                self.position.x() / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32,
+            )
+            .map(|t| !t.solid)
+            .unwrap_or(false);
 
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

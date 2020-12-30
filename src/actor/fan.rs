@@ -5,9 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     geometry::RectExt,
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     HorizontalDirection, Result, Sizes, ANIMATION_FAN,
 };
 use sdl2::rect::{Point, Rect};
@@ -29,7 +27,6 @@ impl CreateActorWithDetails for Fan {
         direction: HorizontalDirection,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -98,7 +95,7 @@ impl Actor for Fan {
             if hdistance.abs() < range {
                 p.hero.position.push_horizontally(
                     p.sizes,
-                    &p.solids,
+                    &p.tiles,
                     fan_direction * p.sizes.width() as i32,
                 );
             }

@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ScoreType, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::{LevelTiles, Tile},
     Result, Sizes, ANIMATION_SODAFLY,
 };
 use sdl2::rect::{Point, Rect};
@@ -18,7 +18,6 @@ impl CreateActor for SodaFlying {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -36,7 +35,7 @@ impl CreateActor for SodaFlying {
 impl Actor for SodaFlying {
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(p.sizes.half_height() as i32));
-        if p.solids.get(
+        if let Ok(Tile { solid: true, .. }) = p.tiles.get(
             self.position.x() / p.sizes.width() as i32,
             self.position.y() / p.sizes.height() as i32,
         ) {

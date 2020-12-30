@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Result, Sizes, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
     NUMBER_2000, NUMBER_500, NUMBER_5000, NUMBER_BONUS_1_LEFT,
     NUMBER_BONUS_1_RIGHT, NUMBER_BONUS_2_LEFT, NUMBER_BONUS_2_RIGHT,
@@ -52,7 +52,6 @@ impl CreateActorWithDetails for Score {
         score_type: ScoreType,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let tile = match score_type {

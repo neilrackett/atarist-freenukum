@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_FIREWHEEL_OFF,
     ANIMATION_FIREWHEEL_ON,
 };
@@ -25,7 +25,6 @@ impl CreateActor for FireWheelBot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -77,7 +76,7 @@ impl Actor for FireWheelBot {
 
             let direction = self.direction.as_factor_i32();
 
-            if !p.solids.push_rect_standing_on_ground(
+            if !p.tiles.push_rect_standing_on_ground(
                 p.sizes,
                 &mut self.position,
                 direction * p.sizes.half_width() as i32 / 2,

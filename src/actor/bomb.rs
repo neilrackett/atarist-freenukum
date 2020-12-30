@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Result, Sizes, ANIMATION_BOMB,
 };
 use sdl2::rect::{Point, Rect};
@@ -25,7 +25,6 @@ impl CreateActor for Bomb {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -60,14 +59,24 @@ impl Actor for Bomb {
                 self.counter as i32 - self.explode_threshold as i32;
             if self.explode_left {
                 // explode to the left if possible
-                let space_is_free = !p.solids.get(
-                    self.position.x() / p.sizes.width() as i32 - distance,
-                    self.position.y() / p.sizes.height() as i32,
-                );
-                let space_has_solid_below = p.solids.get(
-                    self.position.x() / p.sizes.width() as i32 - distance,
-                    self.position.y() / p.sizes.height() as i32 + 1,
-                );
+                let space_is_free = p
+                    .tiles
+                    .get(
+                        self.position.x() / p.sizes.width() as i32
+                            - distance,
+                        self.position.y() / p.sizes.height() as i32,
+                    )
+                    .map(|t| !t.solid)
+                    .unwrap_or(false);
+                let space_has_solid_below = p
+                    .tiles
+                    .get(
+                        self.position.x() / p.sizes.width() as i32
+                            - distance,
+                        self.position.y() / p.sizes.height() as i32 + 1,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(false);
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(
@@ -84,14 +93,24 @@ impl Actor for Bomb {
             }
             if self.explode_right {
                 // explode to the right if possible
-                let space_is_free = !p.solids.get(
-                    self.position.x() / p.sizes.width() as i32 + distance,
-                    self.position.y() / p.sizes.height() as i32,
-                );
-                let space_has_solid_below = p.solids.get(
-                    self.position.x() / p.sizes.width() as i32 + distance,
-                    self.position.y() / p.sizes.height() as i32 + 1,
-                );
+                let space_is_free = p
+                    .tiles
+                    .get(
+                        self.position.x() / p.sizes.width() as i32
+                            + distance,
+                        self.position.y() / p.sizes.height() as i32,
+                    )
+                    .map(|t| !t.solid)
+                    .unwrap_or(false);
+                let space_has_solid_below = p
+                    .tiles
+                    .get(
+                        self.position.x() / p.sizes.width() as i32
+                            + distance,
+                        self.position.y() / p.sizes.height() as i32 + 1,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(false);
                 if space_is_free && space_has_solid_below {
                     p.actor_adder.add_actor(
                         ActorType::SingleAnimation(

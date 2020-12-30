@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, OBJECT_ROCKET,
 };
 use sdl2::rect::{Point, Rect};
@@ -26,7 +24,6 @@ impl CreateActor for Rocket {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -47,20 +44,30 @@ impl Actor for Rocket {
             State::Idle => {}
             State::Flying => {
                 self.position.offset(0, -(p.sizes.half_height() as i32));
-                if p.solids.collides(p.sizes, self.position) {
+                if p.tiles.collides(p.sizes, self.position) {
                     let tile_x =
                         self.position.x() / p.sizes.width() as i32;
                     let tile_y =
                         self.position.y() / p.sizes.height() as i32;
-                    if tile_x >= 0 && tile_y >= -1 {
-                        p.solids.set(tile_x, tile_y + 1, false);
+                    if p.tiles.is_in_range(tile_x, tile_y + 1) {
+                        if let Ok(ref mut t) =
+                            p.tiles.get_mut(tile_x, tile_y + 1)
+                        {
+                            t.solid = false;
+                        }
                     }
-                    p.tiles.copy_from_to(
-                        tile_x,
-                        tile_y - 1,
-                        tile_x,
-                        tile_y,
-                    );
+                    if p.tiles.is_in_range(tile_x, tile_y)
+                        && p.tiles.is_in_range(tile_x, tile_y - 1)
+                    {
+                        p.tiles
+                            .copy_effective_number_from_to(
+                                tile_x,
+                                tile_y - 1,
+                                tile_x,
+                                tile_y,
+                            )
+                            .expect("Can't copy effective number");
+                    }
                 }
             }
         }
@@ -115,10 +122,15 @@ impl Actor for Rocket {
                 + self.position.height() as i32)
                 / p.sizes.height() as i32;
 
-            if tile_x >= 0 && tile_y >= 0 {
-                p.solids.set(tile_x, tile_y, false);
+            let source = p
+                .tiles
+                .get(tile_x, tile_y + 1)
+                .map(|t| t.effective_number)
+                .unwrap_or(0);
+            if let Ok(ref mut t) = p.tiles.get_mut(tile_x, tile_y) {
+                t.solid = false;
+                t.effective_number = source;
             }
-            p.tiles.copy_from_to(tile_x, tile_y + 1, tile_x, tile_y);
         }
         ShotProcessing::Absorb
     }

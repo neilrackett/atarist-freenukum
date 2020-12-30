@@ -4,7 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     geometry::RectExt,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, Result, Sizes, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -26,7 +26,6 @@ impl CreateActor for Elevator {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -59,22 +58,26 @@ impl Actor for Elevator {
 
         match self.state {
             State::Ascending => {
-                if p.solids.get(
-                    self.position.x() / p.sizes.width() as i32,
-                    self.position.y() / p.sizes.height() as i32 - 3,
-                ) {
+                if p.tiles
+                    .get(
+                        self.position.x() / p.sizes.width() as i32,
+                        self.position.y() / p.sizes.height() as i32 - 3,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(true)
+                {
                     // hero touches solid with head
                     self.state = State::Idle;
                 } else {
                     let offset = p.hero.position.push_vertically(
                         p.sizes,
-                        &p.solids,
+                        &p.tiles,
                         -(p.sizes.height() as i32),
                     );
                     if -offset < p.sizes.height() as i32 {
                         p.hero
                             .position
-                            .push_vertically(p.sizes, &p.solids, -offset);
+                            .push_vertically(p.sizes, &p.tiles, -offset);
                         self.state = State::Idle;
                     } else {
                         self.position.offset(0, offset);
@@ -82,22 +85,24 @@ impl Actor for Elevator {
                             self.position.height() + (-offset) as u32,
                         );
 
-                        p.solids.set(
+                        if let Ok(ref mut t) = p.tiles.get_mut(
                             self.position.x() / p.sizes.width() as i32,
                             self.position.y() / p.sizes.height() as i32,
-                            true,
-                        );
+                        ) {
+                            t.solid = true;
+                        }
                     }
                 }
             }
             State::Descending => {
                 for _ in 0..2 {
                     if self.position.height() > p.sizes.height() {
-                        p.solids.set(
+                        if let Ok(ref mut t) = p.tiles.get(
                             self.position.x() / p.sizes.width() as i32,
                             self.position.y() / p.sizes.height() as i32,
-                            false,
-                        );
+                        ) {
+                            t.solid = false;
+                        }
                         self.position.offset(0, p.sizes.height() as i32);
                         self.position.set_height(
                             self.position.height() - p.sizes.height(),

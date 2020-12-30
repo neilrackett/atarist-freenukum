@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
 };
 use sdl2::rect::{Point, Rect};
@@ -23,7 +21,6 @@ impl CreateActor for ElectricArc {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

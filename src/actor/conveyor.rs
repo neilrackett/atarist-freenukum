@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     HorizontalDirection, Result, Sizes, SOLID_BLACK,
     SOLID_CONVEYORBELT_CENTER, SOLID_CONVEYORBELT_LEFTEND,
     SOLID_CONVEYORBELT_RIGHTEND,
@@ -24,31 +24,30 @@ impl CreateActorWithDetails for Conveyor {
         direction: HorizontalDirection,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         tiles: &mut LevelTiles,
     ) -> Self {
         // find the beginning of the conveyor belt
         let mut found_begin = false;
-        let mut tile;
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while !found_begin {
             position.offset(-(sizes.width() as i32), 0);
             position.set_width(position.width() + sizes.width());
-            tile = tiles.get(
+
+            if let Ok(ref mut t) = tiles.get_mut(
                 position.x() / sizes.width() as i32,
                 position.y() / sizes.height() as i32,
-            );
-            if tile as usize == SOLID_CONVEYORBELT_LEFTEND
-                || position.x() <= 0
-                || tile == 0
-            {
+            ) {
+                if t.effective_number as usize
+                    == SOLID_CONVEYORBELT_LEFTEND
+                    || position.x() <= 0
+                    || t.effective_number == 0
+                {
+                    found_begin = true;
+                    t.effective_number = SOLID_BLACK as u16;
+                }
+            } else {
                 found_begin = true;
-                tiles.set(
-                    position.x() / sizes.width() as i32,
-                    position.y() / sizes.height() as i32,
-                    SOLID_BLACK as u16,
-                );
             }
         }
 
@@ -86,7 +85,7 @@ impl Actor for Conveyor {
         {
             p.hero.position.push_horizontally(
                 p.sizes,
-                p.solids,
+                p.tiles,
                 hero_push_offset,
             );
         }

@@ -80,7 +80,7 @@ fn start_in_level(
         );
         let filepath = original_data_dir().join(filename);
         let mut file = File::open(filepath)?;
-        Level::load(&mut file, hero, &mut None, sizes)?
+        Level::load(&mut file, hero, sizes)?
     };
 
     let destrect = Rect::new(

@@ -3,10 +3,17 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_CARBOT,
 };
 use sdl2::rect::{Point, Rect};
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+enum State {
+    Healthy,
+    Hurt,
+    Dead,
+}
 
 #[derive(Debug)]
 pub(crate) struct TankBot {
@@ -14,7 +21,7 @@ pub(crate) struct TankBot {
     tile: usize,
     current_frame: usize,
     num_frames: usize,
-    was_shot: usize,
+    state: State,
     position: Rect,
 }
 
@@ -22,7 +29,6 @@ impl CreateActor for TankBot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -30,7 +36,7 @@ impl CreateActor for TankBot {
             tile: ANIMATION_CARBOT,
             current_frame: 0,
             num_frames: 4,
-            was_shot: 0,
+            state: State::Healthy,
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -46,23 +52,16 @@ impl Actor for TankBot {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
 
-        if !self.is_alive() {
-            p.actor_adder.add_actor(
-                ActorType::SingleAnimation(SingleAnimationType::Explosion),
-                self.position
-                    .top_left()
-                    .offset(p.sizes.half_width() as i32, 0),
-            );
-            p.actor_adder
-                .add_particle_firework(self.position.top_left(), 4);
-            p.hero.score.add(2500);
-        } else if p.solids.get(
-            self.position.x() / p.sizes.width() as i32,
-            self.position.y() / p.sizes.height() as i32 + 1,
-        ) && !p.solids.get(
-            self.position.x() / p.sizes.width() as i32 + 1,
-            self.position.y() / p.sizes.height() as i32 + 1,
-        ) {
+        let solid_below = p
+            .tiles
+            .get(
+                self.position.x() / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32 + 1,
+            )
+            .map(|t| t.solid)
+            .unwrap_or(true);
+
+        if !solid_below {
             // still in the air, falling down
             self.position.offset(0, p.sizes.half_height() as i32);
         } else {
@@ -72,20 +71,31 @@ impl Actor for TankBot {
                 HorizontalDirection::Right => 4,
             };
 
-            if !p.solids.get(
-                // check if the place next ot the bot is free
-                (self.position.x()
-                    + direction * p.sizes.half_width() as i32)
-                    / p.sizes.width() as i32,
-                self.position.y() / p.sizes.height() as i32,
-            ) && p.solids.get(
-                // check if the tile below is solid
-                (self.position.x()
-                    + direction * p.sizes.half_width() as i32)
-                    / p.sizes.width() as i32,
-                (self.position.y() + p.sizes.height() as i32)
-                    / p.sizes.height() as i32,
-            ) {
+            let next_place_is_solid = p
+                .tiles
+                .get(
+                    (self.position.x()
+                        + direction * p.sizes.half_width() as i32)
+                        / p.sizes.width() as i32,
+                    self.position.y() / p.sizes.height() as i32,
+                )
+                .map(|t| t.solid)
+                .unwrap_or(true);
+            let next_place_is_solid_below = p
+                .tiles
+                .get(
+                    // check if the tile below is solid
+                    (self.position.x()
+                        + direction * p.sizes.half_width() as i32)
+                        / p.sizes.width() as i32,
+                    (self.position.y() + p.sizes.height() as i32)
+                        / p.sizes.height() as i32,
+                )
+                .map(|t| t.solid)
+                .unwrap_or(true);
+
+            if !next_place_is_solid && next_place_is_solid_below {
+                // place is free and it's possible to move on
                 if direction > 0 {
                     direction = 1;
                 }
@@ -111,7 +121,7 @@ impl Actor for TankBot {
                 );
             }
         }
-        if self.was_shot == 1 {
+        if self.state == State::Hurt {
             // create steam clouds
             if self.current_frame == 0 {
                 p.actor_adder.add_actor(
@@ -140,10 +150,27 @@ impl Actor for TankBot {
         true
     }
 
-    fn shot(&mut self, _p: ShotParameters) -> ShotProcessing {
-        if self.was_shot != 2 {
-            self.was_shot += 1;
-        }
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
+        self.state = match self.state {
+            State::Healthy => State::Hurt,
+            State::Hurt => {
+                p.actor_adder.add_actor(
+                    ActorType::SingleAnimation(
+                        SingleAnimationType::Explosion,
+                    ),
+                    self.position
+                        .top_left()
+                        .offset(p.sizes.half_width() as i32, 0),
+                );
+                p.actor_adder
+                    .add_particle_firework(self.position.top_left(), 4);
+                p.hero.score.add(2500);
+
+                State::Dead
+            }
+            State::Dead => State::Dead,
+        };
+
         ShotProcessing::Absorb
     }
 
@@ -160,6 +187,6 @@ impl Actor for TankBot {
     }
 
     fn is_alive(&self) -> bool {
-        self.was_shot < 2
+        self.state != State::Dead
     }
 }

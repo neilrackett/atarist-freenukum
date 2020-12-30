@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         SingleAnimationType,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, SOLID_START,
 };
 use sdl2::rect::{Point, Rect};
@@ -23,21 +21,25 @@ impl CreateActor for UnstableFloor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        solids: &mut LevelSolids,
-        _tiles: &mut LevelTiles,
+        tiles: &mut LevelTiles,
     ) -> Self {
         let mut floor_length = 0u32;
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
-        while !solids.get(
-            position.x() / sizes.width() as i32 + floor_length as i32,
-            position.y() / sizes.height() as i32,
-        ) {
-            solids.set(
+        while tiles
+            .get(
                 position.x() / sizes.width() as i32 + floor_length as i32,
                 position.y() / sizes.height() as i32,
-                true,
-            );
+            )
+            .map(|t| !t.solid)
+            .unwrap_or(false)
+        {
+            if let Ok(ref mut t) = tiles.get_mut(
+                position.x() / sizes.width() as i32 + floor_length as i32,
+                position.y() / sizes.height() as i32,
+            ) {
+                t.solid = true;
+            }
             floor_length += 1;
         }
 
@@ -74,11 +76,12 @@ impl Actor for UnstableFloor {
         if !self.is_alive() {
             let mut r = self.position;
             for _ in 0..self.floor_length {
-                p.solids.set(
+                if let Ok(ref mut t) = p.tiles.get_mut(
                     r.x() / p.sizes.width() as i32,
                     r.y() / p.sizes.height() as i32,
-                    false,
-                );
+                ) {
+                    t.solid = false;
+                }
                 p.actor_adder.add_actor(
                     ActorType::SingleAnimation(
                         SingleAnimationType::Explosion,

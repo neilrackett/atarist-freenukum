@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Result, Sizes, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
     ANIMATION_WINDOWBG,
 };
@@ -74,7 +74,6 @@ impl CreateActorWithDetails for BackgroundAnimation {
         animation_type: BackgroundAnimationType,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let (tile, num_frames) = animation_type.tile_and_num_frames();

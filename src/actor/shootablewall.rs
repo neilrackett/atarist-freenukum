@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
 };
 use sdl2::rect::{Point, Rect};
@@ -18,7 +18,6 @@ impl CreateActor for ShootableWall {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -47,11 +46,12 @@ impl Actor for ShootableWall {
             self.position.top_left(),
         );
         self.is_alive = false;
-        p.solids.set(
+        if let Ok(ref mut t) = p.tiles.get_mut(
             self.position.x() / p.sizes.width() as i32,
             self.position.y() / p.sizes.height() as i32,
-            false,
-        );
+        ) {
+            t.solid = false;
+        }
         ShotProcessing::Absorb
     }
 
@@ -75,5 +75,9 @@ impl Actor for ShootableWall {
 
     fn is_alive(&self) -> bool {
         self.is_alive
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::SetTile(0x17e0 / 0x20)
     }
 }

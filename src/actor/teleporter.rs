@@ -4,7 +4,7 @@ use crate::{
         HeroInteractStartParameters, ReceiveMessageParameters,
         RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, Result, Sizes, ANIMATION_TELEPORTER1,
 };
 use sdl2::rect::{Point, Rect};
@@ -37,7 +37,6 @@ impl CreateActorWithDetails for Teleporter {
         index: TeleporterIndex,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

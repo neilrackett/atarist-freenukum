@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
@@ -22,7 +20,6 @@ impl CreateActor for MineJumping {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -89,6 +86,6 @@ impl Actor for MineJumping {
     }
 
     fn background_tile_strategy(&self) -> BackgroundTileStrategy {
-        BackgroundTileStrategy::CopyFromAbove
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

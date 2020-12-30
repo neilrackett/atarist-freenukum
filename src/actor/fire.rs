@@ -2,9 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
     OBJECT_FIRERIGHT,
 };
@@ -33,7 +31,6 @@ impl CreateActorWithDetails for Fire {
         direction: HorizontalDirection,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let position =

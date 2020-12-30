@@ -4,9 +4,7 @@ use crate::{
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
 };
@@ -30,7 +28,6 @@ impl CreateActorWithDetails for WallCrawler {
         orientation: HorizontalDirection,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let tile = match orientation {
@@ -65,20 +62,27 @@ impl Actor for WallCrawler {
                 self.current_frame += 1;
                 self.current_frame %= self.num_frames;
 
-                if
-                // bot collides with solid tile
-                p.solids.get(
-                self.position.x / p.sizes.width() as i32,
-                (self.position.y - 1) / p.sizes.width()as i32) ||
-            // bot has no more wall to stick upon
-            !p.solids.get(
-                (
-                    self.position.x +
-                    orientation *
-                    p.sizes.width() as i32
-                ) / p.sizes.width()as i32,
-                (self.position.y - 1) / p.sizes.height() as i32)
-                {
+                let solid_above = p
+                    .tiles
+                    .get(
+                        self.position.x / p.sizes.width() as i32,
+                        (self.position.top() - 1)
+                            / p.sizes.height() as i32,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(true);
+                let solid_above_wall = p
+                    .tiles
+                    .get(
+                        (self.position.x / p.sizes.width() as i32)
+                            + orientation,
+                        (self.position.top() - 1)
+                            / p.sizes.height() as i32,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(true);
+
+                if solid_above || !solid_above_wall {
                     self.position.y += 1;
                     self.direction = VerticalDirection::Down;
                 } else {
@@ -92,22 +96,27 @@ impl Actor for WallCrawler {
                 }
                 self.current_frame -= 1;
 
-                if
-                // bot collides with solid tile
-                p.solids.get(
-                    self.position.x / p.sizes.width() as i32,
-                    (
-                        self.position.y + p.sizes.height() as i32
-                    ) / p.sizes.height() as i32) ||
-            // bot has no more wall to stick upon
-            !p.solids.get(
-                (
-                    self.position.x +
-                    orientation *
-                    p.sizes.width() as i32)/
-                p.sizes.width() as i32,
-                (self.position.y + p.sizes.height()as i32) / p.sizes.height() as i32)
-                {
+                let solid_below = p
+                    .tiles
+                    .get(
+                        self.position.x / p.sizes.width() as i32,
+                        (self.position.bottom() + 1)
+                            / p.sizes.height() as i32,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(true);
+                let solid_below_wall = p
+                    .tiles
+                    .get(
+                        (self.position.x / p.sizes.width() as i32)
+                            + orientation,
+                        (self.position.bottom() + 1)
+                            / p.sizes.height() as i32,
+                    )
+                    .map(|t| t.solid)
+                    .unwrap_or(true);
+
+                if solid_below || !solid_below_wall {
                     self.position.y -= 1;
                     self.direction = VerticalDirection::Up;
                 } else {

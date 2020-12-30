@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         SingleAnimationType,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
@@ -21,7 +19,6 @@ impl CreateActor for MineLying {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -39,10 +36,14 @@ impl CreateActor for MineLying {
 
 impl Actor for MineLying {
     fn act(&mut self, p: ActParameters) {
-        if !p.solids.get(
-            self.position.x() / p.sizes.width() as i32,
-            self.position.y() / p.sizes.height() as i32 + 1,
-        ) {
+        if p.tiles
+            .get(
+                self.position.x() / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32 + 1,
+            )
+            .map(|t| !t.solid)
+            .unwrap_or(false)
+        {
             self.position.offset(0, p.sizes.half_height() as i32);
         }
 

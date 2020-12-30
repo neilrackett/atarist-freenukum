@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, CreateActor, HeroInteractStartParameters,
         RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles, PlayState},
+    level::{tiles::LevelTiles, PlayState},
     Hero, Result, Sizes, ANIMATION_EXITDOOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -27,7 +27,6 @@ impl CreateActor for ExitDoor {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

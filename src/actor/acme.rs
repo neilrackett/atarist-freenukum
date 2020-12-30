@@ -4,7 +4,8 @@ use crate::{
         ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
     },
     level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
+        tiles::{LevelTiles, Tile},
+        BackgroundTileStrategy,
     },
     Hero, Result, Sizes, OBJECT_FALLINGBLOCK,
 };
@@ -22,7 +23,6 @@ impl CreateActor for Acme {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -58,9 +58,17 @@ impl Actor for Acme {
                         ..hy / p.sizes.height() as i32
                     {
                         let x = xl / p.sizes.width() as i32;
-                        if p.solids.get(x, i) || p.solids.get(x + 1, i) {
-                            solid_between = true;
-                            break;
+                        if let Ok(t) = p.tiles.get(x, i) {
+                            if t.solid {
+                                solid_between = true;
+                                break;
+                            }
+                        }
+                        if let Ok(t) = p.tiles.get(x + 1, i) {
+                            if t.solid {
+                                solid_between = true;
+                                break;
+                            }
                         }
                     }
                     if !solid_between {
@@ -77,7 +85,7 @@ impl Actor for Acme {
                 self.counter += 1;
             }
             _ => {
-                if p.solids.get(
+                if let Ok(Tile { solid: true, .. }) = p.tiles.get(
                     self.position.x() / p.sizes.width() as i32,
                     self.position.y() / p.sizes.height() as i32 + 1,
                 ) {

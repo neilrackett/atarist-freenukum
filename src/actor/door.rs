@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
         ReceiveMessageParameters, RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     KeyColor, Result, Sizes, OBJECT_DOOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -33,7 +31,6 @@ impl CreateActorWithDetails for Door {
         color: KeyColor,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -57,11 +54,12 @@ impl Actor for Door {
             State::Closed => {}
             State::Opening => {
                 if self.counter == 0 {
-                    p.solids.set(
+                    if let Ok(ref mut t) = p.tiles.get_mut(
                         self.position.x() / p.sizes.width() as i32,
                         self.position.y() / p.sizes.height() as i32,
-                        false,
-                    );
+                    ) {
+                        t.solid = false;
+                    }
                 }
                 self.counter += 1;
                 if self.counter == 8 {

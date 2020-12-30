@@ -2,9 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, OBJECT_SPIKE, OBJECT_SPIKES_DOWN,
     OBJECT_SPIKES_UP,
 };
@@ -31,7 +29,6 @@ impl CreateActorWithDetails for Spikes {
         spike_type: SpikeType,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

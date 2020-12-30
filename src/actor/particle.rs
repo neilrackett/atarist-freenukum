@@ -2,7 +2,7 @@ use crate::{
     actor::{
         ActParameters, Actor, CreateActorWithDetails, RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Result, Sizes, OBJECT_SPARK_BLUE, OBJECT_SPARK_GREEN,
     OBJECT_SPARK_PINK, OBJECT_SPARK_WHITE,
 };
@@ -33,7 +33,6 @@ impl CreateActorWithDetails for Particle {
         color: ParticleColor,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         use rand::Rng;

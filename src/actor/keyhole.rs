@@ -4,7 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, KeyColor, Result, Sizes, OBJECT_KEYHOLE_BLACK,
     OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK,
     OBJECT_KEYHOLE_RED,
@@ -26,7 +26,6 @@ impl CreateActorWithDetails for KeyHole {
         color: KeyColor,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {

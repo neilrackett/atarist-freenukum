@@ -3,7 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
-    level::{solids::LevelSolids, tiles::LevelTiles},
+    level::tiles::LevelTiles,
     Hero, Result, Sizes, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
     ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM,
 };
@@ -35,7 +35,6 @@ impl CreateActorWithDetails for SingleAnimation {
         animation_type: SingleAnimationType,
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         let (tile, num_frames, can_hurt_hero, replaced_by) =

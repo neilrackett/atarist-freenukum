@@ -3,9 +3,7 @@ use crate::{
         ActParameters, Actor, ActorType, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing, SingleAnimationType,
     },
-    level::{
-        solids::LevelSolids, tiles::LevelTiles, BackgroundTileStrategy,
-    },
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -24,7 +22,6 @@ impl CreateActor for Robot {
     fn create(
         pos: Point,
         sizes: &dyn Sizes,
-        _solids: &mut LevelSolids,
         _tiles: &mut LevelTiles,
     ) -> Self {
         Self {
@@ -48,10 +45,14 @@ impl Actor for Robot {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
 
-        if !p.solids.get(
-            self.position.x() / p.sizes.width() as i32,
-            self.position.y() / p.sizes.height() as i32 + 1,
-        ) {
+        if p.tiles
+            .get(
+                self.position.x() / p.sizes.width() as i32,
+                self.position.y() / p.sizes.height() as i32 + 1,
+            )
+            .map(|t| !t.solid)
+            .unwrap_or(false)
+        {
             // In the air, falling down.
             self.position.offset(0, p.sizes.half_height() as i32);
         } else {
@@ -62,21 +63,22 @@ impl Actor for Robot {
                     HorizontalDirection::Right => 2,
                 };
                 // Check if the place next to the bot is free
-                if !p.solids.get(
+                if p.tiles.get(
                 (
                     self.position.x() +
                     direction * p.sizes.half_width() as i32
                 ) / p.sizes.width() as i32,
                 self.position.y() / p.sizes.height() as i32
-            ) &&
+            ).map(|t|!t.solid).unwrap_or(false) &&
             // Check if the tile below this free place is solid
-            p.solids.get(
+            p.tiles.get(
                 (
                     self.position.x() +
                     direction * p.sizes.half_width() as i32
                 ) / p.sizes.width() as i32,
                 (self.position.y() + p.sizes.height() as i32) / p.sizes.height() as i32
-            ) {
+            ).map(|t|t.solid).unwrap_or(false)
+                {
                     if direction == 2 {
                         direction = 1;
                     }
