@@ -34,7 +34,10 @@ pub enum PlayState {
 
 impl PlayState {
     pub fn keep_acting(&self) -> bool {
-        matches!(self, PlayState::Playing | PlayState::KilledPlayingAnimation(_))
+        matches!(
+            self,
+            PlayState::Playing | PlayState::KilledPlayingAnimation(_)
+        )
     }
 
     pub fn hero_can_act(&self) -> bool {

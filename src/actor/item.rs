@@ -361,10 +361,10 @@ impl Actor for Item {
         matches!(
             self.item_type,
             ItemType::BoxBlue(_)
-            | ItemType::BoxRed(_)
-            | ItemType::BoxGrey(_)
-            | ItemType::ChickenSingle
-            | ItemType::Soda
+                | ItemType::BoxRed(_)
+                | ItemType::BoxGrey(_)
+                | ItemType::ChickenSingle
+                | ItemType::Soda
         )
     }
 
