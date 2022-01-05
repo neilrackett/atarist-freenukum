@@ -1,8 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
-        HeroInteractStartParameters, ReceiveMessageParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorExt, ActorMessageType,
+        CreateActorWithDetails, HeroInteractStartParameters,
+        ReceiveMessageParameters, RenderParameters,
     },
     level::tiles::LevelTiles,
     Hero, Result, Sizes, ANIMATION_TELEPORTER1,
@@ -38,8 +38,8 @@ impl CreateActorWithDetails for Teleporter {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Teleporter(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -47,11 +47,11 @@ impl CreateActorWithDetails for Teleporter {
                 sizes.height(),
             ),
             index,
-        }
+        })
     }
 }
 
-impl Actor for Teleporter {
+impl ActorExt for Teleporter {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
-        HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, ActorExt, ActorMessageType,
+        CreateActorWithDetails, HeroInteractStartParameters,
+        RenderParameters,
     },
     hero::InventoryItem,
     level::tiles::LevelTiles,
@@ -27,8 +28,8 @@ impl CreateActorWithDetails for KeyHole {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::KeyHole(Self {
             tile: OBJECT_KEYHOLE_BLACK,
             counter: 0,
             position: Rect::new(
@@ -38,11 +39,11 @@ impl CreateActorWithDetails for KeyHole {
                 sizes.height(),
             ),
             color,
-        }
+        })
     }
 }
 
-impl Actor for KeyHole {
+impl ActorExt for KeyHole {
     fn act(&mut self, _p: ActParameters) {
         if self.counter < 5 {
             self.counter += 1;

@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor,
+        HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, PlayState},
     Hero, Result, Sizes, ANIMATION_EXITDOOR,
@@ -28,8 +28,8 @@ impl CreateActor for ExitDoor {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::ExitDoor(Self {
             tile: ANIMATION_EXITDOOR,
             counter: 0,
             state: State::Closed,
@@ -39,11 +39,11 @@ impl CreateActor for ExitDoor {
                 sizes.width() * 2,
                 sizes.height() * 2,
             ),
-        }
+        })
     }
 }
 
-impl Actor for ExitDoor {
+impl ActorExt for ExitDoor {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::tiles::LevelTiles,
     Result, Sizes, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
@@ -75,10 +76,10 @@ impl CreateActorWithDetails for BackgroundAnimation {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let (tile, num_frames) = animation_type.tile_and_num_frames();
 
-        Self {
+        Actor::BackgroundAnimation(Self {
             tile,
             current_frame: 0,
             num_frames,
@@ -88,11 +89,11 @@ impl CreateActorWithDetails for BackgroundAnimation {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for BackgroundAnimation {
+impl ActorExt for BackgroundAnimation {
     fn act(&mut self, _p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

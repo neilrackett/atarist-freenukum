@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, SOLID_START,
@@ -22,7 +22,7 @@ impl CreateActor for UnstableFloor {
         pos: Point,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let mut floor_length = 0u32;
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
@@ -45,17 +45,17 @@ impl CreateActor for UnstableFloor {
 
         position.resize(sizes.width() * floor_length, sizes.height());
 
-        Self {
+        Actor::UnstableFloor(Self {
             tile: SOLID_START + 77,
             touch_count: 0,
             touching_hero: false,
             floor_length,
             position,
-        }
+        })
     }
 }
 
-impl Actor for UnstableFloor {
+impl ActorExt for UnstableFloor {
     fn act(&mut self, p: ActParameters) {
         // Detect whether the hero is standing upon the floor.
         let hero_geometry = p.hero.position.geometry;

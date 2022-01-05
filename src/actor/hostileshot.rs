@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, OBJECT_HOSTILESHOT,
@@ -25,13 +26,13 @@ impl CreateActorWithDetails for HostileShot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let tile = match direction {
             HorizontalDirection::Left => OBJECT_HOSTILESHOT,
             HorizontalDirection::Right => OBJECT_HOSTILESHOT + 2,
         };
 
-        Self {
+        Actor::HostileShot(Self {
             tile,
             current_frame: 0,
             num_frames: 2,
@@ -43,11 +44,11 @@ impl CreateActorWithDetails for HostileShot {
             ),
             is_alive: true,
             direction,
-        }
+        })
     }
 }
 
-impl Actor for HostileShot {
+impl ActorExt for HostileShot {
     fn act(&mut self, p: ActParameters) {
         let offset =
             (p.sizes.width() as i32) * self.direction.as_factor_i32();

@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActorWithDetails,
-        ReceiveMessageParameters, RenderParameters,
+        ActParameters, Actor, ActorExt, ActorMessageType,
+        CreateActorWithDetails, ReceiveMessageParameters,
+        RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     KeyColor, Result, Sizes, OBJECT_DOOR,
@@ -32,8 +33,8 @@ impl CreateActorWithDetails for Door {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Door(Self {
             tile: OBJECT_DOOR,
             counter: 0,
             state: State::Closed,
@@ -44,11 +45,11 @@ impl CreateActorWithDetails for Door {
                 sizes.height(),
             ),
             color,
-        }
+        })
     }
 }
 
-impl Actor for Door {
+impl ActorExt for Door {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Closed => {}

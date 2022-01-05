@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_CARBOT,
@@ -30,8 +31,8 @@ impl CreateActor for TankBot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::TankBot(Self {
             orientation: HorizontalDirection::Left,
             tile: ANIMATION_CARBOT,
             current_frame: 0,
@@ -43,11 +44,11 @@ impl CreateActor for TankBot {
                 sizes.width() * 2,
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for TankBot {
+impl ActorExt for TankBot {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

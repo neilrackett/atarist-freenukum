@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
@@ -21,8 +22,8 @@ impl CreateActor for Camera {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Camera(Self {
             tile: ANIMATION_CAMERA_CENTER,
             position: Rect::new(
                 pos.x,
@@ -31,11 +32,11 @@ impl CreateActor for Camera {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for Camera {
+impl ActorExt for Camera {
     fn act(&mut self, p: ActParameters) {
         let x = p.hero.position.geometry.x;
         self.tile = if x - 1 > self.position.x {

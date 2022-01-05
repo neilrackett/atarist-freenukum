@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::tiles::LevelTiles,
     Result, Sizes, NUMBER_100, NUMBER_1000, NUMBER_10000, NUMBER_200,
@@ -53,7 +54,7 @@ impl CreateActorWithDetails for Score {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let tile = match score_type {
             ScoreType::Score100 => NUMBER_100,
             ScoreType::Score200 => NUMBER_200,
@@ -78,7 +79,7 @@ impl CreateActorWithDetails for Score {
             ScoreType::Bonus7Right => NUMBER_BONUS_7_RIGHT,
         };
 
-        Self {
+        Actor::Score(Self {
             tile,
             countdown: 40,
             position: Rect::new(
@@ -87,11 +88,11 @@ impl CreateActorWithDetails for Score {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for Score {
+impl ActorExt for Score {
     fn act(&mut self, _p: ActParameters) {
         self.countdown -= 1;
         self.position.y -= 1;

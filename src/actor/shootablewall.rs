@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
@@ -19,8 +20,8 @@ impl CreateActor for ShootableWall {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::ShootableWall(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -28,11 +29,11 @@ impl CreateActor for ShootableWall {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for ShootableWall {
+impl ActorExt for ShootableWall {
     fn act(&mut self, _p: ActParameters) {}
 
     fn can_get_shot(&self) -> bool {

@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
@@ -23,8 +24,8 @@ impl CreateActor for Robot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Robot(Self {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_ROBOT,
             current_frame: 0,
@@ -36,11 +37,11 @@ impl CreateActor for Robot {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for Robot {
+impl ActorExt for Robot {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

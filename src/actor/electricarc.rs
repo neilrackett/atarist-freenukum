@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActor,
+        ActParameters, Actor, ActorExt, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
@@ -22,8 +22,8 @@ impl CreateActor for ElectricArc {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::ElectricArc(Self {
             tile: OBJECT_ELECTRIC_ARC,
             current_frame: 0,
             num_frames: 4,
@@ -34,11 +34,11 @@ impl CreateActor for ElectricArc {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for ElectricArc {
+impl ActorExt for ElectricArc {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

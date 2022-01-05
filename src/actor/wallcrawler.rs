@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorExt, ActorType, CreateActorWithDetails,
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
@@ -29,13 +29,13 @@ impl CreateActorWithDetails for WallCrawler {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let tile = match orientation {
             HorizontalDirection::Left => ANIMATION_WALLCRAWLERBOT_LEFT,
             HorizontalDirection::Right => ANIMATION_WALLCRAWLERBOT_RIGHT,
         };
 
-        Self {
+        Actor::WallCrawler(Self {
             direction: VerticalDirection::Up,
             orientation,
             tile,
@@ -48,11 +48,11 @@ impl CreateActorWithDetails for WallCrawler {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for WallCrawler {
+impl ActorExt for WallCrawler {
     fn act(&mut self, p: ActParameters) {
         let orientation = self.orientation.as_factor_i32();
 

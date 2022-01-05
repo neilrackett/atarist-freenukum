@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ScoreType, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ScoreType, SingleAnimationType,
     },
     level::tiles::{LevelTiles, Tile},
     Result, Sizes, ANIMATION_SODAFLY,
@@ -19,8 +19,8 @@ impl CreateActor for SodaFlying {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::SodaFlying(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -28,11 +28,11 @@ impl CreateActor for SodaFlying {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for SodaFlying {
+impl ActorExt for SodaFlying {
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(p.sizes.half_height() as i32));
         if let Ok(Tile { solid: true, .. }) = p.tiles.get(

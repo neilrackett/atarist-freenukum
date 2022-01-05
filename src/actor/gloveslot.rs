@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, ActorType, CreateActor,
-        HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, ActorExt, ActorMessageType, ActorType,
+        CreateActor, HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
     level::tiles::LevelTiles,
@@ -31,8 +31,8 @@ impl CreateActor for GloveSlot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::GloveSlot(Self {
             tile: OBJECT_GLOVE_SLOT,
             current_frame: 0,
             num_frames: 4,
@@ -44,11 +44,11 @@ impl CreateActor for GloveSlot {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for GloveSlot {
+impl ActorExt for GloveSlot {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

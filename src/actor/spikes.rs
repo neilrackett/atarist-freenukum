@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, OBJECT_SPIKE, OBJECT_SPIKES_DOWN,
@@ -30,8 +31,8 @@ impl CreateActorWithDetails for Spikes {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Spikes(Self {
             touching_hero: false,
             position: Rect::new(
                 pos.x,
@@ -40,11 +41,11 @@ impl CreateActorWithDetails for Spikes {
                 sizes.height(),
             ),
             spike_type,
-        }
+        })
     }
 }
 
-impl Actor for Spikes {
+impl ActorExt for Spikes {
     fn act(&mut self, p: ActParameters) {
         self.touching_hero =
             self.position.has_intersection(p.hero.position.geometry);

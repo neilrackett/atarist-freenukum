@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorAdder, ActorType,
+        ActParameters, Actor, ActorAdder, ActorExt, ActorType,
         CreateActorWithDetails, RenderParameters, ScoreType,
         ShotParameters, ShotProcessing,
     },
@@ -118,10 +118,10 @@ impl CreateActorWithDetails for Item {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let (tile, num_frames) = item_type.tile_and_num_frames();
 
-        Self {
+        Actor::Item(Self {
             tile,
             current_frame: 0,
             num_frames,
@@ -133,7 +133,7 @@ impl CreateActorWithDetails for Item {
             ),
             is_alive: true,
             item_type,
-        }
+        })
     }
 }
 
@@ -327,7 +327,7 @@ impl Item {
     }
 }
 
-impl Actor for Item {
+impl ActorExt for Item {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

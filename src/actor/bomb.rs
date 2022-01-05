@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::tiles::LevelTiles,
     Result, Sizes, ANIMATION_BOMB,
@@ -26,8 +26,8 @@ impl CreateActor for Bomb {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Bomb(Self {
             tile: ANIMATION_BOMB,
             current_frame: 0,
             num_frames: 2,
@@ -42,11 +42,11 @@ impl CreateActor for Bomb {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for Bomb {
+impl ActorExt for Bomb {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;

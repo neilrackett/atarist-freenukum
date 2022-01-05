@@ -92,8 +92,203 @@ pub(crate) use {
 };
 
 #[derive(Debug)]
+pub(crate) enum Actor {
+    FireWheelBot(FireWheelBot),
+    PlaceHolder(PlaceHolder),
+    MineJumping(MineJumping),
+    MineLying(MineLying),
+    Robot(Robot),
+    SingleAnimation(SingleAnimation),
+    TankBot(TankBot),
+    WallCrawler(WallCrawler),
+    Camera(Camera),
+    Particle(Particle),
+    Rocket(Rocket),
+    Bomb(Bomb),
+    ExitDoor(ExitDoor),
+    NoteBook(NoteBook),
+    SurveillanceScreen(SurveillanceScreen),
+    HostileShot(HostileShot),
+    SodaFlying(SodaFlying),
+    UnstableFloor(UnstableFloor),
+    ExpandingFloor(ExpandingFloor),
+    Conveyor(Conveyor),
+    Fan(Fan),
+    Teleporter(Teleporter),
+    Item(Item),
+    Balloon(Balloon),
+    AccessCardSlot(AccessCardSlot),
+    GloveSlot(GloveSlot),
+    Key(Key),
+    KeyHole(KeyHole),
+    Door(Door),
+    ShootableWall(ShootableWall),
+    Elevator(Elevator),
+    Acme(Acme),
+    Fire(Fire),
+    Mill(Mill),
+    ElectricArc(ElectricArc),
+    AccessCardDoor(AccessCardDoor),
+    Spikes(Spikes),
+    Score(Score),
+    BackgroundAnimation(BackgroundAnimation),
+}
+
+impl Actor {
+    fn as_actor_ext_mut(&mut self) -> &mut dyn ActorExt {
+        match self {
+            Actor::FireWheelBot(ref mut a) => a,
+            Actor::PlaceHolder(ref mut a) => a,
+            Actor::MineJumping(ref mut a) => a,
+            Actor::MineLying(ref mut a) => a,
+            Actor::Robot(ref mut a) => a,
+            Actor::SingleAnimation(ref mut a) => a,
+            Actor::TankBot(ref mut a) => a,
+            Actor::WallCrawler(ref mut a) => a,
+            Actor::Camera(ref mut a) => a,
+            Actor::Particle(ref mut a) => a,
+            Actor::Rocket(ref mut a) => a,
+            Actor::Bomb(ref mut a) => a,
+            Actor::ExitDoor(ref mut a) => a,
+            Actor::NoteBook(ref mut a) => a,
+            Actor::SurveillanceScreen(ref mut a) => a,
+            Actor::HostileShot(ref mut a) => a,
+            Actor::SodaFlying(ref mut a) => a,
+            Actor::UnstableFloor(ref mut a) => a,
+            Actor::ExpandingFloor(ref mut a) => a,
+            Actor::Conveyor(ref mut a) => a,
+            Actor::Fan(ref mut a) => a,
+            Actor::Teleporter(ref mut a) => a,
+            Actor::Item(ref mut a) => a,
+            Actor::Balloon(ref mut a) => a,
+            Actor::AccessCardSlot(ref mut a) => a,
+            Actor::GloveSlot(ref mut a) => a,
+            Actor::Key(ref mut a) => a,
+            Actor::KeyHole(ref mut a) => a,
+            Actor::Door(ref mut a) => a,
+            Actor::ShootableWall(ref mut a) => a,
+            Actor::Elevator(ref mut a) => a,
+            Actor::Acme(ref mut a) => a,
+            Actor::Fire(ref mut a) => a,
+            Actor::Mill(ref mut a) => a,
+            Actor::ElectricArc(ref mut a) => a,
+            Actor::AccessCardDoor(ref mut a) => a,
+            Actor::Spikes(ref mut a) => a,
+            Actor::Score(ref mut a) => a,
+            Actor::BackgroundAnimation(ref mut a) => a,
+        }
+    }
+
+    fn as_actor_ext(&self) -> &dyn ActorExt {
+        match self {
+            Actor::FireWheelBot(ref a) => a,
+            Actor::PlaceHolder(ref a) => a,
+            Actor::MineJumping(ref a) => a,
+            Actor::MineLying(ref a) => a,
+            Actor::Robot(ref a) => a,
+            Actor::SingleAnimation(ref a) => a,
+            Actor::TankBot(ref a) => a,
+            Actor::WallCrawler(ref a) => a,
+            Actor::Camera(ref a) => a,
+            Actor::Particle(ref a) => a,
+            Actor::Rocket(ref a) => a,
+            Actor::Bomb(ref a) => a,
+            Actor::ExitDoor(ref a) => a,
+            Actor::NoteBook(ref a) => a,
+            Actor::SurveillanceScreen(ref a) => a,
+            Actor::HostileShot(ref a) => a,
+            Actor::SodaFlying(ref a) => a,
+            Actor::UnstableFloor(ref a) => a,
+            Actor::ExpandingFloor(ref a) => a,
+            Actor::Conveyor(ref a) => a,
+            Actor::Fan(ref a) => a,
+            Actor::Teleporter(ref a) => a,
+            Actor::Item(ref a) => a,
+            Actor::Balloon(ref a) => a,
+            Actor::AccessCardSlot(ref a) => a,
+            Actor::GloveSlot(ref a) => a,
+            Actor::Key(ref a) => a,
+            Actor::KeyHole(ref a) => a,
+            Actor::Door(ref a) => a,
+            Actor::ShootableWall(ref a) => a,
+            Actor::Elevator(ref a) => a,
+            Actor::Acme(ref a) => a,
+            Actor::Fire(ref a) => a,
+            Actor::Mill(ref a) => a,
+            Actor::ElectricArc(ref a) => a,
+            Actor::AccessCardDoor(ref a) => a,
+            Actor::Spikes(ref a) => a,
+            Actor::Score(ref a) => a,
+            Actor::BackgroundAnimation(ref a) => a,
+        }
+    }
+}
+
+impl ActorExt for Actor {
+    fn hero_can_interact(&self, hero: &Hero) -> bool {
+        self.as_actor_ext().hero_can_interact(hero)
+    }
+
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+        self.as_actor_ext_mut().hero_interact_start(p)
+    }
+
+    fn hero_interact_end(&mut self, p: HeroInteractEndParameters) {
+        self.as_actor_ext_mut().hero_interact_end(p)
+    }
+
+    fn act(&mut self, p: ActParameters) {
+        self.as_actor_ext_mut().act(p)
+    }
+
+    fn render(&mut self, p: RenderParameters) -> Result<()> {
+        self.as_actor_ext_mut().render(p)
+    }
+
+    fn can_get_shot(&self) -> bool {
+        self.as_actor_ext().can_get_shot()
+    }
+
+    fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
+        self.as_actor_ext_mut().shot(p)
+    }
+
+    fn position(&self) -> Rect {
+        self.as_actor_ext().position()
+    }
+
+    fn is_in_foreground(&self) -> bool {
+        self.as_actor_ext().is_in_foreground()
+    }
+
+    fn hurts_hero(&self, hero: &Hero) -> bool {
+        self.as_actor_ext().hurts_hero(hero)
+    }
+
+    fn is_alive(&self) -> bool {
+        self.as_actor_ext().is_alive()
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        self.as_actor_ext().acts_while_invisible()
+    }
+
+    fn can_receive_message(&self, message_type: ActorMessageType) -> bool {
+        self.as_actor_ext().can_receive_message(message_type)
+    }
+
+    fn receive_message(&mut self, p: ReceiveMessageParameters) {
+        self.as_actor_ext_mut().receive_message(p)
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        self.as_actor_ext().background_tile_strategy()
+    }
+}
+
+#[derive(Debug)]
 pub struct ActorsList {
-    actors: Vec<Box<dyn Actor>>,
+    actors: Vec<Actor>,
     interaction_target: Option<usize>,
 }
 
@@ -383,31 +578,29 @@ impl ActorType {
         p: Point,
         sz: &dyn Sizes,
         t: &mut LevelTiles,
-    ) -> Box<dyn Actor> {
+    ) -> Actor {
         match self {
-            ActorType::FireWheelBot => {
-                FireWheelBot::create_boxed(p, sz, t)
-            }
+            ActorType::FireWheelBot => FireWheelBot::create(p, sz, t),
             ActorType::FlameGnomeBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::FlyingBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::FootBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::HelicopterBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::RabbitoidBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::MineJumping => MineJumping::create_boxed(p, sz, t),
-            ActorType::MineLying => MineLying::create_boxed(p, sz, t),
-            ActorType::Robot => Robot::create_boxed(p, sz, t),
+            ActorType::MineJumping => MineJumping::create(p, sz, t),
+            ActorType::MineLying => MineLying::create(p, sz, t),
+            ActorType::Robot => Robot::create(p, sz, t),
             ActorType::SingleAnimation(animation_type) => {
-                SingleAnimation::create_boxed_with_details(
+                SingleAnimation::create_with_details(
                     *animation_type,
                     p,
                     sz,
@@ -415,99 +608,85 @@ impl ActorType {
                 )
             }
             ActorType::SnakeBot => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::TankBot => TankBot::create_boxed(p, sz, t),
+            ActorType::TankBot => TankBot::create(p, sz, t),
             ActorType::WallCrawler(direction) => {
-                WallCrawler::create_boxed_with_details(
-                    *direction, p, sz, t,
-                )
+                WallCrawler::create_with_details(*direction, p, sz, t)
             }
             ActorType::DrProton => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::Camera => Camera::create_boxed(p, sz, t),
+            ActorType::Camera => Camera::create(p, sz, t),
             ActorType::Particle(color) => {
-                Particle::create_boxed_with_details(*color, p, sz, t)
+                Particle::create_with_details(*color, p, sz, t)
             }
-            ActorType::Rocket => Rocket::create_boxed(p, sz, t),
-            ActorType::Bomb => Bomb::create_boxed(p, sz, t),
+            ActorType::Rocket => Rocket::create(p, sz, t),
+            ActorType::Bomb => Bomb::create(p, sz, t),
             ActorType::Water => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::ExitDoor => ExitDoor::create_boxed(p, sz, t),
-            ActorType::NoteBook => NoteBook::create_boxed(p, sz, t),
+            ActorType::ExitDoor => ExitDoor::create(p, sz, t),
+            ActorType::NoteBook => NoteBook::create(p, sz, t),
             ActorType::SurveillanceScreen => {
-                SurveillanceScreen::create_boxed(p, sz, t)
+                SurveillanceScreen::create(p, sz, t)
             }
             ActorType::HostileShot(direction) => {
-                HostileShot::create_boxed_with_details(
-                    *direction, p, sz, t,
-                )
+                HostileShot::create_with_details(*direction, p, sz, t)
             }
-            ActorType::SodaFlying => SodaFlying::create_boxed(p, sz, t),
-            ActorType::UnstableFloor => {
-                UnstableFloor::create_boxed(p, sz, t)
-            }
-            ActorType::ExpandingFloor => {
-                ExpandingFloor::create_boxed(p, sz, t)
-            }
+            ActorType::SodaFlying => SodaFlying::create(p, sz, t),
+            ActorType::UnstableFloor => UnstableFloor::create(p, sz, t),
+            ActorType::ExpandingFloor => ExpandingFloor::create(p, sz, t),
             ActorType::ConveyorRightEnd(direction) => {
-                Conveyor::create_boxed_with_details(*direction, p, sz, t)
+                Conveyor::create_with_details(*direction, p, sz, t)
             }
             ActorType::Fan(direction) => {
-                Fan::create_boxed_with_details(*direction, p, sz, t)
+                Fan::create_with_details(*direction, p, sz, t)
             }
             ActorType::StoneBackground => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::Teleporter(index) => {
-                Teleporter::create_boxed_with_details(*index, p, sz, t)
+                Teleporter::create_with_details(*index, p, sz, t)
             }
             ActorType::FenceBackground => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::Screen => {
-                PlaceHolder::create_boxed_with_details(*self, p, sz, t)
+                PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::Item(item_type) => {
-                Item::create_boxed_with_details(*item_type, p, sz, t)
+                Item::create_with_details(*item_type, p, sz, t)
             }
-            ActorType::Balloon => Balloon::create_boxed(p, sz, t),
-            ActorType::AccessCardSlot => {
-                AccessCardSlot::create_boxed(p, sz, t)
-            }
-            ActorType::GloveSlot => GloveSlot::create_boxed(p, sz, t),
+            ActorType::Balloon => Balloon::create(p, sz, t),
+            ActorType::AccessCardSlot => AccessCardSlot::create(p, sz, t),
+            ActorType::GloveSlot => GloveSlot::create(p, sz, t),
             ActorType::Key(color) => {
-                Key::create_boxed_with_details(*color, p, sz, t)
+                Key::create_with_details(*color, p, sz, t)
             }
             ActorType::Keyhole(color) => {
-                KeyHole::create_boxed_with_details(*color, p, sz, t)
+                KeyHole::create_with_details(*color, p, sz, t)
             }
             ActorType::Door(color) => {
-                Door::create_boxed_with_details(*color, p, sz, t)
+                Door::create_with_details(*color, p, sz, t)
             }
-            ActorType::ShootableWall => {
-                ShootableWall::create_boxed(p, sz, t)
-            }
-            ActorType::Elevator => Elevator::create_boxed(p, sz, t),
-            ActorType::Acme => Acme::create_boxed(p, sz, t),
+            ActorType::ShootableWall => ShootableWall::create(p, sz, t),
+            ActorType::Elevator => Elevator::create(p, sz, t),
+            ActorType::Acme => Acme::create(p, sz, t),
             ActorType::Fire(direction) => {
-                Fire::create_boxed_with_details(*direction, p, sz, t)
+                Fire::create_with_details(*direction, p, sz, t)
             }
-            ActorType::Mill => Mill::create_boxed(p, sz, t),
-            ActorType::ElectricArc => ElectricArc::create_boxed(p, sz, t),
-            ActorType::AccessCardDoor => {
-                AccessCardDoor::create_boxed(p, sz, t)
-            }
+            ActorType::Mill => Mill::create(p, sz, t),
+            ActorType::ElectricArc => ElectricArc::create(p, sz, t),
+            ActorType::AccessCardDoor => AccessCardDoor::create(p, sz, t),
             ActorType::Spikes(spike_type) => {
-                Spikes::create_boxed_with_details(*spike_type, p, sz, t)
+                Spikes::create_with_details(*spike_type, p, sz, t)
             }
             ActorType::Score(score_type) => {
-                Score::create_boxed_with_details(*score_type, p, sz, t)
+                Score::create_with_details(*score_type, p, sz, t)
             }
             ActorType::BackgroundAnimation(animation_type) => {
-                BackgroundAnimation::create_boxed_with_details(
+                BackgroundAnimation::create_with_details(
                     *animation_type,
                     p,
                     sz,
@@ -652,18 +831,7 @@ trait CreateActorWithDetails: Sized {
         position: Point,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-    ) -> Self;
-
-    fn create_boxed_with_details(
-        details: Self::Details,
-        position: Point,
-        sizes: &dyn Sizes,
-        tiles: &mut LevelTiles,
-    ) -> Box<Self> {
-        Box::new(Self::create_with_details(
-            details, position, sizes, tiles,
-        ))
-    }
+    ) -> Actor;
 }
 
 trait CreateActor: Sized {
@@ -671,15 +839,7 @@ trait CreateActor: Sized {
         position: Point,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-    ) -> Self;
-
-    fn create_boxed(
-        position: Point,
-        sizes: &dyn Sizes,
-        tiles: &mut LevelTiles,
-    ) -> Box<Self> {
-        Box::new(Self::create(position, sizes, tiles))
-    }
+    ) -> Actor;
 }
 
 pub struct ActParameters<'a> {
@@ -722,7 +882,7 @@ pub struct HeroInteractEndParameters<'a> {
     pub play_state: &'a mut PlayState,
 }
 
-pub(crate) trait Actor: std::fmt::Debug {
+pub(crate) trait ActorExt: std::fmt::Debug {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         false
     }

@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActor,
+        ActParameters, Actor, ActorExt, ActorMessageType, CreateActor,
         HeroInteractStartParameters, RenderParameters,
     },
     hero::InventoryItem,
@@ -22,8 +22,8 @@ impl CreateActor for AccessCardSlot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::AccessCardSlot(Self {
             tile: OBJECT_ACCESS_CARD_SLOT,
             current_frame: 0,
             num_frames: 8,
@@ -33,11 +33,11 @@ impl CreateActor for AccessCardSlot {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for AccessCardSlot {
+impl ActorExt for AccessCardSlot {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

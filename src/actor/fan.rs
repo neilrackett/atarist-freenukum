@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorExt, ActorType, CreateActorWithDetails,
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
@@ -28,8 +28,8 @@ impl CreateActorWithDetails for Fan {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Fan(Self {
             tile: ANIMATION_FAN,
             current_frame: 0,
             num_frames: 4,
@@ -41,11 +41,11 @@ impl CreateActorWithDetails for Fan {
                 sizes.height() * 2,
             ),
             direction,
-        }
+        })
     }
 }
 
-impl Actor for Fan {
+impl ActorExt for Fan {
     fn act(&mut self, p: ActParameters) {
         match self.running {
             0 => {}

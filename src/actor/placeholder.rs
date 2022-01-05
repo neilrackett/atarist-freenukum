@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorExt, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
@@ -21,24 +21,24 @@ impl CreateActorWithDetails for PlaceHolder {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         println!(
             "Warning: creating placeholder for unimplemented \
                 actor type {:?} at {:?}",
             actor_type, pos
         );
-        Self {
+        Actor::PlaceHolder(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for PlaceHolder {
+impl ActorExt for PlaceHolder {
     fn act(&mut self, _p: ActParameters) {}
 
     fn render(&mut self, _p: RenderParameters) -> Result<()> {

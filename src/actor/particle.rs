@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::tiles::LevelTiles,
     Result, Sizes, OBJECT_SPARK_BLUE, OBJECT_SPARK_GREEN,
@@ -34,7 +35,7 @@ impl CreateActorWithDetails for Particle {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         use rand::Rng;
         let mut rng = rand::thread_rng();
         let vspeed = rng.gen_range(-0.75f32..0.3f32);
@@ -47,7 +48,7 @@ impl CreateActorWithDetails for Particle {
             ParticleColor::Green => OBJECT_SPARK_GREEN,
         };
 
-        Self {
+        Actor::Particle(Self {
             tile,
             countdown: 20,
             hspeed,
@@ -59,11 +60,11 @@ impl CreateActorWithDetails for Particle {
                 sizes.half_height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for Particle {
+impl ActorExt for Particle {
     fn act(&mut self, p: ActParameters) {
         if self.countdown > 0 {
             self.countdown -= 1;

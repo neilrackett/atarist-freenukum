@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, CreateActor,
+        ActParameters, Actor, ActorExt, ActorMessageType, CreateActor,
         ReceiveMessageParameters, RenderParameters,
     },
     level::tiles::LevelTiles,
@@ -20,8 +20,8 @@ impl CreateActor for ExpandingFloor {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::ExpandingFloor(Self {
             expanding: false,
             finished: false,
             position: Rect::new(
@@ -30,11 +30,11 @@ impl CreateActor for ExpandingFloor {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for ExpandingFloor {
+impl ActorExt for ExpandingFloor {
     fn act(&mut self, p: ActParameters) {
         if self.expanding {
             let x = self.position.right() / p.sizes.width() as i32;

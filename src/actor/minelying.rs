@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, ANIMATION_MINE,
@@ -20,8 +20,8 @@ impl CreateActor for MineLying {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::MineLying(Self {
             tile: ANIMATION_MINE,
             position: Rect::new(
                 pos.x,
@@ -30,11 +30,11 @@ impl CreateActor for MineLying {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for MineLying {
+impl ActorExt for MineLying {
     fn act(&mut self, p: ActParameters) {
         if p.tiles
             .get(

@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
@@ -25,8 +25,8 @@ impl CreateActor for Rocket {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Rocket(Self {
             state: State::Idle,
             position: Rect::new(
                 pos.x,
@@ -34,11 +34,11 @@ impl CreateActor for Rocket {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for Rocket {
+impl ActorExt for Rocket {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Idle => {}

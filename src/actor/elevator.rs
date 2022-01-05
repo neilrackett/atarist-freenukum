@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, HeroInteractEndParameters,
-        HeroInteractStartParameters, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor,
+        HeroInteractEndParameters, HeroInteractStartParameters,
+        RenderParameters,
     },
     geometry::RectExt,
     level::tiles::LevelTiles,
@@ -27,8 +28,8 @@ impl CreateActor for Elevator {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Elevator(Self {
             state: State::Idle,
             position: Rect::new(
                 pos.x,
@@ -36,11 +37,11 @@ impl CreateActor for Elevator {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for Elevator {
+impl ActorExt for Elevator {
     fn act(&mut self, p: ActParameters) {
         let hero_geometry = p.hero.position.geometry;
 

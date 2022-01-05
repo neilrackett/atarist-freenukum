@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActorWithDetails,
+        ActParameters, Actor, ActorExt, ActorType, CreateActorWithDetails,
         RenderParameters,
     },
     level::tiles::LevelTiles,
@@ -36,7 +36,7 @@ impl CreateActorWithDetails for SingleAnimation {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let (tile, num_frames, can_hurt_hero, replaced_by) =
             match animation_type {
                 SingleAnimationType::BombFire => {
@@ -61,7 +61,7 @@ impl CreateActorWithDetails for SingleAnimation {
                 ),
             };
 
-        Self {
+        Actor::SingleAnimation(Self {
             tile,
             current_frame: 0,
             num_frames,
@@ -73,11 +73,11 @@ impl CreateActorWithDetails for SingleAnimation {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for SingleAnimation {
+impl ActorExt for SingleAnimation {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         if !self.is_alive() {

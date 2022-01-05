@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor,
+        HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, OBJECT_NOTEBOOK,
@@ -18,19 +18,19 @@ impl CreateActor for NoteBook {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::NoteBook(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for NoteBook {
+impl ActorExt for NoteBook {
     fn act(&mut self, _p: ActParameters) {}
 
     fn hero_can_interact(&self, _hero: &Hero) -> bool {

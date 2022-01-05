@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::tiles::{LevelTiles, Tile},
     Result, Sizes, OBJECT_BALLOON,
@@ -21,8 +22,8 @@ impl CreateActor for Balloon {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Balloon(Self {
             destroyed: false,
             current_frame: 0,
             position: Rect::new(
@@ -32,11 +33,11 @@ impl CreateActor for Balloon {
                 sizes.height() * 2,
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for Balloon {
+impl ActorExt for Balloon {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= 9;

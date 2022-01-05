@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::tiles::LevelTiles,
     HorizontalDirection, Result, Sizes, SOLID_BLACK,
@@ -25,7 +26,7 @@ impl CreateActorWithDetails for Conveyor {
         pos: Point,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         // find the beginning of the conveyor belt
         let mut found_begin = false;
         let mut position =
@@ -51,16 +52,16 @@ impl CreateActorWithDetails for Conveyor {
             }
         }
 
-        Self {
+        Actor::Conveyor(Self {
             current_frame: 0,
             num_frames: 4,
             direction,
             position,
-        }
+        })
     }
 }
 
-impl Actor for Conveyor {
+impl ActorExt for Conveyor {
     fn act(&mut self, p: ActParameters) {
         let hero_push_offset = match self.direction {
             HorizontalDirection::Left => {

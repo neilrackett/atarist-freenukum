@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ScoreType, ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::{
         tiles::{LevelTiles, Tile},
@@ -24,8 +25,8 @@ impl CreateActor for Acme {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::Acme(Self {
             tile: OBJECT_FALLINGBLOCK,
             counter: 0,
             position: Rect::new(
@@ -35,11 +36,11 @@ impl CreateActor for Acme {
                 sizes.height(),
             ),
             is_alive: true,
-        }
+        })
     }
 }
 
-impl Actor for Acme {
+impl ActorExt for Acme {
     fn act(&mut self, p: ActParameters) {
         let hero_geometry = p.hero.position.geometry;
 

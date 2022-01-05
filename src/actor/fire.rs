@@ -1,6 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActorWithDetails, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActorWithDetails,
+        RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
@@ -32,7 +33,7 @@ impl CreateActorWithDetails for Fire {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         let tile = match direction {
@@ -40,17 +41,17 @@ impl CreateActorWithDetails for Fire {
             HorizontalDirection::Left => OBJECT_FIRELEFT,
         };
 
-        Self {
+        Actor::Fire(Self {
             tile,
             direction,
             state: State::Off,
             counter: 0,
             position,
-        }
+        })
     }
 }
 
-impl Actor for Fire {
+impl ActorExt for Fire {
     fn act(&mut self, _p: ActParameters) {
         match self.state {
             State::Off => {

@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorMessageType, ActorType, CreateActor,
-        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
+        ActParameters, Actor, ActorExt, ActorMessageType, ActorType,
+        CreateActor, RenderParameters, ScoreType, ShotParameters,
+        ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Result, Sizes, OBJECT_ROTATINGCYLINDER,
@@ -22,7 +23,7 @@ impl CreateActor for Mill {
         pos: Point,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-    ) -> Self {
+    ) -> Actor {
         let mut position =
             Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
         while position.y > 0
@@ -38,17 +39,17 @@ impl CreateActor for Mill {
             position.set_height(position.height() + sizes.height());
         }
 
-        Self {
+        Actor::Mill(Self {
             tile: OBJECT_ROTATINGCYLINDER,
             current_frame: 0,
             num_frames: 5,
             lives: 10,
             position,
-        }
+        })
     }
 }
 
-impl Actor for Mill {
+impl ActorExt for Mill {
     fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
             self.current_frame += 1;

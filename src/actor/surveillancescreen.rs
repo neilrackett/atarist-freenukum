@@ -1,7 +1,7 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, HeroInteractStartParameters,
-        RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor,
+        HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, Result, Sizes, ANIMATION_BADGUYSCREEN,
@@ -18,19 +18,19 @@ impl CreateActor for SurveillanceScreen {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::SurveillanceScreen(Self {
             position: Rect::new(
                 pos.x,
                 pos.y,
                 sizes.width() * 2,
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for SurveillanceScreen {
+impl ActorExt for SurveillanceScreen {
     fn hero_can_interact(&self, _hero: &Hero) -> bool {
         true
     }

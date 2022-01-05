@@ -1,6 +1,6 @@
 use crate::{
     actor::{
-        ActParameters, Actor, CreateActor, RenderParameters,
+        ActParameters, Actor, ActorExt, CreateActor, RenderParameters,
         ShotParameters, ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
@@ -21,8 +21,8 @@ impl CreateActor for MineJumping {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::MineJumping(Self {
             tile: ANIMATION_MINE,
             counter: 0,
             base_y: pos.y,
@@ -32,11 +32,11 @@ impl CreateActor for MineJumping {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for MineJumping {
+impl ActorExt for MineJumping {
     fn act(&mut self, p: ActParameters) {
         let relative_distance = match self.counter {
             0 => 0f32,

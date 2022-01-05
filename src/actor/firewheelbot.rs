@@ -1,7 +1,8 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorType, CreateActor, RenderParameters,
-        ShotParameters, ShotProcessing, SingleAnimationType,
+        ActParameters, Actor, ActorExt, ActorType, CreateActor,
+        RenderParameters, ShotParameters, ShotProcessing,
+        SingleAnimationType,
     },
     level::tiles::LevelTiles,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_FIREWHEEL_OFF,
@@ -26,8 +27,8 @@ impl CreateActor for FireWheelBot {
         pos: Point,
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
-    ) -> Self {
-        Self {
+    ) -> Actor {
+        Actor::FireWheelBot(Self {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_FIREWHEEL_OFF,
             counter: 0,
@@ -41,11 +42,11 @@ impl CreateActor for FireWheelBot {
                 sizes.width(),
                 sizes.height(),
             ),
-        }
+        })
     }
 }
 
-impl Actor for FireWheelBot {
+impl ActorExt for FireWheelBot {
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
             p.actor_adder.add_actor(
