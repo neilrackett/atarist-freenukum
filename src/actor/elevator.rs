@@ -97,7 +97,7 @@ impl Actor for Elevator {
             State::Descending => {
                 for _ in 0..2 {
                     if self.position.height() > p.sizes.height() {
-                        if let Ok(ref mut t) = p.tiles.get(
+                        if let Ok(ref mut t) = p.tiles.get_mut(
                             self.position.x() / p.sizes.width() as i32,
                             self.position.y() / p.sizes.height() as i32,
                         ) {
