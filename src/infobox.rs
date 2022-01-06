@@ -1,7 +1,7 @@
 use super::messagebox::messagebox;
 use crate::event::{ConfirmEvent, WaitEvent};
 use crate::{Result, TileProvider};
-use anyhow::anyhow;
+use anyhow::Error;
 use sdl2::{
     rect::{Point, Rect},
     render::WindowCanvas,
@@ -17,10 +17,8 @@ pub fn show(
 ) -> Result<()> {
     let texture_creator = canvas.texture_creator();
     let messagebox = messagebox(text, tileprovider, &texture_creator)?;
-    let surface = canvas
-        .window()
-        .surface(event_pump)
-        .map_err(|s| anyhow!(s))?;
+    let surface =
+        canvas.window().surface(event_pump).map_err(Error::msg)?;
     let destrect = Rect::from_center(
         Point::new(
             surface.width() as i32 / 2,
@@ -35,14 +33,14 @@ pub fn show(
         destrect.height(),
         surface.pixel_format_enum(),
     )
-    .map_err(|s| anyhow!(s))?;
+    .map_err(Error::msg)?;
     surface
         .blit(destrect, &mut background_backup, None)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     canvas
         .copy(&messagebox.as_texture(&texture_creator)?, None, destrect)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
     canvas.present();
 
     loop {
@@ -54,7 +52,7 @@ pub fn show(
                         None,
                         destrect,
                     )
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
                 canvas.present();
                 return Ok(());
             }

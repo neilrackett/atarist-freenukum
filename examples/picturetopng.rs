@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::picture;
 use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::File;
@@ -23,6 +23,6 @@ fn main() -> Result<()> {
     let mut file = File::open(&args.infile)?;
     let picture: Surface = picture::load(&mut file)?;
 
-    picture.save(args.outfile).map_err(|s| anyhow!(s))?;
+    picture.save(args.outfile).map_err(Error::msg)?;
     Ok(())
 }

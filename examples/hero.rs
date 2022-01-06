@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::{
     actor::ActorQueue,
     data::original_data_dir,
@@ -24,17 +24,16 @@ fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     let settings = Settings::load_or_create();
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
     let ttf_context = sdl2::ttf::init()?;
-    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
-    let timer_subsystem = sdl_context.timer().map_err(|s| anyhow!(s))?;
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let event_subsystem = sdl_context.event().map_err(Error::msg)?;
+    let timer_subsystem = sdl_context.timer().map_err(Error::msg)?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
 
     event_subsystem
         .register_custom_event::<UserEvent>()
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     let sizes = DefaultSizes;
 

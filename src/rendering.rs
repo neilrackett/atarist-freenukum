@@ -1,6 +1,6 @@
 use crate::Result;
 use crate::TileProvider;
-use anyhow::anyhow;
+use anyhow::Error;
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
@@ -83,7 +83,7 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
     ) -> Result<()> {
         self.canvas
             .copy(&surface.as_texture(&self.texture_creator)?, None, rect)
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
         Ok(())
     }
 
@@ -101,13 +101,13 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
         );
         self.canvas
             .copy(&tile.as_texture(&self.texture_creator)?, None, rect)
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
         Ok(())
     }
 
     fn fill_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
         self.canvas.set_draw_color(color);
-        self.canvas.fill_rect(rect).map_err(|s| anyhow!(s))?;
+        self.canvas.fill_rect(rect).map_err(Error::msg)?;
         Ok(())
     }
 
@@ -119,7 +119,7 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
 
     fn draw_rect(&mut self, rect: Rect, color: Color) -> Result<()> {
         self.canvas.set_draw_color(color);
-        self.canvas.draw_rect(rect).map_err(|s| anyhow!(s))?;
+        self.canvas.draw_rect(rect).map_err(Error::msg)?;
         Ok(())
     }
 }

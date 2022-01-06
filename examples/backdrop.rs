@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::backdrop;
 use freenukum::settings::Settings;
 use freenukum::tile::TileHeader;
@@ -30,10 +30,9 @@ fn main() -> Result<()> {
     let mut file = File::open(&args.filename)?;
 
     let settings = Settings::load_or_create();
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
 
     let sizes = DefaultSizes;
 
@@ -55,7 +54,7 @@ fn main() -> Result<()> {
     let backdrop: Surface = backdrop::load(&mut file)?;
     canvas
         .copy(&backdrop.as_texture(&texture_creator)?, None, None)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
     canvas.present();
 
     'event_loop: loop {

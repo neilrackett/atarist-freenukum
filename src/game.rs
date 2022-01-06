@@ -16,7 +16,7 @@ use crate::{
     LEVEL_HEIGHT, LEVEL_WIDTH,
 };
 
-use anyhow::anyhow;
+use anyhow::Error;
 use sdl2::{
     event::EventSender,
     pixels::Color,
@@ -213,14 +213,14 @@ fn start_in_level(
                         canvas
                             .window_mut()
                             .set_fullscreen(FullscreenType::Desktop)
-                            .map_err(|s| anyhow!(s))?;
+                            .map_err(Error::msg)?;
                     }
                     FullscreenType::True | FullscreenType::Desktop => {
                         settings.fullscreen = false;
                         canvas
                             .window_mut()
                             .set_fullscreen(FullscreenType::Off)
-                            .map_err(|s| anyhow!(s))?;
+                            .map_err(Error::msg)?;
                     }
                 }
                 settings.save();

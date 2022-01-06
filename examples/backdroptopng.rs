@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::backdrop;
 use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::File;
@@ -22,6 +22,6 @@ fn main() -> Result<()> {
     let mut file = File::open(&args.infile)?;
     let backdrop: Surface = backdrop::load(&mut file)?;
 
-    backdrop.save(args.outfile).map_err(|s| anyhow!(s))?;
+    backdrop.save(args.outfile).map_err(Error::msg)?;
     Ok(())
 }

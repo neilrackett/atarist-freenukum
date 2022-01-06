@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::tilecache::{FileProperties, TileCache};
 use freenukum::tileprovider::TileProvider;
 use sdl2::image::SaveSurface;
@@ -36,7 +36,7 @@ fn main() -> Result<()> {
         let tile = tilecache.get_tile(i).unwrap();
         let filename = format!("tile_{:04}.png", i);
         tile.save(args.destination.join(filename))
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
     }
     Ok(())
 }

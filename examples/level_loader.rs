@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
 use freenukum::hero::Hero;
@@ -45,15 +45,14 @@ fn main() -> Result<()> {
     let args = Arguments::from_args();
 
     let settings = Settings::load_or_create();
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
     let ttf_context = sdl2::ttf::init()?;
-    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let event_subsystem = sdl_context.event().map_err(Error::msg)?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
     event_subsystem
         .register_custom_event::<UserEvent>()
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     let event_sender = event_subsystem.event_sender();
 
@@ -104,7 +103,7 @@ fn main() -> Result<()> {
 
     event_sender
         .push_custom_event(UserEvent::Redraw)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     let mut multiply = 10;
     'event_loop: loop {
@@ -117,7 +116,7 @@ fn main() -> Result<()> {
                 scroll(x * multiply, y * multiply, &mut r, level_rect);
                 event_sender
                     .push_custom_event(UserEvent::Redraw)
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
             }
             Event::KeyDown {
                 keycode: Some(Keycode::Down),
@@ -127,7 +126,7 @@ fn main() -> Result<()> {
                 scroll(x * multiply, y * multiply, &mut r, level_rect);
                 event_sender
                     .push_custom_event(UserEvent::Redraw)
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
             }
             Event::KeyDown {
                 keycode: Some(Keycode::Left),
@@ -137,7 +136,7 @@ fn main() -> Result<()> {
                 scroll(x * multiply, y * multiply, &mut r, level_rect);
                 event_sender
                     .push_custom_event(UserEvent::Redraw)
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
             }
             Event::KeyDown {
                 keycode: Some(Keycode::Right),
@@ -147,7 +146,7 @@ fn main() -> Result<()> {
                 scroll(x * multiply, y * multiply, &mut r, level_rect);
                 event_sender
                     .push_custom_event(UserEvent::Redraw)
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
             }
             Event::KeyDown {
                 keycode: Some(Keycode::LShift),

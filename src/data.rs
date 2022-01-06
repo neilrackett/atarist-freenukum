@@ -1,5 +1,5 @@
 use crate::data_dir;
-use anyhow::anyhow;
+use anyhow::Error;
 use sdl2::{
     pixels::Color,
     rect::Rect,
@@ -44,7 +44,7 @@ pub fn display_text<RT: RenderTarget, T>(
         destrect.set_y(destrect.y() + height as i32);
         destrect.set_width(width);
         destrect.set_height(height);
-        canvas.copy(&text, None, destrect).map_err(|s| anyhow!(s))?;
+        canvas.copy(&text, None, destrect).map_err(Error::msg)?;
     }
     canvas.present();
     Ok(())

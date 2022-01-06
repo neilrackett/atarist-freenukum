@@ -5,7 +5,7 @@ use crate::{
     Result, TileProvider, PICTURE_HEIGHT, PICTURE_WIDTH, WINDOW_HEIGHT,
     WINDOW_WIDTH,
 };
-use anyhow::anyhow;
+use anyhow::Error;
 use rgb::RGBA8;
 use sdl2::{
     rect::Rect, render::WindowCanvas, surface::Surface, EventPump,
@@ -98,7 +98,7 @@ pub fn show_splash_with_message(
 
     canvas
         .copy(&picture.as_texture(&texture_creator)?, None, None)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     if let Some(message) = message {
         let messagebox =
@@ -112,7 +112,7 @@ pub fn show_splash_with_message(
                 None,
                 destrect,
             )
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
     }
     canvas.present();
 

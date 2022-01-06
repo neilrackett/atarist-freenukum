@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
 use freenukum::messagebox::messagebox;
@@ -16,11 +16,10 @@ fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     let settings = Settings::load_or_create();
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
     let ttf_context = sdl2::ttf::init()?;
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
 
     let window = game::create_window(
         WINDOW_WIDTH,
@@ -67,7 +66,7 @@ Q)it to DOS";
     );
     canvas
         .copy(&msgbox.as_texture(&texture_creator)?, None, destrect)
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     canvas.present();
 

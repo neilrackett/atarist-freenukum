@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::{
     data::original_data_dir,
     game,
@@ -18,31 +18,27 @@ fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     let mut settings = Settings::load_or_create();
 
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
     let ttf_context = sdl2::ttf::init()?;
-    let event_subsystem = sdl_context.event().map_err(|s| anyhow!(s))?;
-    let timer_subsystem = sdl_context.timer().map_err(|s| anyhow!(s))?;
+    let event_subsystem = sdl_context.event().map_err(Error::msg)?;
+    let timer_subsystem = sdl_context.timer().map_err(Error::msg)?;
     let controller_subsystem =
-        sdl_context.game_controller().map_err(|s| anyhow!(s))?;
+        sdl_context.game_controller().map_err(Error::msg)?;
     controller_subsystem.set_event_state(true);
 
     let mut controllers = Vec::new();
-    for i in 0..controller_subsystem
-        .num_joysticks()
-        .map_err(|s| anyhow!(s))?
-    {
+    for i in 0..controller_subsystem.num_joysticks().map_err(Error::msg)? {
         if controller_subsystem.is_game_controller(i) {
             controllers.push(controller_subsystem.open(i).unwrap());
         }
     }
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
     let event_sender = event_subsystem.event_sender();
 
     event_subsystem
         .register_custom_event::<UserEvent>()
-        .map_err(|s| anyhow!(s))?;
+        .map_err(Error::msg)?;
 
     let sizes = DefaultSizes;
 
@@ -152,14 +148,14 @@ fn main() -> Result<()> {
                         canvas
                             .window_mut()
                             .set_fullscreen(FullscreenType::Desktop)
-                            .map_err(|s| anyhow!(s))?;
+                            .map_err(Error::msg)?;
                     }
                     FullscreenType::True | FullscreenType::Desktop => {
                         settings.fullscreen = false;
                         canvas
                             .window_mut()
                             .set_fullscreen(FullscreenType::Off)
-                            .map_err(|s| anyhow!(s))?;
+                            .map_err(Error::msg)?;
                     }
                 }
                 settings.save();

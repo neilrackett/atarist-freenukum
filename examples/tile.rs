@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::game;
 use freenukum::settings::Settings;
 use freenukum::tile::{self, TileHeader};
@@ -35,8 +35,8 @@ fn main() -> Result<()> {
     let mut r =
         Rect::new(0, 0, header.width as u32 * 8, header.height as u32);
 
-    let sdl_context = sdl2::init().map_err(|s| anyhow!(s))?;
-    let video_subsystem = sdl_context.video().map_err(|s| anyhow!(s))?;
+    let sdl_context = sdl2::init().map_err(Error::msg)?;
+    let video_subsystem = sdl_context.video().map_err(Error::msg)?;
     let window = game::create_window(
         r.width() * header.tiles as u32,
         r.height(),
@@ -55,13 +55,12 @@ fn main() -> Result<()> {
         let tile: Surface = tile::load(&mut file, header, false)?;
         canvas
             .copy(&tile.as_texture(&texture_creator)?, None, r)
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
         r.set_x(r.x() + header.width as i32 * 8);
     }
     canvas.present();
 
-    let mut event_pump =
-        sdl_context.event_pump().map_err(|s| anyhow!(s))?;
+    let mut event_pump = sdl_context.event_pump().map_err(Error::msg)?;
 
     'event_loop: loop {
         match event_pump.wait_event() {

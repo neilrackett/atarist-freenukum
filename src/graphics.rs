@@ -1,5 +1,5 @@
 use crate::Result;
-use anyhow::anyhow;
+use anyhow::Error;
 use rgb::RGBA8;
 use sdl2::{
     pixels::{Color, PixelFormatEnum},
@@ -27,9 +27,8 @@ pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
     #[cfg(target_os = "linux")]
     let font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 
-    let mut font = ttf_context
-        .load_font(font_path, 10)
-        .map_err(|s| anyhow!(s))?;
+    let mut font =
+        ttf_context.load_font(font_path, 10).map_err(Error::msg)?;
     font.set_style(FontStyle::BOLD);
     Ok(font)
 }
@@ -53,10 +52,10 @@ impl Picture for Surface<'_> {
     fn create(width: u32, height: u32) -> Result<Self> {
         let mut surface =
             Surface::new(width, height, PixelFormatEnum::RGBA8888)
-                .map_err(|s| anyhow!(s))?;
+                .map_err(Error::msg)?;
         surface
             .fill_rect(None, RGBA8::default().as_sdl_color())
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
         Ok(surface)
     }
 
@@ -66,7 +65,7 @@ impl Picture for Surface<'_> {
                 let color =
                     pixels[(i * self.width() + j) as usize].as_sdl_color();
                 let rect = Rect::new(j as i32, i as i32, 1, 1);
-                self.fill_rect(rect, color).map_err(|s| anyhow!(s))?;
+                self.fill_rect(rect, color).map_err(Error::msg)?;
             }
         }
         Ok(())

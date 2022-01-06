@@ -5,7 +5,7 @@ use crate::{
     TileProvider, UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL,
     OBJECT_POINT,
 };
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use sdl2::{
     event::EventSender,
     rect::{Point, Rect},
@@ -72,10 +72,8 @@ impl Menu {
             &texture_creator,
         )?;
 
-        let surface = canvas
-            .window()
-            .surface(event_pump)
-            .map_err(|s| anyhow!(s))?;
+        let surface =
+            canvas.window().surface(event_pump).map_err(Error::msg)?;
         let destrect = Rect::from_center(
             Point::new(
                 surface.width() as i32 / 2,
@@ -107,7 +105,7 @@ impl Menu {
                         None,
                         destrect,
                     )
-                    .map_err(|s| anyhow!(s))?;
+                    .map_err(Error::msg)?;
 
                 let mut renderer = CanvasRenderer {
                     canvas,

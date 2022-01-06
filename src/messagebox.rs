@@ -6,7 +6,7 @@ use crate::{
     BORDER_BLUE_RIGHT, BORDER_BLUE_TOP, BORDER_BLUE_TOPLEFT,
     BORDER_BLUE_TOPRIGHT, FONT_HEIGHT, FONT_WIDTH,
 };
-use anyhow::anyhow;
+use anyhow::Error;
 use sdl2::{
     rect::Point,
     render::{Canvas, TextureCreator},
@@ -36,10 +36,9 @@ pub fn messagebox<'t, T>(
         FONT_HEIGHT * (rows as u32 + 2),
         texture_creator.default_pixel_format(),
     )
-    .map_err(|s| anyhow!(s))?;
+    .map_err(Error::msg)?;
 
-    let mut canvas =
-        Canvas::from_surface(surface).map_err(|s| anyhow!(s))?;
+    let mut canvas = Canvas::from_surface(surface).map_err(Error::msg)?;
 
     {
         let texture_creator = canvas.texture_creator();

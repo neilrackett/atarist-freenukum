@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Error, Result};
 use freenukum::tile::{self, TileHeader};
 use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::{create_dir_all, File};
@@ -32,7 +32,7 @@ fn main() -> Result<()> {
         let tile: Surface = tile::load(&mut file, header, false)?;
         let filename = format!("tile_{:02}.png", i);
         tile.save(args.destination.join(filename))
-            .map_err(|s| anyhow!(s))?;
+            .map_err(Error::msg)?;
     }
     Ok(())
 }
