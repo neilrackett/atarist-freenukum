@@ -76,4 +76,8 @@ impl ActorExt for Key {
     fn background_tile_strategy(&self) -> BackgroundTileStrategy {
         BackgroundTileStrategy::CopyFromLeft
     }
+
+    fn is_alive(&self) -> bool {
+        self.is_alive
+    }
 }
