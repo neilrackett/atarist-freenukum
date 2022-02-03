@@ -5,7 +5,7 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
-    OBJECT_FIRERIGHT,
+    OBJECT_FIRERIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -34,12 +34,13 @@ impl CreateActorWithDetails for Fire {
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
     ) -> Actor {
-        let position =
-            Rect::new(pos.x, pos.y, sizes.width(), sizes.height());
-        let tile = match direction {
-            HorizontalDirection::Right => OBJECT_FIRERIGHT,
-            HorizontalDirection::Left => OBJECT_FIRELEFT,
+        let (x, tile) = match direction {
+            HorizontalDirection::Right => (pos.x, OBJECT_FIRERIGHT),
+            HorizontalDirection::Left => {
+                (pos.x - 2 * TILE_WIDTH as i32, OBJECT_FIRELEFT)
+            }
         };
+        let position = Rect::new(x, pos.y, sizes.width(), sizes.height());
 
         Actor::Fire(Self {
             tile,
