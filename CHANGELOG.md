@@ -1,5 +1,18 @@
 # Freenukum Changelog
 
+## Unreleased
+
+### Added
+- Implement animation for teleporter
+
+### Fixed
+- Fix position of left-looking torch flames which was two tiles too far to
+  the right
+- Despawn keys once the hero fetches them
+- Fix display of electric arc tiles which was swapped for touching the hero
+  and not touching it
+- Rocket continues to act while invisible once it launches
+
 ## [0.3.5] - 2020-12-15
 
 ### Added
