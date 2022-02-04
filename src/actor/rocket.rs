@@ -146,4 +146,8 @@ impl ActorExt for Rocket {
     fn background_tile_strategy(&self) -> BackgroundTileStrategy {
         BackgroundTileStrategy::CopyFromAbove
     }
+
+    fn acts_while_invisible(&self) -> bool {
+        self.state != State::Idle
+    }
 }
