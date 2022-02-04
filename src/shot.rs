@@ -1,8 +1,8 @@
 use crate::{
     actor::{
-        ActorAdder, ActorMessageQueue, ActorType, ActorsList,
-        SingleAnimationType,
+        ActorMessageQueue, ActorType, ActorsList, SingleAnimationType,
     },
+    game::GameCommands,
     hero::Hero,
     level::tiles::LevelTiles,
     rendering::Renderer,
@@ -52,7 +52,7 @@ impl Shot {
         hero: &mut Hero,
         actors: &mut ActorsList,
         tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
         actor_message_queue: &mut ActorMessageQueue,
     ) -> bool {
         self.counter += 1;
@@ -82,7 +82,7 @@ impl Shot {
                 actors,
                 tiles,
                 distance,
-                actor_adder,
+                game_commands,
                 actor_message_queue,
             );
             self.push(
@@ -91,7 +91,7 @@ impl Shot {
                 actors,
                 tiles,
                 distance,
-                actor_adder,
+                game_commands,
                 actor_message_queue,
             );
 
@@ -137,7 +137,7 @@ impl Shot {
         actors: &mut ActorsList,
         tiles: &mut LevelTiles,
         offset: i32,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
         if self.countdown >= 2 {
@@ -147,7 +147,7 @@ impl Shot {
                     self.position,
                     sizes,
                     tiles,
-                    actor_adder,
+                    game_commands,
                     hero,
                     actor_message_queue,
                 ) {
@@ -159,7 +159,7 @@ impl Shot {
         }
         if self.countdown >= 2 && tiles.collides(sizes, self.position) {
             self.countdown = 1;
-            actor_adder.add_actor(
+            game_commands.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left().offset(
                     self.position.width() as i32 / 2

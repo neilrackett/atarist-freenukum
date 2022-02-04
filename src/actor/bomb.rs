@@ -4,6 +4,7 @@ use crate::{
         RenderParameters, SingleAnimationType,
     },
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Result, Sizes, ANIMATION_BOMB,
 };
 use sdl2::rect::{Point, Rect};
@@ -78,7 +79,8 @@ impl ActorExt for Bomb {
                     .map(|t| t.solid)
                     .unwrap_or(false);
                 if space_is_free && space_has_solid_below {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_sound(SoundIndex::BOMBEXPLODE);
+                    p.game_commands.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::BombFire,
                         ),
@@ -112,7 +114,7 @@ impl ActorExt for Bomb {
                     .map(|t| t.solid)
                     .unwrap_or(false);
                 if space_is_free && space_has_solid_below {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::BombFire,
                         ),

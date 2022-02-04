@@ -4,6 +4,7 @@ use crate::{
         RenderParameters, SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, SOLID_START,
 };
 use sdl2::rect::{Point, Rect};
@@ -82,13 +83,14 @@ impl ActorExt for UnstableFloor {
                 ) {
                     t.solid = false;
                 }
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::SingleAnimation(
                         SingleAnimationType::Explosion,
                     ),
                     r.top_left(),
                 );
-                p.actor_adder.add_particle_firework(r.center(), 4);
+                p.game_commands.add_particle_firework(r.center(), 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 r.offset(p.sizes.width() as i32, 0);
             }
         }

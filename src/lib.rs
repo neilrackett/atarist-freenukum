@@ -22,6 +22,7 @@ pub mod picture;
 pub mod rendering;
 pub mod settings;
 pub mod shot;
+pub mod sound;
 pub mod text;
 pub mod tile;
 pub mod tilecache;
@@ -29,6 +30,7 @@ pub mod tileprovider;
 
 use anyhow::Result;
 use hero::Hero;
+use sound::SoundIndex;
 use tileprovider::TileProvider;
 
 pub const GAME_INTERVAL: u32 = 80;

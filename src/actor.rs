@@ -40,11 +40,13 @@ mod unstablefloor;
 mod wallcrawler;
 
 use crate::{
+    game::{GameCommandQueue, GameCommands, LevelCommandProcessor},
     geometry::RectExt,
     hero::Hero,
     infobox::InfoMessageQueue,
     level::{tiles::LevelTiles, BackgroundTileStrategy, PlayState},
     rendering::Renderer,
+    sound::SoundIndex,
     HorizontalDirection, KeyColor, Result, Sizes,
 };
 use sdl2::rect::{Point, Rect};
@@ -293,7 +295,7 @@ impl ActorExt for Actor {
 
 #[derive(Debug)]
 pub struct ActorsList {
-    actors: Vec<Actor>,
+    pub(crate) actors: Vec<Actor>,
     interaction_target: Option<usize>,
 }
 
@@ -363,7 +365,7 @@ impl ActorsList {
         shot_position: Rect,
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
         hero: &mut Hero,
         actor_message_queue: &mut ActorMessageQueue,
     ) -> bool {
@@ -371,7 +373,7 @@ impl ActorsList {
             let p = ShotParameters {
                 sizes,
                 tiles,
-                actor_adder,
+                game_commands,
                 hero,
                 actor_message_queue,
             };
@@ -389,6 +391,7 @@ impl ActorsList {
         &mut self,
         play_state: &mut PlayState,
         hero: &mut Hero,
+        game_commands: &mut dyn GameCommands,
         info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
@@ -404,6 +407,7 @@ impl ActorsList {
             let p = HeroInteractStartParameters {
                 play_state,
                 hero,
+                game_commands,
                 info_message_queue,
                 actor_message_queue,
             };
@@ -430,8 +434,9 @@ impl ActorsList {
         sizes: &dyn Sizes,
         tiles: &mut LevelTiles,
         hero: &mut Hero,
-        actor_queue: &mut ActorQueue,
+        game_commands: &mut GameCommandQueue,
         play_state: &mut PlayState,
+        play_sounds: &mut Vec<SoundIndex>,
         visible_rect: Rect,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
@@ -444,7 +449,7 @@ impl ActorsList {
                     sizes,
                     tiles,
                     hero,
-                    actor_adder: actor_queue,
+                    game_commands,
                     play_state,
                     actor_message_queue,
                 };
@@ -456,14 +461,15 @@ impl ActorsList {
         }
         self.remove_dead();
 
-        let mut adder = LevelActorAdder {
+        let mut command_processor = LevelCommandProcessor {
             sizes,
             tiles,
             actors: self,
+            play_sounds,
             copy_background: false,
         };
 
-        actor_queue.process(&mut adder);
+        game_commands.process(&mut command_processor);
         hero.gets_hurt = actors_hurting_hero > 0;
     }
 
@@ -704,106 +710,6 @@ impl ActorType {
     }
 }
 
-pub struct ActorQueueItem {
-    pub actor_type: ActorType,
-    pub pos: Point,
-}
-
-pub trait ActorAdder {
-    fn add_actor(&mut self, actor_type: ActorType, pos: Point);
-
-    fn add_particle_firework(&mut self, pos: Point, count: usize) {
-        use rand::Rng;
-        let mut rng = rand::thread_rng();
-
-        for _ in 0..count {
-            let color = match rng.gen_range(0..4) {
-                0 => ParticleColor::Pink,
-                1 => ParticleColor::Blue,
-                2 => ParticleColor::White,
-                3 => ParticleColor::Green,
-                _ => unreachable!(),
-            };
-            self.add_actor(ActorType::Particle(color), pos);
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct ActorQueue {
-    pub actors: Vec<ActorQueueItem>,
-}
-
-impl ActorAdder for ActorQueue {
-    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
-        self.push_back(actor_type, pos);
-    }
-}
-
-impl ActorQueue {
-    pub fn new() -> Self {
-        Self { actors: Vec::new() }
-    }
-
-    pub fn push_back(&mut self, actor_type: ActorType, pos: Point) {
-        self.actors.push(ActorQueueItem { actor_type, pos });
-    }
-
-    pub(crate) fn process(&mut self, destination: &mut dyn ActorAdder) {
-        for ActorQueueItem { actor_type, pos } in self.actors.drain(..) {
-            destination.add_actor(actor_type, pos);
-        }
-    }
-}
-
-pub struct LevelActorAdder<'a> {
-    pub sizes: &'a dyn Sizes,
-    pub tiles: &'a mut LevelTiles,
-    pub actors: &'a mut ActorsList,
-    pub copy_background: bool,
-}
-
-impl<'a> ActorAdder for LevelActorAdder<'a> {
-    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
-        let actor =
-            actor_type.create_actor_boxed(pos, self.sizes, self.tiles);
-        if self.copy_background {
-            let x = pos.x / self.sizes.width() as i32;
-            let y = pos.y / self.sizes.height() as i32;
-
-            let effective_number = match actor.background_tile_strategy() {
-                BackgroundTileStrategy::KeepEmpty => 0,
-                BackgroundTileStrategy::SetTile(tile) => tile,
-                BackgroundTileStrategy::CopyFromAbove => self
-                    .tiles
-                    .get(x, y - 1)
-                    .map(|t| t.effective_number)
-                    .unwrap_or(0),
-                BackgroundTileStrategy::CopyFromLeft => self
-                    .tiles
-                    .get(x - 1, y)
-                    .map(|t| t.effective_number)
-                    .unwrap_or(0),
-                BackgroundTileStrategy::CopyFromRight => self
-                    .tiles
-                    .get(x + 1, y)
-                    .map(|t| t.effective_number)
-                    .unwrap_or(0),
-                BackgroundTileStrategy::CopyFromBelow => self
-                    .tiles
-                    .get(x, y + 1)
-                    .map(|t| t.effective_number)
-                    .unwrap_or(0),
-            };
-
-            if let Ok(t) = self.tiles.get_mut(x, y) {
-                t.effective_number = effective_number;
-            }
-        }
-        self.actors.actors.push(actor);
-    }
-}
-
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum ActorMessageType {
     OpenDoor(KeyColor),
@@ -852,7 +758,7 @@ trait CreateActor: Sized {
 pub struct ActParameters<'a> {
     pub tiles: &'a mut LevelTiles,
     pub hero: &'a mut Hero,
-    pub actor_adder: &'a mut dyn ActorAdder,
+    pub game_commands: &'a mut dyn GameCommands,
     pub actor_message_queue: &'a mut ActorMessageQueue,
     pub play_state: &'a mut PlayState,
     pub sizes: &'a dyn Sizes,
@@ -860,7 +766,7 @@ pub struct ActParameters<'a> {
 
 pub struct ShotParameters<'a> {
     pub tiles: &'a mut LevelTiles,
-    pub actor_adder: &'a mut dyn ActorAdder,
+    pub game_commands: &'a mut dyn GameCommands,
     pub hero: &'a mut Hero,
     pub actor_message_queue: &'a mut ActorMessageQueue,
     pub sizes: &'a dyn Sizes,
@@ -881,6 +787,7 @@ pub struct ReceiveMessageParameters<'a> {
 pub struct HeroInteractStartParameters<'a> {
     pub play_state: &'a mut PlayState,
     pub hero: &'a mut Hero,
+    pub game_commands: &'a mut dyn GameCommands,
     pub info_message_queue: &'a mut InfoMessageQueue,
     pub actor_message_queue: &'a mut ActorMessageQueue,
 }

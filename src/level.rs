@@ -2,17 +2,18 @@ pub mod tiles;
 
 use crate::{
     actor::{
-        ActorAdder, ActorMessageQueue, ActorQueue, ActorType, ActorsList,
-        BackgroundAnimationType, BoxBlueContent, BoxGreyContent,
-        BoxRedContent, ItemType, LevelActorAdder, SpikeType,
-        TeleporterIndex,
+        ActorMessageQueue, ActorType, ActorsList, BackgroundAnimationType,
+        BoxBlueContent, BoxGreyContent, BoxRedContent, ItemType,
+        SpikeType, TeleporterIndex,
     },
+    game::{GameCommandQueue, GameCommands, LevelCommandProcessor},
     hero::Hero,
     infobox::InfoMessageQueue,
     rendering::Renderer,
     shot::{Shot, ShotList},
-    HorizontalDirection, KeyColor, Result, Sizes, ANIMATION_START,
-    LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK, SOLID_CONVEYORBELT_LEFTEND,
+    HorizontalDirection, KeyColor, Result, Sizes, SoundIndex,
+    ANIMATION_START, LEVEL_HEIGHT, LEVEL_WIDTH, SOLID_BLACK,
+    SOLID_CONVEYORBELT_LEFTEND,
 };
 use log::warn;
 use sdl2::{
@@ -21,7 +22,7 @@ use sdl2::{
     surface::Surface,
 };
 use std::io::Read;
-use tiles::LevelTiles;
+pub use tiles::LevelTiles;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PlayState {
@@ -71,7 +72,7 @@ impl Level {
         sizes: &dyn Sizes,
     ) -> Result<Self> {
         let mut tiles = LevelTiles::new();
-        let mut actor_queue = ActorQueue::new();
+        let mut game_commands = GameCommandQueue::new();
 
         for i in 0..LEVEL_HEIGHT * LEVEL_WIDTH {
             let x = (i % LEVEL_WIDTH) as i32;
@@ -84,7 +85,7 @@ impl Level {
             let ty = y * sizes.height() as i32;
 
             let mut aa = |actor_type, x, y| {
-                actor_queue.add_actor(actor_type, Point::new(x, y));
+                game_commands.add_actor(actor_type, Point::new(x, y));
             };
 
             let tile = u16::from_le_bytes(tile_buf);
@@ -950,13 +951,15 @@ impl Level {
         }
 
         let mut actors = ActorsList::new();
-        let mut actor_adder = LevelActorAdder {
+        let mut play_sounds = Vec::new();
+        let mut command_processor = LevelCommandProcessor {
             sizes,
             tiles: &mut tiles,
             actors: &mut actors,
+            play_sounds: &mut play_sounds,
             copy_background: true,
         };
-        actor_queue.process(&mut actor_adder);
+        game_commands.process(&mut command_processor);
 
         Ok(Self {
             tiles,
@@ -970,12 +973,14 @@ impl Level {
     pub fn hero_interact_start(
         &mut self,
         hero: &mut Hero,
+        game_commands: &mut dyn GameCommands,
         info_message_queue: &mut InfoMessageQueue,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
         self.actors.start_interaction(
             &mut self.play_state,
             hero,
+            game_commands,
             info_message_queue,
             actor_message_queue,
         );
@@ -1055,8 +1060,9 @@ impl Level {
         &mut self,
         sizes: &dyn Sizes,
         hero: &mut Hero,
-        actor_queue: &mut ActorQueue,
+        game_command_queue: &mut GameCommandQueue,
         actor_message_queue: &mut ActorMessageQueue,
+        play_sounds: &mut Vec<SoundIndex>,
         visible_rect: Rect,
     ) -> Result<()> {
         let animated_frames =
@@ -1068,7 +1074,7 @@ impl Level {
                 hero,
                 &mut self.actors,
                 &mut self.tiles,
-                actor_queue,
+                game_command_queue,
                 actor_message_queue,
             );
         }
@@ -1087,14 +1093,15 @@ impl Level {
             sizes,
             &mut self.tiles,
             hero,
-            actor_queue,
+            game_command_queue,
             &mut self.play_state,
+            play_sounds,
             visible_rect,
             actor_message_queue,
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {
-            hero.act(sizes, &self.tiles, actor_queue)?;
+            hero.act(sizes, &self.tiles, game_command_queue)?;
         }
         hero.next_frame();
         hero.update_animation();
@@ -1103,6 +1110,7 @@ impl Level {
             && self.play_state == PlayState::Playing
         {
             self.play_state = PlayState::KilledPlayingAnimation(80);
+            game_command_queue.add_sound(SoundIndex::PLAYERDEATH);
         }
 
         Ok(())
@@ -1112,7 +1120,7 @@ impl Level {
         &mut self,
         sizes: &dyn Sizes,
         hero: &mut Hero,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
         actor_message_queue: &mut ActorMessageQueue,
     ) {
         if self.shots.len() < hero.firepower.num_shots() as usize
@@ -1121,6 +1129,7 @@ impl Level {
             let heropos = hero.position.geometry;
             let mut shot =
                 Shot::new(sizes, heropos.x, heropos.y, hero.direction);
+            game_commands.add_sound(SoundIndex::PLAYERGUN);
 
             let distance =
                 sizes.half_width() as i32 * shot.direction.as_factor_i32();
@@ -1134,7 +1143,7 @@ impl Level {
                 &mut self.actors,
                 &mut self.tiles,
                 distance,
-                actor_adder,
+                game_commands,
                 actor_message_queue,
             );
 

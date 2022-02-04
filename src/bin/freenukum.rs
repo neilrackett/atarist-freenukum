@@ -8,6 +8,7 @@ use freenukum::{
     mainmenu::{mainmenu, MainMenuEntry},
     picture::show_splash,
     settings::Settings,
+    sound::SoundCache,
     tilecache::TileCache,
     DefaultSizes, UserEvent, WINDOW_HEIGHT, WINDOW_WIDTH,
 };
@@ -23,6 +24,7 @@ fn main() -> Result<()> {
     let ttf_context = sdl2::ttf::init()?;
     let event_subsystem = sdl_context.event().map_err(Error::msg)?;
     let timer_subsystem = sdl_context.timer().map_err(Error::msg)?;
+    let audio_subsystem = sdl_context.audio().map_err(Error::msg)?;
     let controller_subsystem =
         sdl_context.game_controller().map_err(Error::msg)?;
     controller_subsystem.set_event_state(true);
@@ -41,7 +43,6 @@ fn main() -> Result<()> {
         .map_err(Error::msg)?;
 
     let sizes = DefaultSizes;
-
     let window = game::create_window(
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
@@ -62,6 +63,7 @@ fn main() -> Result<()> {
         &mut event_pump,
     )?;
     let tilecache = TileCache::load_from_path(&original_data_dir())?;
+    let soundcache = SoundCache::load_from_path(&original_data_dir())?;
 
     let mut bg_filepath = original_data_dir().join("dn.dn1");
     {
@@ -97,12 +99,14 @@ fn main() -> Result<()> {
                 game::start(
                     &mut canvas,
                     &tilecache,
+                    &soundcache,
                     &mut hero,
                     &mut settings,
                     &episodes,
                     &mut event_pump,
                     &event_sender,
                     &timer_subsystem,
+                    &audio_subsystem,
                     &sizes,
                 )?;
                 let mut file = File::open(&bg_filepath)?;

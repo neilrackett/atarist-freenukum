@@ -5,6 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_CARBOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -116,16 +117,17 @@ impl ActorExt for TankBot {
                     .offset(direction * p.sizes.half_width() as i32, 0);
                 self.tile = (self.tile as i32 + 4 * direction) as usize;
 
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::HostileShot(self.orientation),
                     self.position.top_left().offset(0, -6),
                 );
+                p.game_commands.add_sound(SoundIndex::ENEMYSHOT);
             }
         }
         if self.state == State::Hurt {
             // create steam clouds
             if self.current_frame == 0 {
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::SingleAnimation(SingleAnimationType::Steam),
                     self.position.top_left().offset(
                         p.sizes.half_width() as i32,
@@ -155,7 +157,7 @@ impl ActorExt for TankBot {
         self.state = match self.state {
             State::Healthy => State::Hurt,
             State::Hurt => {
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::SingleAnimation(
                         SingleAnimationType::Explosion,
                     ),
@@ -163,9 +165,10 @@ impl ActorExt for TankBot {
                         .top_left()
                         .offset(p.sizes.half_width() as i32, 0),
                 );
-                p.actor_adder
+                p.game_commands
                     .add_particle_firework(self.position.top_left(), 4);
                 p.hero.score.add(2500);
+                p.game_commands.add_sound(SoundIndex::SMALLDEATH);
 
                 State::Dead
             }

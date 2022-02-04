@@ -118,7 +118,7 @@ impl ActorExt for Fan {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.running = 9;
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Steam),
             self.position.top_left(),
         );

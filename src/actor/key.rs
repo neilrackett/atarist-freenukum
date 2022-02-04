@@ -5,8 +5,8 @@ use crate::{
     },
     hero::InventoryItem,
     level::{tiles::LevelTiles, BackgroundTileStrategy},
-    KeyColor, Result, Sizes, OBJECT_KEY_BLUE, OBJECT_KEY_GREEN,
-    OBJECT_KEY_PINK, OBJECT_KEY_RED,
+    KeyColor, Result, Sizes, SoundIndex, OBJECT_KEY_BLUE,
+    OBJECT_KEY_GREEN, OBJECT_KEY_PINK, OBJECT_KEY_RED,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -46,11 +46,12 @@ impl ActorExt for Key {
 
             p.hero.inventory.set(item);
             p.hero.score.add(1000);
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score1000),
                 self.position.top_left(),
             );
             self.is_alive = false;
+            p.game_commands.add_sound(SoundIndex::GETKEY);
         }
     }
 

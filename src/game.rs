@@ -1,14 +1,17 @@
-use crate::actor::{ActorMessageQueue, ActorQueue};
+use crate::actor::{
+    ActorExt, ActorMessageQueue, ActorType, ActorsList, ParticleColor,
+};
 use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
 use crate::hero::{Hero, Motion};
 use crate::infobox::{self, InfoMessageQueue};
-use crate::level::{Level, PlayState};
+use crate::level::{BackgroundTileStrategy, Level, LevelTiles, PlayState};
 use crate::picture::show_splash_with_message;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
 use crate::settings::Settings;
+use crate::sound::{SoundCache, SoundIndex, SoundPlayer};
 use crate::tile::TileHeader;
 use crate::{backdrop, HorizontalDirection, TileProvider, UserEvent};
 use crate::{
@@ -20,11 +23,11 @@ use anyhow::Error;
 use sdl2::{
     event::EventSender,
     pixels::Color,
-    rect::Rect,
+    rect::{Point, Rect},
     render::{Canvas, RenderTarget, TextureCreator, WindowCanvas},
     ttf::Font,
     video::Window,
-    EventPump, TimerSubsystem, VideoSubsystem,
+    AudioSubsystem, EventPump, TimerSubsystem, VideoSubsystem,
 };
 use std::collections::BTreeSet;
 use std::fs::File;
@@ -41,6 +44,7 @@ fn start_in_level(
     level_number: usize,
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
+    soundcache: &SoundCache,
     hero: &mut Hero,
     settings: &mut Settings,
     episodes: &Episodes,
@@ -48,6 +52,7 @@ fn start_in_level(
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
+    audio_subsystem: &AudioSubsystem,
     sizes: &dyn Sizes,
 ) -> Result<NextAction> {
     let backdrop = {
@@ -106,13 +111,20 @@ fn start_in_level(
         }),
     );
 
-    let mut actor_queue = ActorQueue::new();
+    let mut sound_player =
+        SoundPlayer::create(audio_subsystem, soundcache);
+
+    let mut command_queue = GameCommandQueue::new();
     let mut info_message_queue = InfoMessageQueue::new();
     let mut actor_message_queue = ActorMessageQueue::new();
 
     let mut do_update = true;
     let mut walking_left = BTreeSet::new();
     let mut walking_right = BTreeSet::new();
+
+    if level_number == 1 {
+        command_queue.add_sound(SoundIndex::STARTGAME);
+    }
 
     while level.play_state.keep_acting() {
         let texture_creator = canvas.texture_creator();
@@ -138,8 +150,7 @@ fn start_in_level(
                     hero.hidden = true;
 
                     if i > 30 && i % 2 == 0 {
-                        use crate::actor::ActorAdder;
-                        actor_queue
+                        command_queue
                             .add_particle_firework(heropos.center(), 4);
                     }
                     level.play_state =
@@ -248,6 +259,7 @@ fn start_in_level(
             GameEvent::HeroInteractionStart => {
                 level.hero_interact_start(
                     hero,
+                    &mut command_queue,
                     &mut info_message_queue,
                     &mut actor_message_queue,
                 );
@@ -313,7 +325,7 @@ fn start_in_level(
                 canvas.present();
             }
             GameEvent::HeroJump => {
-                hero.jump();
+                hero.jump(&mut command_queue);
                 hero.update_animation();
             }
             GameEvent::HeroStartFiring => {
@@ -321,7 +333,7 @@ fn start_in_level(
                 level.fire_shot(
                     sizes,
                     hero,
-                    &mut actor_queue,
+                    &mut command_queue,
                     &mut actor_message_queue,
                 );
                 hero.update_animation();
@@ -331,13 +343,18 @@ fn start_in_level(
                 hero.update_animation();
             }
             GameEvent::TimerTriggered => {
+                let mut play_sounds = Vec::new();
                 level.act(
                     sizes,
                     hero,
-                    &mut actor_queue,
+                    &mut command_queue,
                     &mut actor_message_queue,
+                    &mut play_sounds,
                     srcrect,
                 )?;
+                for index in play_sounds {
+                    sound_player.play_sound(index);
+                }
                 do_update = true;
                 info_message_queue.process(
                     canvas,
@@ -362,12 +379,14 @@ fn start_in_level(
 pub fn start(
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
+    soundcache: &SoundCache,
     hero: &mut Hero,
     settings: &mut Settings,
     episodes: &Episodes,
     event_pump: &mut EventPump,
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
+    audio_subsystem: &AudioSubsystem,
     sizes: &dyn Sizes,
 ) -> Result<()> {
     {
@@ -437,6 +456,7 @@ pub fn start(
                 2,
                 canvas,
                 tileprovider,
+                soundcache,
                 hero,
                 settings,
                 episodes,
@@ -444,6 +464,7 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
+                audio_subsystem,
                 sizes,
             )? {
                 NextAction::NextLevel => {
@@ -465,6 +486,7 @@ pub fn start(
                 level,
                 canvas,
                 tileprovider,
+                soundcache,
                 hero,
                 settings,
                 episodes,
@@ -472,6 +494,7 @@ pub fn start(
                 event_pump,
                 event_sender,
                 timer_subsystem,
+                audio_subsystem,
                 sizes,
             )? {
                 NextAction::NextLevel => {
@@ -552,4 +575,126 @@ pub fn create_window(
         builder.fullscreen();
     }
     Ok(builder.build()?)
+}
+
+pub struct ActorQueueItem {
+    pub actor_type: ActorType,
+    pub pos: Point,
+}
+
+pub trait GameCommands {
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point);
+
+    fn add_sound(&mut self, index: SoundIndex);
+
+    fn add_particle_firework(&mut self, pos: Point, count: usize) {
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..count {
+            let color = match rng.gen_range(0..4) {
+                0 => ParticleColor::Pink,
+                1 => ParticleColor::Blue,
+                2 => ParticleColor::White,
+                3 => ParticleColor::Green,
+                _ => unreachable!(),
+            };
+            self.add_actor(ActorType::Particle(color), pos);
+        }
+    }
+}
+
+#[derive(Default)]
+pub struct GameCommandQueue {
+    pub actors: Vec<ActorQueueItem>,
+    pub sounds: Vec<SoundIndex>,
+}
+
+impl GameCommands for GameCommandQueue {
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
+        self.push_back_actor(actor_type, pos);
+    }
+
+    fn add_sound(&mut self, index: SoundIndex) {
+        self.push_back_sound(index);
+    }
+}
+
+impl GameCommandQueue {
+    pub fn new() -> Self {
+        Self {
+            actors: Vec::new(),
+            sounds: Vec::new(),
+        }
+    }
+
+    pub fn push_back_actor(&mut self, actor_type: ActorType, pos: Point) {
+        self.actors.push(ActorQueueItem { actor_type, pos });
+    }
+
+    pub fn push_back_sound(&mut self, index: SoundIndex) {
+        self.sounds.push(index);
+    }
+
+    pub(crate) fn process(&mut self, destination: &mut dyn GameCommands) {
+        for ActorQueueItem { actor_type, pos } in self.actors.drain(..) {
+            destination.add_actor(actor_type, pos);
+        }
+        for index in self.sounds.drain(..) {
+            destination.add_sound(index);
+        }
+    }
+}
+
+pub struct LevelCommandProcessor<'a> {
+    pub sizes: &'a dyn Sizes,
+    pub tiles: &'a mut LevelTiles,
+    pub actors: &'a mut ActorsList,
+    pub play_sounds: &'a mut Vec<SoundIndex>,
+    pub copy_background: bool,
+}
+
+impl<'a> GameCommands for LevelCommandProcessor<'a> {
+    fn add_actor(&mut self, actor_type: ActorType, pos: Point) {
+        let actor =
+            actor_type.create_actor_boxed(pos, self.sizes, self.tiles);
+        if self.copy_background {
+            let x = pos.x / self.sizes.width() as i32;
+            let y = pos.y / self.sizes.height() as i32;
+
+            let effective_number = match actor.background_tile_strategy() {
+                BackgroundTileStrategy::KeepEmpty => 0,
+                BackgroundTileStrategy::SetTile(tile) => tile,
+                BackgroundTileStrategy::CopyFromAbove => self
+                    .tiles
+                    .get(x, y - 1)
+                    .map(|t| t.effective_number)
+                    .unwrap_or(0),
+                BackgroundTileStrategy::CopyFromLeft => self
+                    .tiles
+                    .get(x - 1, y)
+                    .map(|t| t.effective_number)
+                    .unwrap_or(0),
+                BackgroundTileStrategy::CopyFromRight => self
+                    .tiles
+                    .get(x + 1, y)
+                    .map(|t| t.effective_number)
+                    .unwrap_or(0),
+                BackgroundTileStrategy::CopyFromBelow => self
+                    .tiles
+                    .get(x, y + 1)
+                    .map(|t| t.effective_number)
+                    .unwrap_or(0),
+            };
+
+            if let Ok(t) = self.tiles.get_mut(x, y) {
+                t.effective_number = effective_number;
+            }
+        }
+        self.actors.actors.push(actor);
+    }
+
+    fn add_sound(&mut self, index: SoundIndex) {
+        self.play_sounds.push(index);
+    }
 }

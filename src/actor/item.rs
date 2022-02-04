@@ -1,13 +1,13 @@
 use crate::{
     actor::{
-        ActParameters, Actor, ActorAdder, ActorExt, ActorType,
-        CreateActorWithDetails, RenderParameters, ScoreType,
-        ShotParameters, ShotProcessing,
+        ActParameters, Actor, ActorExt, ActorType, CreateActorWithDetails,
+        RenderParameters, ScoreType, ShotParameters, ShotProcessing,
     },
+    game::GameCommands,
     hero::{FetchedLetter, InventoryItem},
     level::{tiles::LevelTiles, BackgroundTileStrategy},
-    Hero, Result, Sizes, ANIMATION_SODA, OBJECT_ACCESS_CARD, OBJECT_BOOT,
-    OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
+    Hero, Result, Sizes, SoundIndex, ANIMATION_SODA, OBJECT_ACCESS_CARD,
+    OBJECT_BOOT, OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
     OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE, OBJECT_CLAMP,
     OBJECT_DISK, OBJECT_FLAG, OBJECT_FOOTBALL, OBJECT_GLOVE, OBJECT_GUN,
     OBJECT_JOYSTICK, OBJECT_LETTER_D, OBJECT_LETTER_E, OBJECT_LETTER_K,
@@ -142,185 +142,203 @@ impl Item {
         &mut self,
         item_type: ItemType,
         hero: &mut Hero,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
     ) {
         match item_type {
             ItemType::LetterD => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::D);
                 hero.score.add(500);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::LetterU => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::U);
                 hero.score.add(500);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::LetterK => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::K);
                 hero.score.add(500);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score500),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::LetterE => {
                 self.is_alive = false;
                 hero.fetched_letter_state.picked(FetchedLetter::E);
                 hero.score.add(500);
                 if hero.fetched_letter_state.succeeded() {
-                    actor_adder.add_actor(
+                    game_commands.add_actor(
                         ActorType::Score(ScoreType::Score10000),
                         self.position.top_left(),
                     );
                     hero.score.add(10000);
+                    game_commands.add_sound(SoundIndex::GETDUKESND);
                 } else {
-                    actor_adder.add_actor(
+                    game_commands.add_actor(
                         ActorType::Score(ScoreType::Score500),
                         self.position.top_left(),
                     );
                     hero.score.add(500);
+                    game_commands.add_sound(SoundIndex::GETBONUSOBJ);
                 }
             }
             ItemType::FullLife => {
                 hero.health.fill_max();
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETPOWERUP);
             }
             ItemType::Gun => {
                 hero.firepower.increase(1);
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::SPECIALITEM);
             }
             ItemType::AccessCard => {
                 hero.inventory.set(InventoryItem::AccessCard);
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::SPECIALITEM);
             }
             ItemType::Glove => {
                 hero.inventory.set(InventoryItem::Glove);
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::SPECIALITEM);
             }
             ItemType::Boots => {
                 hero.inventory.set(InventoryItem::Boot);
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::SPECIALITEM);
             }
             ItemType::Clamps => {
                 hero.inventory.set(InventoryItem::Clamp);
                 self.is_alive = false;
                 hero.score.add(1000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score1000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::SPECIALITEM);
             }
             ItemType::Football => {
                 self.is_alive = false;
                 hero.score.add(100);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score100),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::Disk => {
                 self.is_alive = false;
                 hero.score.add(5000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score5000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::Joystick => {
                 self.is_alive = false;
                 hero.score.add(2000);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score2000),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::Radio | ItemType::Flag => {
                 self.is_alive = false;
                 match self.current_frame {
                     0 => {
                         hero.score.add(100);
-                        actor_adder.add_actor(
+                        game_commands.add_actor(
                             ActorType::Score(ScoreType::Score100),
                             self.position.top_left(),
                         );
                     }
                     1 => {
                         hero.score.add(2000);
-                        actor_adder.add_actor(
+                        game_commands.add_actor(
                             ActorType::Score(ScoreType::Score2000),
                             self.position.top_left(),
                         );
                     }
                     2 => {
                         hero.score.add(5000);
-                        actor_adder.add_actor(
+                        game_commands.add_actor(
                             ActorType::Score(ScoreType::Score5000),
                             self.position.top_left(),
                         );
                     }
                     _ => unreachable!(),
                 }
+                game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             }
             ItemType::Soda => {
                 hero.health.increase(1);
                 self.is_alive = false;
                 hero.score.add(200);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score200),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETFOODITEM);
             }
             ItemType::ChickenSingle => {
                 hero.health.increase(1);
                 self.is_alive = false;
                 hero.score.add(100);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score100),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETFOODITEM);
             }
             ItemType::ChickenDouble => {
                 hero.health.increase(2);
                 self.is_alive = false;
                 hero.score.add(200);
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::Score(ScoreType::Score200),
                     self.position.top_left(),
                 );
+                game_commands.add_sound(SoundIndex::GETFOODITEM);
             }
             _ => {}
         }
@@ -345,7 +363,7 @@ impl ActorExt for Item {
         }
 
         if self.position.has_intersection(p.hero.position.geometry) {
-            self.touched_by_hero(self.item_type, p.hero, p.actor_adder);
+            self.touched_by_hero(self.item_type, p.hero, p.game_commands);
         }
     }
 
@@ -373,148 +391,168 @@ impl ActorExt for Item {
         match self.item_type {
             ItemType::BoxBlue(BoxBlueContent::Football) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Football), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxBlue(BoxBlueContent::Joystick) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Joystick), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxBlue(BoxBlueContent::Disk) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Disk), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxBlue(BoxBlueContent::Balloon) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::Balloon,
                     pos.offset(0, -(p.sizes.height() as i32)),
                 );
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxBlue(BoxBlueContent::Flag) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Flag), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxBlue(BoxBlueContent::Radio) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Radio), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxRed(BoxRedContent::Soda) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Soda), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxRed(BoxRedContent::Chicken) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::Item(ItemType::ChickenSingle),
                     pos,
                 );
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Nothing) => {
                 self.is_alive = false;
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Boots) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Boots), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Clamps) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Clamps), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Gun) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Gun), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Bomb) => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::Bomb, pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_actor(ActorType::Bomb, pos);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::Glove) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::Glove), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::FullLife) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::FullLife), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::AccessCard) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::AccessCard), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::LetterD) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::LetterD), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::LetterU) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::LetterU), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::LetterK) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::LetterK), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::BoxGrey(BoxGreyContent::LetterE) => {
                 self.is_alive = false;
-                p.actor_adder
+                p.game_commands
                     .add_actor(ActorType::Item(ItemType::LetterE), pos);
-                p.actor_adder.add_particle_firework(pos, 4);
+                p.game_commands.add_particle_firework(pos, 4);
+                p.game_commands.add_sound(SoundIndex::BOXEXPLODE);
                 ShotProcessing::Absorb
             }
             ItemType::ChickenSingle => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::Item(ItemType::ChickenDouble),
                     pos,
                 );
@@ -522,7 +560,7 @@ impl ActorExt for Item {
             }
             ItemType::Soda => {
                 self.is_alive = false;
-                p.actor_adder.add_actor(ActorType::SodaFlying, pos);
+                p.game_commands.add_actor(ActorType::SodaFlying, pos);
                 ShotProcessing::Absorb
             }
             _ => ShotProcessing::Ignore,

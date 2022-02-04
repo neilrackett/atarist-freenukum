@@ -5,6 +5,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Hero, Result, Sizes, ANIMATION_TELEPORTER1,
 };
 use sdl2::rect::{Point, Rect};
@@ -67,11 +68,12 @@ impl ActorExt for Teleporter {
         true
     }
 
-    fn hero_interact_start(&mut self, _p: HeroInteractStartParameters) {
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         if self.state == State::Idle {
             self.state = State::Sending;
             self.counter = 0;
         }
+        p.game_commands.add_sound(SoundIndex::TELEPORT);
     }
 
     fn act(&mut self, p: ActParameters) {

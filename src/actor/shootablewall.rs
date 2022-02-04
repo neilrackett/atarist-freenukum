@@ -5,6 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, BACKGROUND_LIGHT_GREY, SOLID_SHOOTABLE_WALL_BRICKS,
 };
 use sdl2::rect::{Point, Rect};
@@ -42,10 +43,11 @@ impl ActorExt for ShootableWall {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.hero.score.add(10);
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Explosion),
             self.position.top_left(),
         );
+        p.game_commands.add_sound(SoundIndex::HITABREAKER);
         self.is_alive = false;
         if let Ok(ref mut t) = p.tiles.get_mut(
             self.position.x() / p.sizes.width() as i32,

@@ -5,6 +5,7 @@ use crate::{
         ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, OBJECT_ROTATINGCYLINDER,
 };
 use sdl2::rect::{Point, Rect};
@@ -52,6 +53,9 @@ impl CreateActor for Mill {
 impl ActorExt for Mill {
     fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
+            if self.current_frame == 0 {
+                p.game_commands.add_sound(SoundIndex::REACTORSND);
+            }
             self.current_frame += 1;
             self.current_frame %= self.num_frames;
 
@@ -78,23 +82,24 @@ impl ActorExt for Mill {
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.lives -= 1;
         if self.lives > 0 {
-            p.actor_adder
+            p.game_commands
                 .add_particle_firework(self.position.center(), 4);
         } else {
             // TODO: add removal animation (destroyed body)
+            p.game_commands.add_sound(SoundIndex::HITREACTOR);
             p.actor_message_queue
                 .push_back(ActorMessageType::RemoveElectricArc);
             p.hero.score.add(20000);
-            p.actor_adder
+            p.game_commands
                 .add_particle_firework(self.position.center(), 20);
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score10000),
                 self.position.top_left().offset(
                     0,
                     (self.position.height() / 2 - p.sizes.height()) as i32,
                 ),
             );
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score10000),
                 self.position
                     .top_left()
@@ -118,5 +123,9 @@ impl ActorExt for Mill {
 
     fn background_tile_strategy(&self) -> BackgroundTileStrategy {
         BackgroundTileStrategy::CopyFromLeft
+    }
+
+    fn acts_while_invisible(&self) -> bool {
+        false
     }
 }

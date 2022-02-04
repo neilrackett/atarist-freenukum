@@ -4,6 +4,7 @@ use crate::{
         ShotParameters, ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
@@ -51,6 +52,10 @@ impl ActorExt for MineJumping {
         let distance =
             ((p.sizes.height() as f32) * relative_distance) as i32;
         self.position.set_y(self.base_y - distance);
+
+        if self.counter == 0 {
+            p.game_commands.add_sound(SoundIndex::MINEBOUNCE);
+        }
 
         self.counter += 1;
         self.counter %= 12;

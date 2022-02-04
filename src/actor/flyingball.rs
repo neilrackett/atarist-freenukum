@@ -4,6 +4,7 @@ use crate::{
         RenderParameters, ShotParameters, ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, Result, Sizes, ANIMATION_BALL,
 };
 use sdl2::rect::{Point, Rect};
@@ -131,8 +132,9 @@ impl ActorExt for FlyingBall {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.hero.score.add(1000);
-        p.actor_adder
+        p.game_commands
             .add_particle_firework(self.position.top_left(), 4);
+        p.game_commands.add_sound(SoundIndex::SMALLDEATH);
         // TODO: add explosion animation (small and then large white circle)
         self.is_alive = false;
         ShotProcessing::Absorb

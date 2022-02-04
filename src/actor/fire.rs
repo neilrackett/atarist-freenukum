@@ -4,6 +4,7 @@ use crate::{
         RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
     OBJECT_FIRERIGHT, TILE_WIDTH,
 };
@@ -53,12 +54,13 @@ impl CreateActorWithDetails for Fire {
 }
 
 impl ActorExt for Fire {
-    fn act(&mut self, _p: ActParameters) {
+    fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Off => {
                 if self.counter == 40 {
                     self.counter = 0;
                     self.state = State::Ignition;
+                    p.game_commands.add_sound(SoundIndex::TORCHON);
                 }
             }
             State::Ignition => {

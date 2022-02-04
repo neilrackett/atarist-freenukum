@@ -5,7 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::tiles::{LevelTiles, Tile},
-    Result, Sizes, OBJECT_BALLOON,
+    Result, Sizes, SoundIndex, OBJECT_BALLOON,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -45,10 +45,11 @@ impl ActorExt for Balloon {
         if self.position.has_intersection(p.hero.position.geometry) {
             self.is_alive = false;
             p.hero.score.add(10000);
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score10000),
                 self.position.top_left(),
             );
+            p.game_commands.add_sound(SoundIndex::GETBALLON);
         } else {
             self.position.y -= 1;
             if let Ok(Tile { solid: true, .. }) = p.tiles.get(
@@ -57,7 +58,7 @@ impl ActorExt for Balloon {
             ) {
                 // balloon bumps against wall
                 self.destroyed = true;
-                p.actor_adder.add_actor(
+                p.game_commands.add_actor(
                     ActorType::SingleAnimation(SingleAnimationType::Steam),
                     self.position.top_left(),
                 );
@@ -89,7 +90,7 @@ impl ActorExt for Balloon {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.destroyed = true;
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Steam),
             self.position.top_left(),
         );

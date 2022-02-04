@@ -6,6 +6,7 @@ use crate::{
     },
     geometry::RectExt,
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Hero, Result, Sizes, OBJECT_ELEVATOR_TOP, SOLID_ELEVATOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -70,6 +71,7 @@ impl ActorExt for Elevator {
                     // hero touches solid with head
                     self.state = State::Idle;
                 } else {
+                    p.game_commands.add_sound(SoundIndex::ELEVATOR);
                     let offset = p.hero.position.push_vertically(
                         p.sizes,
                         &p.tiles,

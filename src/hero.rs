@@ -1,14 +1,15 @@
 use crate::{
-    actor::{ActorAdder, ActorType, SingleAnimationType},
+    actor::{ActorType, SingleAnimationType},
+    game::GameCommands,
     level::tiles::LevelTiles,
     rendering::Renderer,
-    HorizontalDirection, KeyColor, Result, Sizes, HERO_FALLING_LEFT,
-    HERO_FALLING_RIGHT, HERO_JUMPING_LEFT, HERO_JUMPING_LEFT_SOMERSAULT,
-    HERO_JUMPING_RIGHT, HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING,
-    HERO_NUM_JUMPING, HERO_NUM_STANDING, HERO_NUM_WALKING,
-    HERO_SKELETON_LEFT, HERO_SKELETON_RIGHT, HERO_STANDING_LEFT,
-    HERO_STANDING_RIGHT, HERO_WALKING_LEFT, HERO_WALKING_RIGHT,
-    LEVEL_HEIGHT, LEVEL_WIDTH,
+    HorizontalDirection, KeyColor, Result, Sizes, SoundIndex,
+    HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
+    HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
+    HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
+    HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
+    HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
+    HERO_WALKING_LEFT, HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 use std::convert::TryFrom;
@@ -251,7 +252,7 @@ impl Hero {
         };
     }
 
-    pub fn jump(&mut self) {
+    pub fn jump(&mut self, game_commands: &mut dyn GameCommands) {
         if !self.is_in_the_air {
             let (vertical_speed, somersault) =
                 if self.inventory.is_set(InventoryItem::Boot) {
@@ -274,6 +275,7 @@ impl Hero {
             self.somersault = somersault;
             self.vertical_speed = vertical_speed;
             self.is_in_the_air = true;
+            game_commands.add_sound(SoundIndex::PLAYERJUMP);
         }
     }
 
@@ -294,12 +296,13 @@ impl Hero {
         &mut self,
         sizes: &dyn Sizes,
         tiles: &LevelTiles,
-        actor_adder: &mut dyn ActorAdder,
+        game_commands: &mut dyn GameCommands,
     ) -> Result<()> {
         self.immunity.count_down();
         if !self.immunity.hero_is_protected() && self.gets_hurt {
             self.immunity.enable();
             self.health.decrease(1);
+            game_commands.add_sound(SoundIndex::PLAYERHIT);
             // when jumping, this jump should be interrupted
             // just as if the hero had bumped against a ceiling
             self.counter = 0;
@@ -331,6 +334,9 @@ impl Hero {
                     new_position.x,
                     new_position.y,
                 ) {
+                    if !self.is_in_the_air {
+                        game_commands.add_sound(SoundIndex::WALKING);
+                    }
                     self.position.move_to(
                         sizes,
                         new_position.x(),
@@ -368,6 +374,7 @@ impl Hero {
                     } else {
                         // hero bumped against the ceiling
                         self.counter = 0;
+                        game_commands.add_sound(SoundIndex::HITHEAD);
                     }
                 }
             } else {
@@ -396,7 +403,7 @@ impl Hero {
             geometry.y + sizes.half_height() as i32,
         ) {
             if self.is_in_the_air {
-                actor_adder.add_actor(
+                game_commands.add_actor(
                     ActorType::SingleAnimation(
                         SingleAnimationType::DustCloud,
                     ),
@@ -405,6 +412,7 @@ impl Hero {
                         self.position.geometry.y() + sizes.height() as i32,
                     ),
                 );
+                game_commands.add_sound(SoundIndex::PLAYERLAND);
             }
             // the hero is standing on solid ground
             self.land();

@@ -49,7 +49,7 @@ impl ActorExt for MineLying {
 
         if p.hero.position.geometry.has_intersection(self.position) {
             self.is_alive = false;
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::BombFire),
                 self.position.top_left(),
             );

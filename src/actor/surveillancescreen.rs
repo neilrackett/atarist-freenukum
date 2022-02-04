@@ -4,6 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, Result, Sizes, ANIMATION_BADGUYSCREEN,
 };
 use sdl2::rect::{Point, Rect};
@@ -37,6 +38,7 @@ impl ActorExt for SurveillanceScreen {
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         // TODO: implement functionality.
+        p.game_commands.add_sound(SoundIndex::MONITOR);
         p.info_message_queue
             .push_back("Not implemented yet.".to_string());
     }

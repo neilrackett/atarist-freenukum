@@ -1,6 +1,5 @@
 use anyhow::{Error, Result};
 use freenukum::{
-    actor::ActorQueue,
     data::original_data_dir,
     game,
     graphics::load_default_font,
@@ -95,6 +94,8 @@ fn main() -> Result<()> {
         }),
     );
 
+    let mut game_commands = game::GameCommandQueue::new();
+
     'event_loop: loop {
         match event_pump.wait_event() {
             Event::Quit { .. }
@@ -162,7 +163,7 @@ fn main() -> Result<()> {
                 mouse_btn: MouseButton::Right,
                 ..
             } => {
-                hero.jump();
+                hero.jump(&mut game_commands);
                 hero.update_animation();
             }
             Event::KeyUp {
@@ -206,11 +207,10 @@ fn main() -> Result<()> {
                 if e.as_user_event_type::<UserEvent>()
                     == Some(UserEvent::Timer)
                 {
-                    let mut actor_adder = ActorQueue::new();
                     renderer.fill(Color::RGB(0, 0, 0))?;
                     hero.next_frame();
                     hero.update_animation();
-                    hero.act(&sizes, &tiles, &mut actor_adder)?;
+                    hero.act(&sizes, &tiles, &mut game_commands)?;
                     hero.render(
                         &mut renderer,
                         &sizes,

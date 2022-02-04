@@ -4,7 +4,8 @@ use crate::{
         RenderParameters, ScoreType, SingleAnimationType,
     },
     level::tiles::{LevelTiles, Tile},
-    Result, Sizes, ANIMATION_SODAFLY,
+    sound::SoundIndex,
+    Result, Sizes, ANIMATION_SODAFLY, TILE_HEIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -35,11 +36,14 @@ impl CreateActor for SodaFlying {
 impl ActorExt for SodaFlying {
     fn act(&mut self, p: ActParameters) {
         self.position.offset(0, -(p.sizes.half_height() as i32));
+        if (self.position.top() % TILE_HEIGHT as i32) == 0 {
+            p.game_commands.add_sound(SoundIndex::COKECANHIT);
+        }
         if let Ok(Tile { solid: true, .. }) = p.tiles.get(
             self.position.x() / p.sizes.width() as i32,
             self.position.y() / p.sizes.height() as i32,
         ) {
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position.top_left(),
             );
@@ -47,10 +51,11 @@ impl ActorExt for SodaFlying {
         } else if self.position.has_intersection(p.hero.position.geometry)
         {
             p.hero.score.add(1000);
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score1000),
                 self.position.top_left(),
             );
+            p.game_commands.add_sound(SoundIndex::GETBONUSOBJ);
             self.is_alive = false;
         }
     }

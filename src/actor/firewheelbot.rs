@@ -49,13 +49,13 @@ impl CreateActor for FireWheelBot {
 impl ActorExt for FireWheelBot {
     fn act(&mut self, p: ActParameters) {
         if self.was_shot == 2 {
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::SingleAnimation(SingleAnimationType::Explosion),
                 self.position
                     .top_left()
                     .offset(p.sizes.half_width() as i32, 0),
             );
-            p.actor_adder
+            p.game_commands
                 .add_particle_firework(self.position.top_left(), 8);
             p.hero.score.add(2500);
         } else {
@@ -90,7 +90,7 @@ impl ActorExt for FireWheelBot {
             if self.was_shot == 1 {
                 // create steam clouds
                 if self.current_frame == 0 {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::Steam,
                         ),

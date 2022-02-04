@@ -4,6 +4,7 @@ use crate::{
         ShotParameters, ShotProcessing,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, OBJECT_ROCKET,
 };
 use sdl2::rect::{Point, Rect};
@@ -117,6 +118,7 @@ impl ActorExt for Rocket {
         if self.state == State::Idle {
             // TODO: create animation
             self.state = State::Flying;
+            p.game_commands.add_sound(SoundIndex::ROCKET);
             let tile_x = self.position.x() / p.sizes.width() as i32;
             let tile_y = (self.position.y()
                 + self.position.height() as i32)

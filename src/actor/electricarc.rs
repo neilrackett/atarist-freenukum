@@ -4,6 +4,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, Result, Sizes, OBJECT_ELECTRIC_ARC, OBJECT_ELECTRIC_ARC_HURTING,
 };
 use sdl2::rect::{Point, Rect};
@@ -42,6 +43,7 @@ impl ActorExt for ElectricArc {
     fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
+        p.game_commands.add_sound(SoundIndex::FORCEFIELD);
         self.tile =
             if p.hero.position.geometry.has_intersection(self.position) {
                 OBJECT_ELECTRIC_ARC_HURTING

@@ -82,7 +82,7 @@ impl ActorExt for SingleAnimation {
         self.current_frame += 1;
         if !self.is_alive() {
             if let Some(successor) = self.replaced_by {
-                p.actor_adder
+                p.game_commands
                     .add_actor(successor, self.position.top_left());
             }
         }

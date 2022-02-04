@@ -4,6 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, PlayState},
+    sound::SoundIndex,
     Hero, Result, Sizes, ANIMATION_EXITDOOR,
 };
 use sdl2::rect::{Point, Rect};
@@ -48,9 +49,10 @@ impl ActorExt for ExitDoor {
         true
     }
 
-    fn hero_interact_start(&mut self, _p: HeroInteractStartParameters) {
+    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         if self.state == State::Closed {
             self.state = State::Opening;
+            p.game_commands.add_sound(SoundIndex::DOORSND);
         }
     }
 

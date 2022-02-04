@@ -5,6 +5,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Hero, HorizontalDirection, Result, Sizes, OBJECT_GLOVE_SLOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -59,6 +60,7 @@ impl ActorExt for GloveSlot {
                 if p.hero.inventory.is_set(InventoryItem::Glove) {
                     p.actor_message_queue
                         .push_back(ActorMessageType::ExpandFloor);
+                    p.game_commands.add_sound(SoundIndex::BRIDGEXTEND);
                     self.state = State::Expanded;
                 } else {
                     self.state = State::Shooting;
@@ -81,15 +83,17 @@ impl ActorExt for GloveSlot {
                 self.current_frame %= self.num_frames;
                 self.countdown -= 1;
                 if self.countdown % 4 == 0 {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_actor(
                         ActorType::HostileShot(HorizontalDirection::Right),
                         self.position.top_left(),
                     );
+                    p.game_commands.add_sound(SoundIndex::ENEMYSHOT);
                 } else if self.countdown % 4 == 2 {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_actor(
                         ActorType::HostileShot(HorizontalDirection::Left),
                         self.position.top_left(),
                     );
+                    p.game_commands.add_sound(SoundIndex::ENEMYSHOT);
                 }
                 if self.countdown == 0 {
                     self.state = State::Idle;

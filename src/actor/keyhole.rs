@@ -6,6 +6,7 @@ use crate::{
     },
     hero::InventoryItem,
     level::tiles::LevelTiles,
+    sound::SoundIndex,
     Hero, KeyColor, Result, Sizes, OBJECT_KEYHOLE_BLACK,
     OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK,
     OBJECT_KEYHOLE_RED,
@@ -76,6 +77,7 @@ impl ActorExt for KeyHole {
                 .push_back(ActorMessageType::OpenDoor(self.color));
             self.counter = 5;
             p.hero.inventory.unset(required_item);
+            p.game_commands.add_sound(SoundIndex::OPENKEYDOOR);
         } else if self.counter < 5 {
             p.info_message_queue.push_back(format!(
                 "You don't have the {} key.",

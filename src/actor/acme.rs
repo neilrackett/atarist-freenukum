@@ -8,6 +8,7 @@ use crate::{
         tiles::{LevelTiles, Tile},
         BackgroundTileStrategy,
     },
+    sound::SoundIndex,
     Hero, Result, Sizes, OBJECT_FALLINGBLOCK,
 };
 use sdl2::rect::{Point, Rect};
@@ -80,6 +81,9 @@ impl ActorExt for Acme {
             c if c <= 10 && c % 2 == 0 => {
                 self.position.y -= 1;
                 self.counter += 1;
+                if c == 10 {
+                    p.game_commands.add_sound(SoundIndex::DANDERSIGN);
+                }
             }
             c if c <= 10 && c % 2 == 1 => {
                 self.position.y += 1;
@@ -90,13 +94,13 @@ impl ActorExt for Acme {
                     self.position.x() / p.sizes.width() as i32,
                     self.position.y() / p.sizes.height() as i32 + 1,
                 ) {
-                    p.actor_adder.add_actor(
+                    p.game_commands.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::Steam,
                         ),
                         self.position.top_left(),
                     );
-                    p.actor_adder.add_particle_firework(
+                    p.game_commands.add_particle_firework(
                         self.position.top_left(),
                         4,
                     );
@@ -123,11 +127,11 @@ impl ActorExt for Acme {
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         if self.counter > 0 {
             p.hero.score.add(500);
-            p.actor_adder.add_actor(
+            p.game_commands.add_actor(
                 ActorType::Score(ScoreType::Score500),
                 self.position.top_left(),
             );
-            p.actor_adder
+            p.game_commands
                 .add_particle_firework(self.position.top_left(), 4);
 
             self.is_alive = false;

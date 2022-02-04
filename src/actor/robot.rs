@@ -5,6 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
 };
 use sdl2::rect::{Point, Rect};
@@ -113,12 +114,13 @@ impl ActorExt for Robot {
 
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         p.hero.score.add(100);
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(
                 SingleAnimationType::RobotDisappearing,
             ),
             self.position.top_left(),
         );
+        p.game_commands.add_sound(SoundIndex::SMALLDEATH);
         self.is_alive = false;
         ShotProcessing::Absorb
     }

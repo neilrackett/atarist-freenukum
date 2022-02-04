@@ -5,6 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, HorizontalDirection, Result, Sizes, VerticalDirection,
     ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
 };
@@ -142,14 +143,15 @@ impl ActorExt for WallCrawler {
         self.is_alive = false;
 
         p.hero.score.add(100);
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Steam),
             self.position.top_left(),
         );
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Explosion),
             self.position.top_left(),
         );
+        p.game_commands.add_sound(SoundIndex::SMALLDEATH);
 
         ShotProcessing::Absorb
     }

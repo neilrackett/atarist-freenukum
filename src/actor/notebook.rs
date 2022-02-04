@@ -4,6 +4,7 @@ use crate::{
         HeroInteractStartParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Hero, Result, Sizes, OBJECT_NOTEBOOK,
 };
 use sdl2::rect::{Point, Rect};
@@ -38,6 +39,7 @@ impl ActorExt for NoteBook {
     }
 
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
+        p.game_commands.add_sound(SoundIndex::READNOTE);
         // TODO: implement functionality.
         p.info_message_queue
             .push_back("Not implemented yet.".to_string());

@@ -5,6 +5,7 @@ use crate::{
         SingleAnimationType,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, ANIMATION_CAMERA_CENTER, ANIMATION_CAMERA_LEFT,
     ANIMATION_CAMERA_RIGHT,
 };
@@ -60,14 +61,15 @@ impl ActorExt for Camera {
     fn shot(&mut self, p: ShotParameters) -> ShotProcessing {
         self.is_alive = false;
         p.hero.score.add(100);
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::Score(ScoreType::Score100),
             self.position.top_left(),
         );
-        p.actor_adder.add_actor(
+        p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Explosion),
             self.position.top_left(),
         );
+        p.game_commands.add_sound(SoundIndex::SMALLDEATH);
         ShotProcessing::Absorb
     }
 

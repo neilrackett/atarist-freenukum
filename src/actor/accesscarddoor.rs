@@ -4,6 +4,7 @@ use crate::{
         ReceiveMessageParameters, RenderParameters,
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
+    sound::SoundIndex,
     Result, Sizes, OBJECT_LASERBEAM,
 };
 use sdl2::rect::{Point, Rect};
@@ -39,9 +40,10 @@ impl CreateActor for AccessCardDoor {
 }
 
 impl ActorExt for AccessCardDoor {
-    fn act(&mut self, _p: ActParameters) {
+    fn act(&mut self, p: ActParameters) {
         self.current_frame += 1;
         self.current_frame %= self.num_frames;
+        p.game_commands.add_sound(SoundIndex::FORCEFIELD);
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
