@@ -12,6 +12,7 @@
 - Fix display of electric arc tiles which was swapped for touching the hero
   and not touching it
 - Rocket continues to act while invisible once it launches
+- Flying sodacan continues to act while invisible
 
 ## [0.3.5] - 2020-12-15
 

@@ -75,4 +75,8 @@ impl ActorExt for SodaFlying {
     fn is_alive(&self) -> bool {
         self.is_alive
     }
+
+    fn acts_while_invisible(&self) -> bool {
+        true
+    }
 }
