@@ -44,9 +44,9 @@ impl ActorExt for ElectricArc {
         self.current_frame %= self.num_frames;
         self.tile =
             if p.hero.position.geometry.has_intersection(self.position) {
-                OBJECT_ELECTRIC_ARC
-            } else {
                 OBJECT_ELECTRIC_ARC_HURTING
+            } else {
+                OBJECT_ELECTRIC_ARC
             }
     }
 
