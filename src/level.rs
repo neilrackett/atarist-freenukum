@@ -1088,6 +1088,7 @@ impl Level {
             actor_queue,
             &mut self.play_state,
             visible_rect,
+            actor_message_queue,
         );
 
         if self.play_state.hero_can_act() && animated_frames == 0 {

@@ -9,10 +9,19 @@ use crate::{
 };
 use sdl2::rect::{Point, Rect};
 
+#[derive(PartialEq, Eq, Debug)]
+enum State {
+    Idle,
+    Sending,
+    Receiving,
+}
+
 #[derive(Debug)]
 pub(crate) struct Teleporter {
     position: Rect,
     index: TeleporterIndex,
+    counter: usize,
+    state: State,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -47,6 +56,8 @@ impl CreateActorWithDetails for Teleporter {
                 sizes.height(),
             ),
             index,
+            counter: 0usize,
+            state: State::Idle,
         })
     }
 }
@@ -56,12 +67,34 @@ impl ActorExt for Teleporter {
         true
     }
 
-    fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
-        p.actor_message_queue
-            .push_back(ActorMessageType::TeleportTo(self.index.other()))
+    fn hero_interact_start(&mut self, _p: HeroInteractStartParameters) {
+        if self.state == State::Idle {
+            self.state = State::Sending;
+            self.counter = 0;
+        }
     }
 
-    fn act(&mut self, _p: ActParameters) {}
+    fn act(&mut self, p: ActParameters) {
+        self.counter += 1;
+        self.counter %= 12;
+
+        match self.state {
+            State::Idle => {}
+            State::Sending => {
+                if self.counter == 0 {
+                    p.actor_message_queue.push_back(
+                        ActorMessageType::TeleportTo(self.index.other()),
+                    );
+                    self.state = State::Idle;
+                }
+            }
+            State::Receiving => {
+                if self.counter == 0 {
+                    self.state = State::Idle;
+                }
+            }
+        }
+    }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         for i in 0..3 {
@@ -70,9 +103,50 @@ impl ActorExt for Teleporter {
                     (j - 1) * p.sizes.width() as i32,
                     (i - 2) * p.sizes.height() as i32,
                 );
-                let tile =
-                    ANIMATION_TELEPORTER1 + i as usize * 3 + j as usize;
+                let extra_offset = if i == 1 && j == 1 {
+                    // Center part with buttons
+                    match self.counter % 3 {
+                        0 => 0,
+                        1 => 8,
+                        2 => 9,
+                        _ => unreachable!(),
+                    }
+                } else if i == 1 && j == 2 {
+                    // Center right part with lights
+                    match self.counter % 3 {
+                        0 => 0,
+                        1 => 9,
+                        2 => 10,
+                        _ => unreachable!(),
+                    }
+                } else if i == 0
+                    && j == 1
+                    && (self.state == State::Sending
+                        || self.state == State::Receiving)
+                {
+                    // Center top part with electric beam while teleporting
+                    match self.counter % 4 {
+                        0 | 2 => 0,
+                        1 => 8,
+                        3 => 9,
+                        _ => unreachable!(),
+                    }
+                } else {
+                    0
+                };
+
+                // Base tiles
+                let tile_offset = i as usize * 3 + j as usize;
+                let tile = ANIMATION_TELEPORTER1 + tile_offset;
                 p.renderer.place_tile(tile, pos)?;
+
+                // Extra tiles as overlay
+                if extra_offset != 0 {
+                    let tile_offset =
+                        i as usize * 3 + j as usize + extra_offset;
+                    let tile = ANIMATION_TELEPORTER1 + tile_offset;
+                    p.renderer.place_tile(tile, pos)?;
+                }
             }
         }
         Ok(())
@@ -83,6 +157,8 @@ impl ActorExt for Teleporter {
     }
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
+        self.state = State::Receiving;
+        self.counter = 0;
         p.hero.position.move_to(
             p.sizes,
             self.position.x(),

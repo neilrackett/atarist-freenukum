@@ -428,6 +428,7 @@ impl ActorsList {
         actor_queue: &mut ActorQueue,
         play_state: &mut PlayState,
         visible_rect: Rect,
+        actor_message_queue: &mut ActorMessageQueue,
     ) {
         let mut actors_hurting_hero = 0usize;
         for actor in self.actors.iter_mut() {
@@ -440,6 +441,7 @@ impl ActorsList {
                     hero,
                     actor_adder: actor_queue,
                     play_state,
+                    actor_message_queue,
                 };
                 actor.act(p);
                 if actor.is_alive() && actor.hurts_hero(hero) {
@@ -846,6 +848,7 @@ pub struct ActParameters<'a> {
     pub tiles: &'a mut LevelTiles,
     pub hero: &'a mut Hero,
     pub actor_adder: &'a mut dyn ActorAdder,
+    pub actor_message_queue: &'a mut ActorMessageQueue,
     pub play_state: &'a mut PlayState,
     pub sizes: &'a dyn Sizes,
 }
