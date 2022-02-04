@@ -190,8 +190,6 @@ fn start_in_level(
             do_update = false;
         }
 
-        info_message_queue.process(canvas, tileprovider, event_pump)?;
-
         match GameEvent::wait(event_pump)? {
             GameEvent::Escape => {
                 level.play_state = PlayState::GoToMainScreen;
@@ -341,6 +339,11 @@ fn start_in_level(
                     srcrect,
                 )?;
                 do_update = true;
+                info_message_queue.process(
+                    canvas,
+                    tileprovider,
+                    event_pump,
+                )?;
             }
         }
     }
