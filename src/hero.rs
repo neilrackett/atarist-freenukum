@@ -39,7 +39,7 @@ pub struct Hero {
     base_tile_number: usize,
     current_frame: usize,
     num_frames: usize,
-    vertical_speed: f32,
+    vertical_speed: i32,
     pub gets_hurt: bool,
 }
 
@@ -64,7 +64,7 @@ impl Hero {
             base_tile_number: HERO_STANDING_RIGHT,
             current_frame: 0,
             num_frames: 1,
-            vertical_speed: 0f32,
+            vertical_speed: 0i32,
             gets_hurt: false,
         }
     }
@@ -87,7 +87,7 @@ impl Hero {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
-        self.vertical_speed = 0f32;
+        self.vertical_speed = 0i32;
         self.gets_hurt = false;
     }
 
@@ -108,7 +108,7 @@ impl Hero {
         self.base_tile_number = HERO_STANDING_RIGHT;
         self.current_frame = 0;
         self.num_frames = 1;
-        self.vertical_speed = 0f32;
+        self.vertical_speed = 0i32;
         self.gets_hurt = false;
     }
 
@@ -253,32 +253,32 @@ impl Hero {
 
     pub fn jump(&mut self) {
         if !self.is_in_the_air {
-            let (counter, somersault) =
+            let (vertical_speed, somersault) =
                 if self.inventory.is_set(InventoryItem::Boot) {
-                    use rand::Rng;
-                    let mut rng = rand::thread_rng();
-                    (
-                        7,
+                    let somersault = {
+                        use rand::Rng;
+                        let mut rng = rand::thread_rng();
                         if self.motion == Motion::Walking
-                            && rng.gen_range(0..5) == 0
+                            && rng.gen_range(0u8..5u8) == 0u8
                         {
                             Some(0)
                         } else {
                             None
-                        },
-                    )
+                        }
+                    };
+                    (JUMP_PROFILE_HIGH[0], somersault)
                 } else {
-                    (6, None)
+                    (JUMP_PROFILE_DEFAULT[0], None)
                 };
-            self.counter = counter;
+            self.counter = JUMP_PROFILE_DEFAULT.len();
             self.somersault = somersault;
-            self.vertical_speed = 1f32;
+            self.vertical_speed = vertical_speed;
             self.is_in_the_air = true;
         }
     }
 
     pub fn land(&mut self) {
-        self.vertical_speed = 0f32;
+        self.vertical_speed = 0i32;
         self.is_in_the_air = false;
         self.somersault = None;
         self.counter = 0;
@@ -342,21 +342,21 @@ impl Hero {
 
         if !self.is_in_the_air {
             // the hero is standing or walking
-            self.vertical_speed = 0f32;
+            self.vertical_speed = 0i32;
         } else {
             // the hero is jumping or falling
             if self.counter > 0 {
                 // the hero is jumping
                 self.counter -= 1;
-                self.vertical_speed = match self.counter {
-                    3 | 2 => 0.5f32,
-                    1 | 0 => 0f32,
-                    _ => 1f32,
-                };
+                let index = JUMP_PROFILE_DEFAULT.len() - 1 - self.counter;
+                self.vertical_speed =
+                    if self.inventory.is_set(InventoryItem::Boot) {
+                        JUMP_PROFILE_HIGH[index]
+                    } else {
+                        JUMP_PROFILE_DEFAULT[index]
+                    };
 
-                let vertical_distance =
-                    (self.vertical_speed * sizes.height() as f32) as i32;
-                for _ in 0..vertical_distance {
+                for _ in 0..self.vertical_speed {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
@@ -372,15 +372,9 @@ impl Hero {
                 }
             } else {
                 // the hero is falling
-                self.vertical_speed += 0.5f32;
-                if self.vertical_speed > 3f32 {
-                    self.vertical_speed = 3f32;
-                }
+                self.vertical_speed = 8;
 
-                let vertical_distance =
-                    (self.vertical_speed * sizes.height() as f32) as i32;
-
-                for _ in 0..vertical_distance {
+                for _ in 0..self.vertical_speed {
                     let geometry = self.position.geometry;
                     if !self.would_collide(
                         sizes,
@@ -414,7 +408,6 @@ impl Hero {
             }
             // the hero is standing on solid ground
             self.land();
-            self.counter = 0;
         } else {
             // the hero is falling down
             if self.counter == 0 {
@@ -425,6 +418,9 @@ impl Hero {
         Ok(())
     }
 }
+
+const JUMP_PROFILE_DEFAULT: [i32; 9] = [13, 11, 9, 7, 5, 3, 0, 0, 0];
+const JUMP_PROFILE_HIGH: [i32; 9] = [15, 13, 11, 9, 7, 5, 3, 1, 0];
 
 #[derive(Debug)]
 pub struct Position {
