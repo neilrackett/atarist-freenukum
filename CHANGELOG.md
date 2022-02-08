@@ -5,6 +5,7 @@
 ### Added
 - Implement animation for teleporter
 - Sounds
+- Snake of flying balls enemy
 
 ### Fixed
 - Fix position of left-looking torch flames which was two tiles too far to
