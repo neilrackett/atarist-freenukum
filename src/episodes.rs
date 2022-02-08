@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
+
 use super::data::original_data_dir;
 use anyhow::{anyhow, Result};
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
+
 use crate::{
     hero::InventoryItem, HorizontalDirection, KeyColor, UserEvent,
     HALFTILE_HEIGHT, HALFTILE_WIDTH,

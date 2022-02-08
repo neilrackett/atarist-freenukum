@@ -1,5 +1,9 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook V4.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<!--
+SPDX-License-Identifier: AGPL-3.0-or-later
+SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
+-->
 <article>
     <!-- $Id:$ -->
     <articleinfo>
@@ -9,7 +13,7 @@
                 <firstname>Wolfgang</firstname>
                 <surname>Silbermayr</surname>
             </personname>
-            <email>wosi@gmx.at</email>
+            <email>wolfgang@silbermayr.at</email>
         </author>
     </articleinfo>
     <para>

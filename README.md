@@ -1,3 +1,8 @@
+<!--
+SPDX-License-Identifier: AGPL-3.0-or-later
+SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
+-->
+
 # Freenukum
 
 A clone of the 1991 DOS game *Duke Nukem 1*.
