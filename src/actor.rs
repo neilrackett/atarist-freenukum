@@ -14,6 +14,7 @@ mod expandingfloor;
 mod fan;
 mod fire;
 mod firewheelbot;
+mod flyingball;
 mod gloveslot;
 mod hostileshot;
 mod item;
@@ -64,6 +65,7 @@ pub(crate) use {
     fan::Fan,
     fire::Fire,
     firewheelbot::FireWheelBot,
+    flyingball::FlyingBall,
     gloveslot::GloveSlot,
     hostileshot::HostileShot,
     item::{
@@ -99,6 +101,7 @@ pub(crate) enum Actor {
     MineLying(MineLying),
     Robot(Robot),
     SingleAnimation(SingleAnimation),
+    FlyingBall(FlyingBall),
     TankBot(TankBot),
     WallCrawler(WallCrawler),
     Camera(Camera),
@@ -143,6 +146,7 @@ impl Actor {
             Actor::MineLying(ref mut a) => a,
             Actor::Robot(ref mut a) => a,
             Actor::SingleAnimation(ref mut a) => a,
+            Actor::FlyingBall(ref mut a) => a,
             Actor::TankBot(ref mut a) => a,
             Actor::WallCrawler(ref mut a) => a,
             Actor::Camera(ref mut a) => a,
@@ -187,6 +191,7 @@ impl Actor {
             Actor::MineLying(ref a) => a,
             Actor::Robot(ref a) => a,
             Actor::SingleAnimation(ref a) => a,
+            Actor::FlyingBall(ref a) => a,
             Actor::TankBot(ref a) => a,
             Actor::WallCrawler(ref a) => a,
             Actor::Camera(ref a) => a,
@@ -533,7 +538,7 @@ pub enum ActorType {
     MineLying,
     Robot,
     SingleAnimation(SingleAnimationType),
-    SnakeBot,
+    FlyingBall(usize),
     TankBot,
     WallCrawler(HorizontalDirection),
     DrProton,
@@ -609,8 +614,8 @@ impl ActorType {
                     t,
                 )
             }
-            ActorType::SnakeBot => {
-                PlaceHolder::create_with_details(*self, p, sz, t)
+            ActorType::FlyingBall(i) => {
+                FlyingBall::create_with_details(*i, p, sz, t)
             }
             ActorType::TankBot => TankBot::create(p, sz, t),
             ActorType::WallCrawler(direction) => {

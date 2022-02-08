@@ -423,7 +423,9 @@ impl Level {
                 0x3013 =>
                 /* bot consisting of several white-blue balls */
                 {
-                    aa(ActorType::SnakeBot, tx, ty);
+                    for i in 0..10 {
+                        aa(ActorType::FlyingBall(i), tx, ty);
+                    }
                 }
                 0x3014 =>
                 /* water mirroring everything that is above */
