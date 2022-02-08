@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: CC0-1.0
+# SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
+#
+stages:
+    - lint
+
+licensing:
+    image: debian:bookworm
+    stage: lint
+    only:
+        - main
+        - branches
+        - merge_requests
+    before_script:
+        - apt-get update
+        - apt-get --assume-yes install git reuse
+    script:
+        - reuse lint
