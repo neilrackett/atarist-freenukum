@@ -2,7 +2,8 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use crate::Result;
-use anyhow::Error;
+use anyhow::{bail, Error};
+use log::debug;
 use rgb::RGBA8;
 use sdl2::{
     pixels::{Color, PixelFormatEnum},
@@ -10,6 +11,7 @@ use sdl2::{
     surface::Surface,
     ttf::{Font, FontStyle, Sdl2TtfContext},
 };
+use std::path::Path;
 
 trait AsSdlColor {
     fn as_sdl_color(&self) -> Color;
@@ -23,17 +25,72 @@ impl AsSdlColor for RGBA8 {
 
 pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
     #[cfg(target_os = "windows")]
-    let font_path = std::path::Path::new(&std::env::var("WINDIR")?)
-        .join("Fonts")
-        .join("Arial.ttf");
+    let (base_paths, font_paths) = (
+        vec![Path::new(
+            &std::env::var("WINDIR").unwrap_or("C:/Windows".to_string()),
+        )
+        .to_path_buf()],
+        vec![
+            Path::new("Fonts").join("arial.ttf").to_path_buf(),
+            Path::new("Fonts").join("verdana.ttf").to_path_buf(),
+            Path::new("Fonts").join("courier.ttf").to_path_buf(),
+            Path::new("Fonts").join("tahoma.ttf").to_path_buf(),
+            Path::new("Fonts").join("times.ttf").to_path_buf(),
+        ],
+    );
 
     #[cfg(target_os = "linux")]
-    let font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+    let (base_paths, font_paths) = (
+        vec![
+            Path::new(
+                &std::env::var("WINDIR")
+                    .unwrap_or("C:/Windows".to_string()),
+            )
+            .to_path_buf(),
+            Path::new("/usr/share/fonts").to_path_buf(),
+            Path::new("/usr/share/fonts/truetype").to_path_buf(),
+        ],
+        vec![
+            Path::new("dejavu/DejaVuSans.ttf").to_path_buf(),
+            Path::new("dejavu-sans-fonts/DejaVuSans.ttf").to_path_buf(),
+        ],
+    );
 
-    let mut font =
-        ttf_context.load_font(font_path, 10).map_err(Error::msg)?;
-    font.set_style(FontStyle::BOLD);
-    Ok(font)
+    #[cfg(target_os = "macos")]
+    let (base_paths, font_paths) = (
+        vec![
+            Path::new("/System/Library/Fonts/Base").to_path_buf(),
+            Path::new("/System/Library/Fonts").to_path_buf(),
+            Path::new("/Library/Fonts").to_path_buf(),
+        ],
+        vec![
+            Path::new("SFCompact.ttf").to_path_buf(),
+            Path::new("NewYork.ttf").to_path_buf(),
+            Path::new("SFCompactText.ttf").to_path_buf(),
+            Path::new("Georgia.ttf").to_path_buf(),
+            Path::new("Courier New.ttf").to_path_buf(),
+            Path::new("Arial.ttf").to_path_buf(),
+        ],
+    );
+
+    for base_path in base_paths.iter() {
+        for font_path in font_paths.iter() {
+            let full_path = base_path.join(font_path);
+            debug!("Attempting to load font from {:?}", full_path);
+            if full_path.exists() {
+                if let Ok(mut font) = ttf_context.load_font(full_path, 10)
+                {
+                    debug!("Font loaded");
+                    font.set_style(FontStyle::BOLD);
+                    return Ok(font);
+                }
+                debug!("Not a valid font file");
+            } else {
+                debug!("File doesn't exist");
+            }
+        }
+    }
+    bail!("No usable font found");
 }
 
 pub trait Picture: Sized {
