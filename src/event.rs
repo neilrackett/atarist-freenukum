@@ -686,7 +686,7 @@ impl TryFrom<Event> for MenuEvent {
                 ..
             } => Ok(MenuEvent::NextEntry {
                 context: InputContext::Keyboard,
-                enabled: true,
+                enabled: false,
             }),
             E::ControllerButtonUp {
                 button: B::DPadDown,
@@ -704,8 +704,18 @@ impl TryFrom<Event> for MenuEvent {
             E::KeyDown {
                 keycode: Some(K::Up),
                 ..
-            }
-            | E::ControllerButtonDown {
+            } => Ok(MenuEvent::PreviousEntry {
+                context: InputContext::Keyboard,
+                enabled: true,
+            }),
+            E::KeyUp {
+                keycode: Some(K::Up),
+                ..
+            } => Ok(MenuEvent::PreviousEntry {
+                context: InputContext::Keyboard,
+                enabled: false,
+            }),
+            E::ControllerButtonDown {
                 button: B::DPadUp, ..
             } => Ok(MenuEvent::PreviousEntry {
                 context: InputContext::ControllerDPad,
