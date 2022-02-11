@@ -141,10 +141,6 @@ fn main() -> Result<()> {
                             if SaveGame::exists(&episode_name, slot) {
                                 match SaveGame::load(&episode_name, slot) {
                                     Ok(savegame) => {
-                                        println!(
-                                            "Loaded savegame {:#?}",
-                                            savegame
-                                        );
                                         game::start(
                                             &mut canvas,
                                             &tilecache,

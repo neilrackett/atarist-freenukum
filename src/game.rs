@@ -557,6 +557,7 @@ pub fn start(
             hero.inventory.set(item.into());
         }
         game_id = savegame.game_id;
+        interlevel = true;
     } else {
         prelude(
             canvas,
