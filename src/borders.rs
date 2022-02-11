@@ -177,7 +177,7 @@ impl Borders {
 
     pub fn render_score(
         &self,
-        score: u128,
+        score: u64,
         renderer: &mut dyn Renderer,
     ) -> Result<()> {
         let score = std::cmp::min(99999999, score);

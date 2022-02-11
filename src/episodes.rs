@@ -73,4 +73,8 @@ impl Episodes {
     pub fn file_extension(&self) -> String {
         format!("dn{}", self.current + 1)
     }
+
+    pub fn string_identifier(&self) -> String {
+        format!("original_episode{}", self.current + 1)
+    }
 }

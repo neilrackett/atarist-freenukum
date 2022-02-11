@@ -8,11 +8,14 @@ use crate::borders::Borders;
 use crate::data::original_data_dir;
 use crate::episodes::Episodes;
 use crate::event::{ConfirmEvent, GameEvent, InputContext, WaitEvent};
+use crate::gamemenu::{gamemenu, GameMenuEntry};
 use crate::hero::{Hero, Motion};
 use crate::infobox::{self, InfoMessageQueue};
+use crate::inputbox;
 use crate::level::{BackgroundTileStrategy, Level, LevelTiles, PlayState};
 use crate::picture::show_splash_with_message;
 use crate::rendering::{CanvasRenderer, MovePositionRenderer};
+use crate::savegame::SaveGame;
 use crate::settings::Settings;
 use crate::sound::{SoundCache, SoundIndex, SoundPlayer};
 use crate::tile::TileHeader;
@@ -34,6 +37,7 @@ use sdl2::{
 };
 use std::collections::BTreeSet;
 use std::fs::File;
+use uuid::Uuid;
 
 #[derive(PartialEq, Eq)]
 enum NextAction {
@@ -45,6 +49,7 @@ enum NextAction {
 #[allow(clippy::too_many_arguments)]
 fn start_in_level(
     level_number: usize,
+    interlevel: bool,
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
     soundcache: &SoundCache,
@@ -56,16 +61,18 @@ fn start_in_level(
     event_sender: &EventSender,
     timer_subsystem: &TimerSubsystem,
     audio_subsystem: &AudioSubsystem,
+    command_queue: &mut GameCommandQueue,
     sizes: &dyn Sizes,
+    game_id: Uuid,
 ) -> Result<NextAction> {
     let backdrop = {
         let backdrop_number = match level_number {
-            1 | 3 => 0,
-            4 => 7,
-            5 | 8 => 3,
-            6 => 2,
-            7 | 10 => 1,
-            9 => 5,
+            1 | 2 => 0,
+            3 => 7,
+            4 | 7 => 3,
+            5 => 2,
+            6 | 9 => 1,
+            8 => 5,
             _ => 1,
         };
 
@@ -83,7 +90,7 @@ fn start_in_level(
     let mut level = {
         let filename = format!(
             "worldal{:x}.{}",
-            level_number,
+            level_filenumber(level_number, interlevel),
             episodes.file_extension()
         );
         let filepath = original_data_dir().join(filename);
@@ -117,17 +124,12 @@ fn start_in_level(
     let mut sound_player =
         SoundPlayer::create(audio_subsystem, soundcache);
 
-    let mut command_queue = GameCommandQueue::new();
     let mut info_message_queue = InfoMessageQueue::new();
     let mut actor_message_queue = ActorMessageQueue::new();
 
     let mut do_update = true;
     let mut walking_left = BTreeSet::new();
     let mut walking_right = BTreeSet::new();
-
-    if level_number == 1 {
-        command_queue.add_sound(SoundIndex::STARTGAME);
-    }
 
     while level.play_state.keep_acting() {
         let texture_creator = canvas.texture_creator();
@@ -205,6 +207,86 @@ fn start_in_level(
         }
 
         match GameEvent::wait(event_pump)? {
+            GameEvent::GameMenu => {
+                match gamemenu(
+                    canvas,
+                    tileprovider,
+                    event_pump,
+                    event_sender,
+                    timer_subsystem,
+                )? {
+                    GameMenuEntry::Save => {
+                        if interlevel {
+                            let answer = inputbox::show(
+                                canvas,
+                                tileprovider,
+                                "Save a game.\n\
+                             Which game number\n\
+                             do you want to save?\n\
+                             Choose (1-9):",
+                                1,
+                                event_pump,
+                            )?;
+                            if let inputbox::Answer::Ok(slot) = answer {
+                                match slot.parse::<usize>() {
+                                    Ok(slot) if slot > 0 => {
+                                        let savegame = hero
+                                            .create_savegame(
+                                                game_id,
+                                                level_number,
+                                            );
+                                        match savegame.save(
+                                            &episodes.string_identifier(),
+                                            slot,
+                                        ) {
+                                            Ok(_) => {
+                                                info_message_queue
+                                                    .push_back(
+                                                    "Your game is saved."
+                                                        .to_string(),
+                                                );
+                                            }
+                                            Err(e) => {
+                                                let msg =
+                                            format!("Error saving game:\n{:?}", e);
+                                                eprintln!("{}", msg);
+                                                info_message_queue
+                                                    .push_back(msg);
+                                            }
+                                        }
+                                    }
+                                    Ok(_) | Err(_) => {
+                                        infobox::show(
+                                            canvas,
+                                            tileprovider,
+                                            "Not a valid number",
+                                            event_pump,
+                                        )?;
+                                    }
+                                }
+                            }
+                        } else {
+                            infobox::show(
+                                canvas,
+                                tileprovider,
+                                "You can only save a game\n\
+                                 in the main hallways",
+                                event_pump,
+                            )?;
+                        }
+                    }
+                    GameMenuEntry::Instructions
+                    | GameMenuEntry::GameSetup
+                    | GameMenuEntry::HighScores
+                    | GameMenuEntry::RestartLevel => {
+                        info_message_queue
+                            .push_back("Not implemented yet.".to_string());
+                    }
+                    GameMenuEntry::Invalid => {
+                        // Menu was closed
+                    }
+                }
+            }
             GameEvent::Escape => {
                 level.play_state = PlayState::GoToMainScreen;
             }
@@ -262,7 +344,7 @@ fn start_in_level(
             GameEvent::HeroInteractionStart => {
                 level.hero_interact_start(
                     hero,
-                    &mut command_queue,
+                    command_queue,
                     &mut info_message_queue,
                     &mut actor_message_queue,
                 );
@@ -328,7 +410,7 @@ fn start_in_level(
                 canvas.present();
             }
             GameEvent::HeroJump => {
-                hero.jump(&mut command_queue);
+                hero.jump(command_queue);
                 hero.update_animation();
             }
             GameEvent::HeroStartFiring => {
@@ -336,7 +418,7 @@ fn start_in_level(
                 level.fire_shot(
                     sizes,
                     hero,
-                    &mut command_queue,
+                    command_queue,
                     &mut actor_message_queue,
                 );
                 hero.update_animation();
@@ -350,7 +432,7 @@ fn start_in_level(
                 level.act(
                     sizes,
                     hero,
-                    &mut command_queue,
+                    command_queue,
                     &mut actor_message_queue,
                     &mut play_sounds,
                     srcrect,
@@ -378,19 +460,12 @@ fn start_in_level(
     Ok(next_action)
 }
 
-#[allow(clippy::too_many_arguments)]
-pub fn start(
+fn prelude(
     canvas: &mut WindowCanvas,
     tileprovider: &dyn TileProvider,
-    soundcache: &SoundCache,
-    hero: &mut Hero,
-    settings: &mut Settings,
     episodes: &Episodes,
     event_pump: &mut EventPump,
-    event_sender: &EventSender,
-    timer_subsystem: &TimerSubsystem,
-    audio_subsystem: &AudioSubsystem,
-    sizes: &dyn Sizes,
+    command_queue: &mut GameCommandQueue,
 ) -> Result<()> {
     {
         let filename = format!("badguy.{}", episodes.file_extension());
@@ -430,24 +505,73 @@ pub fn start(
             144,
         )?;
     }
-
-    hero.reset(sizes);
-
-    canvas.set_draw_color(Color::RGB(0, 0, 0));
-    canvas.clear();
-
-    let borders = Borders {};
-
-    // start the game itself
-    let mut level = 1;
-    let mut interlevel = false;
-
     infobox::show(
         canvas,
         tileprovider,
         "Get ready FreeNukum,\nyou are going in.\n",
         event_pump,
     )?;
+    command_queue.add_sound(SoundIndex::STARTGAME);
+    Ok(())
+}
+
+fn level_filenumber(level_number: usize, interlevel: bool) -> usize {
+    if interlevel {
+        2
+    } else {
+        if level_number == 1 {
+            1
+        } else {
+            level_number + 1
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn start(
+    canvas: &mut WindowCanvas,
+    tileprovider: &dyn TileProvider,
+    soundcache: &SoundCache,
+    settings: &mut Settings,
+    episodes: &Episodes,
+    event_pump: &mut EventPump,
+    event_sender: &EventSender,
+    timer_subsystem: &TimerSubsystem,
+    audio_subsystem: &AudioSubsystem,
+    sizes: &dyn Sizes,
+    savegame: Option<SaveGame>,
+) -> Result<()> {
+    let mut level_number = 1;
+    let mut interlevel = false;
+    let mut game_id = Uuid::new_v4();
+
+    let mut hero = Hero::new(sizes);
+    let mut command_queue = GameCommandQueue::new();
+
+    if let Some(savegame) = savegame {
+        level_number = savegame.finished_level;
+        hero.health.set(savegame.health);
+        hero.firepower.set(savegame.firepower);
+        hero.score.set_value(savegame.score);
+        for item in savegame.inventory {
+            hero.inventory.set(item.into());
+        }
+        game_id = savegame.game_id;
+    } else {
+        prelude(
+            canvas,
+            tileprovider,
+            episodes,
+            event_pump,
+            &mut command_queue,
+        )?;
+    }
+
+    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.clear();
+
+    let borders = Borders {};
+
     let mut finished = false;
     let mut initial_lives = hero.health.life().unwrap();
     let mut initial_score = hero.score.value();
@@ -456,11 +580,12 @@ pub fn start(
     'level_loop: loop {
         if interlevel {
             match start_in_level(
-                2,
+                level_number,
+                interlevel,
                 canvas,
                 tileprovider,
                 soundcache,
-                hero,
+                &mut hero,
                 settings,
                 episodes,
                 &borders,
@@ -468,13 +593,15 @@ pub fn start(
                 event_sender,
                 timer_subsystem,
                 audio_subsystem,
+                &mut command_queue,
                 sizes,
+                game_id,
             )? {
                 NextAction::NextLevel => {
                     initial_lives = hero.health.life().unwrap();
                     initial_score = hero.score.value();
                     initial_inventory = hero.inventory.get_items();
-                    level = if level == 1 { level + 2 } else { level + 1 };
+                    level_number += 1;
                     interlevel = false;
                 }
                 NextAction::RestartLevel => unreachable!(),
@@ -486,11 +613,12 @@ pub fn start(
             hero.score.set_value(initial_score);
             hero.inventory.set_items(initial_inventory.clone());
             match start_in_level(
-                level,
+                level_number,
+                interlevel,
                 canvas,
                 tileprovider,
                 soundcache,
-                hero,
+                &mut hero,
                 settings,
                 episodes,
                 &borders,
@@ -498,10 +626,12 @@ pub fn start(
                 event_sender,
                 timer_subsystem,
                 audio_subsystem,
+                &mut command_queue,
                 sizes,
+                game_id,
             )? {
                 NextAction::NextLevel => {
-                    if level == 13 {
+                    if level_number == 12 {
                         finished = true;
                         break 'level_loop;
                     } else {

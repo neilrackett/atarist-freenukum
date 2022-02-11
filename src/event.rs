@@ -18,6 +18,7 @@ use std::{collections::BTreeSet, convert::TryFrom, iter::FromIterator};
 #[must_use]
 pub enum GameEvent {
     Escape,
+    GameMenu,
     GetInventoryItem(InventoryItem),
     IncreaseLife,
     FinishLevel,
@@ -150,6 +151,10 @@ impl TryFrom<Event> for GameEvent {
         use Keycode as K;
         use WindowEvent as W;
         match e {
+            E::KeyDown {
+                keycode: Some(K::F1),
+                ..
+            } => Ok(GameEvent::GameMenu),
             E::Quit { .. }
             | E::KeyDown {
                 keycode: Some(K::Escape),

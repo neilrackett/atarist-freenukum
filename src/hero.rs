@@ -6,6 +6,7 @@ use crate::{
     game::GameCommands,
     level::tiles::LevelTiles,
     rendering::Renderer,
+    savegame::SaveGame,
     HorizontalDirection, KeyColor, Result, Sizes, SoundIndex,
     HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
     HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
@@ -16,6 +17,7 @@ use crate::{
 };
 use sdl2::rect::{Point, Rect};
 use std::convert::TryFrom;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Motion {
@@ -428,6 +430,28 @@ impl Hero {
 
         Ok(())
     }
+
+    pub fn create_savegame(
+        &self,
+        game_id: Uuid,
+        finished_level: usize,
+    ) -> SaveGame {
+        use std::convert::TryInto;
+        let inventory = self
+            .inventory
+            .get_items()
+            .into_iter()
+            .filter_map(|item| item.try_into().ok())
+            .collect();
+        SaveGame {
+            game_id,
+            firepower: self.firepower.num_shots(),
+            finished_level,
+            health: self.health.life().unwrap_or_default(),
+            inventory,
+            score: self.score.value(),
+        }
+    }
 }
 
 const JUMP_PROFILE_DEFAULT: [i32; 9] = [13, 11, 9, 7, 5, 3, 0, 0, 0];
@@ -570,7 +594,7 @@ impl Immunity {
 
 #[derive(Debug)]
 pub struct Score {
-    count: u128,
+    count: u64,
 }
 
 impl Default for Score {
@@ -584,7 +608,7 @@ impl Score {
         Score { count: 0 }
     }
 
-    pub fn add(&mut self, amount: u128) {
+    pub fn add(&mut self, amount: u64) {
         self.count = self.count.saturating_add(amount);
     }
 
@@ -592,11 +616,11 @@ impl Score {
         self.count = 0;
     }
 
-    pub fn set_value(&mut self, value: u128) {
+    pub fn set_value(&mut self, value: u64) {
         self.count = value;
     }
 
-    pub fn value(&self) -> u128 {
+    pub fn value(&self) -> u64 {
         self.count
     }
 }
@@ -677,6 +701,10 @@ impl Firepower {
         self.shots = std::cmp::min(Self::MAX, self.shots + count);
     }
 
+    pub fn set(&mut self, count: u8) {
+        self.shots = std::cmp::min(Self::MAX, std::cmp::max(1, count));
+    }
+
     pub fn reset(&mut self) {
         self.shots = 1;
     }
@@ -686,7 +714,18 @@ impl Firepower {
     }
 }
 
-#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+#[derive(
+    Copy,
+    Clone,
+    Debug,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Hash,
+)]
 pub enum InventoryItem {
     Key(KeyColor),
     Boot,

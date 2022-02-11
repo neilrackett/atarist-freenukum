@@ -14,6 +14,7 @@ use sdl2::{
     EventPump,
 };
 
+#[derive(Debug, Clone)]
 pub enum Answer {
     Ok(String),
     Quit,

@@ -11,6 +11,7 @@ pub mod data;
 pub mod episodes;
 pub mod event;
 pub mod game;
+pub mod gamemenu;
 pub mod geometry;
 pub mod graphics;
 pub mod hero;
@@ -23,6 +24,7 @@ pub mod menu;
 pub mod messagebox;
 pub mod picture;
 pub mod rendering;
+pub mod savegame;
 pub mod settings;
 pub mod shot;
 pub mod sound;
@@ -223,7 +225,18 @@ const HERO_JUMPING_RIGHT_SOMERSAULT: usize = HERO_START + 0x54;
 const HERO_SKELETON_LEFT: usize = HERO_START + 0xB0;
 const HERO_SKELETON_RIGHT: usize = HERO_START + 0xB4;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Serialize,
+    Deserialize,
+    Hash,
+)]
 pub enum KeyColor {
     Red,
     Blue,

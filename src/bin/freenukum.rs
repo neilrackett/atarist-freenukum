@@ -6,10 +6,10 @@ use freenukum::{
     data::original_data_dir,
     game,
     graphics::load_default_font,
-    hero::Hero,
-    infobox,
+    infobox, inputbox,
     mainmenu::{mainmenu, MainMenuEntry},
     picture::show_splash,
+    savegame::SaveGame,
     settings::Settings,
     sound::SoundCache,
     tilecache::TileCache,
@@ -88,8 +88,6 @@ fn main() -> Result<()> {
         &mut event_pump,
     )?;
 
-    let mut hero = Hero::new(&sizes);
-
     'menu_loop: loop {
         match mainmenu(
             &mut canvas,
@@ -103,7 +101,6 @@ fn main() -> Result<()> {
                     &mut canvas,
                     &tilecache,
                     &soundcache,
-                    &mut hero,
                     &mut settings,
                     &episodes,
                     &mut event_pump,
@@ -111,6 +108,7 @@ fn main() -> Result<()> {
                     &timer_subsystem,
                     &audio_subsystem,
                     &sizes,
+                    None,
                 )?;
                 let mut file = File::open(&bg_filepath)?;
                 show_splash(
@@ -121,10 +119,79 @@ fn main() -> Result<()> {
                 )?;
             }
             MainMenuEntry::Restore => {
-                infobox::show(
+                let answer = inputbox::show(
                     &mut canvas,
                     &tilecache,
-                    "Restore not implemented yet",
+                    "Restore a game.\n\
+                    Which game number\n\
+                    do you want to load?\n\
+                    Choose (1-9):",
+                    1,
+                    &mut event_pump,
+                )?;
+                if let inputbox::Answer::Ok(slot) = answer {
+                    match slot.parse::<usize>() {
+                        Ok(slot) if slot > 0 => {
+                            let episode_name =
+                                episodes.string_identifier();
+                            println!(
+                                "Loading savegame from slot {:?}",
+                                slot
+                            );
+                            if SaveGame::exists(&episode_name, slot) {
+                                match SaveGame::load(&episode_name, slot) {
+                                    Ok(savegame) => {
+                                        println!(
+                                            "Loaded savegame {:#?}",
+                                            savegame
+                                        );
+                                        game::start(
+                                            &mut canvas,
+                                            &tilecache,
+                                            &soundcache,
+                                            &mut settings,
+                                            &episodes,
+                                            &mut event_pump,
+                                            &event_sender,
+                                            &timer_subsystem,
+                                            &audio_subsystem,
+                                            &sizes,
+                                            Some(savegame),
+                                        )?;
+                                    }
+                                    Err(e) => {
+                                        eprintln!("{:?}", e);
+                                        infobox::show(
+                                            &mut canvas,
+                                            &tilecache,
+                                            &format!("Error loading game:\n{:?}", e),
+                                            &mut event_pump)?;
+                                    }
+                                }
+                            } else {
+                                infobox::show(
+                                    &mut canvas,
+                                    &tilecache,
+                                    &format!("Slot {} is empty", slot),
+                                    &mut event_pump,
+                                )?;
+                            }
+                        }
+                        Ok(_) | Err(_) => {
+                            infobox::show(
+                                &mut canvas,
+                                &tilecache,
+                                "Not a valid number",
+                                &mut event_pump,
+                            )?;
+                        }
+                    }
+                }
+                let mut file = File::open(&bg_filepath)?;
+                show_splash(
+                    &mut canvas,
+                    &tilecache,
+                    &mut file,
                     &mut event_pump,
                 )?;
             }

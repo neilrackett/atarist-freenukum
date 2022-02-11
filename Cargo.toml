@@ -28,3 +28,4 @@ zip = "0.5"
 log = "0.4"
 rgb = "0.8"
 lazy_static = "1.4.0"
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
