@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 - Implement animation for teleporter
 - Sounds
 - Snake of flying balls enemy
+- Implement saving and loading games
 
 ### Fixed
 - Fix position of left-looking torch flames which was two tiles too far to
@@ -20,6 +21,8 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
   and not touching it
 - Rocket continues to act while invisible once it launches
 - Flying sodacan continues to act while invisible
+- Fix navigation in menus with up/down keys
+- Handle missing backdrop files gracefully
 
 ## [0.3.5] - 2020-12-15
 
