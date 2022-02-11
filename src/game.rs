@@ -82,9 +82,17 @@ fn start_in_level(
             episodes.file_extension()
         );
         let filepath = original_data_dir().join(filename);
-        let mut file = File::open(filepath)?;
-        TileHeader::load_from(&mut file)?;
-        backdrop::load(&mut file)?
+        if filepath.exists() {
+            let mut file = File::open(filepath)?;
+            TileHeader::load_from(&mut file)?;
+            Some(backdrop::load(&mut file)?)
+        } else {
+            eprintln!(
+                "Can't open backdrop file {:?}, doesn't exist",
+                filepath
+            );
+            None
+        }
     };
 
     let mut level = {
@@ -198,7 +206,7 @@ fn start_in_level(
                 hero,
                 settings.draw_collision_bounds,
                 srcrect,
-                Some(&backdrop),
+                backdrop.as_ref(),
                 None,
             )?;
             canvas.set_clip_rect(None);
