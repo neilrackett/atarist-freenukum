@@ -652,10 +652,8 @@ impl Health {
     }
 
     pub fn increase(&mut self, count: u8) {
-        self.life = match self.life {
-            Some(life) => Some(std::cmp::min(Self::MAX, life + count)),
-            None => None,
-        }
+        self.life =
+            self.life.map(|life| std::cmp::min(Self::MAX, life + count));
     }
 
     pub fn decrease(&mut self, count: u8) {

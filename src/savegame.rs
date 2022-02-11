@@ -27,9 +27,9 @@ pub enum StorableInventoryItem {
     Clamp,
 }
 
-impl std::convert::Into<InventoryItem> for StorableInventoryItem {
-    fn into(self) -> InventoryItem {
-        match self {
+impl std::convert::From<StorableInventoryItem> for InventoryItem {
+    fn from(item: StorableInventoryItem) -> Self {
+        match item {
             StorableInventoryItem::Boot => InventoryItem::Boot,
             StorableInventoryItem::Glove => InventoryItem::Glove,
             StorableInventoryItem::Clamp => InventoryItem::Clamp,

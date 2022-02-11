@@ -1,8 +1,19 @@
 # SPDX-License-Identifier: CC0-1.0
 # SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
-#
+
 stages:
     - lint
+    - test
+
+cache:
+    key: "$CI_JOB_NAME"
+    untracked: true
+    paths:
+    - $HOME/.cargo/
+    - target/
+
+variables:
+    RUST_BACKTRACE: "FULL"
 
 licensing:
     image: debian:bookworm
@@ -16,3 +27,45 @@ licensing:
         - apt-get --assume-yes install git reuse
     script:
         - reuse lint
+
+clippy:
+    image: rust:latest
+    stage: lint
+    only:
+        - main
+        - branches
+        - merge_requests
+    before_script:
+        - rustup component add clippy
+    script:
+        - cargo clippy -- -D warnings
+
+rustfmt:
+    image: rust:latest
+    stage: lint
+    only:
+        - main
+        - branches
+        - merge_requests
+    before_script:
+        - rustup component add rustfmt
+    script:
+        - cargo fmt -- --check
+
+test:
+    image: rust:latest
+    stage: test
+    only:
+        - main
+        - branches
+        - merge_requests
+    before_script:
+        - apt-get update
+        - apt-get --assume-yes install
+          libsdl2-dev
+          libsdl2-image-dev
+          libsdl2-ttf-dev
+    script:
+        rustc --version && cargo --version
+        cargo build
+        cargo test --verbose

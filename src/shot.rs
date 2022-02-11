@@ -133,6 +133,7 @@ impl Shot {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn push(
         &mut self,
         sizes: &dyn Sizes,

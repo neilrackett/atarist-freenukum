@@ -47,10 +47,10 @@ impl From<char> for MainMenuEntry {
     }
 }
 
-impl Into<char> for MainMenuEntry {
-    fn into(self) -> char {
+impl From<MainMenuEntry> for char {
+    fn from(entry: MainMenuEntry) -> char {
         use MainMenuEntry as M;
-        match self {
+        match entry {
             M::Start => 's',
             M::Restore => 'r',
             M::Instructions => 'i',
@@ -68,11 +68,11 @@ impl Into<char> for MainMenuEntry {
     }
 }
 
-impl Into<MenuEntry> for MainMenuEntry {
-    fn into(self) -> MenuEntry {
+impl From<MainMenuEntry> for MenuEntry {
+    fn from(entry: MainMenuEntry) -> MenuEntry {
         use MainMenuEntry as M;
-        let shortcut: char = self.into();
-        let name = match self {
+        let shortcut: char = entry.into();
+        let name = match entry {
             M::Start => "S)tart a new game",
             M::Restore => "R)estore an old game",
             M::Instructions => "I)nstructions",

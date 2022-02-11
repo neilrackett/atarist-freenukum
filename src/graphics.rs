@@ -44,7 +44,7 @@ pub fn load_default_font(ttf_context: &Sdl2TtfContext) -> Result<Font> {
         vec![
             Path::new(
                 &std::env::var("WINDIR")
-                    .unwrap_or("C:/Windows".to_string()),
+                    .unwrap_or_else(|_| "C:/Windows".to_string()),
             )
             .to_path_buf(),
             Path::new("/usr/share/fonts").to_path_buf(),

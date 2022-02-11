@@ -526,12 +526,10 @@ fn prelude(
 fn level_filenumber(level_number: usize, interlevel: bool) -> usize {
     if interlevel {
         2
+    } else if level_number == 1 {
+        1
     } else {
-        if level_number == 1 {
-            1
-        } else {
-            level_number + 1
-        }
+        level_number + 1
     }
 }
 

@@ -77,13 +77,13 @@ impl ActorExt for Elevator {
                     p.game_commands.add_sound(SoundIndex::ELEVATOR);
                     let offset = p.hero.position.push_vertically(
                         p.sizes,
-                        &p.tiles,
+                        p.tiles,
                         -(p.sizes.height() as i32),
                     );
                     if -offset < p.sizes.height() as i32 {
                         p.hero
                             .position
-                            .push_vertically(p.sizes, &p.tiles, -offset);
+                            .push_vertically(p.sizes, p.tiles, -offset);
                         self.state = State::Idle;
                     } else {
                         self.position.offset(0, offset);

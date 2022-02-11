@@ -85,7 +85,7 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
         rect: Rect,
     ) -> Result<()> {
         self.canvas
-            .copy(&surface.as_texture(&self.texture_creator)?, None, rect)
+            .copy(&surface.as_texture(self.texture_creator)?, None, rect)
             .map_err(Error::msg)?;
         Ok(())
     }
@@ -103,7 +103,7 @@ impl<'a, RT: RenderTarget, T> Renderer for CanvasRenderer<'a, RT, T> {
             tile.height(),
         );
         self.canvas
-            .copy(&tile.as_texture(&self.texture_creator)?, None, rect)
+            .copy(&tile.as_texture(self.texture_creator)?, None, rect)
             .map_err(Error::msg)?;
         Ok(())
     }

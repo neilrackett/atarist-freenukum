@@ -432,6 +432,7 @@ impl ActorsList {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn act(
         &mut self,
         sizes: &dyn Sizes,
@@ -483,14 +484,13 @@ impl ActorsList {
         draw_collision_bounds: bool,
         visible_rect: Rect,
     ) -> Result<()> {
-        Ok(self
-            .actors
+        self.actors
             .iter_mut()
             .filter(|actor| {
                 !actor.is_in_foreground()
                     && actor.position().has_intersection(visible_rect)
             })
-            .map(|actor| {
+            .try_for_each(|actor| {
                 let p = RenderParameters { renderer, sizes };
                 let res = actor.render(p);
                 if res.is_ok() && draw_collision_bounds {
@@ -499,7 +499,6 @@ impl ActorsList {
                 }
                 res
             })
-            .collect::<Result<_>>()?)
     }
 
     pub fn render_foreground_actors(
@@ -509,14 +508,13 @@ impl ActorsList {
         draw_collision_bounds: bool,
         visible_rect: Rect,
     ) -> Result<()> {
-        Ok(self
-            .actors
+        self.actors
             .iter_mut()
             .filter(|actor| {
                 actor.is_in_foreground()
                     && actor.position().has_intersection(visible_rect)
             })
-            .map(|actor| {
+            .try_for_each(|actor| {
                 let p = RenderParameters { renderer, sizes };
                 let res = actor.render(p);
                 if res.is_ok() && draw_collision_bounds {
@@ -525,7 +523,6 @@ impl ActorsList {
                 }
                 res
             })
-            .collect::<Result<_>>()?)
     }
 }
 

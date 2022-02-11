@@ -107,7 +107,7 @@ fn read_raw_data(raw: &[u8]) -> Result<BTreeMap<String, Vec<i16>>> {
     if raw[..4]
         != "SND"
             .as_bytes()
-            .into_iter()
+            .iter()
             .copied()
             .chain(std::iter::once(0u8))
             .collect::<Vec<u8>>()

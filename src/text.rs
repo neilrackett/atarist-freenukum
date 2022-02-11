@@ -10,10 +10,10 @@ use sdl2::rect::Point;
 
 fn render_letter(renderer: &mut dyn Renderer, letter: char) -> Result<()> {
     let tilenr = match letter {
-        c if c >= ' ' && c <= 'Z' => {
+        c if (' '..='Z').contains(&c) => {
             c as usize - ' ' as usize + FONT_ASCII_UPPERCASE
         }
-        c if c >= 'a' && c <= 'z' => {
+        c if ('a'..='z').contains(&c) => {
             c as usize - 'a' as usize + FONT_ASCII_LOWERCASE
         }
         _ => FONT_QUESTIONMARK,

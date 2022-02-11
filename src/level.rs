@@ -94,7 +94,7 @@ impl Level {
             let tile = u16::from_le_bytes(tile_buf);
             let mut t = tiles.get_mut(x, y)?;
             t.raw_number = tile;
-            if tile >= 4 && tile <= 0x2fe0 {
+            if (4..=0x2fe0).contains(&tile) {
                 t.solid = tile >= 0x1800;
                 t.effective_number = tile / 0x20;
             }
@@ -937,7 +937,7 @@ impl Level {
                 {
                     aa(ActorType::Spikes(SpikeType::SpikesDown), tx, ty);
                 }
-                t if t >= 4 && t <= 0x2fe0 => {}
+                t if (4..=0x2fe0).contains(&t) => {}
                 t if (t as usize / 0x20 >= ANIMATION_START) => {
                     warn!(
                         "Unknown tile 0x{:04x} at x: {}, y: {}\n",
@@ -999,6 +999,7 @@ impl Level {
         self.animated_frames_since_last_act
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn render(
         &mut self,
         renderer: &mut dyn Renderer,

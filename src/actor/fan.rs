@@ -98,7 +98,7 @@ impl ActorExt for Fan {
             if hdistance.abs() < range {
                 p.hero.position.push_horizontally(
                     p.sizes,
-                    &p.tiles,
+                    p.tiles,
                     fan_direction * p.sizes.width() as i32,
                 );
             }
