@@ -68,4 +68,5 @@ test:
     script:
         rustc --version && cargo --version
         cargo build
+        cargo build --examples
         cargo test --verbose
