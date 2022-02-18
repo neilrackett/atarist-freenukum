@@ -2,15 +2,15 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::tilecache::{FileProperties, TileCache};
 use freenukum::tileprovider::TileProvider;
 use sdl2::image::SaveSurface;
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 /// Convert a set of original Duke Nukem 1 tile files to a set of png files.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The path to the directory with the files that should be converted.
     /// The files must be lowercase, such as `anim0.dn1` to `anim5.dn1`,
@@ -25,7 +25,7 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let file_properties = FileProperties::get_all();
     let max_tiles =

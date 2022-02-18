@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::data::original_data_dir;
 use freenukum::graphics::load_default_font;
 use freenukum::hero::Hero;
@@ -24,18 +25,17 @@ use sdl2::{
 use std::fs::File;
 use std::num::NonZeroUsize;
 use std::num::ParseIntError;
-use structopt::StructOpt;
 
 /// Show an original Duke Nukem 1 level.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The number of the level in hexadecimal format.
     /// This is usually in the range from 1 to 'c'.
-    #[structopt(parse(try_from_str=parse_hex))]
+    #[clap(parse(try_from_str=parse_hex))]
     level_number: usize,
 
     /// The episode number. Usually in the range 1 to 3.
-    #[structopt(default_value = "1", long, name = "EPISODE_NUMBER")]
+    #[clap(default_value = "1", long, name = "EPISODE_NUMBER")]
     episode: NonZeroUsize,
 }
 
@@ -45,7 +45,7 @@ fn parse_hex(src: &str) -> Result<usize, ParseIntError> {
 
 fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let settings = Settings::load_or_create();
     let sdl_context = sdl2::init().map_err(Error::msg)?;

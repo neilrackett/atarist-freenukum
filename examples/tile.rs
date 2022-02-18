@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::game;
 use freenukum::settings::Settings;
 use freenukum::tile::{self, TileHeader};
@@ -14,10 +15,9 @@ use sdl2::{
 };
 use std::fs::File;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 /// Show tiles from a Duke Nukem 1 grame graphics file.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The path to the file that should be shown.
     /// The file is usually named one of: `anim0.dn1` to `anim5.dn1`,
@@ -28,7 +28,7 @@ struct Arguments {
 
 fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let settings = Settings::load_or_create();
 

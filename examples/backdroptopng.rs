@@ -2,14 +2,14 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::backdrop;
 use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::File;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 /// Convert an original original Duke Nukem 1 backdrop file to a set of png files.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The path to the file that should be converted.
     /// The file is usually named `drop1.dn1` or similar.
@@ -20,7 +20,7 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let mut file = File::open(&args.infile)?;
     let backdrop: Surface = backdrop::load(&mut file)?;

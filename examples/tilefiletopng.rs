@@ -2,14 +2,14 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::tile::{self, TileHeader};
 use sdl2::{image::SaveSurface, surface::Surface};
 use std::fs::{create_dir_all, File};
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 /// Convert an original original Duke Nukem 1 tile file to a set of png files.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The path to the file that should be converted.
     /// The file is usually named one of: `anim0.dn1` to `anim5.dn1`,
@@ -24,7 +24,7 @@ struct Arguments {
 }
 
 fn main() -> Result<()> {
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let mut file = File::open(&args.filename)?;
     let header = TileHeader::load_from(&mut file)?;

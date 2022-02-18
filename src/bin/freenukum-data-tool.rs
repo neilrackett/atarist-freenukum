@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::Context;
+use clap::Parser;
 use explode::explode;
 use freenukum::data_dir;
 use std::fs::{create_dir_all, File};
@@ -10,7 +11,6 @@ use std::io::{Read, Write};
 use std::iter::Iterator;
 use std::ops::Shl;
 use std::path::{Path, PathBuf};
-use structopt::StructOpt;
 use zip::read::ZipArchive;
 
 trait Skip {
@@ -27,19 +27,19 @@ impl<R: Read> Skip for R {
     }
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct InstallFromShrArguments {
     /// Path of the input SHR file (usually named "DN1SW20.SHR")
     input: PathBuf,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct InstallFromZipArguments {
     /// The input Zip file
     input: PathBuf,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 enum Command {
     /// Install the data from a SHR file.
     InstallFromShr(InstallFromShrArguments),
@@ -61,9 +61,9 @@ enum Command {
 ///
 /// After the game data has been successfully installed, the FreeNukum
 /// game can use the data.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     command: Command,
 }
 
@@ -158,7 +158,7 @@ fn extract_zip_nested_shr_file_to_dir(
 }
 
 fn main() -> Result<(), anyhow::Error> {
-    let arguments = Arguments::from_args();
+    let arguments = Arguments::parse();
 
     let data_path = data_dir().join("data").join("original");
 

@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 use anyhow::{Error, Result};
+use clap::Parser;
 use freenukum::picture;
 use freenukum::settings::Settings;
 use freenukum::{game, WINDOW_HEIGHT, WINDOW_WIDTH};
@@ -13,10 +14,9 @@ use sdl2::{
 };
 use std::fs::File;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 /// Show an original Duke Nukem 1 game picture.
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// The path to the file that should be shown.
     /// The file is usually named one of: `badguy.dn1`, `credits.dn1`,
@@ -26,7 +26,7 @@ struct Arguments {
 
 fn main() -> Result<()> {
     const VERSION: &str = env!("CARGO_PKG_VERSION");
-    let args = Arguments::from_args();
+    let args = Arguments::parse();
 
     let mut file = File::open(&args.filename)?;
 
