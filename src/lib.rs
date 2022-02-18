@@ -122,7 +122,7 @@ const SOLID_CONVEYORBELT_RIGHTEND: usize = SOLID_CONVEYORBELT + 6;
 const SOLID_END: usize = SOLID_START + 4 * 48;
 const ANIMATION_START: usize = SOLID_END;
 
-const _ANIMATION_FOOTBOT: usize = ANIMATION_START + 10;
+const _ANIMATION_JUMPBOT: usize = ANIMATION_START + 10;
 const ANIMATION_CARBOT: usize = ANIMATION_START + 34;
 const ANIMATION_EXPLOSION: usize = ANIMATION_START + 42;
 const ANIMATION_FIREWHEEL_OFF: usize = ANIMATION_START + 48;
@@ -338,5 +338,88 @@ impl Sizes for DefaultSizes {
     }
     fn half_height(&self) -> u32 {
         HALFTILE_HEIGHT
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct RangedIterator {
+    current: usize,
+    max: usize,
+    finished_cycles: usize,
+}
+
+impl RangedIterator {
+    pub fn new(max: usize) -> Self {
+        RangedIterator {
+            current: 0,
+            max,
+            finished_cycles: 0,
+        }
+    }
+
+    pub fn reset(&mut self, max: usize) {
+        self.current = 0;
+        self.max = max;
+        self.finished_cycles = 0;
+    }
+
+    pub fn is_first(&self) -> bool {
+        self.current == 0
+    }
+
+    pub fn current(&self) -> usize {
+        self.current
+    }
+
+    pub fn current_reverse(&self) -> usize {
+        self.max - 1 - self.current
+    }
+
+    pub fn finished_cycles(&self) -> usize {
+        self.finished_cycles
+    }
+
+    pub fn max_value(&self) -> usize {
+        self.max
+    }
+
+    pub fn set_limit(&mut self, limit: usize) {
+        self.max = limit;
+        self.enforce_range();
+    }
+
+    fn enforce_range(&mut self) {
+        let old = self.current;
+        self.current %= self.max;
+        if self.current != old {
+            self.finished_cycles =
+                self.finished_cycles.overflowing_add(1).0
+        }
+    }
+
+    fn rewind(&mut self) {
+        if self.current == 0 {
+            self.current = self.max;
+            if self.current > 0 {
+                self.current -= 1;
+            }
+            if self.finished_cycles > 0 {
+                self.finished_cycles -= 1;
+            } else {
+                self.finished_cycles = usize::MAX;
+            }
+        } else {
+            self.current -= 1;
+        }
+    }
+}
+
+impl Iterator for RangedIterator {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.current += 1;
+        self.enforce_range();
+        Some(self.current)
     }
 }

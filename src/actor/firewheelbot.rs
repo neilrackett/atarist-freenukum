@@ -7,9 +7,9 @@ use crate::{
         RenderParameters, ShotParameters, ShotProcessing,
         SingleAnimationType,
     },
-    level::tiles::LevelTiles,
-    Hero, HorizontalDirection, Result, Sizes, ANIMATION_FIREWHEEL_OFF,
-    ANIMATION_FIREWHEEL_ON,
+    level::{tiles::LevelTiles, BackgroundTileStrategy},
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    ANIMATION_FIREWHEEL_OFF, ANIMATION_FIREWHEEL_ON,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -17,8 +17,7 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct FireWheelBot {
     direction: HorizontalDirection,
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     was_shot: usize,
     fire_is_on: bool,
     counter: usize,
@@ -35,8 +34,7 @@ impl CreateActor for FireWheelBot {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_FIREWHEEL_OFF,
             counter: 0,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             was_shot: 0,
             fire_is_on: false,
             position: Rect::new(
@@ -64,8 +62,7 @@ impl ActorExt for FireWheelBot {
         } else {
             self.counter += 1;
             if self.counter % 2 == 1 {
-                self.current_frame += 1;
-                self.current_frame %= self.num_frames;
+                self.frame.next();
             }
 
             if self.counter == 50 {
@@ -92,7 +89,7 @@ impl ActorExt for FireWheelBot {
 
             if self.was_shot == 1 {
                 // create steam clouds
-                if self.current_frame == 0 {
+                if self.frame.is_first() {
                     p.game_commands.add_actor(
                         ActorType::SingleAnimation(
                             SingleAnimationType::Steam,
@@ -113,18 +110,15 @@ impl ActorExt for FireWheelBot {
         pos.x = pos.x + r.width() as i32 / 2 - p.sizes.width() as i32;
         pos.y -= p.sizes.height() as i32;
 
-        p.renderer
-            .place_tile(self.tile + self.current_frame * 4, pos)?;
+        let f = self.frame.current() * 4;
+        p.renderer.place_tile(self.tile + f, pos)?;
         pos.x += p.sizes.width() as i32;
-        p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 1, pos)?;
+        p.renderer.place_tile(self.tile + f + 1, pos)?;
         pos.x -= p.sizes.width() as i32;
         pos.y += p.sizes.height() as i32;
-        p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 2, pos)?;
+        p.renderer.place_tile(self.tile + f + 2, pos)?;
         pos.x += p.sizes.width() as i32;
-        p.renderer
-            .place_tile(self.tile + self.current_frame * 4 + 3, pos)?;
+        p.renderer.place_tile(self.tile + f + 3, pos)?;
         Ok(())
     }
 
@@ -154,5 +148,9 @@ impl ActorExt for FireWheelBot {
 
     fn is_alive(&self) -> bool {
         self.was_shot < 2
+    }
+
+    fn background_tile_strategy(&self) -> BackgroundTileStrategy {
+        BackgroundTileStrategy::CopyFromLeft
     }
 }

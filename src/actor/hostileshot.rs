@@ -7,15 +7,15 @@ use crate::{
         RenderParameters,
     },
     level::tiles::LevelTiles,
-    Hero, HorizontalDirection, Result, Sizes, OBJECT_HOSTILESHOT,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    OBJECT_HOSTILESHOT,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct HostileShot {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
     is_alive: bool,
     direction: HorizontalDirection,
@@ -37,8 +37,7 @@ impl CreateActorWithDetails for HostileShot {
 
         Actor::HostileShot(Self {
             tile,
-            current_frame: 0,
-            num_frames: 2,
+            frame: RangedIterator::new(2),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -66,13 +65,12 @@ impl ActorExt for HostileShot {
             .map(|t| !t.solid)
             .unwrap_or(false);
 
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

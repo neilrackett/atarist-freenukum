@@ -9,12 +9,13 @@ use crate::{
     game::GameCommands,
     hero::{FetchedLetter, InventoryItem},
     level::{tiles::LevelTiles, BackgroundTileStrategy},
-    Hero, Result, Sizes, SoundIndex, ANIMATION_SODA, OBJECT_ACCESS_CARD,
-    OBJECT_BOOT, OBJECT_BOX_BLUE, OBJECT_BOX_GREY, OBJECT_BOX_RED,
-    OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE, OBJECT_CLAMP,
-    OBJECT_DISK, OBJECT_FLAG, OBJECT_FOOTBALL, OBJECT_GLOVE, OBJECT_GUN,
-    OBJECT_JOYSTICK, OBJECT_LETTER_D, OBJECT_LETTER_E, OBJECT_LETTER_K,
-    OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE, OBJECT_RADIO,
+    Hero, RangedIterator, Result, Sizes, SoundIndex, ANIMATION_SODA,
+    OBJECT_ACCESS_CARD, OBJECT_BOOT, OBJECT_BOX_BLUE, OBJECT_BOX_GREY,
+    OBJECT_BOX_RED, OBJECT_CHICKEN_DOUBLE, OBJECT_CHICKEN_SINGLE,
+    OBJECT_CLAMP, OBJECT_DISK, OBJECT_FLAG, OBJECT_FOOTBALL, OBJECT_GLOVE,
+    OBJECT_GUN, OBJECT_JOYSTICK, OBJECT_LETTER_D, OBJECT_LETTER_E,
+    OBJECT_LETTER_K, OBJECT_LETTER_U, OBJECT_NUCLEARMOLECULE,
+    OBJECT_RADIO,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -106,8 +107,7 @@ impl ItemType {
 #[derive(Debug)]
 pub(crate) struct Item {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
     is_alive: bool,
     item_type: ItemType,
@@ -126,8 +126,7 @@ impl CreateActorWithDetails for Item {
 
         Actor::Item(Self {
             tile,
-            current_frame: 0,
-            num_frames,
+            frame: RangedIterator::new(num_frames),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -287,7 +286,7 @@ impl Item {
             }
             ItemType::Radio | ItemType::Flag => {
                 self.is_alive = false;
-                match self.current_frame {
+                match self.frame.current() {
                     0 => {
                         hero.score.add(100);
                         game_commands.add_actor(
@@ -350,8 +349,7 @@ impl Item {
 
 impl ActorExt for Item {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
 
         if p.tiles
             .get(
@@ -372,7 +370,7 @@ impl ActorExt for Item {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

@@ -8,7 +8,7 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Hero, Result, Sizes, ANIMATION_BALL,
+    Hero, RangedIterator, Result, Sizes, ANIMATION_BALL,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -16,9 +16,8 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct FlyingBall {
     base_position: Rect,
     tile: usize,
-    num_frames: usize,
-    counter: usize,
-    position_counter: usize,
+    frame: RangedIterator,
+    position_iterator: RangedIterator,
     position: Rect,
     is_alive: bool,
 }
@@ -80,10 +79,14 @@ impl CreateActorWithDetails for FlyingBall {
         sizes: &dyn Sizes,
         _tiles: &mut LevelTiles,
     ) -> Actor {
-        let num_frames = 8;
-        let counter = start_index % num_frames;
-        let position_counter = start_index % POSITION_OFFSETS.len();
-        let position = POSITION_OFFSETS[position_counter];
+        let mut frame = RangedIterator::new(8 * 3);
+        let mut position_iterator =
+            RangedIterator::new(POSITION_OFFSETS.len());
+        for _ in 0..start_index {
+            position_iterator.next();
+            frame.next();
+        }
+        let position = POSITION_OFFSETS[position_iterator.current()];
         Actor::FlyingBall(Self {
             base_position: Rect::new(
                 pos.x,
@@ -92,9 +95,8 @@ impl CreateActorWithDetails for FlyingBall {
                 sizes.height(),
             ),
             tile: ANIMATION_BALL,
-            num_frames,
-            counter,
-            position_counter,
+            frame,
+            position_iterator,
             position: Rect::new(
                 pos.x + position.0,
                 pos.y + position.1,
@@ -108,22 +110,21 @@ impl CreateActorWithDetails for FlyingBall {
 
 impl ActorExt for FlyingBall {
     fn act(&mut self, _p: ActParameters) {
-        let relative_position = POSITION_OFFSETS[self.position_counter];
+        let relative_position =
+            POSITION_OFFSETS[self.position_iterator.current()];
         self.position
             .set_x(self.base_position.x + relative_position.0);
         self.position
             .set_y(self.base_position.y + relative_position.1);
 
-        self.counter += 1;
-        self.counter %= self.num_frames * 3;
+        self.frame.next();
 
-        self.position_counter += 1;
-        self.position_counter %= POSITION_OFFSETS.len();
+        self.position_iterator.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.counter / 3,
+            self.tile + self.frame.current() / 3,
             self.position.top_left(),
         )?;
         Ok(())

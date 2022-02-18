@@ -5,8 +5,8 @@ use super::messagebox;
 use crate::event::{MenuEvent, OnOffTracking, WaitEvent};
 use crate::rendering::{CanvasRenderer, Renderer};
 use crate::{
-    TileProvider, UserEvent, FONT_HEIGHT, FONT_WIDTH, GAME_INTERVAL,
-    OBJECT_POINT,
+    RangedIterator, TileProvider, UserEvent, FONT_HEIGHT, FONT_WIDTH,
+    GAME_INTERVAL, OBJECT_POINT,
 };
 use anyhow::{Error, Result};
 use sdl2::{
@@ -95,7 +95,7 @@ impl Menu {
         );
 
         let mut changed = true;
-        let mut animationframe = 0;
+        let mut animationframe = RangedIterator::new(4);
 
         let mut next_enabled = BTreeSet::new();
         let mut previous_enabled = BTreeSet::new();
@@ -126,7 +126,7 @@ impl Menu {
                 );
 
                 renderer.place_tile(
-                    OBJECT_POINT + animationframe,
+                    OBJECT_POINT + animationframe.current(),
                     point_pos,
                 )?;
                 canvas.present();
@@ -197,8 +197,7 @@ impl Menu {
                     None
                 }
                 MenuEvent::TimerTriggered => {
-                    animationframe += 1;
-                    animationframe %= 4;
+                    animationframe.next();
                     changed = true;
                     None
                 }

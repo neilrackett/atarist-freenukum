@@ -9,7 +9,8 @@ use crate::{
     hero::InventoryItem,
     level::tiles::LevelTiles,
     sound::SoundIndex,
-    Hero, HorizontalDirection, Result, Sizes, OBJECT_GLOVE_SLOT,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    OBJECT_GLOVE_SLOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -23,8 +24,7 @@ enum State {
 #[derive(Debug)]
 pub(crate) struct GloveSlot {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     state: State,
     countdown: usize,
     position: Rect,
@@ -38,8 +38,7 @@ impl CreateActor for GloveSlot {
     ) -> Actor {
         Actor::GloveSlot(Self {
             tile: OBJECT_GLOVE_SLOT,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             state: State::Idle,
             countdown: 0,
             position: Rect::new(
@@ -78,12 +77,10 @@ impl ActorExt for GloveSlot {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Idle => {
-                self.current_frame += 1;
-                self.current_frame %= self.num_frames;
+                self.frame.next();
             }
             State::Shooting => {
-                self.current_frame += 1;
-                self.current_frame %= self.num_frames;
+                self.frame.next();
                 self.countdown -= 1;
                 if self.countdown % 4 == 0 {
                     p.game_commands.add_actor(
@@ -107,7 +104,7 @@ impl ActorExt for GloveSlot {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let adder = if self.current_frame == 0 { 0 } else { 1 };
+        let adder = if self.frame.is_first() { 0 } else { 1 };
         let mut pos = self.position.top_left();
         p.renderer.place_tile(self.tile + adder, pos)?;
 

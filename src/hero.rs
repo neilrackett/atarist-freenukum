@@ -7,8 +7,8 @@ use crate::{
     level::tiles::LevelTiles,
     rendering::Renderer,
     savegame::SaveGame,
-    HorizontalDirection, KeyColor, Result, Sizes, SoundIndex,
-    HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
+    HorizontalDirection, KeyColor, RangedIterator, Result, Sizes,
+    SoundIndex, HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
     HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
     HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
     HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
@@ -43,8 +43,7 @@ pub struct Hero {
     counter: usize,
     somersault: Option<usize>,
     base_tile_number: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     vertical_speed: i32,
     pub gets_hurt: bool,
 }
@@ -68,8 +67,7 @@ impl Hero {
             counter: 0,
             somersault: None,
             base_tile_number: HERO_STANDING_RIGHT,
-            current_frame: 0,
-            num_frames: 1,
+            frame: RangedIterator::new(1),
             vertical_speed: 0i32,
             gets_hurt: false,
         }
@@ -91,8 +89,7 @@ impl Hero {
         self.is_shooting = false;
         self.counter = 0;
         self.base_tile_number = HERO_STANDING_RIGHT;
-        self.current_frame = 0;
-        self.num_frames = 1;
+        self.frame.reset(1);
         self.vertical_speed = 0i32;
         self.gets_hurt = false;
     }
@@ -112,15 +109,13 @@ impl Hero {
         self.is_shooting = false;
         self.counter = 0;
         self.base_tile_number = HERO_STANDING_RIGHT;
-        self.current_frame = 0;
-        self.num_frames = 1;
+        self.frame.reset(1);
         self.vertical_speed = 0i32;
         self.gets_hurt = false;
     }
 
     pub fn next_frame(&mut self) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
     }
 
     pub fn render(
@@ -212,7 +207,7 @@ impl Hero {
             // hero is jumping or falling
             if self.counter > 0 {
                 // hero is jumping
-                self.num_frames = HERO_NUM_JUMPING;
+                self.frame.set_limit(HERO_NUM_JUMPING);
                 if let Some(frame) = self.somersault {
                     self.direction.map(
                         HERO_JUMPING_LEFT_SOMERSAULT,
@@ -224,7 +219,7 @@ impl Hero {
                 }
             } else {
                 // hero is falling
-                self.num_frames = HERO_NUM_FALLING;
+                self.frame.set_limit(HERO_NUM_FALLING);
                 if let Some(frame) = self.somersault {
                     self.direction.map(
                         HERO_JUMPING_LEFT_SOMERSAULT,
@@ -239,7 +234,7 @@ impl Hero {
             // hero is standing or walking on ground
             if self.motion == Motion::NotMoving {
                 // hero is standing
-                self.num_frames = HERO_NUM_STANDING;
+                self.frame.set_limit(HERO_NUM_STANDING);
                 if self.is_shooting {
                     self.direction
                         .map(HERO_WALKING_LEFT, HERO_WALKING_RIGHT)
@@ -250,9 +245,9 @@ impl Hero {
                 }
             } else {
                 // hero is walking
-                self.num_frames = HERO_NUM_WALKING;
+                self.frame.set_limit(HERO_NUM_WALKING);
                 self.direction.map(HERO_WALKING_LEFT, HERO_WALKING_RIGHT)
-                    + 4 * self.current_frame
+                    + 4 * self.frame.current()
             }
         };
     }

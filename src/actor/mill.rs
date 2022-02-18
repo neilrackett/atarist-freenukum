@@ -9,15 +9,14 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Result, Sizes, OBJECT_ROTATINGCYLINDER,
+    RangedIterator, Result, Sizes, OBJECT_ROTATINGCYLINDER,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Mill {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     lives: usize,
     position: Rect,
 }
@@ -45,8 +44,7 @@ impl CreateActor for Mill {
 
         Actor::Mill(Self {
             tile: OBJECT_ROTATINGCYLINDER,
-            current_frame: 0,
-            num_frames: 5,
+            frame: RangedIterator::new(5),
             lives: 10,
             position,
         })
@@ -56,11 +54,10 @@ impl CreateActor for Mill {
 impl ActorExt for Mill {
     fn act(&mut self, p: ActParameters) {
         if self.lives > 0 {
-            if self.current_frame == 0 {
+            if self.frame.is_first() {
                 p.game_commands.add_sound(SoundIndex::REACTORSND);
             }
-            self.current_frame += 1;
-            self.current_frame %= self.num_frames;
+            self.frame.next();
 
             if self.position.has_intersection(p.hero.position.geometry) {
                 p.hero.health.kill();
@@ -72,7 +69,8 @@ impl ActorExt for Mill {
         let mut pos = self.position.top_left();
 
         for _ in 0..self.position.height() / p.sizes.width() {
-            p.renderer.place_tile(self.tile + self.current_frame, pos)?;
+            p.renderer
+                .place_tile(self.tile + self.frame.current(), pos)?;
             pos.y += p.sizes.height() as i32;
         }
         Ok(())

@@ -8,14 +8,14 @@ use crate::{
         SingleAnimationType,
     },
     level::tiles::{LevelTiles, Tile},
-    Result, Sizes, SoundIndex, OBJECT_BALLOON,
+    RangedIterator, Result, Sizes, SoundIndex, OBJECT_BALLOON,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Balloon {
     destroyed: bool,
-    current_frame: usize,
+    frame: RangedIterator,
     position: Rect,
     is_alive: bool,
 }
@@ -28,7 +28,7 @@ impl CreateActor for Balloon {
     ) -> Actor {
         Actor::Balloon(Self {
             destroyed: false,
-            current_frame: 0,
+            frame: RangedIterator::new(9),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -42,8 +42,8 @@ impl CreateActor for Balloon {
 
 impl ActorExt for Balloon {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= 9;
+        self.frame.next();
+        self.is_alive = !self.destroyed;
 
         if self.position.has_intersection(p.hero.position.geometry) {
             self.is_alive = false;
@@ -81,7 +81,7 @@ impl ActorExt for Balloon {
 
         pos.y += p.sizes.height() as i32;
         p.renderer.place_tile(
-            OBJECT_BALLOON + 1 + self.current_frame / 3,
+            OBJECT_BALLOON + 1 + self.frame.current() / 3,
             pos,
         )?;
         Ok(())

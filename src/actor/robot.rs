@@ -9,7 +9,8 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Hero, HorizontalDirection, Result, Sizes, ANIMATION_ROBOT,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    ANIMATION_ROBOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -17,8 +18,7 @@ use sdl2::rect::{Point, Rect};
 pub(crate) struct Robot {
     direction: HorizontalDirection,
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
     is_alive: bool,
 }
@@ -32,8 +32,7 @@ impl CreateActor for Robot {
         Actor::Robot(Self {
             direction: HorizontalDirection::Left,
             tile: ANIMATION_ROBOT,
-            current_frame: 0,
-            num_frames: 3,
+            frame: RangedIterator::new(3),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -47,8 +46,7 @@ impl CreateActor for Robot {
 
 impl ActorExt for Robot {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
 
         if p.tiles
             .get(
@@ -62,7 +60,7 @@ impl ActorExt for Robot {
             self.position.offset(0, p.sizes.half_height() as i32);
         } else {
             // On the floor, walking.
-            if self.current_frame == 0 {
+            if self.frame.is_first() {
                 let mut direction = match self.direction {
                     HorizontalDirection::Left => -1,
                     HorizontalDirection::Right => 2,

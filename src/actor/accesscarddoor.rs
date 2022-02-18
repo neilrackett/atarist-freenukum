@@ -8,15 +8,14 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Result, Sizes, OBJECT_LASERBEAM,
+    RangedIterator, Result, Sizes, OBJECT_LASERBEAM,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct AccessCardDoor {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
     is_alive: bool,
 }
@@ -29,8 +28,7 @@ impl CreateActor for AccessCardDoor {
     ) -> Actor {
         Actor::AccessCardDoor(Self {
             tile: OBJECT_LASERBEAM,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -44,14 +42,13 @@ impl CreateActor for AccessCardDoor {
 
 impl ActorExt for AccessCardDoor {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
         p.game_commands.add_sound(SoundIndex::FORCEFIELD);
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

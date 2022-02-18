@@ -8,14 +8,14 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Hero, Result, Sizes, ANIMATION_MINE,
+    Hero, RangedIterator, Result, Sizes, ANIMATION_MINE,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct MineJumping {
     tile: usize,
-    counter: u16,
+    frame: RangedIterator,
     base_y: i32,
     position: Rect,
 }
@@ -28,7 +28,7 @@ impl CreateActor for MineJumping {
     ) -> Actor {
         Actor::MineJumping(Self {
             tile: ANIMATION_MINE,
-            counter: 0,
+            frame: RangedIterator::new(12),
             base_y: pos.y,
             position: Rect::new(
                 pos.x,
@@ -42,7 +42,7 @@ impl CreateActor for MineJumping {
 
 impl ActorExt for MineJumping {
     fn act(&mut self, p: ActParameters) {
-        let relative_distance = match self.counter {
+        let relative_distance = match self.frame.current() {
             0 => 0f32,
             1 | 11 => 1f32,
             2 | 10 => 1.75f32,
@@ -56,12 +56,11 @@ impl ActorExt for MineJumping {
             ((p.sizes.height() as f32) * relative_distance) as i32;
         self.position.set_y(self.base_y - distance);
 
-        if self.counter == 0 {
+        if self.frame.is_first() {
             p.game_commands.add_sound(SoundIndex::MINEBOUNCE);
         }
 
-        self.counter += 1;
-        self.counter %= 12;
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {

@@ -7,16 +7,15 @@ use crate::{
         RenderParameters,
     },
     level::tiles::LevelTiles,
-    Result, Sizes, ANIMATION_BROKENWALLBG, ANIMATION_STONEWINDOWBG,
-    ANIMATION_WINDOWBG,
+    RangedIterator, Result, Sizes, ANIMATION_BROKENWALLBG,
+    ANIMATION_STONEWINDOWBG, ANIMATION_WINDOWBG,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct BackgroundAnimation {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
 }
 
@@ -84,8 +83,7 @@ impl CreateActorWithDetails for BackgroundAnimation {
 
         Actor::BackgroundAnimation(Self {
             tile,
-            current_frame: 0,
-            num_frames,
+            frame: RangedIterator::new(num_frames),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -98,13 +96,12 @@ impl CreateActorWithDetails for BackgroundAnimation {
 
 impl ActorExt for BackgroundAnimation {
     fn act(&mut self, _p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

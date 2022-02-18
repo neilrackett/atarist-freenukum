@@ -10,16 +10,23 @@ use crate::{
     hero::InventoryItem,
     level::tiles::LevelTiles,
     sound::SoundIndex,
-    Hero, KeyColor, Result, Sizes, OBJECT_KEYHOLE_BLACK,
+    Hero, KeyColor, RangedIterator, Result, Sizes, OBJECT_KEYHOLE_BLACK,
     OBJECT_KEYHOLE_BLUE, OBJECT_KEYHOLE_GREEN, OBJECT_KEYHOLE_PINK,
     OBJECT_KEYHOLE_RED,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
+enum State {
+    Initial,
+    Opened,
+}
+
+#[derive(Debug)]
 pub(crate) struct KeyHole {
     tile: usize,
-    counter: usize,
+    frame: RangedIterator,
+    state: State,
     position: Rect,
     color: KeyColor,
 }
@@ -35,7 +42,8 @@ impl CreateActorWithDetails for KeyHole {
     ) -> Actor {
         Actor::KeyHole(Self {
             tile: OBJECT_KEYHOLE_BLACK,
-            counter: 0,
+            frame: RangedIterator::new(8),
+            state: State::Initial,
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -49,19 +57,20 @@ impl CreateActorWithDetails for KeyHole {
 
 impl ActorExt for KeyHole {
     fn act(&mut self, _p: ActParameters) {
-        if self.counter < 5 {
-            self.counter += 1;
-            self.counter %= 4;
-        }
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let tile = match (self.counter, self.color) {
-            (0, _) => self.tile,
-            (_, KeyColor::Red) => OBJECT_KEYHOLE_RED,
-            (_, KeyColor::Blue) => OBJECT_KEYHOLE_BLUE,
-            (_, KeyColor::Pink) => OBJECT_KEYHOLE_PINK,
-            (_, KeyColor::Green) => OBJECT_KEYHOLE_GREEN,
+        let color_tile = match self.color {
+            KeyColor::Red => OBJECT_KEYHOLE_RED,
+            KeyColor::Blue => OBJECT_KEYHOLE_BLUE,
+            KeyColor::Pink => OBJECT_KEYHOLE_PINK,
+            KeyColor::Green => OBJECT_KEYHOLE_GREEN,
+        };
+        let tile = if self.frame.current() < self.frame.max_value() / 2 {
+            self.tile
+        } else {
+            color_tile
         };
 
         p.renderer.place_tile(tile, self.position.top_left())?;
@@ -75,17 +84,23 @@ impl ActorExt for KeyHole {
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         let required_item = InventoryItem::Key(self.color);
 
-        if p.hero.inventory.is_set(required_item) {
-            p.actor_message_queue
-                .push_back(ActorMessageType::OpenDoor(self.color));
-            self.counter = 5;
-            p.hero.inventory.unset(required_item);
-            p.game_commands.add_sound(SoundIndex::OPENKEYDOOR);
-        } else if self.counter < 5 {
-            p.info_message_queue.push_back(format!(
-                "You don't have the {} key.",
-                self.color.to_string()
-            ));
+        match self.state {
+            State::Initial => {
+                if p.hero.inventory.is_set(required_item) {
+                    p.actor_message_queue
+                        .push_back(ActorMessageType::OpenDoor(self.color));
+                    self.frame.reset(1);
+                    self.state = State::Opened;
+                    p.hero.inventory.unset(required_item);
+                    p.game_commands.add_sound(SoundIndex::OPENKEYDOOR);
+                } else {
+                    p.info_message_queue.push_back(format!(
+                        "You don't have the {} key.",
+                        self.color.to_string()
+                    ));
+                }
+            }
+            State::Opened => {}
         }
     }
 

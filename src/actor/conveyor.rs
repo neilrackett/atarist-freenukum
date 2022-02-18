@@ -7,7 +7,7 @@ use crate::{
         RenderParameters,
     },
     level::tiles::LevelTiles,
-    HorizontalDirection, Result, Sizes, SOLID_BLACK,
+    HorizontalDirection, RangedIterator, Result, Sizes, SOLID_BLACK,
     SOLID_CONVEYORBELT_CENTER, SOLID_CONVEYORBELT_LEFTEND,
     SOLID_CONVEYORBELT_RIGHTEND,
 };
@@ -15,8 +15,7 @@ use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Conveyor {
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     direction: HorizontalDirection,
     position: Rect,
 }
@@ -56,8 +55,7 @@ impl CreateActorWithDetails for Conveyor {
         }
 
         Actor::Conveyor(Self {
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             direction,
             position,
         })
@@ -66,19 +64,10 @@ impl CreateActorWithDetails for Conveyor {
 
 impl ActorExt for Conveyor {
     fn act(&mut self, p: ActParameters) {
+        self.frame.next();
         let hero_push_offset = match self.direction {
-            HorizontalDirection::Left => {
-                if self.current_frame == 0 {
-                    self.current_frame = self.num_frames;
-                }
-                self.current_frame -= 1;
-                -(p.sizes.half_width() as i32)
-            }
-            HorizontalDirection::Right => {
-                self.current_frame += 1;
-                self.current_frame %= self.num_frames;
-                p.sizes.half_width() as i32
-            }
+            HorizontalDirection::Left => -(p.sizes.half_width() as i32),
+            HorizontalDirection::Right => p.sizes.half_width() as i32,
         };
 
         let hero_geometry = p.hero.position.geometry;
@@ -96,17 +85,21 @@ impl ActorExt for Conveyor {
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
-        let mut tile = SOLID_CONVEYORBELT_LEFTEND + self.current_frame;
+        let tile_number_offset = match self.direction {
+            HorizontalDirection::Left => self.frame.current_reverse(),
+            HorizontalDirection::Right => self.frame.current(),
+        };
+        let mut tile = SOLID_CONVEYORBELT_LEFTEND + tile_number_offset;
         let mut pos = self.position.top_left();
 
         let num_elements = self.position.width() / p.sizes.width();
         for i in 0..num_elements {
             if i == num_elements - 1 {
                 // right end of the conveyor
-                tile = SOLID_CONVEYORBELT_RIGHTEND + self.current_frame;
+                tile = SOLID_CONVEYORBELT_RIGHTEND + tile_number_offset;
             } else if i == 1 {
                 // center parts of the conveyor
-                tile = SOLID_CONVEYORBELT_CENTER + self.current_frame % 2;
+                tile = SOLID_CONVEYORBELT_CENTER + tile_number_offset % 2;
             }
             p.renderer.place_tile(tile, pos)?;
             pos.x += p.sizes.width() as i32;

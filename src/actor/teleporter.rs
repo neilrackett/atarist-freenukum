@@ -9,7 +9,7 @@ use crate::{
     },
     level::tiles::LevelTiles,
     sound::SoundIndex,
-    Hero, Result, Sizes, ANIMATION_TELEPORTER1,
+    Hero, RangedIterator, Result, Sizes, ANIMATION_TELEPORTER1,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -24,7 +24,7 @@ enum State {
 pub(crate) struct Teleporter {
     position: Rect,
     index: TeleporterIndex,
-    counter: usize,
+    frame: RangedIterator,
     state: State,
 }
 
@@ -54,13 +54,13 @@ impl CreateActorWithDetails for Teleporter {
     ) -> Actor {
         Actor::Teleporter(Self {
             position: Rect::new(
-                pos.x,
-                pos.y,
-                sizes.width(),
-                sizes.height(),
+                pos.x - sizes.width() as i32,
+                pos.y - 2 * sizes.height() as i32,
+                sizes.width() * 3,
+                sizes.height() * 3,
             ),
             index,
-            counter: 0usize,
+            frame: RangedIterator::new(12),
             state: State::Idle,
         })
     }
@@ -74,19 +74,16 @@ impl ActorExt for Teleporter {
     fn hero_interact_start(&mut self, p: HeroInteractStartParameters) {
         if self.state == State::Idle {
             self.state = State::Sending;
-            self.counter = 0;
         }
         p.game_commands.add_sound(SoundIndex::TELEPORT);
     }
 
     fn act(&mut self, p: ActParameters) {
-        self.counter += 1;
-        self.counter %= 12;
-
         match self.state {
             State::Idle => {}
             State::Sending => {
-                if self.counter == 0 {
+                self.frame.next();
+                if self.frame.is_first() {
                     p.actor_message_queue.push_back(
                         ActorMessageType::TeleportTo(self.index.other()),
                     );
@@ -94,7 +91,8 @@ impl ActorExt for Teleporter {
                 }
             }
             State::Receiving => {
-                if self.counter == 0 {
+                self.frame.next();
+                if self.frame.is_first() {
                     self.state = State::Idle;
                 }
             }
@@ -105,12 +103,12 @@ impl ActorExt for Teleporter {
         for i in 0..3 {
             for j in 0..3 {
                 let pos = self.position.top_left().offset(
-                    (j - 1) * p.sizes.width() as i32,
-                    (i - 2) * p.sizes.height() as i32,
+                    j * p.sizes.width() as i32,
+                    i * p.sizes.height() as i32,
                 );
                 let extra_offset = if i == 1 && j == 1 {
                     // Center part with buttons
-                    match self.counter % 3 {
+                    match self.frame.current() % 3 {
                         0 => 0,
                         1 => 8,
                         2 => 9,
@@ -118,7 +116,7 @@ impl ActorExt for Teleporter {
                     }
                 } else if i == 1 && j == 2 {
                     // Center right part with lights
-                    match self.counter % 3 {
+                    match self.frame.current() % 3 {
                         0 => 0,
                         1 => 9,
                         2 => 10,
@@ -130,7 +128,7 @@ impl ActorExt for Teleporter {
                         || self.state == State::Receiving)
                 {
                     // Center top part with electric beam while teleporting
-                    match self.counter % 4 {
+                    match self.frame.current() % 4 {
                         0 | 2 => 0,
                         1 => 8,
                         3 => 9,
@@ -163,11 +161,10 @@ impl ActorExt for Teleporter {
 
     fn receive_message(&mut self, p: ReceiveMessageParameters) {
         self.state = State::Receiving;
-        self.counter = 0;
         p.hero.position.move_to(
             p.sizes,
-            self.position.x(),
-            self.position.y() - p.sizes.height() as i32,
+            self.position.x() + p.sizes.width() as i32,
+            self.position.y() + p.sizes.height() as i32,
         );
     }
 

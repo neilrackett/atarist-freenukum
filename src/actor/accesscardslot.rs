@@ -8,15 +8,14 @@ use crate::{
     },
     hero::InventoryItem,
     level::tiles::LevelTiles,
-    Hero, Result, Sizes, OBJECT_ACCESS_CARD_SLOT,
+    Hero, RangedIterator, Result, Sizes, OBJECT_ACCESS_CARD_SLOT,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct AccessCardSlot {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     position: Rect,
 }
 
@@ -28,8 +27,7 @@ impl CreateActor for AccessCardSlot {
     ) -> Actor {
         Actor::AccessCardSlot(Self {
             tile: OBJECT_ACCESS_CARD_SLOT,
-            current_frame: 0,
-            num_frames: 8,
+            frame: RangedIterator::new(8),
             position: Rect::new(
                 pos.x,
                 pos.y,
@@ -49,8 +47,7 @@ impl ActorExt for AccessCardSlot {
         if p.hero.inventory.is_set(InventoryItem::AccessCard) {
             p.actor_message_queue
                 .push_back(ActorMessageType::OpenDoorAccessCard);
-            self.current_frame = 0;
-            self.num_frames = 1;
+            self.frame.reset(1);
             self.tile = OBJECT_ACCESS_CARD_SLOT + 8;
             p.hero.inventory.unset(InventoryItem::AccessCard);
         } else {
@@ -60,13 +57,12 @@ impl ActorExt for AccessCardSlot {
     }
 
     fn act(&mut self, _p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

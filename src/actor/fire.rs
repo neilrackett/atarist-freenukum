@@ -8,10 +8,15 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Hero, HorizontalDirection, Result, Sizes, OBJECT_FIRELEFT,
-    OBJECT_FIRERIGHT, TILE_WIDTH,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    OBJECT_FIRELEFT, OBJECT_FIRERIGHT, TILE_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
+
+const CYCLES_OFF: usize = 20;
+const CYCLES_IGNITION: usize = 10;
+const CYCLES_BURNING: usize = 10;
+const ANIMATION_LENGTH: usize = 2;
 
 #[derive(Debug, PartialEq, Eq)]
 enum State {
@@ -24,8 +29,8 @@ enum State {
 pub(crate) struct Fire {
     tile: usize,
     direction: HorizontalDirection,
+    frame: RangedIterator,
     state: State,
-    counter: usize,
     position: Rect,
 }
 
@@ -50,7 +55,7 @@ impl CreateActorWithDetails for Fire {
             tile,
             direction,
             state: State::Off,
-            counter: 0,
+            frame: RangedIterator::new(ANIMATION_LENGTH),
             position,
         })
     }
@@ -60,34 +65,35 @@ impl ActorExt for Fire {
     fn act(&mut self, p: ActParameters) {
         match self.state {
             State::Off => {
-                if self.counter == 40 {
-                    self.counter = 0;
+                if self.frame.finished_cycles() == CYCLES_OFF {
+                    self.frame.reset(ANIMATION_LENGTH);
                     self.state = State::Ignition;
                     p.game_commands.add_sound(SoundIndex::TORCHON);
                 }
             }
             State::Ignition => {
-                if self.counter == 20 {
-                    self.counter = 0;
+                if self.frame.finished_cycles() == CYCLES_IGNITION {
+                    self.frame.reset(ANIMATION_LENGTH);
                     self.state = State::Burning;
                 }
             }
             State::Burning => {
-                if self.counter == 20 {
-                    self.counter = 0;
+                if self.frame.finished_cycles() == CYCLES_BURNING {
+                    self.frame.reset(ANIMATION_LENGTH);
                     self.state = State::Off;
                 }
             }
         }
 
-        self.counter += 1;
+        self.frame.next();
     }
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
+        let offset = self.frame.current();
         let (tile0, tile1, tile2) = match self.state {
             State::Off => (None, None, None),
             State::Ignition => {
-                if (self.counter % 2) > 0 {
+                if offset > 0 {
                     match self.direction {
                         HorizontalDirection::Left => {
                             (None, None, Some(self.tile))
@@ -100,21 +106,18 @@ impl ActorExt for Fire {
                     (None, None, None)
                 }
             }
-            State::Burning => {
-                let offset = self.counter % 2;
-                match self.direction {
-                    HorizontalDirection::Left => (
-                        Some(self.tile + 3 + offset),
-                        Some(self.tile + 1 + offset),
-                        Some(self.tile + 1 + offset),
-                    ),
-                    HorizontalDirection::Right => (
-                        Some(self.tile + 1 + offset),
-                        Some(self.tile + 1 + offset),
-                        Some(self.tile + 3 + offset),
-                    ),
-                }
-            }
+            State::Burning => match self.direction {
+                HorizontalDirection::Left => (
+                    Some(self.tile + 3 + offset),
+                    Some(self.tile + 1 + offset),
+                    Some(self.tile + 1 + offset),
+                ),
+                HorizontalDirection::Right => (
+                    Some(self.tile + 1 + offset),
+                    Some(self.tile + 1 + offset),
+                    Some(self.tile + 3 + offset),
+                ),
+            },
         };
 
         let mut pos = self.position.top_left();

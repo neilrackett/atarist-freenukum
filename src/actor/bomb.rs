@@ -8,15 +8,14 @@ use crate::{
     },
     level::tiles::LevelTiles,
     sound::SoundIndex,
-    Result, Sizes, ANIMATION_BOMB,
+    RangedIterator, Result, Sizes, ANIMATION_BOMB,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct Bomb {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     counter: u32,
     explode_left: bool,
     explode_right: bool,
@@ -33,8 +32,7 @@ impl CreateActor for Bomb {
     ) -> Actor {
         Actor::Bomb(Self {
             tile: ANIMATION_BOMB,
-            current_frame: 0,
-            num_frames: 2,
+            frame: RangedIterator::new(2),
             counter: 0,
             explode_left: true,
             explode_right: true,
@@ -52,8 +50,7 @@ impl CreateActor for Bomb {
 
 impl ActorExt for Bomb {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
 
         self.counter += 1;
 
@@ -135,7 +132,7 @@ impl ActorExt for Bomb {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         if self.counter < self.explode_threshold {
             p.renderer.place_tile(
-                self.tile + self.current_frame,
+                self.tile + self.frame.current(),
                 self.position.top_left(),
             )?;
         }

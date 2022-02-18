@@ -7,16 +7,15 @@ use crate::{
         RenderParameters,
     },
     level::tiles::LevelTiles,
-    Hero, Result, Sizes, ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION,
-    ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM,
+    Hero, RangedIterator, Result, Sizes, ANIMATION_BOMBFIRE,
+    ANIMATION_EXPLOSION, ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct SingleAnimation {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     can_hurt_hero: bool,
     replaced_by: Option<ActorType>,
     position: Rect,
@@ -66,8 +65,7 @@ impl CreateActorWithDetails for SingleAnimation {
 
         Actor::SingleAnimation(Self {
             tile,
-            current_frame: 0,
-            num_frames,
+            frame: RangedIterator::new(num_frames),
             can_hurt_hero,
             replaced_by,
             position: Rect::new(
@@ -82,7 +80,7 @@ impl CreateActorWithDetails for SingleAnimation {
 
 impl ActorExt for SingleAnimation {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
+        self.frame.next();
         if !self.is_alive() {
             if let Some(successor) = self.replaced_by {
                 p.game_commands
@@ -93,7 +91,7 @@ impl ActorExt for SingleAnimation {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())
@@ -113,7 +111,7 @@ impl ActorExt for SingleAnimation {
     }
 
     fn is_alive(&self) -> bool {
-        self.current_frame < self.num_frames
+        self.frame.finished_cycles() == 0
     }
 
     fn acts_while_invisible(&self) -> bool {

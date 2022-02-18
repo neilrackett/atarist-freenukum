@@ -9,8 +9,9 @@ use crate::{
     },
     level::{tiles::LevelTiles, BackgroundTileStrategy},
     sound::SoundIndex,
-    Hero, HorizontalDirection, Result, Sizes, VerticalDirection,
-    ANIMATION_WALLCRAWLERBOT_LEFT, ANIMATION_WALLCRAWLERBOT_RIGHT,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    VerticalDirection, ANIMATION_WALLCRAWLERBOT_LEFT,
+    ANIMATION_WALLCRAWLERBOT_RIGHT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -19,8 +20,7 @@ pub(crate) struct WallCrawler {
     direction: VerticalDirection,
     orientation: HorizontalDirection,
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     is_alive: bool,
     position: Rect,
 }
@@ -43,8 +43,7 @@ impl CreateActorWithDetails for WallCrawler {
             direction: VerticalDirection::Up,
             orientation,
             tile,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             is_alive: true,
             position: Rect::new(
                 pos.x,
@@ -63,8 +62,7 @@ impl ActorExt for WallCrawler {
         match self.direction {
             VerticalDirection::Up => {
                 // going up
-                self.current_frame += 1;
-                self.current_frame %= self.num_frames;
+                self.frame.next();
 
                 let solid_above = p
                     .tiles
@@ -95,10 +93,7 @@ impl ActorExt for WallCrawler {
             }
             VerticalDirection::Down => {
                 // going down
-                if self.current_frame == 0 {
-                    self.current_frame = self.num_frames;
-                }
-                self.current_frame -= 1;
+                self.frame.rewind();
 
                 let solid_below = p
                     .tiles
@@ -132,7 +127,7 @@ impl ActorExt for WallCrawler {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         p.renderer.place_tile(
-            self.tile + self.current_frame,
+            self.tile + self.frame.current(),
             self.position.top_left(),
         )?;
         Ok(())

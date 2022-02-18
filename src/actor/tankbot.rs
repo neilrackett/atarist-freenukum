@@ -9,7 +9,8 @@ use crate::{
     },
     level::tiles::LevelTiles,
     sound::SoundIndex,
-    Hero, HorizontalDirection, Result, Sizes, ANIMATION_CARBOT,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    ANIMATION_CARBOT,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -24,8 +25,7 @@ enum State {
 pub(crate) struct TankBot {
     orientation: HorizontalDirection,
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     state: State,
     position: Rect,
 }
@@ -39,8 +39,7 @@ impl CreateActor for TankBot {
         Actor::TankBot(Self {
             orientation: HorizontalDirection::Left,
             tile: ANIMATION_CARBOT,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             state: State::Healthy,
             position: Rect::new(
                 pos.x,
@@ -54,8 +53,7 @@ impl CreateActor for TankBot {
 
 impl ActorExt for TankBot {
     fn act(&mut self, p: ActParameters) {
-        self.current_frame += 1;
-        self.current_frame %= self.num_frames;
+        self.frame.next();
 
         let solid_below = p
             .tiles
@@ -129,7 +127,7 @@ impl ActorExt for TankBot {
         }
         if self.state == State::Hurt {
             // create steam clouds
-            if self.current_frame == 0 {
+            if self.frame.is_first() {
                 p.game_commands.add_actor(
                     ActorType::SingleAnimation(SingleAnimationType::Steam),
                     self.position.top_left().offset(
@@ -143,10 +141,10 @@ impl ActorExt for TankBot {
 
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
-        let tile = self.tile + (self.current_frame / 2) * 2;
+        let tile = self.tile + (self.frame.current() / 2) * 2;
         p.renderer.place_tile(tile, pos)?;
 
-        let tile = self.tile + (self.current_frame / 2) * 2 + 1;
+        let tile = self.tile + (self.frame.current() / 2) * 2 + 1;
         pos = pos.offset(p.sizes.width() as i32, 0);
         p.renderer.place_tile(tile, pos)?;
         Ok(())

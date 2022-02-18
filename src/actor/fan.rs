@@ -9,15 +9,14 @@ use crate::{
     },
     geometry::RectExt,
     level::{tiles::LevelTiles, BackgroundTileStrategy},
-    HorizontalDirection, Result, Sizes, ANIMATION_FAN,
+    HorizontalDirection, RangedIterator, Result, Sizes, ANIMATION_FAN,
 };
 use sdl2::rect::{Point, Rect};
 
 #[derive(Debug)]
 pub(crate) struct Fan {
     tile: usize,
-    current_frame: usize,
-    num_frames: usize,
+    frame: RangedIterator,
     running: usize,
     position: Rect,
     direction: HorizontalDirection,
@@ -34,8 +33,7 @@ impl CreateActorWithDetails for Fan {
     ) -> Actor {
         Actor::Fan(Self {
             tile: ANIMATION_FAN,
-            current_frame: 0,
-            num_frames: 4,
+            frame: RangedIterator::new(4),
             running: 10,
             position: Rect::new(
                 pos.x,
@@ -53,26 +51,25 @@ impl ActorExt for Fan {
         match self.running {
             0 => {}
             1 => {
-                self.current_frame += 1;
+                self.frame.next();
             }
             2 => {}
             3 => {}
             4 => {}
             5 => {
-                self.current_frame += 1;
+                self.frame.next();
             }
             6 => {}
             7 => {}
             8 => {
-                self.current_frame += 1;
+                self.frame.next();
             }
             9 => {}
             10 => {
-                self.current_frame += 1;
+                self.frame.next();
             }
             _ => unreachable!(),
         }
-        self.current_frame %= self.num_frames;
         if self.running < 10 && self.running > 0 {
             self.running -= 1;
         } else if self.running == 10
@@ -108,10 +105,10 @@ impl ActorExt for Fan {
     fn render(&mut self, p: RenderParameters) -> Result<()> {
         let mut pos = self.position.top_left();
         p.renderer
-            .place_tile(self.tile + self.current_frame * 2, pos)?;
+            .place_tile(self.tile + self.frame.current() * 2, pos)?;
         pos.y += p.sizes.height() as i32;
         p.renderer
-            .place_tile(self.tile + self.current_frame * 2 + 1, pos)?;
+            .place_tile(self.tile + self.frame.current() * 2 + 1, pos)?;
         Ok(())
     }
 
@@ -123,7 +120,9 @@ impl ActorExt for Fan {
         self.running = 9;
         p.game_commands.add_actor(
             ActorType::SingleAnimation(SingleAnimationType::Steam),
-            self.position.top_left(),
+            self.position
+                .top_left()
+                .offset(0, -(p.sizes.height() as i32 / 2)),
         );
         ShotProcessing::Absorb
     }
