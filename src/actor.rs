@@ -21,6 +21,7 @@ mod flyingball;
 mod gloveslot;
 mod hostileshot;
 mod item;
+mod jumpbot;
 mod key;
 mod keyhole;
 mod mill;
@@ -76,6 +77,7 @@ pub(crate) use {
     item::{
         BoxBlueContent, BoxGreyContent, BoxRedContent, Item, ItemType,
     },
+    jumpbot::JumpBot,
     key::Key,
     keyhole::KeyHole,
     mill::Mill,
@@ -102,6 +104,7 @@ pub(crate) use {
 pub(crate) enum Actor {
     FireWheelBot(FireWheelBot),
     PlaceHolder(PlaceHolder),
+    JumpBot(JumpBot),
     MineJumping(MineJumping),
     MineLying(MineLying),
     Robot(Robot),
@@ -147,6 +150,7 @@ impl Actor {
         match self {
             Actor::FireWheelBot(ref mut a) => a,
             Actor::PlaceHolder(ref mut a) => a,
+            Actor::JumpBot(ref mut a) => a,
             Actor::MineJumping(ref mut a) => a,
             Actor::MineLying(ref mut a) => a,
             Actor::Robot(ref mut a) => a,
@@ -192,6 +196,7 @@ impl Actor {
         match self {
             Actor::FireWheelBot(ref a) => a,
             Actor::PlaceHolder(ref a) => a,
+            Actor::JumpBot(ref a) => a,
             Actor::MineJumping(ref a) => a,
             Actor::MineLying(ref a) => a,
             Actor::Robot(ref a) => a,
@@ -600,9 +605,7 @@ impl ActorType {
             ActorType::FlyingBot => {
                 PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::JumpBot => {
-                PlaceHolder::create_with_details(*self, p, sz, t)
-            }
+            ActorType::JumpBot => JumpBot::create(p, sz, t),
             ActorType::HelicopterBot => {
                 PlaceHolder::create_with_details(*self, p, sz, t)
             }

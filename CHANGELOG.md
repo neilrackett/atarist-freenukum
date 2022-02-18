@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 - Implement animation for teleporter
 - Sounds
 - Snake of flying balls enemy
+- Jumping bot enemy
 - Implement saving and loading games
 
 ### Fixed
