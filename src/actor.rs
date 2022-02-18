@@ -537,7 +537,7 @@ pub enum ActorType {
     FireWheelBot,
     FlameGnomeBot,
     FlyingBot,
-    FootBot,
+    JumpBot,
     HelicopterBot,
     RabbitoidBot,
     MineJumping,
@@ -600,7 +600,7 @@ impl ActorType {
             ActorType::FlyingBot => {
                 PlaceHolder::create_with_details(*self, p, sz, t)
             }
-            ActorType::FootBot => {
+            ActorType::JumpBot => {
                 PlaceHolder::create_with_details(*self, p, sz, t)
             }
             ActorType::HelicopterBot => {

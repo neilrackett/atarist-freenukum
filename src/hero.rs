@@ -10,10 +10,10 @@ use crate::{
     HorizontalDirection, KeyColor, RangedIterator, Result, Sizes,
     SoundIndex, HERO_FALLING_LEFT, HERO_FALLING_RIGHT, HERO_JUMPING_LEFT,
     HERO_JUMPING_LEFT_SOMERSAULT, HERO_JUMPING_RIGHT,
-    HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_FALLING, HERO_NUM_JUMPING,
-    HERO_NUM_STANDING, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
-    HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_RIGHT,
-    HERO_WALKING_LEFT, HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
+    HERO_JUMPING_RIGHT_SOMERSAULT, HERO_NUM_WALKING, HERO_SKELETON_LEFT,
+    HERO_SKELETON_RIGHT, HERO_STANDING_LEFT, HERO_STANDING_LEFT_SHOOTING,
+    HERO_STANDING_RIGHT, HERO_STANDING_RIGHT_SHOOTING, HERO_WALKING_LEFT,
+    HERO_WALKING_RIGHT, LEVEL_HEIGHT, LEVEL_WIDTH,
 };
 use sdl2::rect::{Point, Rect};
 use std::convert::TryFrom;
@@ -23,6 +23,19 @@ use uuid::Uuid;
 pub enum Motion {
     NotMoving,
     Walking,
+}
+
+#[derive(Debug)]
+enum State {
+    Standing,
+    Walking {
+        frame: RangedIterator,
+    },
+    Jumping {
+        frame: RangedIterator,
+        somersault: bool,
+    },
+    Falling,
 }
 
 #[derive(Debug)]
@@ -36,15 +49,9 @@ pub struct Hero {
     pub immunity: Immunity,
     pub hidden: bool,
     pub direction: HorizontalDirection,
-    just_turned_around: bool,
     pub motion: Motion,
-    is_in_the_air: bool,
     pub is_shooting: bool,
-    counter: usize,
-    somersault: Option<usize>,
-    base_tile_number: usize,
-    frame: RangedIterator,
-    vertical_speed: i32,
+    state: State,
     pub gets_hurt: bool,
 }
 
@@ -60,15 +67,9 @@ impl Hero {
             immunity: Immunity::new(),
             hidden: false,
             direction: HorizontalDirection::Right,
-            just_turned_around: false,
             motion: Motion::NotMoving,
-            is_in_the_air: false,
             is_shooting: false,
-            counter: 0,
-            somersault: None,
-            base_tile_number: HERO_STANDING_RIGHT,
-            frame: RangedIterator::new(1),
-            vertical_speed: 0i32,
+            state: State::Falling,
             gets_hurt: false,
         }
     }
@@ -83,14 +84,9 @@ impl Hero {
         self.immunity.reset();
         self.hidden = false;
         self.direction = HorizontalDirection::Right;
-        self.just_turned_around = false;
         self.motion = Motion::NotMoving;
-        self.is_in_the_air = false;
         self.is_shooting = false;
-        self.counter = 0;
-        self.base_tile_number = HERO_STANDING_RIGHT;
-        self.frame.reset(1);
-        self.vertical_speed = 0i32;
+        self.state = State::Falling;
         self.gets_hurt = false;
     }
 
@@ -103,19 +99,10 @@ impl Hero {
         self.fetched_letter_state.reset();
         self.immunity.reset();
         self.hidden = false;
-        self.just_turned_around = false;
         self.motion = Motion::NotMoving;
-        self.is_in_the_air = false;
         self.is_shooting = false;
-        self.counter = 0;
-        self.base_tile_number = HERO_STANDING_RIGHT;
-        self.frame.reset(1);
-        self.vertical_speed = 0i32;
+        self.state = State::Falling;
         self.gets_hurt = false;
-    }
-
-    pub fn next_frame(&mut self) {
-        self.frame.next();
     }
 
     pub fn render(
@@ -138,7 +125,62 @@ impl Hero {
                 HorizontalDirection::Right => HERO_SKELETON_RIGHT,
             }
         } else {
-            self.base_tile_number
+            match (&self.state, self.direction) {
+                (State::Standing, HorizontalDirection::Left)
+                    if self.is_shooting =>
+                {
+                    HERO_STANDING_LEFT_SHOOTING
+                }
+                (State::Standing, HorizontalDirection::Right)
+                    if self.is_shooting =>
+                {
+                    HERO_STANDING_RIGHT_SHOOTING
+                }
+                (State::Standing, HorizontalDirection::Left) => {
+                    HERO_STANDING_LEFT
+                }
+                (State::Standing, HorizontalDirection::Right) => {
+                    HERO_STANDING_RIGHT
+                }
+                (State::Walking { frame }, HorizontalDirection::Left) => {
+                    HERO_WALKING_LEFT + 4 * frame.current()
+                }
+                (State::Walking { frame }, HorizontalDirection::Right) => {
+                    HERO_WALKING_RIGHT + 4 * frame.current()
+                }
+                (
+                    State::Jumping {
+                        frame,
+                        somersault: true,
+                    },
+                    HorizontalDirection::Left,
+                ) => {
+                    HERO_JUMPING_LEFT_SOMERSAULT
+                        + 4 * (frame.current() / 2)
+                }
+                (
+                    State::Jumping {
+                        frame,
+                        somersault: true,
+                    },
+                    HorizontalDirection::Right,
+                ) => {
+                    HERO_JUMPING_RIGHT_SOMERSAULT
+                        + 4 * (frame.current() / 2)
+                }
+                (State::Jumping { .. }, HorizontalDirection::Left) => {
+                    HERO_JUMPING_LEFT
+                }
+                (State::Jumping { .. }, HorizontalDirection::Right) => {
+                    HERO_JUMPING_RIGHT
+                }
+                (State::Falling, HorizontalDirection::Left) => {
+                    HERO_FALLING_LEFT
+                }
+                (State::Falling, HorizontalDirection::Right) => {
+                    HERO_FALLING_RIGHT
+                }
+            }
         };
 
         renderer.place_tile(base_tile_number, point)?;
@@ -202,93 +244,65 @@ impl Hero {
         tiles.collides(sizes, destination)
     }
 
-    pub fn update_animation(&mut self) {
-        self.base_tile_number = if self.is_in_the_air {
-            // hero is jumping or falling
-            if self.counter > 0 {
-                // hero is jumping
-                self.frame.set_limit(HERO_NUM_JUMPING);
-                if let Some(frame) = self.somersault {
-                    self.direction.map(
-                        HERO_JUMPING_LEFT_SOMERSAULT,
-                        HERO_JUMPING_RIGHT_SOMERSAULT,
-                    ) + 4 * (frame / 2)
-                } else {
-                    self.direction
-                        .map(HERO_JUMPING_LEFT, HERO_JUMPING_RIGHT)
-                }
+    pub fn jump(
+        &mut self,
+        sizes: &dyn Sizes,
+        tiles: &LevelTiles,
+        game_commands: &mut dyn GameCommands,
+    ) {
+        if tiles
+            .rect_stands_on_ground_partially(sizes, self.position.geometry)
+        {
+            let somersault = if self.inventory.is_set(InventoryItem::Boot)
+            {
+                use rand::Rng;
+                let mut rng = rand::thread_rng();
+                self.motion == Motion::Walking
+                    && rng.gen_range(0u8..5u8) == 0u8
             } else {
-                // hero is falling
-                self.frame.set_limit(HERO_NUM_FALLING);
-                if let Some(frame) = self.somersault {
-                    self.direction.map(
-                        HERO_JUMPING_LEFT_SOMERSAULT,
-                        HERO_JUMPING_RIGHT_SOMERSAULT,
-                    ) + 4 * (frame / 2)
-                } else {
-                    self.direction
-                        .map(HERO_FALLING_LEFT, HERO_FALLING_RIGHT)
-                }
-            }
-        } else {
-            // hero is standing or walking on ground
-            if self.motion == Motion::NotMoving {
-                // hero is standing
-                self.frame.set_limit(HERO_NUM_STANDING);
-                if self.is_shooting {
-                    self.direction
-                        .map(HERO_WALKING_LEFT, HERO_WALKING_RIGHT)
-                        + 12
-                } else {
-                    self.direction
-                        .map(HERO_STANDING_LEFT, HERO_STANDING_RIGHT)
-                }
-            } else {
-                // hero is walking
-                self.frame.set_limit(HERO_NUM_WALKING);
-                self.direction.map(HERO_WALKING_LEFT, HERO_WALKING_RIGHT)
-                    + 4 * self.frame.current()
-            }
-        };
-    }
+                false
+            };
+            let frame = RangedIterator::new(JUMP_PROFILE_DEFAULT.len());
 
-    pub fn jump(&mut self, game_commands: &mut dyn GameCommands) {
-        if !self.is_in_the_air {
-            let (vertical_speed, somersault) =
-                if self.inventory.is_set(InventoryItem::Boot) {
-                    let somersault = {
-                        use rand::Rng;
-                        let mut rng = rand::thread_rng();
-                        if self.motion == Motion::Walking
-                            && rng.gen_range(0u8..5u8) == 0u8
-                        {
-                            Some(0)
-                        } else {
-                            None
-                        }
-                    };
-                    (JUMP_PROFILE_HIGH[0], somersault)
-                } else {
-                    (JUMP_PROFILE_DEFAULT[0], None)
-                };
-            self.counter = JUMP_PROFILE_DEFAULT.len();
-            self.somersault = somersault;
-            self.vertical_speed = vertical_speed;
-            self.is_in_the_air = true;
-            game_commands.add_sound(SoundIndex::PLAYERJUMP);
+            self.switch_state(
+                State::Jumping { frame, somersault },
+                sizes,
+                game_commands,
+            );
         }
     }
 
-    pub fn land(&mut self) {
-        self.vertical_speed = 0i32;
-        self.is_in_the_air = false;
-        self.somersault = None;
-        self.counter = 0;
-    }
-
-    fn fall(&mut self) {
-        self.is_in_the_air = true;
-        self.counter = 0;
+    fn switch_state(
+        &mut self,
+        new_state: State,
+        sizes: &dyn Sizes,
+        game_commands: &mut dyn GameCommands,
+    ) {
+        match (&self.state, &new_state) {
+            (State::Standing, State::Standing)
+            | (State::Walking { .. }, State::Walking { .. })
+            | (State::Jumping { .. }, State::Jumping { .. })
+            | (State::Falling, State::Falling) => {}
+            (State::Jumping { .. } | State::Falling, State::Standing) => {
+                game_commands.add_actor(
+                    ActorType::SingleAnimation(
+                        SingleAnimationType::DustCloud,
+                    ),
+                    Point::new(
+                        self.position.geometry.x(),
+                        self.position.geometry.y() + sizes.height() as i32,
+                    ),
+                );
+                game_commands.add_sound(SoundIndex::PLAYERLAND);
+            }
+            (State::Walking { .. }, State::Standing) => {}
+            (_, State::Walking { .. }) => {}
+            (_, State::Jumping { .. }) => {
+                game_commands.add_sound(SoundIndex::PLAYERJUMP);
+            }
+            (_, State::Falling) => {}
+        }
+        self.state = new_state;
     }
 
     /// Returns the remaining health
@@ -305,121 +319,140 @@ impl Hero {
             game_commands.add_sound(SoundIndex::PLAYERHIT);
             // when jumping, this jump should be interrupted
             // just as if the hero had bumped against a ceiling
-            self.counter = 0;
+            if matches!(self.state, State::Jumping { .. }) {
+                self.switch_state(State::Falling, sizes, game_commands);
+            }
         }
 
-        self.somersault = match self.somersault {
-            Some(frame) if frame == 13 => None,
-            Some(frame) => Some(frame + 1),
-            None => None,
-        };
-
-        if self.motion == Motion::Walking {
-            // the hero is moving
-            if self.just_turned_around {
-                self.just_turned_around = false;
-            } else {
-                let mut new_position = self.position.geometry;
-                match self.direction {
-                    HorizontalDirection::Left => {
-                        new_position.x -= sizes.half_width() as i32;
-                    }
-                    HorizontalDirection::Right => {
-                        new_position.x += sizes.half_width() as i32;
-                    }
-                }
-                if !self.would_collide(
+        // first, check whether we need to perform state changes
+        match &self.state {
+            State::Standing => {
+                if tiles.rect_stands_on_ground_partially(
                     sizes,
-                    tiles,
-                    new_position.x,
-                    new_position.y,
+                    self.position.geometry,
                 ) {
-                    if !self.is_in_the_air {
-                        game_commands.add_sound(SoundIndex::WALKING);
+                    if matches!(self.motion, Motion::Walking) {
+                        self.switch_state(
+                            State::Walking {
+                                frame: RangedIterator::new(
+                                    HERO_NUM_WALKING,
+                                ),
+                            },
+                            sizes,
+                            game_commands,
+                        );
                     }
-                    self.position.move_to(
+                } else {
+                    self.switch_state(
+                        State::Falling,
                         sizes,
-                        new_position.x(),
-                        new_position.y(),
+                        game_commands,
+                    );
+                }
+            }
+            State::Walking { frame: _ } => {
+                if !tiles.rect_stands_on_ground_partially(
+                    sizes,
+                    self.position.geometry,
+                ) {
+                    self.switch_state(
+                        State::Falling,
+                        sizes,
+                        game_commands,
+                    );
+                } else if !matches!(self.motion, Motion::Walking) {
+                    self.switch_state(
+                        State::Standing,
+                        sizes,
+                        game_commands,
+                    );
+                }
+            }
+            State::Falling => {
+                if tiles.rect_stands_on_ground_partially(
+                    sizes,
+                    self.position.geometry,
+                ) {
+                    self.switch_state(
+                        match self.motion {
+                            Motion::Walking => State::Walking {
+                                frame: RangedIterator::new(
+                                    HERO_NUM_WALKING,
+                                ),
+                            },
+                            Motion::NotMoving => State::Standing,
+                        },
+                        sizes,
+                        game_commands,
+                    );
+                }
+            }
+            State::Jumping { frame, .. } => {
+                if frame.finished_cycles() > 0 {
+                    self.switch_state(
+                        State::Falling,
+                        sizes,
+                        game_commands,
                     );
                 }
             }
         }
 
-        if !self.is_in_the_air {
-            // the hero is standing or walking
-            self.vertical_speed = 0i32;
-        } else {
-            // the hero is jumping or falling
-            if self.counter > 0 {
-                // the hero is jumping
-                self.counter -= 1;
-                let index = JUMP_PROFILE_DEFAULT.len() - 1 - self.counter;
-                self.vertical_speed =
-                    if self.inventory.is_set(InventoryItem::Boot) {
-                        JUMP_PROFILE_HIGH[index]
-                    } else {
-                        JUMP_PROFILE_DEFAULT[index]
-                    };
-
-                for _ in 0..self.vertical_speed {
-                    let geometry = self.position.geometry;
-                    if !self.would_collide(
-                        sizes,
-                        tiles,
-                        geometry.x,
-                        geometry.y - 1,
-                    ) {
-                        self.position.move_y_to(sizes, geometry.y() - 1);
-                    } else {
-                        // hero bumped against the ceiling
-                        self.counter = 0;
-                        game_commands.add_sound(SoundIndex::HITHEAD);
-                    }
-                }
-            } else {
-                // the hero is falling
-                self.vertical_speed = 8;
-
-                for _ in 0..self.vertical_speed {
-                    let geometry = self.position.geometry;
-                    if !self.would_collide(
-                        sizes,
-                        tiles,
-                        geometry.x,
-                        geometry.y + 1,
-                    ) {
-                        self.position.move_y_to(sizes, geometry.y() + 1);
-                    }
-                }
+        if self.motion == Motion::Walking {
+            // the hero is moving
+            let offset =
+                sizes.half_width() as i32 * self.direction.as_factor_i32();
+            let moved = tiles.push_rect_horizontally(
+                sizes,
+                &mut self.position.geometry,
+                offset,
+            );
+            if moved != 0
+                && tiles.rect_stands_on_ground_partially(
+                    sizes,
+                    self.position.geometry,
+                )
+            {
+                game_commands.add_sound(SoundIndex::WALKING);
             }
         }
 
-        let geometry = self.position.geometry;
-        if self.would_collide(
-            sizes,
-            tiles,
-            geometry.x,
-            geometry.y + sizes.half_height() as i32,
-        ) {
-            if self.is_in_the_air {
-                game_commands.add_actor(
-                    ActorType::SingleAnimation(
-                        SingleAnimationType::DustCloud,
-                    ),
-                    Point::new(
-                        self.position.geometry.x(),
-                        self.position.geometry.y() + sizes.height() as i32,
-                    ),
-                );
-                game_commands.add_sound(SoundIndex::PLAYERLAND);
+        // then act in the new state
+        match self.state {
+            State::Standing => {}
+            State::Walking { ref mut frame } => {
+                frame.next();
             }
-            // the hero is standing on solid ground
-            self.land();
-        } else {
-            // the hero is falling down
-            if self.counter == 0 {
-                self.fall();
+            State::Jumping { ref mut frame, .. } => {
+                let distance =
+                    if self.inventory.is_set(InventoryItem::Boot) {
+                        JUMP_PROFILE_HIGH[frame.current()]
+                    } else {
+                        JUMP_PROFILE_DEFAULT[frame.current()]
+                    };
+                let moved = tiles.push_rect_vertically(
+                    sizes,
+                    &mut self.position.geometry,
+                    -distance,
+                );
+                frame.next();
+
+                if moved != -distance {
+                    // hero bumped against the ceiling
+                    self.switch_state(
+                        State::Falling,
+                        sizes,
+                        game_commands,
+                    );
+                    game_commands.add_sound(SoundIndex::HITHEAD);
+                }
+            }
+            State::Falling => {
+                tiles.push_rect_vertically(
+                    sizes,
+                    &mut self.position.geometry,
+                    8,
+                );
             }
         }
 

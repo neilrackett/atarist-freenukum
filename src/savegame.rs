@@ -71,7 +71,7 @@ impl SaveGame {
     }
 
     pub fn exists(episode_name: &str, slot: usize) -> bool {
-        dbg!(Self::savepath(episode_name, slot)).exists()
+        Self::savepath(episode_name, slot).exists()
     }
 
     pub fn load(episode_name: &str, slot: usize) -> Result<SaveGame> {

@@ -166,6 +166,10 @@ const OBJECT_HOSTILESHOT: usize = OBJECT_START + 39;
 const OBJECT_GUN: usize = OBJECT_START + 43;
 const OBJECT_CHICKEN_SINGLE: usize = OBJECT_START + 44;
 const OBJECT_CHICKEN_DOUBLE: usize = OBJECT_START + 45;
+const OBJECT_HERO_GUNFIRE_LEFT: usize = OBJECT_START + 46;
+const OBJECT_HERO_GUNFIRE_RIGHT: usize = OBJECT_START + 47;
+const OBJECT_ENEMY_GUNFIRE_LEFT: usize = OBJECT_START + 48;
+const OBJECT_ENEMY_GUNFIRE_RIGHT: usize = OBJECT_START + 49;
 const OBJECT_ELECTRIC_ARC: usize = OBJECT_START + 50;
 const OBJECT_ELECTRIC_ARC_HURTING: usize = OBJECT_START + 54;
 const OBJECT_FOOTBALL: usize = OBJECT_START + 58;
@@ -210,14 +214,13 @@ const HERO_START: usize = OBJECT_START + 150;
 
 const HERO_NUM_WALKING: usize = 4;
 const HERO_WALKING_LEFT: usize = HERO_START;
+const HERO_STANDING_LEFT_SHOOTING: usize = HERO_START + 0x0C;
 const HERO_WALKING_RIGHT: usize = HERO_START + 0x10;
-const HERO_NUM_JUMPING: usize = 1;
+const HERO_STANDING_RIGHT_SHOOTING: usize = HERO_START + 0x1C;
 const HERO_JUMPING_LEFT: usize = HERO_START + 0x20;
 const HERO_JUMPING_RIGHT: usize = HERO_START + 0x24;
-const HERO_NUM_FALLING: usize = 1;
 const HERO_FALLING_LEFT: usize = HERO_START + 0x28;
 const HERO_FALLING_RIGHT: usize = HERO_START + 0x2C;
-const HERO_NUM_STANDING: usize = 1;
 const HERO_STANDING_LEFT: usize = HERO_START + 0x30;
 const HERO_STANDING_RIGHT: usize = HERO_START + 0x34;
 const HERO_JUMPING_LEFT_SOMERSAULT: usize = HERO_START + 0x38;
@@ -381,11 +384,6 @@ impl RangedIterator {
 
     pub fn max_value(&self) -> usize {
         self.max
-    }
-
-    pub fn set_limit(&mut self, limit: usize) {
-        self.max = limit;
-        self.enforce_range();
     }
 
     fn enforce_range(&mut self) {

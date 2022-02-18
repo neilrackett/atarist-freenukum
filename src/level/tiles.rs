@@ -130,6 +130,14 @@ impl LevelTiles {
     }
 
     pub fn collides(&self, sizes: &dyn Sizes, rect: Rect) -> bool {
+        if rect.left() < 0
+            || rect.top() < 0
+            || rect.right() >= LEVEL_WIDTH as i32 * sizes.width() as i32
+            || rect.bottom() >= LEVEL_HEIGHT as i32 * sizes.height() as i32
+        {
+            return true;
+        }
+
         let mut solidrect = Rect::new(0, 0, sizes.width(), sizes.height());
         let left_edge = rect.left() / sizes.width() as i32;
         let right_edge = rect.right() / sizes.width() as i32 + 1;
@@ -148,6 +156,60 @@ impl LevelTiles {
             }
         }
         false
+    }
+
+    pub fn push_rect_vertically(
+        &self,
+        sizes: &dyn Sizes,
+        geometry: &mut Rect,
+        offset: i32,
+    ) -> i32 {
+        if offset == 0 {
+            return 0;
+        }
+        geometry.y += offset;
+
+        if !self.collides(sizes, *geometry) {
+            return offset;
+        }
+
+        let offset_absolute = offset.abs();
+        let direction = offset / offset_absolute;
+
+        for i in 0..offset_absolute {
+            geometry.offset(0, -direction);
+            if !self.collides(sizes, *geometry) {
+                return i * direction;
+            }
+        }
+        0
+    }
+
+    pub fn push_rect_horizontally(
+        &self,
+        sizes: &dyn Sizes,
+        geometry: &mut Rect,
+        offset: i32,
+    ) -> i32 {
+        if offset == 0 {
+            return 0;
+        }
+        geometry.x += offset;
+
+        if !self.collides(sizes, *geometry) {
+            return offset;
+        }
+
+        let offset_absolute = offset.abs();
+        let direction = offset / offset_absolute;
+
+        for i in 0..offset_absolute {
+            geometry.offset(-direction, 0);
+            if !self.collides(sizes, *geometry) {
+                return i * direction;
+            }
+        }
+        0
     }
 
     pub fn push_rect_standing_on_ground(
@@ -188,7 +250,7 @@ impl LevelTiles {
         }
     }
 
-    fn rect_fall_down(
+    pub fn rect_fall_down(
         &self,
         sizes: &dyn Sizes,
         rect: &mut Rect,
@@ -212,7 +274,7 @@ impl LevelTiles {
         distance
     }
 
-    fn rect_stands_on_ground_partially(
+    pub fn rect_stands_on_ground_partially(
         &self,
         sizes: &dyn Sizes,
         rect: Rect,
@@ -222,16 +284,28 @@ impl LevelTiles {
         }
         let j = rect.bottom() / sizes.height() as i32;
         for i in (rect.left() / sizes.width() as i32)
-            ..(rect.right() + 1) / sizes.width() as i32 + 1
+            ..1 + rect.right() / sizes.width() as i32
         {
             if self.get(i, j).map(|t| t.solid).unwrap_or(true) {
-                return true;
+                let tile = Rect::new(
+                    i * sizes.width() as i32,
+                    j * sizes.height() as i32,
+                    sizes.width(),
+                    sizes.height(),
+                );
+                if (tile.left() < rect.right()
+                    && tile.right() >= rect.right())
+                    || (tile.left() <= rect.left()
+                        && tile.right() > rect.left())
+                {
+                    return true;
+                }
             }
         }
         false
     }
 
-    fn rect_stands_on_ground_completely(
+    pub fn rect_stands_on_ground_completely(
         &self,
         sizes: &dyn Sizes,
         rect: Rect,

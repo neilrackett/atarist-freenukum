@@ -121,7 +121,6 @@ fn main() -> Result<()> {
                     hero.motion = Motion::Walking;
                     hero.direction = HorizontalDirection::Right;
                 }
-                hero.update_animation();
             }
             Event::KeyDown {
                 keycode: Some(Keycode::Left),
@@ -134,7 +133,6 @@ fn main() -> Result<()> {
                     hero.motion = Motion::Walking;
                     hero.direction = HorizontalDirection::Left;
                 }
-                hero.update_animation();
             }
             Event::KeyDown {
                 keycode: Some(Keycode::LAlt),
@@ -145,7 +143,6 @@ fn main() -> Result<()> {
                 ..
             } => {
                 hero.is_shooting = true;
-                hero.update_animation();
             }
             Event::KeyUp {
                 keycode: Some(Keycode::LAlt),
@@ -156,7 +153,6 @@ fn main() -> Result<()> {
                 ..
             } => {
                 hero.is_shooting = false;
-                hero.update_animation();
             }
             Event::KeyDown {
                 keycode: Some(Keycode::LCtrl),
@@ -166,19 +162,7 @@ fn main() -> Result<()> {
                 mouse_btn: MouseButton::Right,
                 ..
             } => {
-                hero.jump(&mut game_commands);
-                hero.update_animation();
-            }
-            Event::KeyUp {
-                keycode: Some(Keycode::LCtrl),
-                ..
-            }
-            | Event::MouseButtonUp {
-                mouse_btn: MouseButton::Right,
-                ..
-            } => {
-                hero.land();
-                hero.update_animation();
+                hero.jump(&sizes, &tiles, &mut game_commands);
             }
             Event::KeyUp {
                 keycode: Some(Keycode::Right),
@@ -191,7 +175,6 @@ fn main() -> Result<()> {
                 } else {
                     hero.motion = Motion::NotMoving;
                 }
-                hero.update_animation();
             }
             Event::KeyUp {
                 keycode: Some(Keycode::Left),
@@ -204,15 +187,12 @@ fn main() -> Result<()> {
                 } else {
                     hero.motion = Motion::NotMoving;
                 }
-                hero.update_animation();
             }
             e if e.is_user_event() => {
                 if e.as_user_event_type::<UserEvent>()
                     == Some(UserEvent::Timer)
                 {
                     renderer.fill(Color::RGB(0, 0, 0))?;
-                    hero.next_frame();
-                    hero.update_animation();
                     hero.act(&sizes, &tiles, &mut game_commands)?;
                     hero.render(
                         &mut renderer,

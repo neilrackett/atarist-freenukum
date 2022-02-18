@@ -7,8 +7,11 @@ use crate::{
         RenderParameters,
     },
     level::tiles::LevelTiles,
-    Hero, RangedIterator, Result, Sizes, ANIMATION_BOMBFIRE,
-    ANIMATION_EXPLOSION, ANIMATION_ROBOT, OBJECT_DUSTCLOUD, OBJECT_STEAM,
+    Hero, HorizontalDirection, RangedIterator, Result, Sizes,
+    ANIMATION_BOMBFIRE, ANIMATION_EXPLOSION, ANIMATION_ROBOT,
+    OBJECT_DUSTCLOUD, OBJECT_ENEMY_GUNFIRE_LEFT,
+    OBJECT_ENEMY_GUNFIRE_RIGHT, OBJECT_HERO_GUNFIRE_LEFT,
+    OBJECT_HERO_GUNFIRE_RIGHT, OBJECT_STEAM,
 };
 use sdl2::rect::{Point, Rect};
 
@@ -28,6 +31,8 @@ pub enum SingleAnimationType {
     DustCloud,
     Steam,
     RobotDisappearing,
+    HeroGunFire(HorizontalDirection),
+    EnemyGunFire(HorizontalDirection),
 }
 
 impl CreateActorWithDetails for SingleAnimation {
@@ -61,6 +66,28 @@ impl CreateActorWithDetails for SingleAnimation {
                         SingleAnimationType::Explosion,
                     )),
                 ),
+                SingleAnimationType::HeroGunFire(orientation) => {
+                    let tile = match orientation {
+                        HorizontalDirection::Left => {
+                            OBJECT_HERO_GUNFIRE_LEFT
+                        }
+                        HorizontalDirection::Right => {
+                            OBJECT_HERO_GUNFIRE_RIGHT
+                        }
+                    };
+                    (tile, 1, false, None)
+                }
+                SingleAnimationType::EnemyGunFire(orientation) => {
+                    let tile = match orientation {
+                        HorizontalDirection::Left => {
+                            OBJECT_ENEMY_GUNFIRE_LEFT
+                        }
+                        HorizontalDirection::Right => {
+                            OBJECT_ENEMY_GUNFIRE_RIGHT
+                        }
+                    };
+                    (tile, 1, false, None)
+                }
             };
 
         Actor::SingleAnimation(Self {

@@ -374,9 +374,9 @@ impl Level {
                     aa(ActorType::FlyingBot, tx, ty);
                 }
                 0x300c =>
-                /* footbot */
+                /* jumpbot */
                 {
-                    aa(ActorType::FootBot, tx, ty);
+                    aa(ActorType::JumpBot, tx, ty);
                 }
                 0x300d =>
                 /* tankbot */
@@ -1107,8 +1107,6 @@ impl Level {
         if self.play_state.hero_can_act() && animated_frames == 0 {
             hero.act(sizes, &self.tiles, game_command_queue)?;
         }
-        hero.next_frame();
-        hero.update_animation();
 
         if hero.health.life().is_none()
             && self.play_state == PlayState::Playing

@@ -412,14 +412,12 @@ fn start_in_level(
                         hero.direction = HorizontalDirection::Right;
                     }
                 }
-                hero.update_animation();
             }
             GameEvent::RefreshScreen => {
                 canvas.present();
             }
             GameEvent::HeroJump => {
-                hero.jump(command_queue);
-                hero.update_animation();
+                hero.jump(sizes, &level.tiles, command_queue);
             }
             GameEvent::HeroStartFiring => {
                 hero.is_shooting = true;
@@ -429,11 +427,9 @@ fn start_in_level(
                     command_queue,
                     &mut actor_message_queue,
                 );
-                hero.update_animation();
             }
             GameEvent::HeroStopFiring => {
                 hero.is_shooting = false;
-                hero.update_animation();
             }
             GameEvent::TimerTriggered => {
                 let mut play_sounds = Vec::new();
