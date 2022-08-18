@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 - Snake of flying balls enemy
 - Jumping bot enemy
 - Implement saving and loading games
+- Re-add pixelsize field in settings.toml for scaling the graphics
 
 ### Fixed
 - Fix position of left-looking torch flames which was two tiles too far to

@@ -45,15 +45,24 @@ fn main() -> Result<()> {
         .register_custom_event::<UserEvent>()
         .map_err(Error::msg)?;
 
+    let scale = if settings.pixelsize > 0 {
+        settings.pixelsize
+    } else {
+        1
+    } as u32;
+
     let sizes = DefaultSizes;
     let window = game::create_window(
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
+        WINDOW_WIDTH * scale,
+        WINDOW_HEIGHT * scale,
         settings.fullscreen,
         &format!("Freenukum {}", VERSION),
         &video_subsystem,
     )?;
     let mut canvas = window.into_canvas().present_vsync().build()?;
+    canvas
+        .set_scale(scale as f32, scale as f32)
+        .map_err(Error::msg)?;
     canvas.set_draw_color(Color::RGB(0, 0, 0));
     canvas.clear();
     canvas.present();

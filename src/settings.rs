@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
-    pixelsize: u8,
+    pub pixelsize: u8,
     pub fullscreen: bool,
     pub draw_collision_bounds: bool,
 }
