@@ -11,8 +11,8 @@ categories = ["games"]
 license = "AGPL-3.0-or-later"
 description = "A clone of the 1991 DOS game Duke Nukem 1"
 readme = "README.md"
-homepage = "https://gitlab.com/silwol/freenukum"
-repository = "https://gitlab.com/silwol/freenukum"
+homepage = "https://salsa.debian.org/silwol/freenukum"
+repository = "https://salsa.debian.org/silwol/freenukum"
 
 [dependencies]
 anyhow = "1"

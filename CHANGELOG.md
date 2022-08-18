@@ -15,6 +15,9 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 - Implement saving and loading games
 - Re-add pixelsize field in settings.toml for scaling the graphics
 
+### Changed
+- Url is now https://salsa.debian.org/silwol/freenukum/
+
 ### Fixed
 - Fix position of left-looking torch flames which was two tiles too far to
   the right

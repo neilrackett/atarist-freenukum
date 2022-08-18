@@ -12,11 +12,11 @@ such as opponents and some other items missing from the levels.
 
 ## Screenshots
 
-[Screenshots can be found here](https://gitlab.com/silwol/freenukum/-/wikis/FreeNukum-Screenshots).
+[Screenshots can be found here](https://salsa.debian.org/silwol/freenukum/-/wikis/FreeNukum-Screenshots).
 
 ## Changelog
 
-[Changelog can be found here](https://gitlab.com/silwol/freenukum/-/blob/main/CHANGELOG.md)
+[Changelog can be found here](https://salsa.debian.org/silwol/freenukum/-/blob/main/CHANGELOG.md)
 
 ## How to install
 
@@ -31,8 +31,8 @@ book](https://doc.rust-lang.org/book/ch14-04-installing-binaries.html).
 
 If your desired system is not listed and you'd like to contribute the guide
 for it, please either submit
-[an issue](https://gitlab.com/silwol/freenukum/-/issues) or
-[a merge request](https://gitlab.com/silwol/freenukum/-/merge_requests).
+[an issue](https://salsa.debian.org/silwol/freenukum/-/issues) or
+[a merge request](https://salsa.debian.org/silwol/freenukum/-/merge_requests).
 
 ### Debian GNU/Linux or derived distributions such as Ubuntu or Mint
 
@@ -59,4 +59,4 @@ The game data can be obtained:
   longer the case. Maybe it will be available some time in the future
   again.
 
-The home of FreeNukum is <https://gitlab.com/silwol/freenukum>.
+The home of FreeNukum is <https://salsa.debian.org/silwol/freenukum>.
