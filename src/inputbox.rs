@@ -38,10 +38,11 @@ pub fn show(
     let surface =
         canvas.window().surface(event_pump).map_err(Error::msg)?;
 
+    let (scale_x, scale_y) = canvas.scale();
     let destrect = Rect::from_center(
         Point::new(
-            surface.width() as i32 / 2,
-            surface.height() as i32 / 2,
+            (surface.width() as f32 / 2f32 / scale_x) as i32,
+            (surface.height() as f32 / 2f32 / scale_y) as i32,
         ),
         messagebox.width(),
         messagebox.height(),
