@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: Wolfgang Silbermayr <wolfgang@silbermayr.at>
 
 # Freenukum Changelog
 
-## Unreleased
+## [0.4.0] - 2022-08-18
 
 ### Added
 - Implement animation for teleporter
