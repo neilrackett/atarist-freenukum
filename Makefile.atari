@@ -1,0 +1,32 @@
+# Cross-compile FreeNukum for Atari ST/MiNT with m68k-atari-mint-gcc.
+# Run inside the toolkit container:  stcmd make -f Makefile.atari
+# or from the host with the stcmd wrapper doing the mounting.
+
+CROSS   = m68k-atari-mint-
+CC      = $(CROSS)gcc
+STRIP   = $(CROSS)strip
+
+SDL_INC = /usr/m68k-atari-mint/include/SDL
+
+CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
+          -DHAVE_CONFIG_H -Iatari -I$(SDL_INC)
+LDLIBS  = -lSDLmain -lSDL -lgem -lm
+
+TARGET  = freenukum.tos
+
+SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) src/freenukum.c
+OBJS    = $(SRCS:.c=.o)
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) -o $@ $(OBJS) $(LDLIBS)
+	$(STRIP) $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	rm -f $(OBJS) $(TARGET)
+
+.PHONY: all clean
