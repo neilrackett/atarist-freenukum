@@ -12,7 +12,8 @@ CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
           -DHAVE_CONFIG_H -Iatari -I$(SDL_INC)
 LDLIBS  = -lSDLmain -lSDL -lgem -lm
 
-TARGET  = freenukum.tos
+# GEMDOS 8.3 filename
+TARGET  = NUKUM.TOS
 
 SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) src/freenukum.c
 OBJS    = $(SRCS:.c=.o)

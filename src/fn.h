@@ -74,7 +74,12 @@
 
 /* --------------------------------------------------------------- */
 
+#ifdef __MINT__
+/* Atari ST low resolution is 320x200, the game's native size. */
+#define FN_DEFAULT_PIXELSIZE           1
+#else
 #define FN_DEFAULT_PIXELSIZE           2
+#endif
 #define FN_DEFAULT_FULLSCREEN          0
 #define FN_DEFAULT_DRAWCOLLISIONBOUNDS 0
 
@@ -103,7 +108,12 @@
 
 /* --------------------------------------------------------------- */
 
-#define FN_SURFACE_FLAGS (SDL_HWSURFACE | SDL_HWACCEL | SDL_ANYFORMAT)
+/* SDL_HWPALETTE is required so that SDL_SetColors reaches the
+ * hardware palette on paletted displays (e.g. Atari ST); it is
+ * ignored on truecolor displays.
+ */
+#define FN_SURFACE_FLAGS \
+  (SDL_HWSURFACE | SDL_HWACCEL | SDL_ANYFORMAT | SDL_HWPALETTE)
 
 /* --------------------------------------------------------------- */
 

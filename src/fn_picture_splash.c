@@ -78,7 +78,7 @@ int fn_picture_splash_show_with_message(
   SDL_Surface * picture;
 
   char * datapath = fn_environment_get_datapath(env);
-  path = malloc(strlen(datapath) + strlen(filename) + 1);
+  path = malloc(strlen(datapath) + strlen(filename) + 2);
   sprintf(path, "%s/%s", datapath, filename);
   fd = open(path, O_RDONLY);
 

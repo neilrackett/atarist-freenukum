@@ -30,6 +30,37 @@
 
 /* --------------------------------------------------------------- */
 
+/* The 16 EGA colors indexed by brighten|red|green|blue bits,
+ * mapped to pixel values once per pixel format. Mapping colors
+ * per-pixel via SDL_MapRGB is prohibitively expensive on paletted
+ * displays (linear palette search), which the Atari ST port hits
+ * for every decoded graphics byte.
+ */
+static Uint32 fn_draw_colorcache[16];
+static SDL_PixelFormat * fn_draw_colorcache_fmt = NULL;
+
+static void fn_draw_fill_colorcache(SDL_PixelFormat * fmt)
+{
+    int i;
+    for (i = 0; i < 16; i++) {
+        Uint8 bright = (i & 1) ? 0x54 : 0x00;
+        Uint8 red    = ((i & 8) ? 0xA8 : 0x00) + bright;
+        Uint8 green  = ((i & 4) ? 0xA8 : 0x00) + bright;
+        Uint8 blue   = ((i & 2) ? 0xA8 : 0x00) + bright;
+
+        /* Workaround for beautiful brown instead of
+         * strange yellow */
+        if (red == 0xA8 && green == 0xA8 && blue == 0x00) {
+            green = 0x54;
+        }
+
+        fn_draw_colorcache[i] = SDL_MapRGB(fmt, red, green, blue);
+    }
+    fn_draw_colorcache_fmt = fmt;
+}
+
+/* --------------------------------------------------------------- */
+
 int fn_draw_byterow(
         SDL_Surface * target,
         SDL_Rect r,
@@ -43,6 +74,10 @@ int fn_draw_byterow(
     r.h = pixelsize;
     r.w = pixelsize;
 
+    if (fmt != fn_draw_colorcache_fmt) {
+        fn_draw_fill_colorcache(fmt);
+    }
+
     for (i = 0; i != 8; i++)
     {
         Uint8 filled = (br->trans >> (7-i)) & 1;
@@ -52,30 +87,11 @@ int fn_draw_byterow(
         }
         else
         {
-            color = SDL_MapRGB(
-                    fmt,
-                    ((br->red >> (7-i)) & 1) * 0x54 * 2
-                    + ((br->brighten >> (7-i)) & 1) * 0x54,
-                    ((br->green >> (7-i)) & 1) * 0x54 * 2
-                    + ((br->brighten >> (7-i)) & 1) * 0x54,
-                    ((br->blue >> (7-i)) & 1) * 0x54 * 2
-                    + ((br->brighten >> (7-i)) & 1) * 0x54
-                    );
-            /* Workaround for beautiful brown instead of
-             * strange yellow */
-            {
-              Uint8 r;
-              Uint8 g;
-              Uint8 b;
-              SDL_GetRGB(color, fmt,
-                  &r, &g, &b);
-
-              if (r == 0xA8 && g == 0xA8 && b == 0x00) {
-                color = SDL_MapRGB(
-                    fmt,
-                    0xA8, 0x54, 0x00);
-              }
-            }
+            color = fn_draw_colorcache[
+                (((br->brighten >> (7-i)) & 1))
+                | (((br->blue     >> (7-i)) & 1) << 1)
+                | (((br->green    >> (7-i)) & 1) << 2)
+                | (((br->red      >> (7-i)) & 1) << 3)];
         }
         SDL_FillRect(target, &r, color);
 

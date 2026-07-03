@@ -113,7 +113,15 @@ TTF_Font * fn_environment_loadfont(fontsize)
 
 /* --------------------------------------------------------------- */
 
+#ifdef __MINT__
+/* GEMDOS filesystems only allow 8.3 names, no leading dot.
+ * $HOME is normally unset on plain TOS, so this ends up
+ * relative to the current directory: ./nukum/{config,data}
+ */
+char const * const subpath_config = "/nukum";
+#else
 char const * const subpath_config = "/.freenukum";
+#endif
 char const * const subpath_data = "/data";
 char const * const subpath_configfile = "/config";
 
@@ -227,6 +235,15 @@ fn_environment_t * fn_environment_create()
     env->videoflags |= SDL_FULLSCREEN;
   }
 
+#ifdef __MINT__
+  /* SDL's default Atari events driver hooks the IKBD hardware
+   * directly and has been observed to stop delivering events after
+   * a while. The polled BIOS driver goes through the OS keyboard
+   * handling and is reliable (the game only needs the keyboard).
+   */
+  putenv("SDL_ATARI_EVENTSDRIVER=bios");
+#endif
+
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1) {
     fn_error_printf(1024,
         "Could not initialize SDL: %s", SDL_GetError());
@@ -241,6 +258,30 @@ fn_environment_t * fn_environment_create()
   if (env->screen == NULL) {
     fn_error_printf(1024, "Can't set video mode: %s", SDL_GetError());
     return env;
+  }
+
+  /* On paletted displays (e.g. Atari ST 16-colour modes) install the
+   * 16 EGA colours that fn_draw_byterow() computes, so that
+   * SDL_MapRGB resolves to exact palette entries instead of
+   * nearest-matching against the driver's default (grey) palette.
+   * Entry 16 is a dedicated transparency key which never appears in
+   * the graphics, so it cannot collide with a real colour.
+   */
+  if (env->screen->format->palette != NULL) {
+    SDL_Color colors[17];
+    int i;
+    for (i = 0; i < 16; i++) {
+      Uint8 bright = (i & 8) ? 0x54 : 0x00;
+      colors[i].r = ((i & 4) ? 0xA8 : 0x00) + bright;
+      colors[i].g = ((i & 2) ? 0xA8 : 0x00) + bright;
+      colors[i].b = ((i & 1) ? 0xA8 : 0x00) + bright;
+    }
+    /* EGA's brown: dark yellow has halved green */
+    colors[6].g = 0x54;
+    colors[16].r = 100;
+    colors[16].g = 1;
+    colors[16].b = 1;
+    SDL_SetColors(env->screen, colors, 0, 17);
   }
 
   env->transparent = SDL_MapRGB(env->screen->format, 100, 1, 1);
@@ -490,6 +531,17 @@ SDL_Surface * fn_environment_create_surface_with_aboslute_size(
       0,
       0,
       0);
+
+  /* On paletted displays blits copy raw indices, so every surface
+   * must share the screen's palette for colors to stay consistent.
+   */
+  if (env->screen->format->palette != NULL &&
+      surface->format->palette != NULL) {
+    SDL_SetColors(surface,
+        env->screen->format->palette->colors,
+        0,
+        env->screen->format->palette->ncolors);
+  }
 
   SDL_SetColorKey(surface, SDL_SRCCOLORKEY, env->transparent);
 
