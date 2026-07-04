@@ -1,3 +1,6 @@
+# Copyright (C) 2026 Neil Rackett
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 # Cross-compile FreeNukum for Atari ST/MiNT with m68k-atari-mint-gcc.
 # Output goes to dist/, which doubles as a Hatari GEMDOS drive when
 # the game data is extracted to dist/NUKUM/DATA/.

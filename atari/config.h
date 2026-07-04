@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 /* Hand-written config.h for the Atari ST / MiNT cross build.
  * Replaces the autotools-generated one; SDL_ttf, libcurl and libzip
  * are deliberately left undefined so the optional shareware
