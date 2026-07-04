@@ -512,6 +512,17 @@ typedef struct {
 #define NSDL_BLIT ((volatile nsdl_blitregs_t *)0xFFFF8A00UL)
 
 static int nsdl_have_blitter = 0;
+static int nsdl_splash_active = 0;
+
+/* the splash keeps its own palette until the game first draws
+ * to the screen, then the EGA palette takes over */
+static void nsdl_splash_over(void)
+{
+  if (nsdl_splash_active) {
+    nsdl_splash_active = 0;
+    nsdl_set_hardware_palette();
+  }
+}
 
 /* run one plane-rectangle operation and wait for completion */
 static void nsdl_blit_go(Uint32 src, Sint16 sxinc, Sint16 syinc,
@@ -560,6 +571,9 @@ static void nsdl_blit_span(int g0, int ng, nsdl_blitspan_t * sp)
 int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
 {
   int x, y, w, h;
+  if (dst->is_screen) {
+    nsdl_splash_over();
+  }
   if (dstrect == NULL) {
     x = 0; y = 0; w = dst->w; h = dst->h;
   } else {
@@ -666,6 +680,9 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
 
   if (src == NULL || dst == NULL) {
     return -1;
+  }
+  if (dst->is_screen) {
+    nsdl_splash_over();
   }
 
   if (srcrect != NULL) {
@@ -920,12 +937,19 @@ SDL_Surface * SDL_SetVideoMode(int width, int height, int bpp,
   nsdl_screen.format = &nsdl_format;
   nsdl_screen.flags = SDL_HWSURFACE | SDL_HWPALETTE | SDL_FULLSCREEN;
 
-  memset(nsdl_screen.pixels, 0, 32000);
-
-  /* clear/home the console, hide the blinking cursor and greet the
-   * player in white while the game data loads (VT52 sequences) */
-  Cconws("\033E\033f\033b\017");
-  Cconws("\r\nCome get STome!\r\n\r\nLoading...\r\n");
+  /* hide the blinking console cursor, then show the embedded
+   * splash picture with its own palette while the game data
+   * loads; the game palette takes over on the first real draw */
+  Cconws("\033f");
+  {
+    extern const unsigned char nsdl_splash_pi1[32034];
+    for (i = 0; i < 16; i++) {
+      Setcolor(i, (nsdl_splash_pi1[2 + 2 * i] << 8)
+          | nsdl_splash_pi1[3 + 2 * i]);
+    }
+    memcpy(nsdl_screen.pixels, nsdl_splash_pi1 + 34, 32000);
+  }
+  nsdl_splash_active = 1;
 
   return &nsdl_screen;
 }

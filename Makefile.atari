@@ -21,7 +21,7 @@ LDLIBS  = -lm
 TARGET  = dist/NUKUM.TOS
 
 SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) \
-          src/freenukum.c atari/nsdl/nsdl.c atari/nsdl/sound.c
+          src/freenukum.c atari/nsdl/nsdl.c atari/nsdl/sound.c atari/nsdl/splash.c
 OBJS    = $(SRCS:.c=.o)
 
 all: $(TARGET)
