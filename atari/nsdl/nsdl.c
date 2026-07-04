@@ -497,7 +497,21 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
   if (dx + w > dst->w) { w = dst->w - dx; }
   if (dy + h > dst->h) { h = dst->h - dy; }
   if (w <= 0 || h <= 0) {
+    if (dstrect != NULL) {
+      dstrect->w = 0;
+      dstrect->h = 0;
+    }
     return 0;
+  }
+
+  /* SDL 1.2 stores the final clipped rectangle back into dstrect,
+   * and the game relies on it (e.g. stepping by the blitted tile
+   * size when composing the hero from tiles). */
+  if (dstrect != NULL) {
+    dstrect->x = dx;
+    dstrect->y = dy;
+    dstrect->w = w;
+    dstrect->h = h;
   }
 
   {
