@@ -168,11 +168,6 @@ int fn_game_start_in_level(
 
   fn_hero_t * hero = fn_environment_get_hero(env);
 
-  SDL_Surface * level = fn_environment_create_surface(
-      env,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
-
   SDL_Surface * backdrop = NULL;;
   SDL_TimerID tick = 0;
   int backdropnumber = 0;
@@ -300,12 +295,11 @@ int fn_game_start_in_level(
     if (doupdate) {
       SDL_Surface * screen = fn_environment_get_screen(env);
       fn_level_blit_to_surface(lv,
-          level,
-          &srcrect,
+          screen,
+          &dstrect,
           &srcrect,
           backdrop,
           NULL);
-      SDL_BlitSurface(level, &srcrect, screen, &dstrect);
       if (updateWholeScreen) {
         SDL_UpdateRect(screen, 0, 0, 0, 0);
         updateWholeScreen = 0;
@@ -617,7 +611,6 @@ cleanup:
     fn_level_free(lv);
   }
   SDL_RemoveTimer(tick);
-  SDL_FreeSurface(level);
 
   return returnvalue;
 }

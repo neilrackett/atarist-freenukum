@@ -64,15 +64,14 @@ fn_level_t * fn_level_load(int fd,
 
   lv->do_play = 1;
 
-  lv->surface_fixed = fn_environment_create_surface(
-      env,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
-
+  /* The level is composed in a full-width stripe that follows the
+   * camera vertically (surface->ybias); a full-level surface would
+   * need almost 3MB which does not fit small machines. */
+  lv->surface_fixed = NULL;
   lv->surface = fn_environment_create_surface(
       env,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * FN_LEVEL_HEIGHT);
+      FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4));
 
   while (i != FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH)
   {
@@ -759,35 +758,6 @@ fn_level_t * fn_level_load(int fd,
   }
   fn_list_free(cameras);
 
-  /*
-   * Blit everything fixed to lv->surface_fixed.
-   */
-  Uint32 transparent;
-  transparent = SDL_MapRGB(lv->surface_fixed->format, 100, 1, 1);
-  SDL_SetColorKey(lv->surface, SDL_SRCCOLORKEY, transparent);
-  SDL_FillRect(lv->surface_fixed, NULL, transparent);
-
-  SDL_Rect r;
-  Uint8 pixelsize = fn_environment_get_pixelsize(env);
-  r.w = FN_TILE_WIDTH * pixelsize;
-  r.h = FN_TILE_HEIGHT * pixelsize;
-
-  Uint16 y = 0;
-  Uint16 x = 0;
-  SDL_Surface * tile = NULL;
-  for (y = 0; y < FN_LEVEL_HEIGHT; y++) {
-    for (x = 0; x < FN_LEVEL_WIDTH; x++) {
-      tilenr = fn_level_get_tile(lv, x, y);
-      tile = NULL;
-      if (tilenr > 1 && tilenr < (48 * 8)) {
-        r.x = x * FN_TILE_WIDTH * pixelsize;
-        r.y = y * FN_TILE_WIDTH * pixelsize;
-        tile = fn_environment_get_tile(env, tilenr);
-        SDL_BlitSurface(tile, NULL, lv->surface_fixed, &r);
-      }
-    }
-  }
-
   return lv;
 }
 
@@ -903,15 +873,26 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   /*
   SDL_FillRect(lv->surface, sourcerect, 0);
   */
-  if (backdrop1 != NULL) {
-    SDL_BlitSurface(backdrop1, NULL, lv->surface, sourcerect);
-  } else {
-    SDL_FillRect(lv->surface, sourcerect, 0);
+  /* let the stripe follow the camera */
+  if (sourcerect != NULL) {
+    lv->surface->ybias =
+      sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize;
   }
 
-  SDL_BlitSurface(
-      lv->surface_fixed, sourcerect,
-      lv->surface, sourcerect);
+  {
+    /* blits store the clipped rectangle back into their dstrect,
+     * so never pass the caller's sourcerect as a destination */
+    SDL_Rect bgrect;
+    if (sourcerect != NULL) {
+      bgrect = *sourcerect;
+    }
+    if (backdrop1 != NULL) {
+      SDL_BlitSurface(backdrop1, NULL, lv->surface,
+          sourcerect ? &bgrect : NULL);
+    } else {
+      SDL_FillRect(lv->surface, sourcerect, 0);
+    }
+  }
 
   /* calculate the bounds of the area we have to blit. */
   if (sourcerect) {
@@ -944,6 +925,29 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   r.y = 0;
   r.w = FN_TILE_WIDTH * pixelsize;
   r.h = FN_TILE_HEIGHT * pixelsize;
+
+  /* draw the static tiles of the visible window; this replaces the
+   * old full-level prerender surface and also picks up tile changes
+   * (shot walls etc.) automatically */
+  {
+    int tx, ty;
+    Uint16 tilenr;
+    for (ty = y_start; ty < y_end; ty++) {
+      for (tx = x_start; tx < x_end; tx++) {
+        tilenr = fn_level_get_tile(lv, tx, ty);
+        if (tilenr > 1 && tilenr < (48 * 8)) {
+          SDL_Rect tr;
+          tr.x = tx * FN_TILE_WIDTH * pixelsize;
+          tr.y = ty * FN_TILE_HEIGHT * pixelsize;
+          tr.w = r.w;
+          tr.h = r.h;
+          SDL_BlitSurface(
+              fn_environment_get_tile(env, tilenr),
+              NULL, lv->surface, &tr);
+        }
+      }
+    }
+  }
 
   fn_hero_t * hero = fn_environment_get_hero(env);
 

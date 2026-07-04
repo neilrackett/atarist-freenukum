@@ -394,6 +394,7 @@ int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
     x = 0; y = 0; w = dst->w; h = dst->h;
   } else {
     x = dstrect->x; y = dstrect->y; w = dstrect->w; h = dstrect->h;
+    y -= dst->ybias;
   }
 
   /* clip */
@@ -480,6 +481,8 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
   } else {
     dx = 0; dy = 0;
   }
+  sy -= src->ybias;
+  dy -= dst->ybias;
 
   /* keep source and destination on the same 8px phase by moving
    * the destination back to the grid */
@@ -509,7 +512,7 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
    * size when composing the hero from tiles). */
   if (dstrect != NULL) {
     dstrect->x = dx;
-    dstrect->y = dy;
+    dstrect->y = dy + dst->ybias;
     dstrect->w = w;
     dstrect->h = h;
   }

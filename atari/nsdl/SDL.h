@@ -99,6 +99,9 @@ typedef struct SDL_Surface {
   Uint16 maskpitch;    /* bytes per line of mask data */
   int usekey;          /* honor mask as colorkey when blitting */
   int is_screen;       /* pixels point at video RAM */
+  int ybias;           /* logical y of the surface's first line;
+                        * lets a short stripe stand in for a tall
+                        * virtual surface (windowed level render) */
 } SDL_Surface;
 
 #define SDL_SWSURFACE   0x00000000
