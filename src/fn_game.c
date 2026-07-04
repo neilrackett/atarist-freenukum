@@ -230,6 +230,9 @@ int fn_game_start_in_level(
         env);
     if (backdrop == NULL) {
       printf("could not load backdrop");
+    } else {
+      /* backdrops are fully opaque; skip the colorkey */
+      backdrop->usekey = 0;
     }
     close(fd);
   }

@@ -53,16 +53,15 @@ static void nsdl_set_hardware_palette(void)
 /* ---------------------------------------------------------------- */
 /* time                                                             */
 
-static long nsdl_read_hz200(void)
-{
-  return *(volatile long *)0x4BA;
-}
+/* The whole game runs in supervisor mode (entered in SDL_Init),
+ * which gives direct access to the 200Hz counter, the sound chip
+ * and the blitter without trap overhead. */
 
 static Uint32 nsdl_ticks_base = 0;
 
 Uint32 SDL_GetTicks(void)
 {
-  Uint32 now = (Uint32)Supexec(nsdl_read_hz200) * 5;
+  Uint32 now = (Uint32)(*(volatile long *)0x4BAUL) * 5;
   if (nsdl_ticks_base == 0) {
     nsdl_ticks_base = now;
   }
@@ -110,6 +109,7 @@ static int nsdl_pop_event(SDL_Event * event)
 /* Mega STE 16MHz + cache                                           */
 
 static int nsdl_old_cpuspeed = -1;
+static long nsdl_old_ssp = 0;
 
 static long nsdl_sup_speedup(void)
 {
@@ -478,6 +478,83 @@ int SDL_SetColors(SDL_Surface * surface, SDL_Color * colors,
 }
 
 /* ---------------------------------------------------------------- */
+/* BLiTTER                                                          */
+/*
+ * The BLiTTER moves one bitplane rectangle per operation. Our
+ * surfaces share the screen's word-interleaved layout, so a plane
+ * is walked with an x increment of 8 bytes; the separate 1-bit
+ * mask is contiguous, and conveniently one mask word covers the
+ * same 16 pixels as one plane word. Masked blits take two passes
+ * per plane: dst &= ~mask, then dst |= source (transparent source
+ * pixels are already zero in the plane data).
+ * Detected with Blitmode(-1), so Mega STs count too.
+ */
+
+typedef struct {
+  Uint16 halftone[16];
+  Sint16 src_xinc;
+  Sint16 src_yinc;
+  Uint32 src_addr;
+  Uint16 endmask1;
+  Uint16 endmask2;
+  Uint16 endmask3;
+  Sint16 dst_xinc;
+  Sint16 dst_yinc;
+  Uint32 dst_addr;
+  Uint16 xcount;
+  Uint16 ycount;
+  Uint8 hop;
+  Uint8 op;
+  volatile Uint8 ctrl;
+  Uint8 skew;
+} nsdl_blitregs_t;
+
+#define NSDL_BLIT ((volatile nsdl_blitregs_t *)0xFFFF8A00UL)
+
+static int nsdl_have_blitter = 0;
+
+/* run one plane-rectangle operation and wait for completion */
+static void nsdl_blit_go(Uint32 src, Sint16 sxinc, Sint16 syinc,
+    Uint32 dst, Sint16 dxinc, Sint16 dyinc,
+    Uint16 em1, Uint16 em3, Uint16 nwords, Uint16 nlines,
+    Uint8 hop, Uint8 op)
+{
+  volatile nsdl_blitregs_t * b = NSDL_BLIT;
+  b->src_xinc = sxinc;
+  b->src_yinc = syinc;
+  b->src_addr = src;
+  b->endmask1 = (nwords == 1) ? (em1 & em3) : em1;
+  b->endmask2 = 0xFFFF;
+  b->endmask3 = em3;
+  b->dst_xinc = dxinc;
+  b->dst_yinc = dyinc;
+  b->dst_addr = dst;
+  b->xcount = nwords;
+  b->ycount = nlines;
+  b->hop = hop;
+  b->op = op;
+  b->skew = 0;
+  b->ctrl = 0xC0;                 /* start, hog mode */
+  while (b->ctrl & 0x80);
+}
+
+/* geometry of a group-aligned rectangle for plane operations */
+typedef struct {
+  Uint16 w0;        /* first word index in the line */
+  Uint16 nwords;
+  Uint16 em1, em3;
+} nsdl_blitspan_t;
+
+static void nsdl_blit_span(int g0, int ng, nsdl_blitspan_t * sp)
+{
+  int glast = g0 + ng - 1;
+  sp->w0 = g0 >> 1;
+  sp->nwords = (glast >> 1) - sp->w0 + 1;
+  sp->em1 = (g0 & 1) ? 0x00FF : 0xFFFF;
+  sp->em3 = (glast & 1) ? 0xFFFF : 0xFF00;
+}
+
+/* ---------------------------------------------------------------- */
 /* blitting                                                         */
 
 int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
@@ -516,6 +593,34 @@ int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
       planebyte[p] =
         (!transparent && (color & (1 << p))) ? 0xFF : 0x00;
     }
+
+    /* big edge-aligned fills go to the blitter */
+    if (nsdl_have_blitter && (x & 7) == 0 && ((x + w) & 7) == 0
+        && gx1 - gx0 >= 4 && h >= 4) {
+      nsdl_blitspan_t sp;
+      Uint32 base;
+      nsdl_blit_span(gx0, gx1 - gx0, &sp);
+      base = (Uint32)dst->pixels + (Uint32)y * dst->pitch
+        + ((Uint32)sp.w0 << 3);
+      for (p = 0; p < 4; p++) {
+        /* HOP 0 = all ones; OP 3 writes them, OP 0 writes zeros */
+        nsdl_blit_go(0, 0, 0,
+            base + (p << 1),
+            8, dst->pitch - ((sp.nwords - 1) << 3),
+            sp.em1, sp.em3, sp.nwords, h,
+            0, planebyte[p] ? 3 : 0);
+      }
+      if (dst->mask != NULL) {
+        nsdl_blit_go(0, 0, 0,
+            (Uint32)dst->mask + (Uint32)y * dst->maskpitch
+              + ((Uint32)sp.w0 << 1),
+            2, dst->maskpitch - ((sp.nwords - 1) << 1),
+            sp.em1, sp.em3, sp.nwords, h,
+            0, transparent ? 0 : 3);
+      }
+      return 0;
+    }
+
     for (; h > 0; y++, h--) {
       Uint8 * line = (Uint8 *)dst->pixels + (Uint32)y * dst->pitch;
       Uint8 * mline =
@@ -617,6 +722,77 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
     int masked = (src->usekey && src->mask != NULL);
     int y;
 
+    /* the blitter beats the CPU once the area is big enough to
+     * amortize the register setup; small sprites stay on the CPU */
+    if (nsdl_have_blitter && (sg0 & 1) == (dg0 & 1)
+        && ng >= (masked ? 8 : 4) && h >= 4) {
+      nsdl_blitspan_t ssp, dsp;
+      Uint32 sbase, dbase;
+      int p;
+      nsdl_blit_span(sg0, ng, &ssp);
+      nsdl_blit_span(dg0, ng, &dsp);
+      sbase = (Uint32)src->pixels + (Uint32)sy * src->pitch
+        + ((Uint32)ssp.w0 << 3);
+      dbase = (Uint32)dst->pixels + (Uint32)dy * dst->pitch
+        + ((Uint32)dsp.w0 << 3);
+      if (masked) {
+        Uint32 mbase = (Uint32)src->mask
+          + (Uint32)sy * src->maskpitch + ((Uint32)ssp.w0 << 1);
+        for (p = 0; p < 4; p++) {
+          /* dst &= ~mask */
+          nsdl_blit_go(mbase,
+              2, src->maskpitch - ((ssp.nwords - 1) << 1),
+              dbase + (p << 1),
+              8, dst->pitch - ((dsp.nwords - 1) << 3),
+              dsp.em1, dsp.em3, dsp.nwords, h, 2, 4);
+          /* dst |= source plane (transparent bits are zero) */
+          nsdl_blit_go(sbase + (p << 1),
+              8, src->pitch - ((ssp.nwords - 1) << 3),
+              dbase + (p << 1),
+              8, dst->pitch - ((dsp.nwords - 1) << 3),
+              dsp.em1, dsp.em3, dsp.nwords, h, 2, 7);
+        }
+        if (dst->mask != NULL) {
+          /* dstmask |= srcmask */
+          nsdl_blit_go(mbase,
+              2, src->maskpitch - ((ssp.nwords - 1) << 1),
+              (Uint32)dst->mask + (Uint32)dy * dst->maskpitch
+                + ((Uint32)dsp.w0 << 1),
+              2, dst->maskpitch - ((dsp.nwords - 1) << 1),
+              dsp.em1, dsp.em3, dsp.nwords, h, 2, 7);
+        }
+      } else {
+        for (p = 0; p < 4; p++) {
+          nsdl_blit_go(sbase + (p << 1),
+              8, src->pitch - ((ssp.nwords - 1) << 3),
+              dbase + (p << 1),
+              8, dst->pitch - ((dsp.nwords - 1) << 3),
+              dsp.em1, dsp.em3, dsp.nwords, h, 2, 3);
+        }
+        if (dst->mask != NULL) {
+          if (src->mask != NULL) {
+            nsdl_blit_go((Uint32)src->mask
+                  + (Uint32)sy * src->maskpitch
+                  + ((Uint32)ssp.w0 << 1),
+                2, src->maskpitch - ((ssp.nwords - 1) << 1),
+                (Uint32)dst->mask + (Uint32)dy * dst->maskpitch
+                  + ((Uint32)dsp.w0 << 1),
+                2, dst->maskpitch - ((dsp.nwords - 1) << 1),
+                dsp.em1, dsp.em3, dsp.nwords, h, 2, 3);
+          } else {
+            /* opaque source: set mask bits */
+            nsdl_blit_go(0,
+                0, 0,
+                (Uint32)dst->mask + (Uint32)dy * dst->maskpitch
+                  + ((Uint32)dsp.w0 << 1),
+                2, dst->maskpitch - ((dsp.nwords - 1) << 1),
+                dsp.em1, dsp.em3, dsp.nwords, h, 0, 3);
+          }
+        }
+      }
+      return 0;
+    }
+
     if (sg0 + ng > src->w >> 3) {
       ng = (src->w >> 3) - sg0;
     }
@@ -696,7 +872,11 @@ static void nsdl_restore(void)
   int i;
   Cconws("\033e");  /* cursor back on */
   nsdl_joy_remove();
-  Supexec(nsdl_sup_speedrestore);
+  nsdl_sup_speedrestore();
+  if (nsdl_old_ssp != 0) {
+    Super((void *)nsdl_old_ssp);
+    nsdl_old_ssp = 0;
+  }
   if (nsdl_old_rez >= 0) {
     for (i = 0; i < 16; i++) {
       Setcolor(i, nsdl_old_palette[i]);
@@ -757,7 +937,17 @@ int SDL_Init(Uint32 flags)
   nsdl_old_kbrate = (Uint16)Kbrate(-1, -1);
   Kbrate(1, 1);
   nsdl_joy_install();
-  nsdl_old_cpuspeed = (int)Supexec(nsdl_sup_speedup);
+
+  /* run in supervisor mode from here on: direct access to the
+   * 200Hz counter, sound chip and blitter without traps */
+  nsdl_old_ssp = Super(0L);
+
+  nsdl_old_cpuspeed = (int)nsdl_sup_speedup();
+
+  {
+    long bm = Blitmode(-1);
+    nsdl_have_blitter = (bm >= 0 && (bm & 2)) ? 1 : 0;
+  }
   return 0;
 }
 

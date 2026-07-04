@@ -1126,7 +1126,9 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     }
   }
 
-  /* bring the composed image to the screen */
+  /* bring the composed image to the screen; the composed stripe
+   * is fully opaque, so skip the colorkey for a faster blit */
+  lv->surface->usekey = 0;
   if (full_blit) {
     SDL_Rect src = *sourcerect;
     SDL_Rect dst = *targetrect;
@@ -1161,6 +1163,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       SDL_BlitSurface(lv->surface, &src, target, &dst);
     }
   }
+
+  lv->surface->usekey = 1;
 
   lv->prev_sourcerect = *sourcerect;
   lv->prev_valid = 1;
