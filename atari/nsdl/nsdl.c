@@ -581,6 +581,7 @@ static Uint16 nsdl_old_kbrate = 0xFFFF;
 static void nsdl_restore(void)
 {
   int i;
+  Cconws("\033e");  /* cursor back on */
   if (nsdl_old_rez >= 0) {
     for (i = 0; i < 16; i++) {
       Setcolor(i, nsdl_old_palette[i]);
@@ -625,6 +626,11 @@ SDL_Surface * SDL_SetVideoMode(int width, int height, int bpp,
   nsdl_screen.flags = SDL_HWSURFACE | SDL_HWPALETTE | SDL_FULLSCREEN;
 
   memset(nsdl_screen.pixels, 0, 32000);
+
+  /* clear/home the console, hide the blinking cursor and greet the
+   * player in white while the game data loads (VT52 sequences) */
+  Cconws("\033E\033f\033b\017");
+  Cconws("\r\nCome get STome!\r\n\r\nLoading...\r\n");
 
   return &nsdl_screen;
 }
