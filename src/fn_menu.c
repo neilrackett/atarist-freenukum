@@ -32,6 +32,7 @@
 
 /* --------------------------------------------------------------- */
 
+#include "fn_tick.h"
 #include "fn_menu.h"
 #include "fn_text.h"
 #include "fn_object.h"
@@ -242,7 +243,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
       changed = 0;
     }
 
-    res = SDL_WaitEvent(&event);
+    res = fn_wait_event_tick(&event);
     if (res == 1) {
       switch(event.type) {
         case SDL_KEYDOWN:

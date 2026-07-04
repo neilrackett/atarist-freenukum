@@ -34,6 +34,7 @@
 
 /* --------------------------------------------------------------- */
 
+#include "fn_tick.h"
 #include "fn_environment.h"
 #include "fn_hero.h"
 #include "fn_game.h"
@@ -318,7 +319,7 @@ int fn_game_start_in_level(
       doupdate = 0;
     }
 
-    res = SDL_WaitEvent(&event);
+    res = fn_wait_event_tick(&event);
     if (res == 1) {
       switch(event.type) {
         case SDL_QUIT:
