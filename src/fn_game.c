@@ -396,8 +396,15 @@ int fn_game_start_in_level(
                 if (srcrect.y > 0) {
                   srcrect.y -= pixelsize * FN_HALFTILE_HEIGHT;
                 }
-              } else {
-                fn_level_hero_interact_start(lv);
+              } else if (!fn_level_hero_interact_start(lv)
+                  && (event.key.keysym.mod & KMOD_JOYSTICK)) {
+                /* joystick up doubles as the jump button when
+                 * there is nothing to use */
+                if (hero->flying == FN_HERO_FLYING_FALSE) {
+                  fn_sound_play(FN_SOUND_PLAYERJUMP);
+                }
+                fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
+                fn_hero_update_animation(hero);
               }
               doupdate = 1;
               break;

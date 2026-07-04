@@ -1147,7 +1147,7 @@ void fn_level_hero_interact_stop(fn_level_t * lv)
 
 /* --------------------------------------------------------------- */
 
-void fn_level_hero_interact_start(fn_level_t * lv)
+int fn_level_hero_interact_start(fn_level_t * lv)
 {
   fn_list_t * iter = NULL;
   for (iter = fn_list_first(lv->actors);
@@ -1167,10 +1167,11 @@ void fn_level_hero_interact_start(fn_level_t * lv)
 
         lv->interactor = actor;
         fn_actor_hero_interact_start(actor);
-        return;
+        return 1;
       }
     }
   }
+  return 0;
 }
 
 /* --------------------------------------------------------------- */

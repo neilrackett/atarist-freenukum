@@ -107,6 +107,55 @@ static int nsdl_pop_event(SDL_Event * event)
 }
 
 /* ---------------------------------------------------------------- */
+/* joystick                                                         */
+/*
+ * The IKBD reports joystick 1 as event packets which the OS routes
+ * through the joyvec vector. The handler just stores the state
+ * byte: bit 0 up, 1 down, 2 left, 3 right, 7 fire. The event pump
+ * turns state changes into key events (fire = Alt, i.e. the fire
+ * key), marked with KMOD_JOYSTICK so the game can give joystick-up
+ * its own meaning.
+ */
+
+volatile Uint8 nsdl_joy_state;
+static Uint8 nsdl_joy_prev;
+static long nsdl_old_joyvec;
+
+typedef struct {
+  long midivec, vkbderr, vmiderr, statvec;
+  long mousevec, clockvec, joyvec, midisys, ikbdsys;
+} nsdl_kbdvecs_t;
+
+/* called with a0 pointing at the packet: 0xFF for joystick 1,
+ * then the state byte */
+void nsdl_joyvec_handler(void);
+__asm__(
+  "\t.text\n"
+  "_nsdl_joyvec_handler:\n"
+  "\tcmp.b #-1,(%a0)\n"
+  "\tbne.s 1f\n"
+  "\tmove.b 1(%a0),_nsdl_joy_state\n"
+  "1:\trts\n");
+
+static void nsdl_joy_install(void)
+{
+  nsdl_kbdvecs_t * kv = (nsdl_kbdvecs_t *)Kbdvbase();
+  nsdl_old_joyvec = kv->joyvec;
+  kv->joyvec = (long)nsdl_joyvec_handler;
+  /* make sure the IKBD reports joystick events */
+  Ikbdws(0, "\x14");
+}
+
+static void nsdl_joy_remove(void)
+{
+  if (nsdl_old_joyvec != 0) {
+    nsdl_kbdvecs_t * kv = (nsdl_kbdvecs_t *)Kbdvbase();
+    kv->joyvec = nsdl_old_joyvec;
+    nsdl_old_joyvec = 0;
+  }
+}
+
+/* ---------------------------------------------------------------- */
 /* keyboard                                                         */
 /*
  * Plain TOS gives us key presses (with auto repeat) through the
@@ -166,6 +215,8 @@ static Uint16 nsdl_kmod(void)
   return mod;
 }
 
+static Uint16 nsdl_push_mod_extra = 0;
+
 static void nsdl_push_key(Uint8 type, SDLKey sym)
 {
   SDL_Event ev;
@@ -173,7 +224,7 @@ static void nsdl_push_key(Uint8 type, SDLKey sym)
   ev.key.state = (type == SDL_KEYDOWN);
   ev.key.keysym.scancode = 0;
   ev.key.keysym.sym = sym;
-  ev.key.keysym.mod = nsdl_kmod();
+  ev.key.keysym.mod = nsdl_kmod() | nsdl_push_mod_extra;
   ev.key.keysym.unicode = 0;
   SDL_PushEvent(&ev);
 }
@@ -218,6 +269,33 @@ static void nsdl_pump(void)
       nsdl_push_key(SDL_KEYDOWN, held->sym);
     }
     held->last_seen = now;
+  }
+
+  /* joystick state changes become key events */
+  {
+    static const struct {
+      Uint8 bit;
+      SDLKey sym;
+    } joymap[] = {
+      { 0x01, SDLK_UP },
+      { 0x02, SDLK_DOWN },
+      { 0x04, SDLK_LEFT },
+      { 0x08, SDLK_RIGHT },
+      { 0x80, SDLK_LALT },  /* fire */
+    };
+    Uint8 js = nsdl_joy_state;
+    Uint8 jchanged = js ^ nsdl_joy_prev;
+    if (jchanged) {
+      nsdl_joy_prev = js;
+      nsdl_push_mod_extra = KMOD_JOYSTICK;
+      for (i = 0; i < 5; i++) {
+        if (jchanged & joymap[i].bit) {
+          nsdl_push_key((js & joymap[i].bit)
+              ? SDL_KEYDOWN : SDL_KEYUP, joymap[i].sym);
+        }
+      }
+      nsdl_push_mod_extra = 0;
+    }
   }
 
   /* expire keys that stopped repeating */
@@ -582,6 +660,7 @@ static void nsdl_restore(void)
 {
   int i;
   Cconws("\033e");  /* cursor back on */
+  nsdl_joy_remove();
   if (nsdl_old_rez >= 0) {
     for (i = 0; i < 16; i++) {
       Setcolor(i, nsdl_old_palette[i]);
@@ -641,6 +720,7 @@ int SDL_Init(Uint32 flags)
   nsdl_init_colors();
   nsdl_old_kbrate = (Uint16)Kbrate(-1, -1);
   Kbrate(1, 1);
+  nsdl_joy_install();
   return 0;
 }
 

@@ -308,7 +308,10 @@ int fn_level_act(fn_level_t * lv);
  *
  * @param  lv  The level whose hero should interact.
  */
-void fn_level_hero_interact_start(fn_level_t * lv);
+/**
+ * @return 1 if an interaction was started, otherwise 0.
+ */
+int fn_level_hero_interact_start(fn_level_t * lv);
 
 /* --------------------------------------------------------------- */
 

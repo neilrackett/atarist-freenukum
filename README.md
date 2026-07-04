@@ -25,6 +25,9 @@ You can download the latest version from the
 | Esc / Q | Quit level / back to menu            |
 | F1      | Help                                 |
 
+A joystick in port 1 also works: push up to use doors and lifts —
+or to jump when there's nothing to use — and fire to shoot.
+
 ## System requirements
 
 - Atari ST, STE, Mega ST/STE or TT with **2MB RAM** or more

@@ -181,6 +181,8 @@ typedef enum {
 #define KMOD_LALT   0x0100
 #define KMOD_RALT   0x0200
 #define KMOD_ALT    0x0300
+/* nsdl extension: the event was synthesized from the joystick */
+#define KMOD_JOYSTICK 0x8000
 
 typedef struct SDL_keysym {
   Uint8 scancode;
