@@ -1,14 +1,15 @@
-# Freenukum for Atari ST
+# FreeNukum for Atari ST
 
-<img src="./doc/atarist-splash.png" alt="Freenukum screenshot" width="640" height="400"/>
+<img src="./doc/atarist-splash.png" alt="Come get STome!" width="640" height="400"/>
 
-Atari ST port of the [Freenukum](https://gitlab.com/silwol/freenukum) by
+Atari ST port of [FreeNukum](https://gitlab.com/silwol/freenukum) by
 [Neil Rackett](https://x.com/neilrackett).
 
 ## Introduction
 
 To celebrate 35 years of two great 90s icons, Duke Nukem and the Atari Mega STE,
-here's a port of Freenukum for the Atari Mega STE (and any other Atari ST too).
+I've ported ~~Duke Nukem~~ FreeNukum to the Atari ST with support for Blitter
+and 16MHz modes.
 
 You can download the latest version from the
 [releases page](https://github.com/neilrackett/atarist-freenukum/releases).
@@ -75,6 +76,6 @@ game data files — SDL is replaced by a native ST implementation in
 
 ## Original version
 
-To find more information about the original Freenukum project, check out the
+To find more information about the original FreeNukum project, check out the
 project page at http://launchpad.net/freenukum or take a look at the
 [INSTALL](./INSTALL) file for more information about building it.

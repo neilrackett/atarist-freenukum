@@ -33,6 +33,11 @@ $(TARGET): $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# the splash screen is embedded from the Degas picture; replace
+# atari/assets/SPLASH.PI1 and rebuild to update it
+atari/nsdl/splash.c: atari/assets/SPLASH.PI1 atari/mksplash.sh
+	sh atari/mksplash.sh atari/assets/SPLASH.PI1 $@
+
 clean:
 	rm -f $(OBJS) $(TARGET)
 
