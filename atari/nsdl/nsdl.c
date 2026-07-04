@@ -491,6 +491,30 @@ int SDL_SetColors(SDL_Surface * surface, SDL_Color * colors,
 }
 
 /* ---------------------------------------------------------------- */
+/* decoder fast path                                                */
+
+/* write one 8px group (4 plane bytes + opacity mask) directly;
+ * x must be a multiple of 8 and the group fully inside */
+void nsdl_put_group(SDL_Surface * s, int x, int y,
+    const Uint8 * planes, Uint8 mask)
+{
+  int g = x >> 3;
+  Uint8 * chunk;
+  if ((unsigned)y >= (unsigned)s->h || x < 0 || x + 8 > s->w + 15) {
+    return;
+  }
+  chunk = (Uint8 *)s->pixels + (Uint32)y * s->pitch
+    + ((g >> 1) << 3) + (g & 1);
+  chunk[0] = planes[0];
+  chunk[2] = planes[1];
+  chunk[4] = planes[2];
+  chunk[6] = planes[3];
+  if (s->mask != NULL) {
+    s->mask[(Uint32)y * s->maskpitch + g] = mask;
+  }
+}
+
+/* ---------------------------------------------------------------- */
 /* BLiTTER                                                          */
 /*
  * The BLiTTER moves one bitplane rectangle per operation. Our
@@ -831,40 +855,77 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
         ? src->mask + (Uint32)(sy + y) * src->maskpitch : NULL;
       Uint8 * dmline = dst->mask
         ? dst->mask + (Uint32)(dy + y) * dst->maskpitch : NULL;
-      int g;
-      for (g = 0; g < ng; g++) {
+      int g = 0;
+      while (g < ng) {
         int sgg = sg0 + g;
         int dgg = dg0 + g;
-        Uint8 * schunk = sline + ((sgg >> 1) << 3) + (sgg & 1);
-        Uint8 * dchunk = dline + ((dgg >> 1) << 3) + (dgg & 1);
-        if (masked) {
-          Uint8 m = smline[sgg];
-          if (m == 0) {
+        /* both sides share the same 8px phase, so whenever the
+         * group index is even and a partner group follows, a
+         * whole chunk (4 plane words) can move at once */
+        if ((sgg & 1) == 0 && (dgg & 1) == 0 && g + 1 < ng) {
+          Uint16 * sw = (Uint16 *)(sline + ((sgg >> 1) << 3));
+          Uint16 * dw = (Uint16 *)(dline + ((dgg >> 1) << 3));
+          if (!masked) {
+            dw[0] = sw[0];
+            dw[1] = sw[1];
+            dw[2] = sw[2];
+            dw[3] = sw[3];
+            if (dmline != NULL) {
+              *(Uint16 *)(dmline + dgg) = smline != NULL
+                ? *(Uint16 *)(smline + sgg) : 0xFFFF;
+            }
+            g += 2;
             continue;
+          } else {
+            Uint16 m16 = *(Uint16 *)(smline + sgg);
+            if (m16 == 0) {
+              g += 2;
+              continue;
+            }
+            if (m16 == 0xFFFF) {
+              dw[0] = sw[0];
+              dw[1] = sw[1];
+              dw[2] = sw[2];
+              dw[3] = sw[3];
+              if (dmline != NULL) {
+                *(Uint16 *)(dmline + dgg) = 0xFFFF;
+              }
+              g += 2;
+              continue;
+            }
+            /* mixed mask: fall through to the byte path */
           }
-          if (m == 0xFF) {
+        }
+        {
+          Uint8 * schunk = sline + ((sgg >> 1) << 3) + (sgg & 1);
+          Uint8 * dchunk = dline + ((dgg >> 1) << 3) + (dgg & 1);
+          if (masked) {
+            Uint8 m = smline[sgg];
+            if (m == 0xFF) {
+              dchunk[0] = schunk[0];
+              dchunk[2] = schunk[2];
+              dchunk[4] = schunk[4];
+              dchunk[6] = schunk[6];
+            } else if (m != 0) {
+              Uint8 nm = ~m;
+              dchunk[0] = (dchunk[0] & nm) | (schunk[0] & m);
+              dchunk[2] = (dchunk[2] & nm) | (schunk[2] & m);
+              dchunk[4] = (dchunk[4] & nm) | (schunk[4] & m);
+              dchunk[6] = (dchunk[6] & nm) | (schunk[6] & m);
+            }
+            if (dmline != NULL && m != 0) {
+              dmline[dgg] |= m;
+            }
+          } else {
             dchunk[0] = schunk[0];
             dchunk[2] = schunk[2];
             dchunk[4] = schunk[4];
             dchunk[6] = schunk[6];
-          } else {
-            Uint8 nm = ~m;
-            dchunk[0] = (dchunk[0] & nm) | (schunk[0] & m);
-            dchunk[2] = (dchunk[2] & nm) | (schunk[2] & m);
-            dchunk[4] = (dchunk[4] & nm) | (schunk[4] & m);
-            dchunk[6] = (dchunk[6] & nm) | (schunk[6] & m);
+            if (dmline != NULL) {
+              dmline[dgg] = smline != NULL ? smline[sgg] : 0xFF;
+            }
           }
-          if (dmline != NULL) {
-            dmline[dgg] |= m;
-          }
-        } else {
-          dchunk[0] = schunk[0];
-          dchunk[2] = schunk[2];
-          dchunk[4] = schunk[4];
-          dchunk[6] = schunk[6];
-          if (dmline != NULL) {
-            dmline[dgg] = smline != NULL ? smline[sgg] : 0xFF;
-          }
+          g += 1;
         }
       }
     }

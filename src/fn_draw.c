@@ -82,6 +82,36 @@ int fn_draw_byterow(
         fn_draw_fill_colorcache(fmt);
     }
 
+    /* fast path: build the whole 8px group and write it once
+     * instead of one FillRect per pixel */
+    if (pixelsize == 1 && (r.x & 7) == 0) {
+        Uint8 planes[4] = { 0, 0, 0, 0 };
+        Uint8 mask = 0;
+        for (i = 0; i != 8; i++) {
+            Uint8 bit = 0x80 >> i;
+            Uint32 c;
+            if ((br->trans >> (7 - i)) & 1) {
+                c = fn_draw_colorcache[
+                    (((br->brighten >> (7 - i)) & 1))
+                    | (((br->blue     >> (7 - i)) & 1) << 1)
+                    | (((br->green    >> (7 - i)) & 1) << 2)
+                    | (((br->red      >> (7 - i)) & 1) << 3)];
+            } else {
+                c = transcolor;
+            }
+            if (c > 15) {
+                continue;       /* transparent pixel */
+            }
+            mask |= bit;
+            if (c & 1) planes[0] |= bit;
+            if (c & 2) planes[1] |= bit;
+            if (c & 4) planes[2] |= bit;
+            if (c & 8) planes[3] |= bit;
+        }
+        nsdl_put_group(target, r.x, r.y, planes, mask);
+        return 0;
+    }
+
     for (i = 0; i != 8; i++)
     {
         Uint8 filled = (br->trans >> (7-i)) & 1;

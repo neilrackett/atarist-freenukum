@@ -115,6 +115,10 @@ int SDL_SetColors(SDL_Surface * surface, SDL_Color * colors,
     int firstcolor, int ncolors);
 int SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key);
 
+/* nsdl extension: write one 8px group of a decoded graphic */
+void nsdl_put_group(SDL_Surface * s, int x, int y,
+    const Uint8 * planes, Uint8 mask);
+
 void SDL_WM_SetCaption(const char * title, const char * icon);
 int SDL_WM_ToggleFullScreen(SDL_Surface * surface);
 

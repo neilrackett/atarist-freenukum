@@ -43,13 +43,10 @@ clean:
 
 # Run the latest build in Hatari. This target runs on the host
 # (not through stcmd):  make -f Makefile.atari run
-HATARI  ?= /Applications/Hatari.app/Contents/MacOS/hatari
-TOSROM  ?= /Users/neil/Library/CloudStorage/Dropbox/Atari ST/SidecarTridge/TOS Emulator/TOS Images/TOS 2.06 - UK - Original.img
-
 run:
 	@test -f $(TARGET) || { \
 	  echo "$(TARGET) not found - build first: stcmd make -f Makefile.atari"; \
 	  exit 1; }
-	"$(HATARI)" --memsize 4 --fast-boot on --tos "$(TOSROM)" $(TARGET)
+	hatari --memsize 4 --fast-boot on $(TARGET)
 
 .PHONY: all clean run

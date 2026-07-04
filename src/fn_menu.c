@@ -211,21 +211,22 @@ char fn_menu_get_choice(fn_menu_t * menu,
             entry->name
             );
         if (i == menu->currententry) {
-          targetrect.x -= FN_FONT_WIDTH * pixelsize * 2;
           pointrect.y = targetrect.y + destrect.y;
-          SDL_BlitSurface(
-              fn_environment_get_tile(
-                env,
-                OBJ_POINT + animationframe),
-              NULL,
-              target,
-              &targetrect);
         }
         i++;
       }
 
       SDL_BlitSurface(target, NULL,
           screen, &destrect);
+      {
+        /* the pointer is drawn on the screen only, so its cell in
+         * target stays clean for the animation to restore */
+        SDL_Rect pr = pointrect;
+        SDL_BlitSurface(
+            fn_environment_get_tile(env,
+              OBJ_POINT + animationframe),
+            NULL, screen, &pr);
+      }
       if (updateWholeScreen) {
         SDL_UpdateRect(screen, 0, 0, 0, 0);
         updateWholeMenu = 0;
@@ -330,10 +331,25 @@ char fn_menu_get_choice(fn_menu_t * menu,
           SDL_UpdateRect(screen, 0, 0, 0, 0);
           break;
         case SDL_USEREVENT:
-          /* timer tick */
+          /* timer tick: animate only the pointer instead of
+           * re-rendering the whole menu */
           animationframe++;
           animationframe %= 4;
-          changed = 1;
+          {
+            SDL_Rect cell;
+            SDL_Rect pr;
+            cell.x = pointrect.x - destrect.x;
+            cell.y = pointrect.y - destrect.y;
+            cell.w = 2 * FN_FONT_WIDTH * pixelsize;
+            cell.h = FN_FONT_HEIGHT * pixelsize;
+            pr = pointrect;
+            SDL_BlitSurface(target, &cell, screen, &pr);
+            pr = pointrect;
+            SDL_BlitSurface(
+                fn_environment_get_tile(env,
+                  OBJ_POINT + animationframe),
+                NULL, screen, &pr);
+          }
           break;
         default:
           /* ignore other events */
