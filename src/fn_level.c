@@ -67,6 +67,10 @@ fn_level_t * fn_level_load(int fd,
   lv->shots = NULL;
   lv->interactor = NULL;
 
+  lv->prev_valid = 0;
+  lv->screen_refresh = 0;
+  lv->num_carry_dirty = 0;
+
   lv->do_play = 1;
 
   /* The level is composed in a full-width stripe that follows the
@@ -868,84 +872,179 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   int x_end = FN_LEVEL_WIDTH;
   int y_start = 0;
   int y_end = FN_LEVEL_HEIGHT;
-  SDL_Rect r;
   fn_list_t * iter = NULL;
+
+  /* dirty rectangle bookkeeping: only the parts of the window that
+   * changed get recomposed and blitted. A camera move invalidates
+   * everything because the backdrop is anchored to the window. */
+#define FN_LEVEL_MAXDIRTY 48
+  SDL_Rect dirty[FN_LEVEL_MAXDIRTY];
+  int num_dirty = 0;
+  int full_compose;
+  int full_blit;
+  int i;
 
   fn_environment_t * env = fn_level_get_environment(lv);
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
+  Uint16 tilesize = FN_TILE_WIDTH * pixelsize;
+  fn_hero_t * hero = fn_environment_get_hero(env);
+  SDL_Rect herorect;
 
-  /* load the background tiles */
-  /*
-  SDL_FillRect(lv->surface, sourcerect, 0);
-  */
-  /* let the stripe follow the camera */
-  if (sourcerect != NULL) {
-    lv->surface->ybias =
-      sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize;
+  if (sourcerect == NULL) {
+    return;
   }
 
-  {
-    /* blits store the clipped rectangle back into their dstrect,
-     * so never pass the caller's sourcerect as a destination */
-    SDL_Rect bgrect;
-    if (sourcerect != NULL) {
-      bgrect = *sourcerect;
+  /* let the stripe follow the camera */
+  lv->surface->ybias =
+    sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize;
+
+  full_compose = !lv->prev_valid
+    || sourcerect->x != lv->prev_sourcerect.x
+    || sourcerect->y != lv->prev_sourcerect.y
+    || lv->bots != NULL;
+  full_blit = full_compose || lv->screen_refresh;
+
+  herorect.x = pixelsize *
+    (fn_hero_get_x(hero) - FN_HALFTILE_WIDTH);
+  herorect.y = pixelsize * fn_hero_get_y(hero);
+  herorect.w = pixelsize * fn_hero_get_w(hero);
+  herorect.h = pixelsize * fn_hero_get_h(hero);
+
+  /* visibility bounds in tiles (with margin) for the actor loops */
+  x_start = sourcerect->x / tilesize - 2;
+  if (x_start < 0) {
+    x_start = 0;
+  }
+  x_end = (sourcerect->x + sourcerect->w) / tilesize + 3;
+  if (x_end > FN_LEVEL_WIDTH) {
+    x_end = FN_LEVEL_WIDTH;
+  }
+  y_start = sourcerect->y / tilesize - 2;
+  if (y_start < 0) {
+    y_start = 0;
+  }
+  y_end = (sourcerect->y + sourcerect->h) / tilesize + 3;
+  if (y_end > FN_LEVEL_HEIGHT) {
+    y_end = FN_LEVEL_HEIGHT;
+  }
+
+  if (full_compose) {
+    dirty[0] = *sourcerect;
+    num_dirty = 1;
+  } else {
+    /* collect the rects of everything that may have changed */
+    num_dirty = 0;
+
+    for (i = 0; i < lv->num_carry_dirty
+        && num_dirty < FN_LEVEL_MAXDIRTY; i++) {
+      dirty[num_dirty++] = lv->carry_dirty[i];
+    }
+
+    if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
+      dirty[num_dirty++] = lv->prev_herorect;
+      dirty[num_dirty++] = herorect;
+    } else {
+      full_compose = 1;
+    }
+
+    for (iter = fn_list_first(lv->actors);
+        !full_compose && iter != NULL;
+        iter = fn_list_next(iter)) {
+      fn_actor_t * actor = (fn_actor_t *)iter->data;
+      if (actor != NULL && fn_actor_is_visible(actor)) {
+        if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
+          dirty[num_dirty++] = actor->lastdrawn;
+          dirty[num_dirty++] = actor->position;
+        } else {
+          full_compose = 1;
+        }
+      }
+    }
+
+    for (iter = fn_list_first(lv->shots);
+        !full_compose && iter != NULL;
+        iter = fn_list_next(iter)) {
+      fn_shot_t * shot = (fn_shot_t *)iter->data;
+      if (shot != NULL) {
+        if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
+          dirty[num_dirty++] = shot->lastdrawn;
+          dirty[num_dirty++] = shot->position;
+        } else {
+          full_compose = 1;
+        }
+      }
+    }
+
+    if (full_compose) {
+      dirty[0] = *sourcerect;
+      num_dirty = 1;
+      full_blit = 1;
+    }
+  }
+  lv->num_carry_dirty = 0;
+
+  /* align the dirty rects to the tile grid and clip them to the
+   * window; empty ones get zero size */
+  for (i = 0; i < num_dirty; i++) {
+    Sint16 rx0 = dirty[i].x;
+    Sint16 ry0 = dirty[i].y;
+    Sint32 rx1 = rx0 + dirty[i].w;
+    Sint32 ry1 = ry0 + dirty[i].h;
+    if (rx0 < sourcerect->x) rx0 = sourcerect->x;
+    if (ry0 < sourcerect->y) ry0 = sourcerect->y;
+    if (rx1 > sourcerect->x + sourcerect->w)
+      rx1 = sourcerect->x + sourcerect->w;
+    if (ry1 > sourcerect->y + sourcerect->h)
+      ry1 = sourcerect->y + sourcerect->h;
+    if (rx1 <= rx0 || ry1 <= ry0) {
+      dirty[i].w = 0;
+      dirty[i].h = 0;
+      continue;
+    }
+    /* align outward to whole tiles */
+    rx0 -= rx0 % tilesize;
+    ry0 -= ry0 % tilesize;
+    if (rx1 % tilesize) rx1 += tilesize - rx1 % tilesize;
+    if (ry1 % tilesize) ry1 += tilesize - ry1 % tilesize;
+    dirty[i].x = rx0;
+    dirty[i].y = ry0;
+    dirty[i].w = rx1 - rx0;
+    dirty[i].h = ry1 - ry0;
+  }
+
+  /* recompose the base (backdrop + static tiles) under each rect */
+  for (i = 0; i < num_dirty; i++) {
+    SDL_Rect d = dirty[i];
+    int tx, ty;
+    if (d.w == 0) {
+      continue;
     }
     if (backdrop1 != NULL) {
-      SDL_BlitSurface(backdrop1, NULL, lv->surface,
-          sourcerect ? &bgrect : NULL);
+      SDL_Rect bsrc;
+      SDL_Rect bdst;
+      bsrc.x = d.x - sourcerect->x;
+      bsrc.y = d.y - sourcerect->y;
+      bsrc.w = d.w;
+      bsrc.h = d.h;
+      bdst = d;
+      SDL_BlitSurface(backdrop1, &bsrc, lv->surface, &bdst);
     } else {
-      SDL_FillRect(lv->surface, sourcerect, 0);
+      SDL_Rect bdst = d;
+      SDL_FillRect(lv->surface, &bdst, 0);
     }
-  }
-
-  /* calculate the bounds of the area we have to blit. */
-  if (sourcerect) {
-    x_start = (sourcerect->x / FN_TILE_WIDTH / pixelsize)
-      - (FN_LEVELWINDOW_WIDTH / 2);
-    if (x_start < 0) {
-      x_start = 0;
-    }
-    x_end = x_start + (sourcerect->w / FN_TILE_WIDTH / pixelsize) * 2;
-    if (x_end > FN_LEVEL_WIDTH) {
-      x_end = FN_LEVEL_WIDTH;
-      x_start = x_end - FN_LEVELWINDOW_WIDTH * 2;
-    }
-
-    y_start = (sourcerect->y / FN_TILE_HEIGHT / pixelsize)
-      - (FN_LEVELWINDOW_HEIGHT / 2);
-    if (y_start < 0) {
-      y_start = 0;
-    }
-    y_end =
-      y_start +
-      (sourcerect->h / FN_TILE_HEIGHT / pixelsize) * 2;
-    if (y_end > FN_LEVEL_HEIGHT) {
-      y_end = FN_LEVEL_HEIGHT;
-      y_start = y_end - FN_LEVELWINDOW_HEIGHT * 2;
-    }
-  }
-
-  r.x = 0;
-  r.y = 0;
-  r.w = FN_TILE_WIDTH * pixelsize;
-  r.h = FN_TILE_HEIGHT * pixelsize;
-
-  /* draw the static tiles of the visible window; this replaces the
-   * old full-level prerender surface and also picks up tile changes
-   * (shot walls etc.) automatically */
-  {
-    int tx, ty;
-    Uint16 tilenr;
-    for (ty = y_start; ty < y_end; ty++) {
-      for (tx = x_start; tx < x_end; tx++) {
-        tilenr = fn_level_get_tile(lv, tx, ty);
+    for (ty = d.y / tilesize;
+        ty <= (d.y + d.h - 1) / tilesize
+        && ty < FN_LEVEL_HEIGHT; ty++) {
+      for (tx = d.x / tilesize;
+          tx <= (d.x + d.w - 1) / tilesize
+          && tx < FN_LEVEL_WIDTH; tx++) {
+        Uint16 tilenr = fn_level_get_tile(lv, tx, ty);
         if (tilenr > 1 && tilenr < (48 * 8)) {
           SDL_Rect tr;
-          tr.x = tx * FN_TILE_WIDTH * pixelsize;
-          tr.y = ty * FN_TILE_HEIGHT * pixelsize;
-          tr.w = r.w;
-          tr.h = r.h;
+          tr.x = tx * tilesize;
+          tr.y = ty * tilesize;
+          tr.w = tilesize;
+          tr.h = tilesize;
           SDL_BlitSurface(
               fn_environment_get_tile(env, tilenr),
               NULL, lv->surface, &tr);
@@ -953,8 +1052,6 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       }
     }
   }
-
-  fn_hero_t * hero = fn_environment_get_hero(env);
 
   /* blit the actors in the background */
   for (iter = fn_list_first(lv->actors);
@@ -973,6 +1070,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
         if (!fn_actor_in_foreground(actor)) {
           fn_actor_blit(actor);
         }
+        actor->lastdrawn = actor->position;
       } else {
         fn_actor_set_visible(actor, 0);
       }
@@ -983,6 +1081,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   fn_hero_blit(hero,
       lv->surface,
       lv);
+  lv->prev_herorect = herorect;
 
   /* blit the actors in the foreground */
   for (iter = fn_list_first(lv->actors);
@@ -1023,11 +1122,49 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       } else {
         fn_shot_gets_out_of_sight(shot);
       }
+      shot->lastdrawn = shot->position;
     }
   }
 
-  /* blit the whole thing to the caller */
-  SDL_BlitSurface(lv->surface, sourcerect, target, targetrect);
+  /* bring the composed image to the screen */
+  if (full_blit) {
+    SDL_Rect src = *sourcerect;
+    SDL_Rect dst = *targetrect;
+    SDL_BlitSurface(lv->surface, &src, target, &dst);
+  } else {
+    for (i = 0; i < num_dirty; i++) {
+      SDL_Rect src = dirty[i];
+      SDL_Rect dst;
+      Sint32 sx1, sy1;
+      if (src.w == 0) {
+        continue;
+      }
+      /* tile alignment may overhang the window; clamp so the
+       * screen blit cannot touch the HUD around it */
+      sx1 = src.x + src.w;
+      sy1 = src.y + src.h;
+      if (src.x < sourcerect->x) src.x = sourcerect->x;
+      if (src.y < sourcerect->y) src.y = sourcerect->y;
+      if (sx1 > sourcerect->x + sourcerect->w)
+        sx1 = sourcerect->x + sourcerect->w;
+      if (sy1 > sourcerect->y + sourcerect->h)
+        sy1 = sourcerect->y + sourcerect->h;
+      if (sx1 <= src.x || sy1 <= src.y) {
+        continue;
+      }
+      src.w = sx1 - src.x;
+      src.h = sy1 - src.y;
+      dst.x = targetrect->x + (src.x - sourcerect->x);
+      dst.y = targetrect->y + (src.y - sourcerect->y);
+      dst.w = src.w;
+      dst.h = src.h;
+      SDL_BlitSurface(lv->surface, &src, target, &dst);
+    }
+  }
+
+  lv->prev_sourcerect = *sourcerect;
+  lv->prev_valid = 1;
+  lv->screen_refresh = 0;
 }
 
 /* --------------------------------------------------------------- */
@@ -1051,6 +1188,13 @@ fn_tilecache_t * fn_level_get_tilecache(fn_level_t * lv)
 Uint8 fn_level_get_pixelsize(fn_level_t * lv)
 {
   return fn_environment_get_pixelsize(lv->environment);
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_level_request_refresh(fn_level_t * lv)
+{
+  lv->screen_refresh = 1;
 }
 
 /* --------------------------------------------------------------- */
@@ -1092,6 +1236,11 @@ int fn_level_act(fn_level_t * lv) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = 0;
+        if (lv->num_carry_dirty < FN_LEVEL_MAXCARRY) {
+          lv->carry_dirty[lv->num_carry_dirty++] = shot->lastdrawn;
+        } else {
+          lv->prev_valid = 0;
+        }
         fn_shot_free(shot); shot = NULL;
         lv->num_shots--;
       }
@@ -1118,6 +1267,11 @@ int fn_level_act(fn_level_t * lv) {
         /* set the cleanup flag and free the memory */
         cleanup = 1;
         iter->data = NULL;
+        if (lv->num_carry_dirty < FN_LEVEL_MAXCARRY) {
+          lv->carry_dirty[lv->num_carry_dirty++] = actor->lastdrawn;
+        } else {
+          lv->prev_valid = 0;
+        }
         fn_actor_free(actor); actor = NULL;
       }
     }

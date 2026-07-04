@@ -52,6 +52,7 @@ fn_shot_t * fn_shot_create(fn_level_t * level,
   shot->countdown = 2;
   shot->draw_collision_bounds = 0;
 
+  shot->lastdrawn = shot->position;
   return shot;
 }
 

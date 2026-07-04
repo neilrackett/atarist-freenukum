@@ -334,46 +334,55 @@ int fn_game_start_in_level(
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_KEY_RED);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_2:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_KEY_GREEN);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_3:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_KEY_BLUE);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_4:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_KEY_PINK);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_5:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_BOOT);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_6:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_GLOVE);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_7:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_CLAMP);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_8:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_ACCESS_CARD);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_9:
               fn_hero_set_firepower(hero, fn_hero_get_firepower(hero) +
                   1);
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case SDLK_0:
               lv->levelpassed = 1;
@@ -579,21 +588,25 @@ int fn_game_start_in_level(
                   env);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case fn_event_hero_firepower_changed:
               fn_borders_blit_firepower(env);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case fn_event_hero_inventory_changed:
               fn_borders_blit_inventory(env);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case fn_event_hero_health_changed:
               fn_borders_blit_life(env);
               /* TODO separately update this area. */
               updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
               break;
             case fn_event_herolanded:
               fn_level_add_actor(lv, FN_ACTOR_DUSTCLOUD,

@@ -8052,6 +8052,7 @@ fn_actor_t * fn_actor_create(fn_level_t * level,
   if (func != NULL) {
     func(actor);
   }
+  actor->lastdrawn = actor->position;
   return actor;
 }
 

@@ -54,6 +54,11 @@ struct fn_shot_t {
   SDL_Rect position;
 
   /**
+   * Where the shot was drawn last frame (dirty rect tracking).
+   */
+  SDL_Rect lastdrawn;
+
+  /**
    * Flag that indicates if the shot is (still) alive.
    */
   int is_alive;

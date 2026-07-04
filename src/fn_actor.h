@@ -222,6 +222,11 @@ struct fn_actor_t {
   SDL_Rect position;
 
   /**
+   * Where the actor was drawn last frame (dirty rect tracking).
+   */
+  SDL_Rect lastdrawn;
+
+  /**
    * Private data - depends on type.
    */
   void * data;

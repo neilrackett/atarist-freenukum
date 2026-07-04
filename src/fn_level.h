@@ -123,6 +123,17 @@ struct fn_level_t {
    * The actor with which the hero interacts.
    */
   fn_actor_t * interactor;
+
+  /**
+   * Dirty rectangle rendering state.
+   */
+  SDL_Rect prev_sourcerect;   /* camera window of the last frame */
+  SDL_Rect prev_herorect;     /* where the hero was drawn */
+  int prev_valid;             /* zero forces a full redraw */
+  int screen_refresh;         /* blit the whole window to screen */
+#define FN_LEVEL_MAXCARRY 16
+  SDL_Rect carry_dirty[FN_LEVEL_MAXCARRY]; /* rects of removed things */
+  int num_carry_dirty;
 };
 
 /* --------------------------------------------------------------- */
@@ -312,6 +323,12 @@ int fn_level_act(fn_level_t * lv);
  * @return 1 if an interaction was started, otherwise 0.
  */
 int fn_level_hero_interact_start(fn_level_t * lv);
+
+/**
+ * Request that the next frame recomposes and blits the whole
+ * visible window (call after something else drew over it).
+ */
+void fn_level_request_refresh(fn_level_t * lv);
 
 /* --------------------------------------------------------------- */
 
