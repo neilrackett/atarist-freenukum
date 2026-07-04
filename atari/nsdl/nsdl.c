@@ -107,6 +107,41 @@ static int nsdl_pop_event(SDL_Event * event)
 }
 
 /* ---------------------------------------------------------------- */
+/* Mega STE 16MHz + cache                                           */
+
+static int nsdl_old_cpuspeed = -1;
+
+static long nsdl_sup_speedup(void)
+{
+  /* find the _MCH cookie; only the Mega STE has the speed
+   * register at $FF8E21, touching it elsewhere bus-errors */
+  long * jar = *(long **)0x5A0UL;
+  if (jar != NULL) {
+    for (; jar[0] != 0; jar += 2) {
+      if (jar[0] == 0x5F4D4348L) {          /* '_MCH' */
+        if (jar[1] == 0x00010010L) {        /* Mega STE */
+          volatile Uint8 * ctl = (volatile Uint8 *)0xFFFF8E21UL;
+          Uint8 old = *ctl;
+          *ctl = 3;                         /* 16MHz, cache on */
+          return old;
+        }
+        break;
+      }
+    }
+  }
+  return -1;
+}
+
+static long nsdl_sup_speedrestore(void)
+{
+  if (nsdl_old_cpuspeed >= 0) {
+    *(volatile Uint8 *)0xFFFF8E21UL = (Uint8)nsdl_old_cpuspeed;
+    nsdl_old_cpuspeed = -1;
+  }
+  return 0;
+}
+
+/* ---------------------------------------------------------------- */
 /* joystick                                                         */
 /*
  * The IKBD reports joystick 1 as event packets which the OS routes
@@ -661,6 +696,7 @@ static void nsdl_restore(void)
   int i;
   Cconws("\033e");  /* cursor back on */
   nsdl_joy_remove();
+  Supexec(nsdl_sup_speedrestore);
   if (nsdl_old_rez >= 0) {
     for (i = 0; i < 16; i++) {
       Setcolor(i, nsdl_old_palette[i]);
@@ -721,6 +757,7 @@ int SDL_Init(Uint32 flags)
   nsdl_old_kbrate = (Uint16)Kbrate(-1, -1);
   Kbrate(1, 1);
   nsdl_joy_install();
+  nsdl_old_cpuspeed = (int)Supexec(nsdl_sup_speedup);
   return 0;
 }
 
