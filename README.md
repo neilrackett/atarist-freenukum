@@ -1,8 +1,8 @@
 # Freenukum for Atari ST
 
-<img src="./doc/atarist-1.png" alt="Freenukum screenshot" width="640" height="400"/>
+<img src="./doc/atarist-splash.png" alt="Freenukum screenshot" width="640" height="400"/>
 
-Atari ST port of the [Freenukum](https://gitlab.com/silwol/freenukum) project by
+Atari ST port of the [Freenukum](https://gitlab.com/silwol/freenukum) by
 [Neil Rackett](https://x.com/neilrackett).
 
 ## Introduction
@@ -32,14 +32,10 @@ or to jump when there's nothing to use — and fire to shoot.
 
 - Atari ST, STE, Mega ST/STE or TT with **2MB RAM** or more
 - Colour monitor or TV (the game runs in ST low resolution)
-- TOS 1.x or 2.x — no MiNT required (tested with TOS 2.06)
 - A hard disk (or emulated GEMDOS drive) with the game files:
   - `NUKUM.TOS`
   - `NUKUM\DATA\*.DN1` — the original Duke Nukem 1 data files, e.g. from the
     freely available shareware episode (`1duke.zip` / `DN1SW20.SHR`)
-
-The game is developed and tested with [Hatari](https://www.hatari-emu.org/);
-verification on real hardware is coming soon.
 
 ## Game data
 
@@ -49,23 +45,24 @@ the `NUKUM\DATA` folder alongside `NUKUM.TOS`.
 The easiest way to install the freely distributable shareware episode is the
 bundled installer — run it from the folder containing `NUKUM.TOS`:
 
-* **macOS / Linux:** `sh installer/install.sh`
-* **Windows:** `installer\install.bat`
+- **macOS / Linux:** `sh installer/install.sh`
+- **Windows:** `installer\install.bat`
 
 The game data can be obtained:
-* Shareware episode from ftp://ftp.3drealms.com/share/1duke.zip (free of
+
+- Shareware episode from ftp://ftp.3drealms.com/share/1duke.zip (free of
   charge)
-* Search on https://archive.org/ for it.
-* The Duke Nukem 3D CD contains a copy of the full version.
-* Buy it from an online store if you find it. It used to be available on
+- Search on https://archive.org/ for it.
+- The Duke Nukem 3D CD contains a copy of the full version.
+- Buy it from an online store if you find it. It used to be available on
   [GOG.com](https://www.gog.com/news/release_duke_nukem_12), but that is no
   longer the case. Maybe it will be available some time in the future
   again.
 
 ## Building
 
-Building requires the dockerised
-[Atari ST toolkit](https://github.com/nguillaumin/atarist-toolkit-docker)
+The easiest way to build the project is using
+[atarist-toolkit-docker](https://github.com/sidecartridge/atarist-toolkit-docker)
 (`m68k-atari-mint-gcc` via the `stcmd` wrapper):
 
 ```sh

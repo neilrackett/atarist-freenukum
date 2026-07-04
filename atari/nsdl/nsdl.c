@@ -50,6 +50,18 @@ static void nsdl_set_hardware_palette(void)
   }
 }
 
+/* while the startup splash is on screen it keeps its own palette;
+ * the game palette takes over on the first real draw */
+static int nsdl_splash_active = 0;
+
+static void nsdl_splash_over(void)
+{
+  if (nsdl_splash_active) {
+    nsdl_splash_active = 0;
+    nsdl_set_hardware_palette();
+  }
+}
+
 /* ---------------------------------------------------------------- */
 /* time                                                             */
 
@@ -471,7 +483,8 @@ int SDL_SetColors(SDL_Surface * surface, SDL_Color * colors,
   for (i = 0; i < ncolors && firstcolor + i < 17; i++) {
     nsdl_colors[firstcolor + i] = colors[i];
   }
-  if (surface != NULL && surface->is_screen) {
+  if (surface != NULL && surface->is_screen
+      && !nsdl_splash_active) {
     nsdl_set_hardware_palette();
   }
   return 1;
@@ -512,17 +525,6 @@ typedef struct {
 #define NSDL_BLIT ((volatile nsdl_blitregs_t *)0xFFFF8A00UL)
 
 static int nsdl_have_blitter = 0;
-static int nsdl_splash_active = 0;
-
-/* the splash keeps its own palette until the game first draws
- * to the screen, then the EGA palette takes over */
-static void nsdl_splash_over(void)
-{
-  if (nsdl_splash_active) {
-    nsdl_splash_active = 0;
-    nsdl_set_hardware_palette();
-  }
-}
 
 /* run one plane-rectangle operation and wait for completion */
 static void nsdl_blit_go(Uint32 src, Sint16 sxinc, Sint16 syinc,
@@ -944,6 +946,7 @@ SDL_Surface * SDL_SetVideoMode(int width, int height, int bpp,
   {
     extern const unsigned char nsdl_splash_pi1[32034];
     for (i = 0; i < 16; i++) {
+      /* the palette words are already in ST/STE hardware format */
       Setcolor(i, (nsdl_splash_pi1[2 + 2 * i] << 8)
           | nsdl_splash_pi1[3 + 2 * i]);
     }
