@@ -1,0 +1,72 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+/*
+ * Sound effect playback (PC speaker effects on the YM2149)
+ */
+
+#ifndef FN_SOUND_H
+#define FN_SOUND_H
+
+/* Names match the entries inside DUKE1.DN1 / DUKE1-B.DN1. */
+typedef enum fn_sound_e {
+  FN_SOUND_PLAYERDEATH,
+  FN_SOUND_GETFOODITEM,
+  FN_SOUND_COKECANHIT,
+  FN_SOUND_GETBALLON,
+  FN_SOUND_GETPOWERUP,
+  FN_SOUND_BRIDGEXTEND,
+  FN_SOUND_PLAYERGUN,
+  FN_SOUND_TELEPORT,
+  FN_SOUND_PLAYERQUIT,
+  FN_SOUND_GETKEY,
+  FN_SOUND_BOXEXPLODE,
+  FN_SOUND_ENEMYSHOT,
+  FN_SOUND_SPECIALITEM,
+  FN_SOUND_PLAYERJUMP,
+  FN_SOUND_PLAYERLAND,
+  FN_SOUND_PLAYERHIT,
+  FN_SOUND_GETBONUSOBJ,
+  FN_SOUND_HITREACTOR,
+  FN_SOUND_SMALLDEATH,
+  FN_SOUND_LEVELDONE,
+  FN_SOUND_ELEVATOR,
+  FN_SOUND_FORCEFIELD,
+  FN_SOUND_WALKING,
+  FN_SOUND_HIGHSCORE,
+  FN_SOUND_CHEATMODE,
+  FN_SOUND_STARTGAME,
+  FN_SOUND_CLINGHOOKS,
+  FN_SOUND_READNOTE,
+  FN_SOUND_MONITOR,
+  FN_SOUND_ROCKET,
+  FN_SOUND_OPENKEYDOOR,
+  FN_SOUND_DANDERSIGN,
+  FN_SOUND_BOMBEXPLODE,
+  FN_SOUND_MINEBOUNCE,
+  FN_SOUND_RABBITGONE,
+  FN_SOUND_REACTORSND,
+  FN_SOUND_GETDUKESND,
+  FN_SOUND_HITHEAD,
+  FN_SOUND_DOORSND,
+  FN_SOUND_BADGUYGOUP,
+  FN_SOUND_BADGUYISDED,
+  FN_SOUND_HITABREAKER,
+  FN_SOUND_TORCHON,
+  FN_SOUND_THEND,
+  FN_SOUND_NUM
+} fn_sound_e;
+
+/**
+ * Load the sound data from the given data directory.
+ * Sounds silently stay disabled if loading fails.
+ */
+void fn_sound_init(char * datapath);
+
+/**
+ * Play a sound effect. Does nothing if sound is not initialized.
+ */
+void fn_sound_play(fn_sound_e sound);
+
+#endif /* FN_SOUND_H */

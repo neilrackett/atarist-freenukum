@@ -14,14 +14,14 @@ STRIP   = $(CROSS)strip
 # Native SDL-subset shim (atari/nsdl) instead of the real SDL:
 # its SDL.h shadows the system one via include order.
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
-          -DHAVE_CONFIG_H -Iatari -Iatari/nsdl
+          -DHAVE_CONFIG_H -Iatari -Iatari/nsdl -Isrc
 LDLIBS  = -lm
 
 # GEMDOS 8.3 filename
 TARGET  = dist/NUKUM.TOS
 
 SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) \
-          src/freenukum.c atari/nsdl/nsdl.c
+          src/freenukum.c atari/nsdl/nsdl.c atari/nsdl/sound.c
 OBJS    = $(SRCS:.c=.o)
 
 all: $(TARGET)

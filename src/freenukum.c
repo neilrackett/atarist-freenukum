@@ -66,6 +66,7 @@
 #include "fn_game.h"
 #include "fn_data.h"
 #include "fn_environment.h"
+#include "fn_sound.h"
 
 /* --------------------------------------------------------------- */
 
@@ -95,6 +96,8 @@ int main(int argc, char ** argv)
   /* load the tilecache */
   res = fn_environment_load_tilecache(env);
 
+  fn_sound_init(fn_environment_get_datapath(env));
+
 
   /* show the splash screen */
   res = fn_picture_splash_show(
@@ -110,6 +113,7 @@ int main(int argc, char ** argv)
     choice = fn_mainmenu(env);
     switch(choice) {
       case FN_MENUCHOICE_START:
+        fn_sound_play(FN_SOUND_STARTGAME);
         fn_game_start(
             env);
         res = fn_picture_splash_show(

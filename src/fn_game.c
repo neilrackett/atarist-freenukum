@@ -39,6 +39,7 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_tick.h"
+#include "fn_sound.h"
 #include "fn_environment.h"
 #include "fn_hero.h"
 #include "fn_game.h"
@@ -438,6 +439,9 @@ int fn_game_start_in_level(
               doupdate = 1;
               break;
             case SDLK_LCTRL:
+              if (hero->flying == FN_HERO_FLYING_FALSE) {
+                fn_sound_play(FN_SOUND_PLAYERJUMP);
+              }
               fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
               fn_hero_update_animation(hero);
               break;

@@ -18,8 +18,8 @@ You can download the latest version from the
 | Key     | Action                               |
 | ------- | ------------------------------------ |
 | ← / →   | Walk left / right                    |
-| Alt     | Jump                                 |
-| Ctrl    | Fire                                 |
+| Ctrl    | Jump                                 |
+| Alt     | Fire                                 |
 | ↑ / ↓   | Use doors, elevators and other items |
 | Return  | Select menu item                     |
 | Esc / Q | Quit level / back to menu            |

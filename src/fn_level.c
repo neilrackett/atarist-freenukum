@@ -36,6 +36,7 @@
 /* --------------------------------------------------------------- */
 
 #include "fn_level.h"
+#include "fn_sound.h"
 #include "fn_actor.h"
 #include "fn_hero.h"
 #include "fn_object.h"
@@ -1267,6 +1268,7 @@ void fn_level_fire_shot(fn_level_t * lv)
 
     fn_level_add_shot(lv, hero->direction, position->x, position->y);
     lv->num_shots++;
+    fn_sound_play(FN_SOUND_PLAYERGUN);
   }
 }
 

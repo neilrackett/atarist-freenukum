@@ -36,6 +36,7 @@
 
 #include "fn_tilecache.h"
 #include "fn_actor.h"
+#include "fn_sound.h"
 #include "fn_object.h"
 #include "fn_infobox.h"
 #include "fn_error_cmdline.h"
@@ -2568,6 +2569,16 @@ void fn_actor_function_item_touch_start(fn_actor_t * actor)
   Uint8 health = fn_hero_get_health(hero);
   Uint8 firepower = fn_hero_get_firepower(hero);
   switch(actor->type) {
+    case FN_ACTOR_SODA:
+    case FN_ACTOR_CHICKEN_SINGLE:
+    case FN_ACTOR_CHICKEN_DOUBLE:
+      fn_sound_play(FN_SOUND_GETFOODITEM);
+      break;
+    default:
+      fn_sound_play(FN_SOUND_GETBONUSOBJ);
+      break;
+  }
+  switch(actor->type) {
     case FN_ACTOR_LETTER_D:
       fn_hero_set_fetched_letter(hero, 'D');
       actor->is_alive = 0;
@@ -3146,6 +3157,7 @@ void fn_actor_function_teleporter_create(fn_actor_t * actor)
 void fn_actor_function_teleporter_interact_start(fn_actor_t * actor)
 {
   fn_actor_type_e othertype;
+  fn_sound_play(FN_SOUND_TELEPORT);
   if (actor->type == FN_ACTOR_TELEPORTER1) {
     othertype = FN_ACTOR_TELEPORTER2;
   } else {
@@ -4756,6 +4768,7 @@ void fn_actor_function_exitdoor_free(fn_actor_t * actor)
 void fn_actor_function_exitdoor_interact_start(fn_actor_t * actor)
 {
   fn_actor_exitdoor_data_t * data = actor->data;
+  fn_sound_play(FN_SOUND_LEVELDONE);
   data->state = 1;
   fn_level_t * level = actor->level;
   level->levelpassed = 1;
@@ -5184,6 +5197,7 @@ void fn_actor_function_key_touch_start(fn_actor_t * actor)
 {
   fn_hero_t * hero = fn_level_get_hero(actor->level);
   Uint8 inventory = fn_hero_get_inventory(hero);
+  fn_sound_play(FN_SOUND_GETKEY);
   switch(actor->type) {
     case FN_ACTOR_KEY_RED:
       inventory |= FN_INVENTORY_KEY_RED;
