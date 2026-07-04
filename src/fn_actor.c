@@ -412,6 +412,7 @@ void fn_actor_function_redball_jumping_blit(fn_actor_t * actor)
 
 void fn_actor_function_redball_jumping_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   /*
    * Do nothing. This function just exists so that the red
    * ball absorbs the bullet when it is shot.
@@ -664,6 +665,7 @@ void fn_actor_function_robot_blit(fn_actor_t * actor)
 
 void fn_actor_function_robot_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   fn_actor_robot_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -878,6 +880,7 @@ void fn_actor_function_tankbot_blit(fn_actor_t * actor)
 
 void fn_actor_function_tankbot_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   fn_actor_tankbot_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -1088,6 +1091,7 @@ void fn_actor_function_firewheelbot_blit(fn_actor_t * actor)
 
 void fn_actor_function_firewheelbot_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   fn_actor_firewheelbot_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -1284,6 +1288,7 @@ void fn_actor_function_wallcrawler_blit(fn_actor_t * actor)
 
 void fn_actor_function_wallcrawler_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   fn_actor_wallcrawler_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -1363,6 +1368,7 @@ void fn_actor_function_lift_free(fn_actor_t * actor)
  */
 void fn_actor_function_lift_interact_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_ELEVATOR);
   fn_actor_lift_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -1683,6 +1689,7 @@ void fn_actor_function_acme_shot(fn_actor_t * actor)
 
 void fn_actor_function_acme_hero_touch_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_DANDERSIGN);
   fn_actor_acme_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
 
@@ -2095,6 +2102,7 @@ void fn_actor_function_accesscard_slot_free(fn_actor_t * actor)
  */
 void fn_actor_function_accesscard_slot_interact_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_FORCEFIELD);
   fn_actor_access_card_slot_data_t * data = actor->data;
   fn_level_t * level = actor->level;
   fn_hero_t * hero = fn_level_get_hero(level);
@@ -2233,6 +2241,7 @@ void fn_actor_function_glove_slot_free(fn_actor_t * actor)
 
 void fn_actor_function_glove_slot_interact_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_BRIDGEXTEND);
   fn_actor_glove_slot_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
   switch(data->state)
@@ -2574,6 +2583,22 @@ void fn_actor_function_item_touch_start(fn_actor_t * actor)
     case FN_ACTOR_CHICKEN_DOUBLE:
       fn_sound_play(FN_SOUND_GETFOODITEM);
       break;
+    case FN_ACTOR_GUN:
+      fn_sound_play(FN_SOUND_GETPOWERUP);
+      break;
+    case FN_ACTOR_LETTER_D:
+    case FN_ACTOR_LETTER_U:
+    case FN_ACTOR_LETTER_K:
+    case FN_ACTOR_BOOTS:
+    case FN_ACTOR_CLAMPS:
+    case FN_ACTOR_GLOVE:
+    case FN_ACTOR_ACCESS_CARD:
+      fn_sound_play(FN_SOUND_SPECIALITEM);
+      break;
+    case FN_ACTOR_LETTER_E:
+      fn_sound_play(fn_hero_get_fetched_letter(hero) == 'K' ?
+          FN_SOUND_GETDUKESND : FN_SOUND_SPECIALITEM);
+      break;
     default:
       fn_sound_play(FN_SOUND_GETBONUSOBJ);
       break;
@@ -2798,6 +2823,35 @@ void fn_actor_function_item_blit(fn_actor_t * actor)
 void fn_actor_function_item_shot(fn_actor_t * actor)
 {
   fn_level_t * lv = actor->level;
+  switch(actor->type) {
+    case FN_ACTOR_SODA:
+      fn_sound_play(FN_SOUND_COKECANHIT);
+      break;
+    case FN_ACTOR_BOX_GREY_EMPTY:
+    case FN_ACTOR_BOX_GREY_BOOTS:
+    case FN_ACTOR_BOX_GREY_CLAMPS:
+    case FN_ACTOR_BOX_GREY_GUN:
+    case FN_ACTOR_BOX_GREY_BOMB:
+    case FN_ACTOR_BOX_RED_SODA:
+    case FN_ACTOR_BOX_RED_CHICKEN:
+    case FN_ACTOR_BOX_BLUE_FOOTBALL:
+    case FN_ACTOR_BOX_BLUE_JOYSTICK:
+    case FN_ACTOR_BOX_BLUE_DISK:
+    case FN_ACTOR_BOX_BLUE_BALLOON:
+    case FN_ACTOR_BOX_GREY_GLOVE:
+    case FN_ACTOR_BOX_GREY_FULL_LIFE:
+    case FN_ACTOR_BOX_BLUE_FLAG:
+    case FN_ACTOR_BOX_BLUE_RADIO:
+    case FN_ACTOR_BOX_GREY_ACCESS_CARD:
+    case FN_ACTOR_BOX_GREY_LETTER_D:
+    case FN_ACTOR_BOX_GREY_LETTER_U:
+    case FN_ACTOR_BOX_GREY_LETTER_K:
+    case FN_ACTOR_BOX_GREY_LETTER_E:
+      fn_sound_play(FN_SOUND_BOXEXPLODE);
+      break;
+    default:
+      break;
+  }
   switch(actor->type) {
     case FN_ACTOR_BOX_BLUE_FOOTBALL:
       actor->is_alive = 0;
@@ -3053,6 +3107,7 @@ void fn_actor_function_balloon_free(fn_actor_t * actor)
 
 void fn_actor_function_balloon_touch_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_GETBALLON);
   fn_actor_balloon_data_t * data = actor->data;
   fn_hero_t * hero = fn_level_get_hero(actor->level);
   if (!data->destroyed) {
@@ -3571,6 +3626,7 @@ void fn_actor_function_rocket_blit(fn_actor_t * actor)
 
 void fn_actor_function_rocket_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_ROCKET);
   fn_actor_rocket_data_t * data = actor->data;
   data->state = fn_actor_rocket_state_flying;
   /* TODO create animation */
@@ -3856,6 +3912,7 @@ typedef struct fn_actor_explosion_data_t {
  */
 void fn_actor_function_explosion_create(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_BOMBEXPLODE);
   fn_actor_explosion_data_t * data = malloc(
       sizeof(fn_actor_explosion_data_t));
 
@@ -3978,6 +4035,7 @@ void fn_actor_function_camera_blit(fn_actor_t * actor)
  */
 void fn_actor_function_camera_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_SMALLDEATH);
   fn_hero_t * hero = fn_level_get_hero(actor->level);
   actor->is_alive = 0;
   fn_hero_add_score(hero, 100);
@@ -4513,6 +4571,7 @@ void fn_actor_function_surveillancescreen_free(fn_actor_t * actor)
 void fn_actor_function_surveillancescreen_interact_start(
     fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_MONITOR);
   fn_environment_t * env = fn_level_get_environment(actor->level);
 
   /* TODO show real note instead of this dummy */
@@ -4568,6 +4627,7 @@ typedef struct fn_actor_hostileshot_data_t {
 
 void fn_actor_function_hostileshot_create(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_ENEMYSHOT);
   fn_actor_hostileshot_data_t * data = malloc(
       sizeof(fn_actor_hostileshot_data_t));
   actor->position.w = FN_TILE_WIDTH;
@@ -4676,6 +4736,7 @@ void fn_actor_function_notebook_free(fn_actor_t * actor)
 
 void fn_actor_function_notebook_interact_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_READNOTE);
   fn_environment_t * env = fn_level_get_environment(actor->level);
 
   /* TODO show real note instead of this dummy */
@@ -4768,7 +4829,7 @@ void fn_actor_function_exitdoor_free(fn_actor_t * actor)
 void fn_actor_function_exitdoor_interact_start(fn_actor_t * actor)
 {
   fn_actor_exitdoor_data_t * data = actor->data;
-  fn_sound_play(FN_SOUND_LEVELDONE);
+  fn_sound_play(FN_SOUND_DOORSND);
   data->state = 1;
   fn_level_t * level = actor->level;
   level->levelpassed = 1;
@@ -5110,6 +5171,7 @@ void fn_actor_function_keyhole_blit(fn_actor_t * actor)
  */
 void fn_actor_function_keyhole_interact_start(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_OPENKEYDOOR);
   fn_hero_t * hero = fn_level_get_hero(actor->level);
   fn_actor_keyhole_data_t * data = actor->data;
   Uint8 inventory = fn_hero_get_inventory(hero);
@@ -5315,6 +5377,7 @@ void fn_actor_function_shootable_wall_blit(fn_actor_t * actor)
  */
 void fn_actor_function_shootable_wall_shot(fn_actor_t * actor)
 {
+  fn_sound_play(FN_SOUND_HITABREAKER);
   fn_level_t * level = actor->level;
   fn_hero_t * hero = fn_level_get_hero(level);
   actor->is_alive = 0;

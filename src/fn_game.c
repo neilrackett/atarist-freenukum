@@ -146,6 +146,9 @@ void fn_game_start(
         /* real level */
         success = fn_game_start_in_level(level,
             env);
+        if (success) {
+          fn_sound_play(FN_SOUND_LEVELDONE);
+        }
         interlevel = 1;
       }
     }
@@ -331,6 +334,7 @@ int fn_game_start_in_level(
           switch(event.key.keysym.sym) {
             case SDLK_q:
             case SDLK_ESCAPE:
+              fn_sound_play(FN_SOUND_PLAYERQUIT);
               goto cleanup;
               break;
             case SDLK_1:
