@@ -82,6 +82,8 @@ typedef struct SDL_Surface {
   int ybias;           /* logical y of the surface's first line;
                         * lets a short stripe stand in for a tall
                         * virtual surface (windowed level render) */
+  Uint8 opaque_state;  /* cached mask scan: 0 unknown, 1 opaque,
+                        * 2 has transparent pixels */
 } SDL_Surface;
 
 #define SDL_SWSURFACE   0x00000000
@@ -104,6 +106,7 @@ void SDL_FreeSurface(SDL_Surface * surface);
 
 int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
     SDL_Surface * dst, SDL_Rect * dstrect);
+int nsdl_surface_is_opaque(SDL_Surface * s);
 int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color);
 void SDL_UpdateRect(SDL_Surface * screen, Sint32 x, Sint32 y,
     Uint32 w, Uint32 h);

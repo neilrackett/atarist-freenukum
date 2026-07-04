@@ -51,6 +51,19 @@
 
 /* --------------------------------------------------------------- */
 
+#ifdef FN_ATARI_PROFILE
+/* Where do the milliseconds go? Accumulators in 200Hz system timer
+ * units, read live via the emulator debugger (the game runs in
+ * supervisor mode, so 0x4BA is readable):
+ * [0] draw time  [1] frames drawn  [2] act time  [3] ticks acted
+ * [4] frames skipped  [5] compose  [6] actor blits  [7] screen blit
+ * [8] full composes   [9] horizontal-scroll composes */
+volatile Uint32 fn_prof[12];
+#define FN_HZ200 (*(volatile Uint32 *)0x4baUL)
+#endif
+
+/* --------------------------------------------------------------- */
+
 Uint32 fn_game_timer_triggered(
     Uint32 interval,
     void * param)
@@ -173,6 +186,7 @@ int fn_game_start_in_level(
   SDL_Event event;
   int res = 0;
   int doupdate = 1;
+  int drawskips = 0;
 
   fn_hero_t * hero = fn_environment_get_hero(env);
 
@@ -278,6 +292,12 @@ int fn_game_start_in_level(
   if (srcrect.y < 0) {
     srcrect.y = 0;
   }
+  /* keep the camera on the tile grid horizontally: the level
+   * window then always lands on the same 8px-group parity as its
+   * screen position, which is what lets the big scroll blits run
+   * on the blitter (and word-wise on plain STs) instead of the
+   * byte-by-byte fallback */
+  srcrect.x -= srcrect.x % (FN_TILE_WIDTH * pixelsize);
   srcrect.w = FN_LEVELWINDOW_WIDTH * pixelsize * FN_TILE_WIDTH;
   srcrect.h = FN_LEVELWINDOW_HEIGHT * pixelsize * FN_TILE_HEIGHT;
 
@@ -304,24 +324,43 @@ int fn_game_start_in_level(
   while (fn_level_keep_on_playing(lv))
   {
     if (doupdate) {
-      SDL_Surface * screen = fn_environment_get_screen(env);
-      fn_level_blit_to_surface(lv,
-          screen,
-          &dstrect,
-          &srcrect,
-          backdrop,
-          NULL);
-      if (updateWholeScreen) {
-        SDL_UpdateRect(screen, 0, 0, 0, 0);
-        updateWholeScreen = 0;
+      /* frameskip: when the next tick is already due (or input is
+       * waiting), run the logic first and draw once we caught up,
+       * so the game keeps real-time speed on slow machines. Never
+       * skip more than 3 in a row. */
+      if (!updateWholeScreen && drawskips < 3 && fn_tick_pending()) {
+        drawskips++;
+#ifdef FN_ATARI_PROFILE
+        fn_prof[4]++;
+#endif
       } else {
-        SDL_UpdateRect(screen,
-            dstrect.x,
-            dstrect.y,
-            dstrect.w,
-            dstrect.h);
+        SDL_Surface * screen = fn_environment_get_screen(env);
+#ifdef FN_ATARI_PROFILE
+        Uint32 prof_t0 = FN_HZ200;
+#endif
+        drawskips = 0;
+        fn_level_blit_to_surface(lv,
+            screen,
+            &dstrect,
+            &srcrect,
+            backdrop,
+            NULL);
+        if (updateWholeScreen) {
+          SDL_UpdateRect(screen, 0, 0, 0, 0);
+          updateWholeScreen = 0;
+        } else {
+          SDL_UpdateRect(screen,
+              dstrect.x,
+              dstrect.y,
+              dstrect.w,
+              dstrect.h);
+        }
+        doupdate = 0;
+#ifdef FN_ATARI_PROFILE
+        fn_prof[0] += FN_HZ200 - prof_t0;
+        fn_prof[1]++;
+#endif
       }
-      doupdate = 0;
     }
 
     res = fn_wait_event_tick(&event);
@@ -556,7 +595,16 @@ int fn_game_start_in_level(
         case SDL_USEREVENT:
           switch(event.user.code) {
             case fn_event_timer:
-              fn_level_act(lv);
+              {
+#ifdef FN_ATARI_PROFILE
+                Uint32 prof_t0 = FN_HZ200;
+#endif
+                fn_level_act(lv);
+#ifdef FN_ATARI_PROFILE
+                fn_prof[2] += FN_HZ200 - prof_t0;
+                fn_prof[3]++;
+#endif
+              }
               doupdate = 1;
               break;
             case fn_event_heromoved:
@@ -588,6 +636,9 @@ int fn_game_start_in_level(
                     FN_LEVEL_HEIGHT * FN_TILE_HEIGHT * pixelsize -
                     srcrect.h;
                 }
+                /* tile-grid camera: keeps the scroll blits on the
+                 * blitter-friendly 8px-group parity (see above) */
+                srcrect.x -= srcrect.x % (FN_TILE_WIDTH * pixelsize);
               }
               break;
             case fn_event_heroscored:

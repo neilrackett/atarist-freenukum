@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 /*******************************************************************
  *
  * Project: FreeNukum 2D Jump'n Run
@@ -50,6 +54,10 @@ fn_bot_t * fn_bot_create(
   bot->environment = env;
   bot->type = type;
   bot->hero = hero;
+  bot->lastdrawn.x = 0;
+  bot->lastdrawn.y = 0;
+  bot->lastdrawn.w = 0;
+  bot->lastdrawn.h = 0;
 
   switch(type) {
     case FN_BOT_TYPE_FIREWHEEL:

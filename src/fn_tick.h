@@ -25,4 +25,14 @@
  */
 int fn_wait_event_tick(SDL_Event * event);
 
+/**
+ * Check whether work is already waiting: an event is queued or the
+ * next timer tick is due. Lets render loops skip drawing frames
+ * while the game logic is behind (frameskip) so the game keeps
+ * real-time speed on slow machines.
+ *
+ * @return 1 if fn_wait_event_tick would return without waiting.
+ */
+int fn_tick_pending(void);
+
 #endif /* FN_TICK_H */

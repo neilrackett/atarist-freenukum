@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 /*******************************************************************
  *
  * Project: FreeNukum 2D Jump'n Run
@@ -218,6 +222,11 @@ struct fn_bot_t {
    * The data of the different bot types.
    */
   fn_bot_data_u data;
+
+  /**
+   * The screen area the bot was last drawn to (dirty rects).
+   */
+  SDL_Rect lastdrawn;
 };
 
 /* --------------------------------------------------------------- */

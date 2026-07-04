@@ -15,10 +15,25 @@
 
 /* --------------------------------------------------------------- */
 
+static Uint32 next_tick = 0;
+
+/* --------------------------------------------------------------- */
+
+int fn_tick_pending(void)
+{
+  if (SDL_PollEvent(NULL)) {
+    return 1;
+  }
+  if (next_tick == 0) {
+    return 0;
+  }
+  return (Sint32)(SDL_GetTicks() - next_tick) >= 0;
+}
+
+/* --------------------------------------------------------------- */
+
 int fn_wait_event_tick(SDL_Event * event)
 {
-  static Uint32 next_tick = 0;
-
   while (1) {
     if (SDL_PollEvent(event)) {
       return 1;

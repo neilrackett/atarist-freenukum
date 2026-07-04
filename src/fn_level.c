@@ -861,6 +861,89 @@ void fn_level_set_solid(fn_level_t * lv, int x, int y, Uint8 solid)
 
 /* --------------------------------------------------------------- */
 
+#ifdef FN_ATARI_PROFILE
+extern volatile Uint32 fn_prof[12];
+#define FN_HZ200 (*(volatile Uint32 *)0x4baUL)
+#endif
+
+/* Compose backdrop + static tiles for the cells under rect d.
+ * Backdrop only gets painted where it can show through, and runs
+ * of see-through cells are batched into one blit per row. With
+ * skip_opaque set, cells whose tile is fully opaque are left
+ * entirely untouched - used after horizontal scrolls, where those
+ * cells are still valid in the level-anchored stripe and only
+ * cells showing the window-anchored backdrop need repainting. */
+static void fn_level_compose_cells(fn_level_t * lv,
+    fn_environment_t * env,
+    SDL_Surface * backdrop1,
+    const SDL_Rect * sourcerect,
+    Uint16 tilesize,
+    SDL_Rect d,
+    int skip_opaque)
+{
+  int tx, ty;
+  int tx0, tx1;
+  if (d.w == 0) {
+    return;
+  }
+  tx0 = d.x / tilesize;
+  tx1 = (d.x + d.w - 1) / tilesize;
+  if (tx1 >= FN_LEVEL_WIDTH) {
+    tx1 = FN_LEVEL_WIDTH - 1;
+  }
+  for (ty = d.y / tilesize;
+      ty <= (d.y + d.h - 1) / tilesize
+      && ty < FN_LEVEL_HEIGHT; ty++) {
+    int run_start = -1;
+    for (tx = tx0; tx <= tx1 + 1; tx++) {
+      SDL_Surface * tile = NULL;
+      int opaque = 0;
+      if (tx <= tx1) {
+        Uint16 tilenr = fn_level_get_tile(lv, tx, ty);
+        if (tilenr > 1 && tilenr < (48 * 8)) {
+          tile = fn_environment_get_tile(env, tilenr);
+          opaque = nsdl_surface_is_opaque(tile);
+        }
+      }
+      /* backdrop shows through where there is no tile or the
+       * tile has transparent pixels */
+      if (tx <= tx1 && !opaque && run_start < 0) {
+        run_start = tx;
+      }
+      /* flush the pending backdrop run when the see-through
+       * stretch ends, or up to and including this cell when a
+       * transparent tile needs backdrop beneath it now */
+      if (run_start >= 0 && (tx > tx1 || opaque || tile != NULL)) {
+        int run_end = (tx > tx1 || opaque) ? tx - 1 : tx;
+        SDL_Rect bdst;
+        bdst.x = run_start * tilesize;
+        bdst.y = ty * tilesize;
+        bdst.w = (run_end + 1 - run_start) * tilesize;
+        bdst.h = tilesize;
+        if (backdrop1 != NULL) {
+          SDL_Rect bsrc;
+          bsrc.x = bdst.x - sourcerect->x;
+          bsrc.y = bdst.y - sourcerect->y;
+          bsrc.w = bdst.w;
+          bsrc.h = bdst.h;
+          SDL_BlitSurface(backdrop1, &bsrc, lv->surface, &bdst);
+        } else {
+          SDL_FillRect(lv->surface, &bdst, 0);
+        }
+        run_start = -1;
+      }
+      if (tile != NULL && !(skip_opaque && opaque)) {
+        SDL_Rect tr;
+        tr.x = tx * tilesize;
+        tr.y = ty * tilesize;
+        tr.w = tilesize;
+        tr.h = tilesize;
+        SDL_BlitSurface(tile, NULL, lv->surface, &tr);
+      }
+    }
+  }
+}
+
 void fn_level_blit_to_surface(fn_level_t * lv,
     SDL_Surface * target,
     SDL_Rect * targetrect,
@@ -877,11 +960,12 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   /* dirty rectangle bookkeeping: only the parts of the window that
    * changed get recomposed and blitted. A camera move invalidates
    * everything because the backdrop is anchored to the window. */
-#define FN_LEVEL_MAXDIRTY 48
+#define FN_LEVEL_MAXDIRTY 64
   SDL_Rect dirty[FN_LEVEL_MAXDIRTY];
   int num_dirty = 0;
   int full_compose;
   int full_blit;
+  int hscroll = 0;
   int i;
 
   fn_environment_t * env = fn_level_get_environment(lv);
@@ -899,10 +983,21 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize;
 
   full_compose = !lv->prev_valid
-    || sourcerect->x != lv->prev_sourcerect.x
-    || sourcerect->y != lv->prev_sourcerect.y
-    || lv->bots != NULL;
-  full_blit = full_compose || lv->screen_refresh;
+    || sourcerect->y != lv->prev_sourcerect.y;
+#ifdef FN_ATARI_PROFILE
+  if (!lv->prev_valid) fn_prof[10]++;
+  else if (sourcerect->y != lv->prev_sourcerect.y) fn_prof[11]++;
+#endif
+  if (!full_compose && sourcerect->x != lv->prev_sourcerect.x) {
+    Sint32 dx = sourcerect->x - lv->prev_sourcerect.x;
+    if (dx >= -2 * (Sint32)tilesize && dx <= 2 * (Sint32)tilesize) {
+      /* small horizontal step: most composed cells stay valid */
+      hscroll = 1;
+    } else {
+      full_compose = 1;
+    }
+  }
+  full_blit = full_compose || hscroll || lv->screen_refresh;
 
   herorect.x = pixelsize *
     (fn_hero_get_x(hero) - FN_HALFTILE_WIDTH);
@@ -935,6 +1030,22 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     /* collect the rects of everything that may have changed */
     num_dirty = 0;
 
+    if (hscroll) {
+      /* the column of cells that just scrolled into the window */
+      SDL_Rect strip;
+      Sint32 dx = sourcerect->x - lv->prev_sourcerect.x;
+      strip.y = sourcerect->y;
+      strip.h = sourcerect->h;
+      if (dx > 0) {
+        strip.x = sourcerect->x + sourcerect->w - dx;
+        strip.w = dx;
+      } else {
+        strip.x = sourcerect->x;
+        strip.w = -dx;
+      }
+      dirty[num_dirty++] = strip;
+    }
+
     for (i = 0; i < lv->num_carry_dirty
         && num_dirty < FN_LEVEL_MAXDIRTY; i++) {
       dirty[num_dirty++] = lv->carry_dirty[i];
@@ -951,10 +1062,19 @@ void fn_level_blit_to_surface(fn_level_t * lv,
         !full_compose && iter != NULL;
         iter = fn_list_next(iter)) {
       fn_actor_t * actor = (fn_actor_t *)iter->data;
-      if (actor != NULL && fn_actor_is_visible(actor)) {
-        if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
+      if (actor != NULL && actor->is_visible) {
+        /* most actors just animate in place - one rect covers
+         * both the erase and the redraw then, which keeps the
+         * dirty list from overflowing into a full recompose */
+        int moved = actor->lastdrawn.x != actor->position.x
+          || actor->lastdrawn.y != actor->position.y
+          || actor->lastdrawn.w != actor->position.w
+          || actor->lastdrawn.h != actor->position.h;
+        if (num_dirty + 1 + moved <= FN_LEVEL_MAXDIRTY) {
           dirty[num_dirty++] = actor->lastdrawn;
-          dirty[num_dirty++] = actor->position;
+          if (moved) {
+            dirty[num_dirty++] = actor->position;
+          }
         } else {
           full_compose = 1;
         }
@@ -969,6 +1089,29 @@ void fn_level_blit_to_surface(fn_level_t * lv,
         if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
           dirty[num_dirty++] = shot->lastdrawn;
           dirty[num_dirty++] = shot->position;
+        } else {
+          full_compose = 1;
+        }
+      }
+    }
+
+    for (iter = fn_list_first(lv->bots);
+        !full_compose && iter != NULL;
+        iter = fn_list_next(iter)) {
+      fn_bot_t * bot = (fn_bot_t *)iter->data;
+      if (bot != NULL) {
+        if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
+          /* bots draw up to 2x2 tiles, one tile above their
+           * anchor (footbot), so cover that whole area */
+          SDL_Rect botrect;
+          botrect.x = fn_bot_get_x(bot) * pixelsize
+            * FN_HALFTILE_WIDTH;
+          botrect.y = (fn_bot_get_y(bot) - 2) * pixelsize
+            * FN_HALFTILE_HEIGHT;
+          botrect.w = 2 * FN_TILE_WIDTH * pixelsize;
+          botrect.h = 2 * FN_TILE_HEIGHT * pixelsize;
+          dirty[num_dirty++] = bot->lastdrawn;
+          dirty[num_dirty++] = botrect;
         } else {
           full_compose = 1;
         }
@@ -1012,87 +1155,81 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     dirty[i].h = ry1 - ry0;
   }
 
-  /* recompose the base (backdrop + static tiles) under each rect */
+#ifdef FN_ATARI_PROFILE
+  Uint32 prof_t0 = FN_HZ200;
+  Uint32 prof_t1, prof_t2;
+  if (full_compose) fn_prof[8]++;
+  if (hscroll) fn_prof[9]++;
+#endif
+
+  /* recompose the base (backdrop + static tiles) under each rect.
+   * Backdrop only gets painted where it can show through: cells
+   * whose tile is fully opaque skip it (most of a level is solid
+   * tiles, so this saves the bulk of the compose work). Runs of
+   * see-through cells are batched into one backdrop blit per row. */
   for (i = 0; i < num_dirty; i++) {
-    SDL_Rect d = dirty[i];
-    int tx, ty;
-    if (d.w == 0) {
-      continue;
-    }
-    if (backdrop1 != NULL) {
-      SDL_Rect bsrc;
-      SDL_Rect bdst;
-      bsrc.x = d.x - sourcerect->x;
-      bsrc.y = d.y - sourcerect->y;
-      bsrc.w = d.w;
-      bsrc.h = d.h;
-      bdst = d;
-      SDL_BlitSurface(backdrop1, &bsrc, lv->surface, &bdst);
-    } else {
-      SDL_Rect bdst = d;
-      SDL_FillRect(lv->surface, &bdst, 0);
-    }
-    for (ty = d.y / tilesize;
-        ty <= (d.y + d.h - 1) / tilesize
-        && ty < FN_LEVEL_HEIGHT; ty++) {
-      for (tx = d.x / tilesize;
-          tx <= (d.x + d.w - 1) / tilesize
-          && tx < FN_LEVEL_WIDTH; tx++) {
-        Uint16 tilenr = fn_level_get_tile(lv, tx, ty);
-        if (tilenr > 1 && tilenr < (48 * 8)) {
-          SDL_Rect tr;
-          tr.x = tx * tilesize;
-          tr.y = ty * tilesize;
-          tr.w = tilesize;
-          tr.h = tilesize;
-          SDL_BlitSurface(
-              fn_environment_get_tile(env, tilenr),
-              NULL, lv->surface, &tr);
+    fn_level_compose_cells(lv, env, backdrop1, sourcerect,
+        tilesize, dirty[i], 0);
+  }
+
+  /* after a horizontal scroll the level-anchored stripe still
+   * holds valid cells; only the ones showing the window-anchored
+   * backdrop need repainting (plus the fresh column, which is in
+   * the dirty list) */
+  if (hscroll && !full_compose) {
+    fn_level_compose_cells(lv, env, backdrop1, sourcerect,
+        tilesize, *sourcerect, 1);
+  }
+
+#ifdef FN_ATARI_PROFILE
+  prof_t1 = FN_HZ200;
+  fn_prof[5] += prof_t1 - prof_t0;
+#endif
+
+  /* blit the actors: a single pass with direct field access -
+   * this loop visits every actor in the level, so per-actor call
+   * overhead adds up. The (rare) foreground actors are stashed
+   * and drawn after the hero to keep the original layering. */
+  {
+    fn_actor_t * foreground[24];
+    int num_foreground = 0;
+
+    for (iter = fn_list_first(lv->actors);
+        iter != NULL;
+        iter = fn_list_next(iter)) {
+      fn_actor_t * actor = (fn_actor_t *)iter->data;
+
+      if (actor != NULL) {
+        Uint16 xl = (Uint16)actor->position.x / FN_TILE_WIDTH;
+        Uint16 yt = (Uint16)actor->position.y / FN_TILE_HEIGHT;
+        Uint16 xr = xl + actor->position.w / FN_TILE_WIDTH;
+        Uint16 yb = yt + actor->position.h / FN_TILE_HEIGHT;
+
+        if (xr > x_start && yb > y_start
+            && xl < x_end && yt < y_end) {
+          actor->is_visible = 1;
+          if (actor->is_in_foreground
+              && num_foreground < 24) {
+            foreground[num_foreground++] = actor;
+          } else {
+            fn_actor_blit(actor);
+          }
+          actor->lastdrawn = actor->position;
+        } else {
+          actor->is_visible = 0;
         }
       }
     }
-  }
 
-  /* blit the actors in the background */
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    fn_actor_t * actor = (fn_actor_t *)iter->data;
+    /* blit the hero */
+    fn_hero_blit(hero,
+        lv->surface,
+        lv);
+    lv->prev_herorect = herorect;
 
-    if (actor != NULL) {
-      Uint16 xl = fn_actor_get_x(actor) / FN_TILE_WIDTH;
-      Uint16 yt = fn_actor_get_y(actor) / FN_TILE_HEIGHT;
-      Uint16 xr = xl + fn_actor_get_w(actor) / FN_TILE_WIDTH;
-      Uint16 yb = yt + fn_actor_get_h(actor) / FN_TILE_HEIGHT;
-
-      if (xr > x_start && yb > y_start && xl < x_end && yt < y_end) {
-        fn_actor_set_visible(actor, 1);
-        if (!fn_actor_in_foreground(actor)) {
-          fn_actor_blit(actor);
-        }
-        actor->lastdrawn = actor->position;
-      } else {
-        fn_actor_set_visible(actor, 0);
-      }
-    }
-  }
-
-  /* blit the hero */
-  fn_hero_blit(hero,
-      lv->surface,
-      lv);
-  lv->prev_herorect = herorect;
-
-  /* blit the actors in the foreground */
-  for (iter = fn_list_first(lv->actors);
-      iter != NULL;
-      iter = fn_list_next(iter)) {
-    fn_actor_t * actor = (fn_actor_t *)iter->data;
-
-    if (actor != NULL && fn_actor_is_visible(actor)) {
-      if (fn_actor_in_foreground(actor)) {
-        fn_actor_blit(actor);
-      }
+    /* the foreground actors go over the hero */
+    for (i = 0; i < num_foreground; i++) {
+      fn_actor_blit(foreground[i]);
     }
   }
 
@@ -1106,6 +1243,12 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     if (x > x_start && y > y_start && x < x_end && y < y_end) {
       fn_bot_blit(bot, lv->surface);
     }
+    bot->lastdrawn.x = fn_bot_get_x(bot) * pixelsize
+      * FN_HALFTILE_WIDTH;
+    bot->lastdrawn.y = (fn_bot_get_y(bot) - 2) * pixelsize
+      * FN_HALFTILE_HEIGHT;
+    bot->lastdrawn.w = 2 * FN_TILE_WIDTH * pixelsize;
+    bot->lastdrawn.h = 2 * FN_TILE_HEIGHT * pixelsize;
   }
 
   /* blit the shots */
@@ -1125,6 +1268,11 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       shot->lastdrawn = shot->position;
     }
   }
+
+#ifdef FN_ATARI_PROFILE
+  prof_t2 = FN_HZ200;
+  fn_prof[6] += prof_t2 - prof_t1;
+#endif
 
   /* bring the composed image to the screen; the composed stripe
    * is fully opaque, so skip the colorkey for a faster blit */
@@ -1165,6 +1313,10 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   }
 
   lv->surface->usekey = 1;
+
+#ifdef FN_ATARI_PROFILE
+  fn_prof[7] += FN_HZ200 - prof_t2;
+#endif
 
   lv->prev_sourcerect = *sourcerect;
   lv->prev_valid = 1;

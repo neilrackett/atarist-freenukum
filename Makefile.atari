@@ -14,7 +14,8 @@ STRIP   = $(CROSS)strip
 # Native SDL-subset shim (atari/nsdl) instead of the real SDL:
 # its SDL.h shadows the system one via include order.
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
-          -DHAVE_CONFIG_H -Iatari -Iatari/nsdl -Isrc
+          -DHAVE_CONFIG_H -DFN_ATARI_PROFILE \
+          -Iatari -Iatari/nsdl -Isrc
 LDLIBS  = -lm
 
 # GEMDOS 8.3 filename

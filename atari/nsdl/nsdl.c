@@ -359,6 +359,10 @@ static void nsdl_pump(void)
 int SDL_PollEvent(SDL_Event * event)
 {
   nsdl_pump();
+  if (event == NULL) {
+    /* SDL 1.2 semantics: NULL just checks for pending events */
+    return nsdl_queue_len != 0;
+  }
   return nsdl_pop_event(event);
 }
 
@@ -438,6 +442,28 @@ void SDL_FreeSurface(SDL_Surface * surface)
   free(surface);
 }
 
+/* Cached check whether a surface has no transparent pixels; lets
+ * the level compositor skip painting backdrop under solid tiles.
+ * Only exact for widths that are a multiple of 8 (tiles are). */
+int nsdl_surface_is_opaque(SDL_Surface * s)
+{
+  if (s == NULL || s->mask == NULL) {
+    return s != NULL;
+  }
+  if (s->opaque_state == 0) {
+    Uint32 n = (Uint32)s->maskpitch * s->h;
+    Uint8 * m = s->mask;
+    s->opaque_state = 1;
+    while (n--) {
+      if (*m++ != 0xFF) {
+        s->opaque_state = 2;
+        break;
+      }
+    }
+  }
+  return s->opaque_state == 1;
+}
+
 int SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 {
   (void)key;
@@ -503,14 +529,17 @@ void nsdl_put_group(SDL_Surface * s, int x, int y,
   if ((unsigned)y >= (unsigned)s->h || x < 0 || x + 8 > s->w + 15) {
     return;
   }
-  chunk = (Uint8 *)s->pixels + (Uint32)y * s->pitch
+  s->opaque_state = 0;
+  /* 16x16 multiply: keeps gcc on a single mulu instead of a
+   * 32-bit multiply library call (called per group at decode) */
+  chunk = (Uint8 *)s->pixels + (Uint32)(Uint16)y * s->pitch
     + ((g >> 1) << 3) + (g & 1);
   chunk[0] = planes[0];
   chunk[2] = planes[1];
   chunk[4] = planes[2];
   chunk[6] = planes[3];
   if (s->mask != NULL) {
-    s->mask[(Uint32)y * s->maskpitch + g] = mask;
+    s->mask[(Uint32)(Uint16)y * s->maskpitch + g] = mask;
   }
 }
 
@@ -600,6 +629,7 @@ int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
   if (dst->is_screen) {
     nsdl_splash_over();
   }
+  dst->opaque_state = 0;
   if (dstrect == NULL) {
     x = 0; y = 0; w = dst->w; h = dst->h;
   } else {
@@ -661,10 +691,13 @@ int SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
       return 0;
     }
 
-    for (; h > 0; y++, h--) {
-      Uint8 * line = (Uint8 *)dst->pixels + (Uint32)y * dst->pitch;
-      Uint8 * mline =
-        dst->mask ? dst->mask + (Uint32)y * dst->maskpitch : NULL;
+    /* strided row pointers: no y*pitch multiply per row (the
+     * 68000 would need a library call for it) */
+    Uint8 * line = (Uint8 *)dst->pixels + (Uint32)y * dst->pitch;
+    Uint8 * mline =
+      dst->mask ? dst->mask + (Uint32)y * dst->maskpitch : NULL;
+    for (; h > 0; h--, line += dst->pitch,
+        mline = mline ? mline + dst->maskpitch : NULL) {
       for (g = gx0; g < gx1; g++) {
         Uint8 * chunk = line + ((g >> 1) << 3) + (g & 1);
         /* pixel-precise coverage of [x, x+w) within this group,
@@ -710,6 +743,7 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
   if (dst->is_screen) {
     nsdl_splash_over();
   }
+  dst->opaque_state = 0;
 
   if (srcrect != NULL) {
     sx = srcrect->x; sy = srcrect->y;
@@ -846,15 +880,57 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
       return 0;
     }
 
+    /* row addresses stride instead of multiplying: the 68000 has
+     * no 32-bit multiply, so a y*pitch per row would become a
+     * costly library call inside the hottest loop of the game */
+    Uint8 * sline =
+      (Uint8 *)src->pixels + (Uint32)(Uint16)sy * src->pitch;
+    Uint8 * dline =
+      (Uint8 *)dst->pixels + (Uint32)(Uint16)dy * dst->pitch;
+    Uint8 * smline = src->mask
+      ? src->mask + (Uint32)(Uint16)sy * src->maskpitch : NULL;
+    Uint8 * dmline = dst->mask
+      ? dst->mask + (Uint32)(Uint16)dy * dst->maskpitch : NULL;
+
+    /* fully word-aligned span from a source with no transparent
+     * pixels (or colorkey off): plain long-word copies. This is
+     * the common case - level tiles are solid 16x16 blocks - and
+     * the straight-line loop is several times faster than the
+     * general per-group logic below. */
+    if (((sg0 | dg0 | ng) & 1) == 0
+        && (!masked || nsdl_surface_is_opaque(src))) {
+      Uint8 * sp = sline + ((Uint32)(sg0 >> 1) << 3);
+      Uint8 * dp = dline + ((Uint32)(dg0 >> 1) << 3);
+      int nch = ng >> 1;
+      for (y = 0; y < h; y++) {
+        Uint32 * s32 = (Uint32 *)sp;
+        Uint32 * d32 = (Uint32 *)dp;
+        int c = nch;
+        while (c--) {
+          *d32++ = *s32++;
+          *d32++ = *s32++;
+        }
+        if (dmline != NULL) {
+          if (smline != NULL) {
+            Uint16 * sm16 = (Uint16 *)(smline + sg0);
+            Uint16 * dm16 = (Uint16 *)(dmline + dg0);
+            c = nch;
+            while (c--) {
+              *dm16++ = *sm16++;
+            }
+            smline += src->maskpitch;
+          } else {
+            memset(dmline + dg0, 0xFF, (size_t)ng);
+          }
+          dmline += dst->maskpitch;
+        }
+        sp += src->pitch;
+        dp += dst->pitch;
+      }
+      return 0;
+    }
+
     for (y = 0; y < h; y++) {
-      Uint8 * sline =
-        (Uint8 *)src->pixels + (Uint32)(sy + y) * src->pitch;
-      Uint8 * dline =
-        (Uint8 *)dst->pixels + (Uint32)(dy + y) * dst->pitch;
-      Uint8 * smline = src->mask
-        ? src->mask + (Uint32)(sy + y) * src->maskpitch : NULL;
-      Uint8 * dmline = dst->mask
-        ? dst->mask + (Uint32)(dy + y) * dst->maskpitch : NULL;
       int g = 0;
       while (g < ng) {
         int sgg = sg0 + g;
@@ -893,7 +969,20 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
               g += 2;
               continue;
             }
-            /* mixed mask: fall through to the byte path */
+            /* mixed mask: word-wide read-modify-write, still two
+             * groups per iteration */
+            {
+              Uint16 nm16 = ~m16;
+              dw[0] = (dw[0] & nm16) | (sw[0] & m16);
+              dw[1] = (dw[1] & nm16) | (sw[1] & m16);
+              dw[2] = (dw[2] & nm16) | (sw[2] & m16);
+              dw[3] = (dw[3] & nm16) | (sw[3] & m16);
+              if (dmline != NULL) {
+                *(Uint16 *)(dmline + dgg) |= m16;
+              }
+              g += 2;
+              continue;
+            }
           }
         }
         {
@@ -927,6 +1016,14 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
           }
           g += 1;
         }
+      }
+      sline += src->pitch;
+      dline += dst->pitch;
+      if (smline != NULL) {
+        smline += src->maskpitch;
+      }
+      if (dmline != NULL) {
+        dmline += dst->maskpitch;
       }
     }
   }
