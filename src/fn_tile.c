@@ -41,7 +41,19 @@
 
 int fn_tile_loadheader(int fd, fn_tileheader_t * h)
 {
-    return read(fd, h, sizeof(*h)) == sizeof(*h);
+    /* read the three header bytes explicitly; reading into the
+     * struct reads sizeof(*h) bytes, which is 4 on platforms that
+     * pad the struct (m68k), shifting the whole tile data stream
+     * by one byte. */
+    unsigned char buf[3];
+
+    if (read(fd, buf, 3) != 3) {
+        return 0;
+    }
+    h->tiles = buf[0];
+    h->width = buf[1];
+    h->height = buf[2];
+    return 1;
 }
 
 /* --------------------------------------------------------------- */

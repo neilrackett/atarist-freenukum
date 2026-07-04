@@ -91,6 +91,7 @@ int main(int argc, char ** argv)
   /* load the tilecache */
   res = fn_environment_load_tilecache(env);
 
+
   /* show the splash screen */
   res = fn_picture_splash_show(
       env,
