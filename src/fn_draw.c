@@ -43,6 +43,14 @@
 static Uint32 fn_draw_colorcache[16];
 static SDL_PixelFormat * fn_draw_colorcache_fmt = NULL;
 
+/* Set when the pixel values in the cache are exactly the source
+ * bits rearranged (cache index brighten|blue<<1|green<<2|red<<3
+ * maps to pixel value blue|green<<1|red<<2|brighten<<3, i.e. the
+ * native EGA palette). Then the five bytes of a decoded row ARE
+ * the four bitplanes plus the mask, and fn_draw_byterow collapses
+ * to a handful of ANDs. */
+static int fn_draw_cache_direct = 0;
+
 static void fn_draw_fill_colorcache(SDL_PixelFormat * fmt)
 {
     int i;
@@ -61,7 +69,28 @@ static void fn_draw_fill_colorcache(SDL_PixelFormat * fmt)
         fn_draw_colorcache[i] = SDL_MapRGB(fmt, red, green, blue);
     }
     fn_draw_colorcache_fmt = fmt;
+
+    fn_draw_cache_direct = 1;
+    for (i = 0; i < 16; i++) {
+        Uint32 want = ((i & 1) << 3)    /* brighten */
+            | ((i >> 1) & 1)            /* blue */
+            | (((i >> 2) & 1) << 1)     /* green */
+            | (((i >> 3) & 1) << 2);    /* red */
+        if (fn_draw_colorcache[i] != want) {
+            fn_draw_cache_direct = 0;
+            break;
+        }
+    }
 }
+
+/* --------------------------------------------------------------- */
+
+static int fn_draw_byterow_slow(
+        SDL_Surface * target,
+        SDL_Rect r,
+        fn_byterow_t * br,
+        Uint32 transcolor,
+        Uint8 pixelsize);
 
 /* --------------------------------------------------------------- */
 
@@ -73,13 +102,28 @@ int fn_draw_byterow(
         Uint8 pixelsize)
 {
     SDL_PixelFormat * fmt = target->format;
-    Uint32 color;
     size_t i = 0;
     r.h = pixelsize;
     r.w = pixelsize;
 
     if (fmt != fn_draw_colorcache_fmt) {
         fn_draw_fill_colorcache(fmt);
+    }
+
+    /* fastest path: the source bytes are the bitplanes (see
+     * fn_draw_cache_direct); pixels without their trans bit are
+     * background - transparent (mask 0) or black (planes 0) */
+    if (pixelsize == 1 && (r.x & 7) == 0 && fn_draw_cache_direct
+            && (transcolor == 0 || transcolor > 15)) {
+        Uint8 planes[4];
+        Uint8 t = br->trans;
+        planes[0] = br->blue & t;
+        planes[1] = br->green & t;
+        planes[2] = br->red & t;
+        planes[3] = br->brighten & t;
+        nsdl_put_group(target, r.x, r.y, planes,
+            transcolor > 15 ? t : 0xFF);
+        return 0;
     }
 
     /* fast path: build the whole 8px group and write it once
@@ -111,6 +155,98 @@ int fn_draw_byterow(
         nsdl_put_group(target, r.x, r.y, planes, mask);
         return 0;
     }
+
+    return fn_draw_byterow_slow(target, r, br, transcolor,
+        pixelsize);
+}
+
+/* --------------------------------------------------------------- */
+
+int fn_draw_byterow_run(
+        SDL_Surface * target,
+        int x,
+        int y,
+        const Uint8 * data,
+        size_t ngroups,
+        size_t rowgroups,
+        Uint32 transcolor,
+        Uint8 pixelsize)
+{
+    /* whole-image decode in one call: the per-group function call
+     * and address setup dominate tile loading otherwise */
+    if (pixelsize == 1 && (x & 7) == 0
+            && fn_draw_cache_direct
+            && (transcolor == 0 || transcolor > 15)
+            && target->mask != NULL
+            && x + (int)rowgroups * 8 <= target->w
+            && y + (int)(ngroups / rowgroups) <= target->h) {
+        int g0 = x >> 3;
+        Uint8 * prow = (Uint8 *)target->pixels
+            + (Uint32)(Uint16)y * target->pitch
+            + ((Uint32)(g0 >> 1) << 3) + (g0 & 1);
+        Uint8 * mrow = target->mask
+            + (Uint32)(Uint16)y * target->maskpitch + g0;
+        int transparent = (transcolor > 15);
+        size_t done = 0;
+
+        target->opaque_state = 0;
+        while (done < ngroups) {
+            Uint8 * p = prow;
+            Uint8 * m = mrow;
+            int step = (g0 & 1) ? 7 : 1;
+            size_t g;
+            for (g = 0; g < rowgroups; g++) {
+                Uint8 t = data[0];
+                p[0] = data[1] & t;   /* blue  = plane 0 */
+                p[2] = data[2] & t;   /* green = plane 1 */
+                p[4] = data[3] & t;   /* red   = plane 2 */
+                p[6] = data[4] & t;   /* brighten = plane 3 */
+                *m++ = transparent ? t : 0xFF;
+                data += 5;
+                p += step;
+                step = 8 - step;
+            }
+            prow += target->pitch;
+            mrow += target->maskpitch;
+            done += rowgroups;
+        }
+        return 0;
+    }
+
+    /* general case: one row at a time */
+    {
+        SDL_Rect r;
+        fn_byterow_t br;
+        size_t done;
+        r.w = 8 * pixelsize;
+        r.h = pixelsize;
+        for (done = 0; done < ngroups; done++) {
+            size_t col = done % rowgroups;
+            r.x = (x + (int)col * 8) * pixelsize;
+            r.y = (y + (int)(done / rowgroups)) * pixelsize;
+            br.trans    = data[0];
+            br.blue     = data[1];
+            br.green    = data[2];
+            br.red      = data[3];
+            br.brighten = data[4];
+            data += 5;
+            fn_draw_byterow(target, r, &br, transcolor, pixelsize);
+        }
+    }
+    return 0;
+}
+
+/* --------------------------------------------------------------- */
+
+static int fn_draw_byterow_slow(
+        SDL_Surface * target,
+        SDL_Rect r,
+        fn_byterow_t * br,
+        Uint32 transcolor,
+        Uint8 pixelsize)
+{
+    Uint32 color;
+    size_t i;
 
     for (i = 0; i != 8; i++)
     {

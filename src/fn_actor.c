@@ -136,6 +136,9 @@ void fn_actor_function_simpleanimation_create(fn_actor_t * actor)
   actor->data = data;
   actor->position.w = FN_TILE_WIDTH;
   actor->position.h = FN_TILE_HEIGHT;
+  data->tile = 0;
+  data->current_frame = 0;
+  data->num_frames = 1;
   switch(actor->type) {
     case FN_ACTOR_TEXT_ON_SCREEN_BACKGROUND:
       data->tile = 0x0004;
@@ -229,6 +232,10 @@ void fn_actor_function_simpleanimation_create(fn_actor_t * actor)
           __LINE__, actor->type);
       break;
   }
+  /* single-frame decorations never change their appearance, so
+   * the renderer can skip redrawing them (window backgrounds
+   * and similar - a level can contain dozens of these) */
+  actor->appearance_static = (data->num_frames <= 1);
 }
 
 /* --------------------------------------------------------------- */
@@ -8111,6 +8118,7 @@ fn_actor_t * fn_actor_create(fn_level_t * level,
   actor->is_in_foreground = 0;
   actor->is_visible = 0;
   actor->acts_while_invisible = 0;
+  actor->appearance_static = 0;
   func = fn_actor_functions[actor->type][FN_ACTOR_FUNCTION_CREATE];
   if (func != NULL) {
     func(actor);

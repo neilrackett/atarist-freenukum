@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 /*******************************************************************
  *
  * Project: FreeNukum 2D Jump'n Run
@@ -256,6 +260,13 @@ struct fn_actor_t {
    * Does the actor act even if outside the visible area?
    */
   Uint8 acts_while_invisible;
+
+  /**
+   * The actor never changes its appearance (single-frame
+   * decoration); the renderer skips redrawing it while nothing
+   * repaints the area underneath.
+   */
+  Uint8 appearance_static;
 };
 
 /* --------------------------------------------------------------- */

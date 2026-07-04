@@ -866,6 +866,24 @@ extern volatile Uint32 fn_prof[12];
 #define FN_HZ200 (*(volatile Uint32 *)0x4baUL)
 #endif
 
+/* Does r overlap any of the collected dirty rects? Used to decide
+ * whether a never-changing decoration actor must be redrawn. */
+static int fn_level_rect_dirty(const SDL_Rect * r,
+    const SDL_Rect * dirty, int num_dirty)
+{
+  int i;
+  for (i = 0; i < num_dirty; i++) {
+    if (dirty[i].w != 0
+        && r->x < dirty[i].x + dirty[i].w
+        && r->x + r->w > dirty[i].x
+        && r->y < dirty[i].y + dirty[i].h
+        && r->y + r->h > dirty[i].y) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* Compose backdrop + static tiles for the cells under rect d.
  * Backdrop only gets painted where it can show through, and runs
  * of see-through cells are batched into one blit per row. With
@@ -1070,6 +1088,10 @@ void fn_level_blit_to_surface(fn_level_t * lv,
           || actor->lastdrawn.y != actor->position.y
           || actor->lastdrawn.w != actor->position.w
           || actor->lastdrawn.h != actor->position.h;
+        if (actor->appearance_static && !moved) {
+          /* never changes; nothing to erase or redraw */
+          continue;
+        }
         if (num_dirty + 1 + moved <= FN_LEVEL_MAXDIRTY) {
           dirty[num_dirty++] = actor->lastdrawn;
           if (moved) {
@@ -1208,13 +1230,25 @@ void fn_level_blit_to_surface(fn_level_t * lv,
         if (xr > x_start && yb > y_start
             && xl < x_end && yt < y_end) {
           actor->is_visible = 1;
-          if (actor->is_in_foreground
+          /* a never-changing decoration only needs redrawing
+           * when something repainted the area underneath */
+          if (actor->appearance_static
+              && !full_compose && !hscroll
+              && actor->lastdrawn.x == actor->position.x
+              && actor->lastdrawn.y == actor->position.y
+              && actor->lastdrawn.w == actor->position.w
+              && actor->lastdrawn.h == actor->position.h
+              && !fn_level_rect_dirty(&actor->position,
+                  dirty, num_dirty)) {
+            /* untouched since last frame */
+          } else if (actor->is_in_foreground
               && num_foreground < 24) {
             foreground[num_foreground++] = actor;
+            actor->lastdrawn = actor->position;
           } else {
             fn_actor_blit(actor);
+            actor->lastdrawn = actor->position;
           }
-          actor->lastdrawn = actor->position;
         } else {
           actor->is_visible = 0;
         }

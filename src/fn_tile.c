@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 /* --------------------------------------------------------------- */
 
@@ -94,6 +95,40 @@ SDL_Surface * fn_tile_load(
         0);
 
 
+    /* bulk-read the whole tile: one system call instead of one
+     * per 8-pixel group (tile loading was dominated by the
+     * ~50000 GEMDOS traps this used to make). The buffer is
+     * reused across calls - the ~1500 tiles of a tilecache load
+     * otherwise spend real time in malloc/free. */
+    static Uint8 * data = NULL;
+    static size_t data_size = 0;
+    if (num_loads * 5 > data_size) {
+        free(data);
+        data_size = num_loads * 5;
+        data = malloc(data_size);
+        if (data == NULL) {
+            data_size = 0;
+        }
+    }
+    if (data != NULL) {
+        size_t total = num_loads * 5;
+        size_t got = 0;
+        while (got < total) {
+            ssize_t n = read(fd, data + got, total - got);
+            if (n <= 0) {
+                break;
+            }
+            got += (size_t)n;
+        }
+    }
+
+    if (data != NULL) {
+        /* decode the whole image in one call */
+        fn_draw_byterow_run(tile, 0, 0, data, num_loads,
+            h->width, transparent_color, pixelsize);
+        return tile;
+    }
+
     while (num_read < num_loads)
     {
         read(fd, readbuf, 5);
@@ -108,12 +143,13 @@ SDL_Surface * fn_tile_load(
                 &br,
                 transparent_color,
                 pixelsize);
+        /* wrap without the 32-bit modulo: that division was a
+         * library call per 8-pixel group on the 68000 */
         r.x += 8 * pixelsize;
-        r.x %= (8 * h->width * pixelsize);
-
-
-        if (r.x == 0)
+        if (r.x >= 8 * h->width * pixelsize) {
+            r.x = 0;
             r.y += pixelsize;
+        }
         num_read++;
     }
 

@@ -292,12 +292,14 @@ int fn_game_start_in_level(
   if (srcrect.y < 0) {
     srcrect.y = 0;
   }
-  /* keep the camera on the tile grid horizontally: the level
-   * window then always lands on the same 8px-group parity as its
-   * screen position, which is what lets the big scroll blits run
-   * on the blitter (and word-wise on plain STs) instead of the
-   * byte-by-byte fallback */
+  /* keep the camera on the tile grid: horizontally that makes the
+   * level window land on the same 8px-group parity as its screen
+   * position, which is what lets the big scroll blits run on the
+   * blitter (and word-wise on plain STs) instead of the
+   * byte-by-byte fallback; vertically it halves how often jumps
+   * and falls have to recompose the window */
   srcrect.x -= srcrect.x % (FN_TILE_WIDTH * pixelsize);
+  srcrect.y -= srcrect.y % (FN_TILE_HEIGHT * pixelsize);
   srcrect.w = FN_LEVELWINDOW_WIDTH * pixelsize * FN_TILE_WIDTH;
   srcrect.h = FN_LEVELWINDOW_HEIGHT * pixelsize * FN_TILE_HEIGHT;
 
@@ -637,8 +639,10 @@ int fn_game_start_in_level(
                     srcrect.h;
                 }
                 /* tile-grid camera: keeps the scroll blits on the
-                 * blitter-friendly 8px-group parity (see above) */
+                 * blitter-friendly 8px-group parity and vertical
+                 * recomposes on alternate ticks (see above) */
                 srcrect.x -= srcrect.x % (FN_TILE_WIDTH * pixelsize);
+                srcrect.y -= srcrect.y % (FN_TILE_HEIGHT * pixelsize);
               }
               break;
             case fn_event_heroscored:

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2026 Neil Rackett
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 /*******************************************************************
  *
  * Project: FreeNukum 2D Jump'n Run
@@ -49,6 +53,24 @@ int fn_draw_byterow(
         SDL_Surface * target,
         SDL_Rect r,
         fn_byterow_t * br,
+        Uint32 transcolor,
+        Uint8 pixelsize);
+
+/* --------------------------------------------------------------- */
+
+/**
+ * Decode a run of 8-pixel groups (5 bytes each: trans, blue,
+ * green, red, brighten) in one call, wrapping to the next row
+ * after rowgroups groups. Much faster than calling
+ * fn_draw_byterow per group.
+ */
+int fn_draw_byterow_run(
+        SDL_Surface * target,
+        int x,
+        int y,
+        const Uint8 * data,
+        size_t ngroups,
+        size_t rowgroups,
         Uint32 transcolor,
         Uint8 pixelsize);
 

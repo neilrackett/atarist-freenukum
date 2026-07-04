@@ -930,100 +930,175 @@ int SDL_BlitSurface(SDL_Surface * src, SDL_Rect * srcrect,
       return 0;
     }
 
-    for (y = 0; y < h; y++) {
-      int g = 0;
-      while (g < ng) {
-        int sgg = sg0 + g;
-        int dgg = dg0 + g;
-        /* both sides share the same 8px phase, so whenever the
-         * group index is even and a partner group follows, a
-         * whole chunk (4 plane words) can move at once */
-        if ((sgg & 1) == 0 && (dgg & 1) == 0 && g + 1 < ng) {
-          Uint16 * sw = (Uint16 *)(sline + ((sgg >> 1) << 3));
-          Uint16 * dw = (Uint16 *)(dline + ((dgg >> 1) << 3));
-          if (!masked) {
-            dw[0] = sw[0];
-            dw[1] = sw[1];
-            dw[2] = sw[2];
-            dw[3] = sw[3];
-            if (dmline != NULL) {
-              *(Uint16 *)(dmline + dgg) = smline != NULL
-                ? *(Uint16 *)(smline + sgg) : 0xFFFF;
-            }
-            g += 2;
-            continue;
-          } else {
-            Uint16 m16 = *(Uint16 *)(smline + sgg);
-            if (m16 == 0) {
-              g += 2;
-              continue;
-            }
-            if (m16 == 0xFFFF) {
-              dw[0] = sw[0];
-              dw[1] = sw[1];
-              dw[2] = sw[2];
-              dw[3] = sw[3];
-              if (dmline != NULL) {
-                *(Uint16 *)(dmline + dgg) = 0xFFFF;
+    /* General span walker. Source and destination groups either
+     * share parity (optional odd lead group, then word pairs, then
+     * an optional tail group) or disagree (pure byte walk). Either
+     * way the loops step pointers instead of recomputing chunk
+     * addresses per group - on the 68000 that address arithmetic
+     * costs more than the pixel moves themselves. Absent masks are
+     * pointed at an all-ones word / a sink word with a zero stride
+     * so the loops stay branch-free. */
+    {
+      static const Uint16 nsdl_mask_ones = 0xFFFF;
+      static Uint16 nsdl_mask_sink;
+      int smstep = (smline != NULL) ? 1 : 0;
+      int dmstep = (dmline != NULL) ? 1 : 0;
+      const Uint8 * smrow = (smline != NULL)
+        ? smline + sg0 : (const Uint8 *)&nsdl_mask_ones;
+      Uint8 * dmrow = (dmline != NULL)
+        ? dmline + dg0 : (Uint8 *)&nsdl_mask_sink;
+
+      if (((sg0 ^ dg0) & 1) == 0) {
+        /* same parity: lead byte group if odd, then word pairs */
+        int lead = sg0 & 1;
+        int npair = (ng - lead) >> 1;
+        int tail = ng - lead - npair * 2;
+        Uint8 * sprow = sline + ((Uint32)(sg0 >> 1) << 3) + lead;
+        Uint8 * dprow = dline + ((Uint32)(dg0 >> 1) << 3) + lead;
+
+        for (y = 0; y < h; y++) {
+          Uint8 * sp = sprow;
+          Uint8 * dp = dprow;
+          const Uint8 * sm = smrow;
+          Uint8 * dm = dmrow;
+          int c;
+
+          if (lead) {
+            if (masked) {
+              Uint8 m = *sm;
+              if (m == 0xFF) {
+                dp[0] = sp[0]; dp[2] = sp[2];
+                dp[4] = sp[4]; dp[6] = sp[6];
+                *dm |= 0xFF;
+              } else if (m != 0) {
+                Uint8 nm = ~m;
+                dp[0] = (dp[0] & nm) | (sp[0] & m);
+                dp[2] = (dp[2] & nm) | (sp[2] & m);
+                dp[4] = (dp[4] & nm) | (sp[4] & m);
+                dp[6] = (dp[6] & nm) | (sp[6] & m);
+                *dm |= m;
               }
-              g += 2;
-              continue;
+            } else {
+              dp[0] = sp[0]; dp[2] = sp[2];
+              dp[4] = sp[4]; dp[6] = sp[6];
+              *dm = *sm;
             }
-            /* mixed mask: word-wide read-modify-write, still two
-             * groups per iteration */
-            {
-              Uint16 nm16 = ~m16;
-              dw[0] = (dw[0] & nm16) | (sw[0] & m16);
-              dw[1] = (dw[1] & nm16) | (sw[1] & m16);
-              dw[2] = (dw[2] & nm16) | (sw[2] & m16);
-              dw[3] = (dw[3] & nm16) | (sw[3] & m16);
-              if (dmline != NULL) {
-                *(Uint16 *)(dmline + dgg) |= m16;
+            sp += 7;
+            dp += 7;
+            sm += smstep;
+            dm += dmstep;
+          }
+
+          for (c = npair; c--; ) {
+            Uint16 * sw = (Uint16 *)sp;
+            Uint16 * dw = (Uint16 *)dp;
+            if (masked) {
+              Uint16 m16 = *(const Uint16 *)sm;
+              if (m16 == 0xFFFF) {
+                dw[0] = sw[0]; dw[1] = sw[1];
+                dw[2] = sw[2]; dw[3] = sw[3];
+                *(Uint16 *)dm = 0xFFFF;
+              } else if (m16 != 0) {
+                Uint16 nm16 = ~m16;
+                dw[0] = (dw[0] & nm16) | (sw[0] & m16);
+                dw[1] = (dw[1] & nm16) | (sw[1] & m16);
+                dw[2] = (dw[2] & nm16) | (sw[2] & m16);
+                dw[3] = (dw[3] & nm16) | (sw[3] & m16);
+                *(Uint16 *)dm |= m16;
               }
-              g += 2;
-              continue;
+            } else {
+              dw[0] = sw[0]; dw[1] = sw[1];
+              dw[2] = sw[2]; dw[3] = sw[3];
+              *(Uint16 *)dm = *(const Uint16 *)sm;
+            }
+            sp += 8;
+            dp += 8;
+            sm += smstep << 1;
+            dm += dmstep << 1;
+          }
+
+          if (tail) {
+            if (masked) {
+              Uint8 m = *sm;
+              if (m == 0xFF) {
+                dp[0] = sp[0]; dp[2] = sp[2];
+                dp[4] = sp[4]; dp[6] = sp[6];
+                *dm |= 0xFF;
+              } else if (m != 0) {
+                Uint8 nm = ~m;
+                dp[0] = (dp[0] & nm) | (sp[0] & m);
+                dp[2] = (dp[2] & nm) | (sp[2] & m);
+                dp[4] = (dp[4] & nm) | (sp[4] & m);
+                dp[6] = (dp[6] & nm) | (sp[6] & m);
+                *dm |= m;
+              }
+            } else {
+              dp[0] = sp[0]; dp[2] = sp[2];
+              dp[4] = sp[4]; dp[6] = sp[6];
+              *dm = *sm;
             }
           }
-        }
-        {
-          Uint8 * schunk = sline + ((sgg >> 1) << 3) + (sgg & 1);
-          Uint8 * dchunk = dline + ((dgg >> 1) << 3) + (dgg & 1);
-          if (masked) {
-            Uint8 m = smline[sgg];
-            if (m == 0xFF) {
-              dchunk[0] = schunk[0];
-              dchunk[2] = schunk[2];
-              dchunk[4] = schunk[4];
-              dchunk[6] = schunk[6];
-            } else if (m != 0) {
-              Uint8 nm = ~m;
-              dchunk[0] = (dchunk[0] & nm) | (schunk[0] & m);
-              dchunk[2] = (dchunk[2] & nm) | (schunk[2] & m);
-              dchunk[4] = (dchunk[4] & nm) | (schunk[4] & m);
-              dchunk[6] = (dchunk[6] & nm) | (schunk[6] & m);
-            }
-            if (dmline != NULL && m != 0) {
-              dmline[dgg] |= m;
-            }
-          } else {
-            dchunk[0] = schunk[0];
-            dchunk[2] = schunk[2];
-            dchunk[4] = schunk[4];
-            dchunk[6] = schunk[6];
-            if (dmline != NULL) {
-              dmline[dgg] = smline != NULL ? smline[sgg] : 0xFF;
-            }
+
+          sprow += src->pitch;
+          dprow += dst->pitch;
+          if (smline != NULL) {
+            smrow += src->maskpitch;
           }
-          g += 1;
+          if (dmline != NULL) {
+            dmrow += dst->maskpitch;
+          }
         }
-      }
-      sline += src->pitch;
-      dline += dst->pitch;
-      if (smline != NULL) {
-        smline += src->maskpitch;
-      }
-      if (dmline != NULL) {
-        dmline += dst->maskpitch;
+      } else {
+        /* opposite parity: byte walk, alternating +1/+7 strides
+         * out of phase between source and destination */
+        int s_first = (sg0 & 1) ? 7 : 1;
+        Uint8 * sprow = sline + ((Uint32)(sg0 >> 1) << 3) + (sg0 & 1);
+        Uint8 * dprow = dline + ((Uint32)(dg0 >> 1) << 3) + (dg0 & 1);
+
+        for (y = 0; y < h; y++) {
+          Uint8 * sp = sprow;
+          Uint8 * dp = dprow;
+          const Uint8 * sm = smrow;
+          Uint8 * dm = dmrow;
+          int s_next = s_first;
+          int d_next = 8 - s_first;
+          int c;
+
+          for (c = ng; c--; ) {
+            if (masked) {
+              Uint8 m = *sm;
+              if (m == 0xFF) {
+                dp[0] = sp[0]; dp[2] = sp[2];
+                dp[4] = sp[4]; dp[6] = sp[6];
+                *dm |= 0xFF;
+              } else if (m != 0) {
+                Uint8 nm = ~m;
+                dp[0] = (dp[0] & nm) | (sp[0] & m);
+                dp[2] = (dp[2] & nm) | (sp[2] & m);
+                dp[4] = (dp[4] & nm) | (sp[4] & m);
+                dp[6] = (dp[6] & nm) | (sp[6] & m);
+                *dm |= m;
+              }
+            } else {
+              dp[0] = sp[0]; dp[2] = sp[2];
+              dp[4] = sp[4]; dp[6] = sp[6];
+              *dm = *sm;
+            }
+            sp += s_next; s_next = 8 - s_next;
+            dp += d_next; d_next = 8 - d_next;
+            sm += smstep;
+            dm += dmstep;
+          }
+
+          sprow += src->pitch;
+          dprow += dst->pitch;
+          if (smline != NULL) {
+            smrow += src->maskpitch;
+          }
+          if (dmline != NULL) {
+            dmrow += dst->maskpitch;
+          }
+        }
       }
     }
   }
