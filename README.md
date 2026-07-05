@@ -7,9 +7,12 @@ Atari ST port of [FreeNukum](https://gitlab.com/silwol/freenukum) by
 
 ## Introduction
 
-To celebrate 35 years of two great 90s icons, Duke Nukem and the Atari Mega STE,
-I've ported ~~Duke Nukem~~ FreeNukum to the Atari ST with support for the Mega
-STE's Blitter and 16MHz modes.
+1991 saw the arrival of two 90s icons: Duke Nukem and the Atari Mega STE. So, to
+celebrate their 35th Birthday I've ported ~~Duke Nukem~~ FreeNukum to the
+Atari ST!
+
+And, as this is in honour of the Mega STE, I have, of course included support
+for Blitter and 16MHz mode.
 
 You can download the latest version from the
 [releases page](https://github.com/neilrackett/atarist-freenukum/releases).

@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* --------------------------------------------------------------- */
 
@@ -82,6 +83,21 @@ fn_level_t * fn_level_load(int fd,
       FN_TILE_WIDTH * FN_LEVEL_WIDTH,
       FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4));
 
+  /* bulk-read the level map: two 1-byte reads per tile cost a
+   * system call each, which alone took seconds per level */
+  Uint8 * levelmap = malloc(FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH * 2);
+  if (levelmap != NULL) {
+    size_t total = FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH * 2;
+    size_t got = 0;
+    while (got < total) {
+      ssize_t n = read(fd, levelmap + got, total - got);
+      if (n <= 0) {
+        break;
+      }
+      got += (size_t)n;
+    }
+  }
+
   while (i != FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH)
   {
     size_t x = i%FN_LEVEL_WIDTH;
@@ -90,8 +106,13 @@ fn_level_t * fn_level_load(int fd,
     /* we don't only want to run on big-endian systems,
      * so we load the bytes separately.
      */
-    read(fd, &lowertile, 1);
-    read(fd, &uppertile, 1);
+    if (levelmap != NULL) {
+      lowertile = levelmap[i * 2];
+      uppertile = levelmap[i * 2 + 1];
+    } else {
+      read(fd, &lowertile, 1);
+      read(fd, &uppertile, 1);
+    }
     tilenr = (uppertile << 8) | lowertile;
 
     lv->raw[y][x] = tilenr;
@@ -751,6 +772,8 @@ fn_level_t * fn_level_load(int fd,
     i++;
   }
 
+  free(levelmap);
+
   /* Put the correct tile behind the cameras. */
   fn_list_t * cameras =
     fn_level_get_items_of_type(lv,
@@ -1017,11 +1040,13 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   }
   full_blit = full_compose || hscroll || lv->screen_refresh;
 
+  /* fn_hero_blit paints a 2x2 tile grid stepped by w and h, so
+   * the drawn area is twice the position size in each direction */
   herorect.x = pixelsize *
     (fn_hero_get_x(hero) - FN_HALFTILE_WIDTH);
   herorect.y = pixelsize * fn_hero_get_y(hero);
-  herorect.w = pixelsize * fn_hero_get_w(hero);
-  herorect.h = pixelsize * fn_hero_get_h(hero);
+  herorect.w = pixelsize * fn_hero_get_w(hero) * 2;
+  herorect.h = pixelsize * fn_hero_get_h(hero) * 2;
 
   /* visibility bounds in tiles (with margin) for the actor loops */
   x_start = sourcerect->x / tilesize - 2;
@@ -1066,7 +1091,12 @@ void fn_level_blit_to_surface(fn_level_t * lv,
 
     for (i = 0; i < lv->num_carry_dirty
         && num_dirty < FN_LEVEL_MAXDIRTY; i++) {
-      dirty[num_dirty++] = lv->carry_dirty[i];
+      /* carried rects are lastdrawn rects of removed actors and
+       * shots; pad like the live ones (blits can overshoot) */
+      SDL_Rect pad = lv->carry_dirty[i];
+      pad.w += FN_TILE_WIDTH * pixelsize;
+      pad.h += FN_TILE_HEIGHT * pixelsize;
+      dirty[num_dirty++] = pad;
     }
 
     if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
@@ -1093,9 +1123,18 @@ void fn_level_blit_to_surface(fn_level_t * lv,
           continue;
         }
         if (num_dirty + 1 + moved <= FN_LEVEL_MAXDIRTY) {
-          dirty[num_dirty++] = actor->lastdrawn;
+          /* some blit functions paint up to a tile beyond their
+           * position rect (multi-tile sprites anchored at the
+           * top left), so cover that too */
+          SDL_Rect pad = actor->lastdrawn;
+          pad.w += FN_TILE_WIDTH * pixelsize;
+          pad.h += FN_TILE_HEIGHT * pixelsize;
+          dirty[num_dirty++] = pad;
           if (moved) {
-            dirty[num_dirty++] = actor->position;
+            pad = actor->position;
+            pad.w += FN_TILE_WIDTH * pixelsize;
+            pad.h += FN_TILE_HEIGHT * pixelsize;
+            dirty[num_dirty++] = pad;
           }
         } else {
           full_compose = 1;
@@ -1109,8 +1148,14 @@ void fn_level_blit_to_surface(fn_level_t * lv,
       fn_shot_t * shot = (fn_shot_t *)iter->data;
       if (shot != NULL) {
         if (num_dirty + 2 <= FN_LEVEL_MAXDIRTY) {
-          dirty[num_dirty++] = shot->lastdrawn;
-          dirty[num_dirty++] = shot->position;
+          SDL_Rect pad = shot->lastdrawn;
+          pad.w += FN_TILE_WIDTH * pixelsize;
+          pad.h += FN_TILE_HEIGHT * pixelsize;
+          dirty[num_dirty++] = pad;
+          pad = shot->position;
+          pad.w += FN_TILE_WIDTH * pixelsize;
+          pad.h += FN_TILE_HEIGHT * pixelsize;
+          dirty[num_dirty++] = pad;
         } else {
           full_compose = 1;
         }
