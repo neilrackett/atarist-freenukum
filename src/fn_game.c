@@ -64,6 +64,46 @@ volatile Uint32 fn_prof[12];
 
 /* --------------------------------------------------------------- */
 
+/**
+ * Show the episode ending: story screens over the END picture.
+ * The wording is a period-appropriate approximation of the
+ * original epilogue - correct it against the original if needed.
+ */
+static void fn_game_end_sequence(fn_environment_t * env)
+{
+  char filename[30];
+
+  char * msg1 =
+    "Incredible work, Duke!\n"
+    "You wrecked Dr. Proton's\n"
+    "army of Techbots and\n"
+    "saved the city!\n";
+  char * msg2 =
+    "But Proton has fled to\n"
+    "his secret moonbase.\n"
+    "The chase continues in\n"
+    "Episode Two!\n";
+
+  snprintf(
+      filename, 30, "END.DN%d", fn_environment_get_episode(env));
+
+  fn_sound_play(FN_SOUND_THEND);
+  fn_picture_splash_show_with_message(
+      env,
+      filename,
+      msg1,
+      0,
+      144);
+  fn_picture_splash_show_with_message(
+      env,
+      filename,
+      msg2,
+      79,
+      144);
+}
+
+/* --------------------------------------------------------------- */
+
 Uint32 fn_game_timer_triggered(
     Uint32 interval,
     void * param)
@@ -147,9 +187,11 @@ void fn_game_start(
 
     while (success && level < 13) {
       if (interlevel) {
-        /* interlevel */
-        success = fn_game_start_in_level(2,
-            env);
+        /* interlevel - but not after the final level */
+        if (level < 12) {
+          success = fn_game_start_in_level(2,
+              env);
+        }
         level++;
         if (level == 2) {
           level++;
@@ -168,7 +210,7 @@ void fn_game_start(
 
     if (success) {
       /* the player finished, so we show the end sequence */
-      /* TODO */
+      fn_game_end_sequence(env);
     }
   }
 
