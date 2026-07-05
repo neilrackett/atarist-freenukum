@@ -304,6 +304,8 @@ int fn_hero_act(
         } else {
           /* we bumped against the ceiling */
           hero->counter = 0;
+          fn_sound_play(FN_SOUND_HITHEAD);
+          break;
         }
       }
     } else {
@@ -347,6 +349,13 @@ int fn_hero_act(
       fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
       hero->counter = 0;
     }
+  }
+
+  /* footsteps while actually walking on the ground */
+  if (hero->motion == FN_HERO_MOTION_WALKING
+      && hero->is_moving_horizontally
+      && hero->flying == FN_HERO_FLYING_FALSE) {
+    fn_sound_play(FN_SOUND_WALKING);
   }
 
   if (heromoved) {

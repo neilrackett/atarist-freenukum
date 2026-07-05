@@ -359,6 +359,10 @@ void fn_actor_function_redball_jumping_act(fn_actor_t * actor)
   fn_actor_redball_jumping_data_t * data = actor->data;
 
   Uint8 distance = 0;
+  if (data->counter == 0) {
+    /* launching off the ground */
+    fn_sound_play(FN_SOUND_MINEBOUNCE);
+  }
   switch(data->counter) {
     case 0:
       distance = 0;
@@ -1816,6 +1820,7 @@ void fn_actor_function_fire_act(fn_actor_t * actor)
       if (data->counter == 40) {
         data->counter = 0;
         data->state = fn_actor_fire_state_ignition;
+        fn_sound_play(FN_SOUND_TORCHON);
       }
       break;
     case fn_actor_fire_state_ignition:
