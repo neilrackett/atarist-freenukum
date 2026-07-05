@@ -105,6 +105,11 @@ struct fn_level_t {
   fn_list_t * bots;
 
   /**
+   * Set when the mill powering the laser beams was destroyed.
+   */
+  Uint8 laserbeams_off;
+
+  /**
    * As long as this is non-zero, we keep on playing.
    */
   int do_play;

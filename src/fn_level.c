@@ -68,6 +68,8 @@ fn_level_t * fn_level_load(int fd,
   lv->shots = NULL;
   lv->interactor = NULL;
 
+  lv->laserbeams_off = 0;
+
   lv->prev_valid = 0;
   lv->screen_refresh = 0;
   lv->num_carry_dirty = 0;
@@ -311,16 +313,23 @@ fn_level_t * fn_level_load(int fd,
             FN_ACTOR_BOX_GREY_BOMB, x, y);
         break;
       case 0x3013: /* bot consisting of several white-blue balls */
-        fn_level_add_initial_actor(lv,
-            FN_ACTOR_SNAKEBOT, x, y);
+        {
+          /* the snake is a chain of ten balls trailing each
+           * other along a shared path */
+          int ball;
+          for (ball = 0; ball < 10; ball++) {
+            fn_level_add_initial_actor(lv,
+                FN_ACTOR_SNAKEBOT, x, y);
+          }
+        }
         break;
       case 0x3014: /* water mirroring everything that is above */
+        /* the mirror effect is not implemented (it never was),
+         * but the surface must be solid to stand on */
         if (x > 0) {
           lv->tiles[y][x] = lv->tiles[y][x-1];
         }
         lv->solid[y][x] = 1;
-        fn_level_add_initial_actor(lv,
-            FN_ACTOR_WATER, x, y);
         break;
       case 0x3015: /* red box with soda inside */
         if (x > 0) {

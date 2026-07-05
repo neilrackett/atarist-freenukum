@@ -225,6 +225,11 @@ void fn_actor_function_simpleanimation_create(fn_actor_t * actor)
       data->current_frame = 0;
       data->num_frames = 1;
       break;
+    case FN_ACTOR_FENCE_BACKGROUND:
+      data->tile = ANIM_FENCEBG;
+      data->current_frame = 0;
+      data->num_frames = 1;
+      break;
     default:
       /* we got a type which should not be an animation. */
       printf(__FILE__ ":%d: warning: animation #%d"
@@ -2034,6 +2039,7 @@ void fn_actor_function_mill_shot(fn_actor_t * actor)
   } else {
     /* TODO add removal animation (destroyed body) */
     actor->is_alive = 0;
+    actor->level->laserbeams_off = 1;
     fn_hero_add_score(fn_level_get_hero(actor->level), 20000);
     fn_level_add_particle_firework(
         actor->level,
@@ -5779,6 +5785,861 @@ void fn_actor_function_fan_shot(fn_actor_t * actor)
 
 /* --------------------------------------------------------------- */
 /* --------------------------------------------------------------- */
+/*
+ * The enemies below were unimplemented stubs in the original
+ * FreeNukum (and are placeholders in its Rust rewrite too). The
+ * behaviour is modelled on the original Duke Nukem 1; the snake
+ * bot and the laser beam follow the Rust rewrite's FlyingBall and
+ * ElectricArc implementations.
+ */
+
+/**
+ * The flying techbot: hovers and homes in on the hero.
+ */
+typedef struct fn_actor_flyingbot_data_t {
+  Uint8 current_frame;
+  Uint8 touching_hero;
+} fn_actor_flyingbot_data_t;
+
+void fn_actor_function_flyingbot_create(fn_actor_t * actor)
+{
+  fn_actor_flyingbot_data_t * data = malloc(
+      sizeof(fn_actor_flyingbot_data_t));
+  actor->data = data;
+  actor->position.w = FN_TILE_WIDTH;
+  actor->position.h = FN_TILE_HEIGHT;
+  data->current_frame = 0;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_flyingbot_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_flyingbot_touch_start(fn_actor_t * actor)
+{
+  fn_actor_flyingbot_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_flyingbot_touch_end(fn_actor_t * actor)
+{
+  fn_actor_flyingbot_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_flyingbot_act(fn_actor_t * actor)
+{
+  fn_actor_flyingbot_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+  fn_hero_t * hero = fn_level_get_hero(level);
+  Sint32 dx = (Sint32)fn_hero_get_x(hero) - actor->position.x;
+  Sint32 dy = (Sint32)fn_hero_get_y(hero) - actor->position.y;
+
+  data->current_frame++;
+  data->current_frame %= 4;
+
+  /* home in on the hero, one half-tile at a time, moving along
+   * the axis with the larger distance; stops at solid tiles */
+  if (dx > 4 || dx < -4 || dy > 4 || dy < -4) {
+    int step;
+    Sint32 nx = actor->position.x;
+    Sint32 ny = actor->position.y;
+    if ((dx > 0 ? dx : -dx) >= (dy > 0 ? dy : -dy)) {
+      step = (dx > 0) ? FN_HALFTILE_WIDTH : -FN_HALFTILE_WIDTH;
+      nx += step;
+    } else {
+      step = (dy > 0) ? FN_HALFTILE_HEIGHT : -FN_HALFTILE_HEIGHT;
+      ny += step;
+    }
+    if (!fn_level_is_solid(level,
+          (nx + FN_HALFTILE_WIDTH) / FN_TILE_WIDTH,
+          (ny + FN_HALFTILE_HEIGHT) / FN_TILE_HEIGHT)) {
+      actor->position.x = nx;
+      actor->position.y = ny;
+    }
+  }
+}
+
+void fn_actor_function_flyingbot_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_flyingbot_data_t * data = actor->data;
+  SDL_Surface * tile = fn_tilecache_get_tile(tc,
+      ANIM_FLYBOT + data->current_frame);
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  destrect.x = actor->position.x * pixelsize;
+  destrect.y = actor->position.y * pixelsize;
+  destrect.w = actor->position.w * pixelsize;
+  destrect.h = actor->position.h * pixelsize;
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+}
+
+void fn_actor_function_flyingbot_shot(fn_actor_t * actor)
+{
+  fn_actor_flyingbot_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+  if (data->touching_hero) {
+    fn_hero_decrease_hurting_actors(hero, actor);
+    data->touching_hero = 0;
+  }
+  fn_sound_play(FN_SOUND_SMALLDEATH);
+  fn_hero_add_score(hero, 100);
+  fn_level_add_actor(actor->level, FN_ACTOR_SCORE_100,
+      actor->position.x, actor->position.y);
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_HALFTILE_WIDTH,
+      actor->position.y + FN_HALFTILE_HEIGHT, 4);
+  actor->is_alive = 0;
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * The rabbitoid: a tall robot rabbit that hops towards the hero.
+ */
+typedef struct fn_actor_rabbitoid_data_t {
+  Uint8 phase;
+  Sint8 hop_dir;
+  Uint8 touching_hero;
+} fn_actor_rabbitoid_data_t;
+
+void fn_actor_function_rabbitoid_create(fn_actor_t * actor)
+{
+  fn_actor_rabbitoid_data_t * data = malloc(
+      sizeof(fn_actor_rabbitoid_data_t));
+  actor->data = data;
+  /* two tiles tall, anchored on the lower tile */
+  actor->position.y -= FN_TILE_HEIGHT;
+  actor->position.w = FN_TILE_WIDTH;
+  actor->position.h = 2 * FN_TILE_HEIGHT;
+  data->phase = 0;
+  data->hop_dir = 0;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_rabbitoid_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_rabbitoid_touch_start(fn_actor_t * actor)
+{
+  fn_actor_rabbitoid_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_rabbitoid_touch_end(fn_actor_t * actor)
+{
+  fn_actor_rabbitoid_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+static int fn_actor_rabbitoid_on_ground(fn_actor_t * actor)
+{
+  return fn_level_is_solid(actor->level,
+      actor->position.x / FN_TILE_WIDTH,
+      (actor->position.y + actor->position.h) / FN_TILE_HEIGHT);
+}
+
+void fn_actor_function_rabbitoid_act(fn_actor_t * actor)
+{
+  fn_actor_rabbitoid_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+  fn_hero_t * hero = fn_level_get_hero(level);
+
+  if (!fn_actor_rabbitoid_on_ground(actor) && data->phase < 2) {
+    /* walked off a ledge outside a hop: fall */
+    actor->position.y += FN_HALFTILE_HEIGHT;
+    return;
+  }
+
+  switch (data->phase) {
+    case 0:
+    case 1:
+      /* crouching; pick the hop direction towards the hero */
+      data->hop_dir =
+        (fn_hero_get_x(hero) < actor->position.x) ? -1 : 1;
+      break;
+    case 2:
+    case 3:
+      actor->position.y -= FN_TILE_HEIGHT;
+      break;
+    case 4:
+    case 5:
+      if (!fn_actor_rabbitoid_on_ground(actor)) {
+        actor->position.y += FN_TILE_HEIGHT;
+      }
+      break;
+  }
+  if (data->phase >= 2) {
+    /* airborne: drift sideways unless blocked */
+    Sint32 nx = actor->position.x
+      + data->hop_dir * FN_HALFTILE_WIDTH;
+    if (!fn_level_is_solid(level,
+          (nx + (data->hop_dir > 0 ? FN_TILE_WIDTH - 1 : 0))
+            / FN_TILE_WIDTH,
+          (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)) {
+      actor->position.x = nx;
+    }
+  }
+  data->phase++;
+  data->phase %= 6;
+}
+
+void fn_actor_function_rabbitoid_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_rabbitoid_data_t * data = actor->data;
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  /* frames are stacked pairs: crouched, mid, stretched */
+  Uint8 frame = (data->phase < 2) ? 0 : ((data->phase < 4) ? 2 : 1);
+  SDL_Surface * tile;
+
+  destrect.x = actor->position.x * pixelsize;
+  destrect.y = actor->position.y * pixelsize;
+  destrect.w = FN_TILE_WIDTH * pixelsize;
+  destrect.h = FN_TILE_HEIGHT * pixelsize;
+  tile = fn_tilecache_get_tile(tc, ANIM_RABBIT1 + frame * 2);
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+  destrect.y += FN_TILE_HEIGHT * pixelsize;
+  tile = fn_tilecache_get_tile(tc, ANIM_RABBIT1 + frame * 2 + 1);
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+}
+
+void fn_actor_function_rabbitoid_shot(fn_actor_t * actor)
+{
+  fn_actor_rabbitoid_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+  if (data->touching_hero) {
+    fn_hero_decrease_hurting_actors(hero, actor);
+    data->touching_hero = 0;
+  }
+  fn_sound_play(FN_SOUND_RABBITGONE);
+  fn_hero_add_score(hero, 500);
+  fn_level_add_actor(actor->level, FN_ACTOR_SCORE_500,
+      actor->position.x, actor->position.y);
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_HALFTILE_WIDTH,
+      actor->position.y + FN_TILE_HEIGHT, 4);
+  actor->is_alive = 0;
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * The helicopter bot: patrols horizontally, turns at walls.
+ */
+typedef struct fn_actor_helicopter_data_t {
+  Sint8 direction;
+  Uint8 current_frame;
+  Uint8 lives;
+  Uint8 touching_hero;
+} fn_actor_helicopter_data_t;
+
+void fn_actor_function_helicopter_create(fn_actor_t * actor)
+{
+  fn_actor_helicopter_data_t * data = malloc(
+      sizeof(fn_actor_helicopter_data_t));
+  actor->data = data;
+  /* two by two tiles, anchored on the lower left tile */
+  actor->position.y -= FN_TILE_HEIGHT;
+  actor->position.w = 2 * FN_TILE_WIDTH;
+  actor->position.h = 2 * FN_TILE_HEIGHT;
+  data->direction = 1;
+  data->current_frame = 0;
+  data->lives = 3;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_helicopter_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_helicopter_touch_start(fn_actor_t * actor)
+{
+  fn_actor_helicopter_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_helicopter_touch_end(fn_actor_t * actor)
+{
+  fn_actor_helicopter_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_helicopter_act(fn_actor_t * actor)
+{
+  fn_actor_helicopter_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+  fn_hero_t * hero = fn_level_get_hero(level);
+  Sint32 nx;
+  Sint32 probe_x;
+
+  data->current_frame++;
+  data->current_frame %= 2;
+
+  /* chase the hero horizontally, keeping altitude */
+  data->direction =
+    (fn_hero_get_x(hero) < actor->position.x) ? -1 : 1;
+  nx = actor->position.x + data->direction * FN_HALFTILE_WIDTH;
+  probe_x = (data->direction > 0)
+    ? nx + actor->position.w - 1 : nx;
+
+  if (fn_level_is_solid(level,
+        probe_x / FN_TILE_WIDTH,
+        actor->position.y / FN_TILE_HEIGHT)
+      || fn_level_is_solid(level,
+        probe_x / FN_TILE_WIDTH,
+        (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)) {
+    data->direction = -data->direction;
+  } else {
+    actor->position.x = nx;
+  }
+}
+
+void fn_actor_function_helicopter_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_helicopter_data_t * data = actor->data;
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  Uint16 base = ANIM_HELICOPTER + data->current_frame * 4;
+  int i;
+
+  for (i = 0; i < 4; i++) {
+    SDL_Surface * tile = fn_tilecache_get_tile(tc, base + i);
+    destrect.x = (actor->position.x
+        + (i % 2) * FN_TILE_WIDTH) * pixelsize;
+    destrect.y = (actor->position.y
+        + (i / 2) * FN_TILE_HEIGHT) * pixelsize;
+    destrect.w = FN_TILE_WIDTH * pixelsize;
+    destrect.h = FN_TILE_HEIGHT * pixelsize;
+    SDL_BlitSurface(tile, NULL, target, &destrect);
+  }
+}
+
+void fn_actor_function_helicopter_shot(fn_actor_t * actor)
+{
+  fn_actor_helicopter_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+
+  data->lives--;
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_TILE_WIDTH,
+      actor->position.y + FN_TILE_HEIGHT, 4);
+  if (data->lives == 0) {
+    if (data->touching_hero) {
+      fn_hero_decrease_hurting_actors(hero, actor);
+      data->touching_hero = 0;
+    }
+    fn_sound_play(FN_SOUND_BOMBEXPLODE);
+    fn_hero_add_score(hero, 2000);
+    fn_level_add_actor(actor->level, FN_ACTOR_SCORE_2000,
+        actor->position.x + FN_HALFTILE_WIDTH,
+        actor->position.y);
+    fn_level_add_actor(actor->level, FN_ACTOR_EXPLOSION,
+        actor->position.x + FN_HALFTILE_WIDTH,
+        actor->position.y + FN_HALFTILE_HEIGHT);
+    actor->is_alive = 0;
+  } else {
+    fn_sound_play(FN_SOUND_COKECANHIT);
+  }
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * The snake bot: a chain of white-blue balls circling a wide
+ * figure-eight path. The level loader spawns ten of these per
+ * map marker, trailing one path step apart (like the Rust
+ * rewrite's FlyingBall).
+ */
+typedef struct fn_actor_snakebot_data_t {
+  Sint16 base_x;
+  Sint16 base_y;
+  Uint8 step;
+  Uint8 animframe;
+  Uint8 touching_hero;
+} fn_actor_snakebot_data_t;
+
+#define FN_SNAKEBOT_STEPS 40
+
+static const Sint16 fn_snakebot_path[FN_SNAKEBOT_STEPS][2] = {
+  /* resting */
+  {128, 0}, {128, 0}, {128, 0}, {128, 0}, {128, 0},
+  {128, 0}, {128, 0}, {128, 0}, {128, 0},
+  /* moving to bottom left */
+  {128, 8}, {120, 16}, {112, 24}, {96, 32},
+  {80, 32}, {64, 24}, {56, 16}, {48, 8},
+  /* moving to top left */
+  {48, 0}, {56, -8}, {64, -16}, {80, -24},
+  {96, -24}, {112, -16}, {120, -8}, {128, 0},
+  /* moving to bottom right */
+  {128, 8}, {136, 16}, {144, 24}, {160, 32},
+  {176, 32}, {192, 24}, {200, 16}, {208, 8},
+  /* moving to top right */
+  {208, 0}, {200, -8}, {192, -16}, {176, -24},
+  {160, -24}, {144, -16}, {136, -8},
+};
+
+void fn_actor_function_snakebot_create(fn_actor_t * actor)
+{
+  /* consecutive spawns trail each other along the path */
+  static Uint8 fn_snakebot_spawn_phase = 0;
+  fn_actor_snakebot_data_t * data = malloc(
+      sizeof(fn_actor_snakebot_data_t));
+  actor->data = data;
+  actor->is_in_foreground = 1;
+  actor->acts_while_invisible = 1;
+  actor->position.w = FN_TILE_WIDTH;
+  actor->position.h = FN_TILE_HEIGHT;
+  data->base_x = actor->position.x;
+  data->base_y = actor->position.y;
+  data->step = fn_snakebot_spawn_phase;
+  data->animframe = fn_snakebot_spawn_phase;
+  fn_snakebot_spawn_phase =
+    (fn_snakebot_spawn_phase + 1) % FN_SNAKEBOT_STEPS;
+  actor->position.x = data->base_x + fn_snakebot_path[data->step][0];
+  actor->position.y = data->base_y + fn_snakebot_path[data->step][1];
+}
+
+void fn_actor_function_snakebot_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_snakebot_touch_start(fn_actor_t * actor)
+{
+  fn_actor_snakebot_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_snakebot_touch_end(fn_actor_t * actor)
+{
+  fn_actor_snakebot_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_snakebot_act(fn_actor_t * actor)
+{
+  fn_actor_snakebot_data_t * data = actor->data;
+  actor->position.x = data->base_x + fn_snakebot_path[data->step][0];
+  actor->position.y = data->base_y + fn_snakebot_path[data->step][1];
+  data->step = (data->step + 1) % FN_SNAKEBOT_STEPS;
+  data->animframe++;
+}
+
+void fn_actor_function_snakebot_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_snakebot_data_t * data = actor->data;
+  SDL_Surface * tile = fn_tilecache_get_tile(tc,
+      ANIM_BALLWORM + (data->animframe / 3) % 6);
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  destrect.x = actor->position.x * pixelsize;
+  destrect.y = actor->position.y * pixelsize;
+  destrect.w = actor->position.w * pixelsize;
+  destrect.h = actor->position.h * pixelsize;
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+}
+
+void fn_actor_function_snakebot_shot(fn_actor_t * actor)
+{
+  fn_actor_snakebot_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+  if (data->touching_hero) {
+    fn_hero_decrease_hurting_actors(hero, actor);
+    data->touching_hero = 0;
+  }
+  fn_sound_play(FN_SOUND_SMALLDEATH);
+  fn_hero_add_score(hero, 1000);
+  fn_level_add_actor(actor->level, FN_ACTOR_SCORE_1000,
+      actor->position.x, actor->position.y);
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_HALFTILE_WIDTH,
+      actor->position.y + FN_HALFTILE_HEIGHT, 4);
+  actor->is_alive = 0;
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * The laser beam (electric arc): hurts while touched, vanishes
+ * for good when the mill that powers it is destroyed.
+ */
+typedef struct fn_actor_laserbeam_data_t {
+  Uint8 current_frame;
+  Uint8 touching_hero;
+} fn_actor_laserbeam_data_t;
+
+void fn_actor_function_laserbeam_create(fn_actor_t * actor)
+{
+  fn_actor_laserbeam_data_t * data = malloc(
+      sizeof(fn_actor_laserbeam_data_t));
+  actor->data = data;
+  actor->is_in_foreground = 1;
+  actor->position.w = FN_TILE_WIDTH;
+  actor->position.h = FN_TILE_HEIGHT;
+  data->current_frame = 0;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_laserbeam_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_laserbeam_touch_start(fn_actor_t * actor)
+{
+  fn_actor_laserbeam_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_laserbeam_touch_end(fn_actor_t * actor)
+{
+  fn_actor_laserbeam_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_laserbeam_act(fn_actor_t * actor)
+{
+  fn_actor_laserbeam_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+  if (level->laserbeams_off) {
+    if (data->touching_hero) {
+      fn_hero_decrease_hurting_actors(
+          fn_level_get_hero(level), actor);
+      data->touching_hero = 0;
+    }
+    actor->is_alive = 0;
+    return;
+  }
+  data->current_frame++;
+  data->current_frame %= 4;
+}
+
+void fn_actor_function_laserbeam_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_laserbeam_data_t * data = actor->data;
+  SDL_Surface * tile = fn_tilecache_get_tile(tc,
+      (data->touching_hero ?
+       OBJ_ELECTRICFENCE_ACTIVE : OBJ_ELECTRICFENCE)
+      + data->current_frame);
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  destrect.x = actor->position.x * pixelsize;
+  destrect.y = actor->position.y * pixelsize;
+  destrect.w = actor->position.w * pixelsize;
+  destrect.h = actor->position.h * pixelsize;
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * The flame gnome: waddles back and forth on its platform.
+ */
+typedef struct fn_actor_flamegnome_data_t {
+  Sint8 direction;
+  Uint8 current_frame;
+  Uint8 touching_hero;
+} fn_actor_flamegnome_data_t;
+
+void fn_actor_function_flamegnome_create(fn_actor_t * actor)
+{
+  fn_actor_flamegnome_data_t * data = malloc(
+      sizeof(fn_actor_flamegnome_data_t));
+  actor->data = data;
+  actor->position.w = FN_TILE_WIDTH;
+  actor->position.h = FN_TILE_HEIGHT;
+  data->direction = -1;
+  data->current_frame = 0;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_flamegnome_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_flamegnome_touch_start(fn_actor_t * actor)
+{
+  fn_actor_flamegnome_data_t * data = actor->data;
+  fn_hero_increase_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 1;
+}
+
+void fn_actor_function_flamegnome_touch_end(fn_actor_t * actor)
+{
+  fn_actor_flamegnome_data_t * data = actor->data;
+  fn_hero_decrease_hurting_actors(
+      fn_level_get_hero(actor->level), actor);
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_flamegnome_act(fn_actor_t * actor)
+{
+  fn_actor_flamegnome_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+  Sint32 nx = actor->position.x
+    + data->direction * FN_HALFTILE_WIDTH;
+  Sint32 probe_x = (data->direction > 0)
+    ? nx + actor->position.w - 1 : nx;
+
+  data->current_frame++;
+  data->current_frame %= 2;
+
+  /* turn at walls and at the edge of the platform */
+  if (fn_level_is_solid(level,
+        probe_x / FN_TILE_WIDTH,
+        actor->position.y / FN_TILE_HEIGHT)
+      || !fn_level_is_solid(level,
+        probe_x / FN_TILE_WIDTH,
+        (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)) {
+    data->direction = -data->direction;
+  } else {
+    actor->position.x = nx;
+  }
+}
+
+void fn_actor_function_flamegnome_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_flamegnome_data_t * data = actor->data;
+  SDL_Surface * tile = fn_tilecache_get_tile(tc,
+      ANIM_FIREGNOME
+      + (data->direction < 0 ? 0 : 2) + data->current_frame);
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  destrect.x = actor->position.x * pixelsize;
+  destrect.y = actor->position.y * pixelsize;
+  destrect.w = actor->position.w * pixelsize;
+  destrect.h = actor->position.h * pixelsize;
+  SDL_BlitSurface(tile, NULL, target, &destrect);
+}
+
+void fn_actor_function_flamegnome_shot(fn_actor_t * actor)
+{
+  fn_actor_flamegnome_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+  if (data->touching_hero) {
+    fn_hero_decrease_hurting_actors(hero, actor);
+    data->touching_hero = 0;
+  }
+  fn_sound_play(FN_SOUND_SMALLDEATH);
+  fn_hero_add_score(hero, 500);
+  fn_level_add_actor(actor->level, FN_ACTOR_SCORE_500,
+      actor->position.x, actor->position.y);
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_HALFTILE_WIDTH,
+      actor->position.y + FN_HALFTILE_HEIGHT, 4);
+  actor->is_alive = 0;
+}
+
+/* --------------------------------------------------------------- */
+
+/**
+ * Dr Proton, the final opponent: bounces around his chamber in
+ * his hoverchair. After enough hits he is beaten and his chair
+ * shoots upwards - which finishes the level, as the boss chamber
+ * has no exit door.
+ */
+typedef struct fn_actor_drproton_data_t {
+  Sint8 dx;
+  Sint8 dy;
+  Uint8 current_frame;
+  Uint8 lives;
+  Uint8 ascending;
+  Uint8 touching_hero;
+} fn_actor_drproton_data_t;
+
+void fn_actor_function_drproton_create(fn_actor_t * actor)
+{
+  fn_actor_drproton_data_t * data = malloc(
+      sizeof(fn_actor_drproton_data_t));
+  actor->data = data;
+  /* two by two tiles, anchored on the lower left tile */
+  actor->position.y -= FN_TILE_HEIGHT;
+  actor->position.w = 2 * FN_TILE_WIDTH;
+  actor->position.h = 2 * FN_TILE_HEIGHT;
+  data->dx = 1;
+  data->dy = 1;
+  data->current_frame = 0;
+  data->lives = 20;
+  data->ascending = 0;
+  data->touching_hero = 0;
+}
+
+void fn_actor_function_drproton_free(fn_actor_t * actor)
+{
+  free(actor->data); actor->data = NULL;
+}
+
+void fn_actor_function_drproton_touch_start(fn_actor_t * actor)
+{
+  fn_actor_drproton_data_t * data = actor->data;
+  if (!data->ascending) {
+    fn_hero_increase_hurting_actors(
+        fn_level_get_hero(actor->level), actor);
+    data->touching_hero = 1;
+  }
+}
+
+void fn_actor_function_drproton_touch_end(fn_actor_t * actor)
+{
+  fn_actor_drproton_data_t * data = actor->data;
+  if (data->touching_hero) {
+    fn_hero_decrease_hurting_actors(
+        fn_level_get_hero(actor->level), actor);
+    data->touching_hero = 0;
+  }
+}
+
+void fn_actor_function_drproton_act(fn_actor_t * actor)
+{
+  fn_actor_drproton_data_t * data = actor->data;
+  fn_level_t * level = actor->level;
+
+  data->current_frame++;
+  data->current_frame %= 2;
+
+  if (data->ascending) {
+    /* beaten: the hoverchair shoots up and out */
+    actor->position.y -= FN_TILE_HEIGHT;
+    data->ascending++;
+    if (data->ascending > 12
+        || actor->position.y < FN_TILE_HEIGHT) {
+      actor->is_alive = 0;
+      level->levelpassed = 1;
+      level->do_play = 0;
+    }
+    return;
+  }
+
+  /* bounce around the chamber */
+  {
+    Sint32 nx = actor->position.x + data->dx * FN_HALFTILE_WIDTH;
+    Sint32 probe_x = (data->dx > 0) ? nx + actor->position.w - 1 : nx;
+    if (fn_level_is_solid(level,
+          probe_x / FN_TILE_WIDTH,
+          actor->position.y / FN_TILE_HEIGHT)
+        || fn_level_is_solid(level,
+          probe_x / FN_TILE_WIDTH,
+          (actor->position.y + FN_TILE_HEIGHT) / FN_TILE_HEIGHT)) {
+      data->dx = -data->dx;
+    } else {
+      actor->position.x = nx;
+    }
+  }
+  {
+    Sint32 ny = actor->position.y + data->dy * FN_HALFTILE_HEIGHT;
+    Sint32 probe_y = (data->dy > 0) ? ny + actor->position.h - 1 : ny;
+    if (fn_level_is_solid(level,
+          actor->position.x / FN_TILE_WIDTH,
+          probe_y / FN_TILE_HEIGHT)
+        || fn_level_is_solid(level,
+          (actor->position.x + FN_TILE_WIDTH) / FN_TILE_WIDTH,
+          probe_y / FN_TILE_HEIGHT)) {
+      data->dy = -data->dy;
+    } else {
+      actor->position.y = ny;
+    }
+  }
+}
+
+void fn_actor_function_drproton_blit(fn_actor_t * actor)
+{
+  SDL_Surface * target = fn_level_get_surface(actor->level);
+  SDL_Rect destrect;
+  fn_tilecache_t * tc = fn_level_get_tilecache(actor->level);
+  fn_actor_drproton_data_t * data = actor->data;
+  Uint8 pixelsize = fn_level_get_pixelsize(actor->level);
+  Uint16 base = ANIM_BADGUY + data->current_frame * 4;
+  int i;
+
+  for (i = 0; i < 4; i++) {
+    SDL_Surface * tile = fn_tilecache_get_tile(tc, base + i);
+    destrect.x = (actor->position.x
+        + (i % 2) * FN_TILE_WIDTH) * pixelsize;
+    destrect.y = (actor->position.y
+        + (i / 2) * FN_TILE_HEIGHT) * pixelsize;
+    destrect.w = FN_TILE_WIDTH * pixelsize;
+    destrect.h = FN_TILE_HEIGHT * pixelsize;
+    SDL_BlitSurface(tile, NULL, target, &destrect);
+  }
+}
+
+void fn_actor_function_drproton_shot(fn_actor_t * actor)
+{
+  fn_actor_drproton_data_t * data = actor->data;
+  fn_hero_t * hero = fn_level_get_hero(actor->level);
+
+  if (data->ascending) {
+    return;
+  }
+  data->lives--;
+  fn_level_add_particle_firework(actor->level,
+      actor->position.x + FN_TILE_WIDTH,
+      actor->position.y + FN_TILE_HEIGHT, 4);
+  if (data->lives == 0) {
+    if (data->touching_hero) {
+      fn_hero_decrease_hurting_actors(hero, actor);
+      data->touching_hero = 0;
+    }
+    fn_sound_play(FN_SOUND_BADGUYISDED);
+    fn_sound_play(FN_SOUND_BADGUYGOUP);
+    fn_hero_add_score(hero, 10000);
+    fn_level_add_actor(actor->level, FN_ACTOR_SCORE_10000,
+        actor->position.x + FN_HALFTILE_WIDTH,
+        actor->position.y);
+    fn_level_add_particle_firework(actor->level,
+        actor->position.x + FN_TILE_WIDTH,
+        actor->position.y + FN_TILE_HEIGHT, 20);
+    /* keep acting while the chair rises out of view, otherwise
+     * the level would never finish */
+    actor->acts_while_invisible = 1;
+    data->ascending = 1;
+  } else {
+    fn_sound_play(FN_SOUND_COKECANHIT);
+  }
+}
+
+/* --------------------------------------------------------------- */
+/* --------------------------------------------------------------- */
 
 typedef void (* fn_actor_function_t)(fn_actor_t *);
 
@@ -5809,26 +6670,40 @@ void
       fn_actor_function_firewheelbot_shot,
   },
   [FN_ACTOR_FLAMEGNOMEBOT] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_flamegnome_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_flamegnome_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_flamegnome_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_flamegnome_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_flamegnome_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_flamegnome_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_flamegnome_shot,
   },
   [FN_ACTOR_FLYINGBOT] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_flyingbot_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_flyingbot_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_flyingbot_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_flyingbot_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_flyingbot_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_flyingbot_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_flyingbot_shot,
   },
   [FN_ACTOR_FOOTBOT] = {
     [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
@@ -5842,26 +6717,40 @@ void
     [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
   },
   [FN_ACTOR_HELICOPTERBOT] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_helicopter_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_helicopter_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_helicopter_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_helicopter_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_helicopter_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_helicopter_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_helicopter_shot,
   },
   [FN_ACTOR_RABBITOIDBOT] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_rabbitoid_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_rabbitoid_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_rabbitoid_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_rabbitoid_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_rabbitoid_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_rabbitoid_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_rabbitoid_shot,
   },
   [FN_ACTOR_REDBALL_JUMPING] = {
     [FN_ACTOR_FUNCTION_CREATE]              =
@@ -5931,15 +6820,22 @@ void
     [FN_ACTOR_FUNCTION_SHOT]                = NULL,
   },
   [FN_ACTOR_SNAKEBOT] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_snakebot_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_snakebot_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_snakebot_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_snakebot_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_snakebot_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_snakebot_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_snakebot_shot,
   },
   [FN_ACTOR_TANKBOT] = {
     [FN_ACTOR_FUNCTION_CREATE]              =
@@ -5996,15 +6892,22 @@ void
       fn_actor_function_wallcrawler_shot,
   },
   [FN_ACTOR_DRPROTON] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_drproton_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_drproton_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_drproton_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_drproton_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_drproton_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_drproton_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      fn_actor_function_drproton_shot,
   },
   [FN_ACTOR_CAMERA] = {
     [FN_ACTOR_FUNCTION_CREATE]              =
@@ -6462,15 +7365,19 @@ void
     [FN_ACTOR_FUNCTION_SHOT]                = NULL,
   },
   [FN_ACTOR_FENCE_BACKGROUND] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_simpleanimation_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_simpleanimation_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_simpleanimation_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_simpleanimation_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                = NULL,
   },
   [FN_ACTOR_STONEWINDOW_BACKGROUND] = {
     [FN_ACTOR_FUNCTION_CREATE]              =
@@ -7518,15 +8425,22 @@ void
       fn_actor_function_mill_shot,
   },
   [FN_ACTOR_LASERBEAM] = {
-    [FN_ACTOR_FUNCTION_CREATE]              = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_FREE]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_ACT]                 = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_BLIT]                = NULL, /* TODO */
-    [FN_ACTOR_FUNCTION_SHOT]                = NULL, /* TODO */
+    [FN_ACTOR_FUNCTION_CREATE]              =
+      fn_actor_function_laserbeam_create,
+    [FN_ACTOR_FUNCTION_FREE]                =
+      fn_actor_function_laserbeam_free,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_START]    =
+      fn_actor_function_laserbeam_touch_start,
+    [FN_ACTOR_FUNCTION_HERO_TOUCH_END]      =
+      fn_actor_function_laserbeam_touch_end,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_START] = NULL,
+    [FN_ACTOR_FUNCTION_HERO_INTERACT_END]   = NULL,
+    [FN_ACTOR_FUNCTION_ACT]                 =
+      fn_actor_function_laserbeam_act,
+    [FN_ACTOR_FUNCTION_BLIT]                =
+      fn_actor_function_laserbeam_blit,
+    [FN_ACTOR_FUNCTION_SHOT]                =
+      NULL,
   },
   [FN_ACTOR_ACCESS_CARD_DOOR] = {
     [FN_ACTOR_FUNCTION_CREATE]              =
