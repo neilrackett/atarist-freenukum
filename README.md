@@ -52,7 +52,7 @@ bundled installer — run it from the folder containing `NUKUM.TOS`:
 
 Alternatively, the game data can be obtained:
 
-- Shareware episode from ftp://ftp.3drealms.com/share/1duke.zip
+- Shareware episode from [ftp://ftp.3drealms.com/share/1duke.zip](https://ftp.zx.net.nz/pub/archive/ftp.3drealms.com/share/)
 - Search on https://archive.org/ for it.
 - The Duke Nukem 3D CD contains a copy of the full version.
 - Buy it from an online store if you find it.
