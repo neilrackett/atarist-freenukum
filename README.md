@@ -11,7 +11,7 @@ Feature complete port of Duke Nukem, Episode 1 to Atari ST by
 sadly they never met... _Until now!_
 
 To celebrate their 35th Birthday I've ported the full Episode 1 (shareware
-version) of Duke Nukem to the Atari ST: it runs on any ST with at leat 2MB of
+version) of Duke Nukem to the Atari ST: it runs on any ST with at least 2MB of
 RAM, and of course includes support for Mega STE features like Blitter and
 16MHz mode.
 
