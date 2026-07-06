@@ -165,32 +165,52 @@ static long nsdl_sup_speedrestore(void)
  */
 
 volatile Uint8 nsdl_joy_state;
+volatile Uint8 nsdl_joy_fire;
 static Uint8 nsdl_joy_prev;
 static long nsdl_old_joyvec;
+static long nsdl_old_mousevec;
 
 typedef struct {
   long midivec, vkbderr, vmiderr, statvec;
   long mousevec, clockvec, joyvec, midisys, ikbdsys;
 } nsdl_kbdvecs_t;
 
-/* called with a0 pointing at the packet: 0xFF for joystick 1,
- * then the state byte */
+/* called by TOS with a0 pointing at a 3-byte packet
+ * [header, joy0, joy1]; latch joystick 1 (the physical joystick
+ * port - byte 1 would be the mouse port) */
 void nsdl_joyvec_handler(void);
 __asm__(
   "\t.text\n"
   "_nsdl_joyvec_handler:\n"
-  "\tcmp.b #-1,(%a0)\n"
-  "\tbne.s 1f\n"
-  "\tmove.b 1(%a0),_nsdl_joy_state\n"
-  "1:\trts\n");
+  "\tmove.b 2(%a0),_nsdl_joy_state\n"
+  "\trts\n");
+
+/* The joystick 1 fire button shares its input line with the right
+ * mouse button, so in the default (mouse reporting) IKBD mode fire
+ * presses arrive as mouse packets, not joystick packets. Latch the
+ * right button (bit 0 of the packet header) as fire. Keeps every
+ * register intact - this runs in interrupt context. */
+void nsdl_mousevec_handler(void);
+__asm__(
+  "\t.text\n"
+  "_nsdl_mousevec_handler:\n"
+  "\tbtst #0,(%a0)\n"
+  "\tbeq.s 1f\n"
+  "\tori.b #0x80,_nsdl_joy_fire\n"
+  "\trts\n"
+  "1:\tandi.b #0x7f,_nsdl_joy_fire\n"
+  "\trts\n");
 
 static void nsdl_joy_install(void)
 {
   nsdl_kbdvecs_t * kv = (nsdl_kbdvecs_t *)Kbdvbase();
   nsdl_old_joyvec = kv->joyvec;
   kv->joyvec = (long)nsdl_joyvec_handler;
-  /* make sure the IKBD reports joystick events */
-  Ikbdws(0, "\x14");
+  nsdl_old_mousevec = kv->mousevec;
+  kv->mousevec = (long)nsdl_mousevec_handler;
+  /* no IKBD mode commands: TOS already delivers joystick events
+   * by default, and turning the mouse off makes its movements
+   * arrive as joystick 0 packets */
 }
 
 static void nsdl_joy_remove(void)
@@ -199,6 +219,7 @@ static void nsdl_joy_remove(void)
     nsdl_kbdvecs_t * kv = (nsdl_kbdvecs_t *)Kbdvbase();
     kv->joyvec = nsdl_old_joyvec;
     nsdl_old_joyvec = 0;
+    kv->mousevec = nsdl_old_mousevec;
   }
 }
 
@@ -330,7 +351,7 @@ static void nsdl_pump(void)
       { 0x08, SDLK_RIGHT },
       { 0x80, SDLK_LALT },  /* fire */
     };
-    Uint8 js = nsdl_joy_state;
+    Uint8 js = nsdl_joy_state | nsdl_joy_fire;
     Uint8 jchanged = js ^ nsdl_joy_prev;
     if (jchanged) {
       nsdl_joy_prev = js;
