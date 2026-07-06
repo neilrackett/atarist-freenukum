@@ -420,6 +420,21 @@ int fn_game_start_in_level(
               fn_sound_play(FN_SOUND_PLAYERQUIT);
               goto cleanup;
               break;
+            case SDLK_F1:
+              /* the border art promises help on F1 (and the ST
+               * Help key maps here too) */
+              fn_infobox_show(env,
+                  "Arrows:  walk, use items\n"
+                  "Ctrl:    jump\n"
+                  "Alt:     fire\n"
+                  "Esc/Q:   quit level\n"
+                  "\n"
+                  "Joystick: move and fire;\n"
+                  "push up to use or jump.\n");
+              updateWholeScreen = 1;
+              fn_level_request_refresh(lv);
+              doupdate = 1;
+              break;
             case SDLK_1:
               fn_hero_set_inventory(hero, fn_hero_get_inventory(hero) |
                   FN_INVENTORY_KEY_RED);

@@ -126,7 +126,17 @@ int main(int argc, char ** argv)
         break;
       case FN_MENUCHOICE_INSTRUCTIONS:
         fn_infobox_show(env,
-            "Instructions not implemented yet.\n");
+            "Rescue the city from\n"
+            "Dr. Proton's Techbot army!\n"
+            "\n"
+            "Arrows:  walk, use items\n"
+            "Ctrl:    jump\n"
+            "Alt:     fire\n"
+            "Esc/Q:   quit level\n"
+            "F1:      help\n"
+            "\n"
+            "Joystick: move and fire;\n"
+            "push up to use or jump.\n");
         break;
       case FN_MENUCHOICE_ORDERINGINFO:
         fn_infobox_show(env,
