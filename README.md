@@ -3,9 +3,9 @@
 <img src="./doc/atarist-splash.png" alt="Come get STome!" width="640" height="400"/>
 
 Feature complete port of Duke Nukem, Episode 1 to Atari ST by
-[Neil Rackett](https://x.com/neilrackett), based on [FreeNukum](https://gitlab.com/silwol/freenukum).
+[Neil Rackett](https://x.com/neilrackett).
 
-## Introduction
+## Come get STome!
 
 1991 saw the arrival of two 90s icons: Duke Nukem and the Atari Mega STE, but
 sadly they never met... _Until now!_
