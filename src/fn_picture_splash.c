@@ -118,33 +118,51 @@ int fn_picture_splash_show_with_message(
   SDL_UpdateRect(screen, 0, 0, 0, 0);
   SDL_FreeSurface(picture);
 
-  while (1) {
-    res = SDL_WaitEvent(&event);
-    if (res == 1) {
-      switch(event.type) {
-        case SDL_QUIT:
-          return 1;
-          break;
-        case SDL_KEYDOWN:
-          switch(event.key.keysym.sym) {
-            case SDLK_ESCAPE:
-            case SDLK_RETURN:
-              return 1;
-            default:
-              /* ignore other keys */
-              break;
-          }
-        case SDL_MOUSEBUTTONDOWN:
-          if (event.button.button == SDL_BUTTON_LEFT) {
+  /* drop whatever is still queued from the previous screen so a
+   * held key or a joystick twitch cannot dismiss this page before
+   * anyone has seen it */
+  while (SDL_PollEvent(&event));
+
+  {
+    Uint32 shown_at = SDL_GetTicks();
+
+    while (1) {
+      res = SDL_WaitEvent(&event);
+      if (res == 1) {
+        switch(event.type) {
+          case SDL_QUIT:
             return 1;
-          }
-          break;
-        case SDL_VIDEOEXPOSE:
-          SDL_UpdateRect(screen, 0, 0, 0, 0);
-          break;
-        default:
-          /* ignore unknown events */
-          break;
+            break;
+          case SDL_KEYDOWN:
+            /* ignore input during the first moments on screen */
+            if (SDL_GetTicks() - shown_at < 400) {
+              break;
+            }
+            switch(event.key.keysym.sym) {
+              case SDLK_ESCAPE:
+              case SDLK_RETURN:
+              case SDLK_SPACE:
+              case SDLK_LALT: /* joystick fire */
+                return 1;
+              default:
+                /* ignore other keys */
+                break;
+            }
+            /* no fall-through: a key event read as a mouse event
+             * aliases state==SDL_PRESSED to SDL_BUTTON_LEFT */
+            break;
+          case SDL_MOUSEBUTTONDOWN:
+            if (event.button.button == SDL_BUTTON_LEFT) {
+              return 1;
+            }
+            break;
+          case SDL_VIDEOEXPOSE:
+            SDL_UpdateRect(screen, 0, 0, 0, 0);
+            break;
+          default:
+            /* ignore unknown events */
+            break;
+        }
       }
     }
   }
