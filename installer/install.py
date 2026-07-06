@@ -24,8 +24,8 @@ import urllib.request
 import zipfile
 
 DOWNLOAD_URLS = [
-    # canonical source, offline more often than not these days
-    "ftp://ftp.3drealms.com/share/1duke.zip",
+    # reliable archive of the original ftp.3drealms.com layout
+    "https://ftp.zx.net.nz/pub/archive/ftp.3drealms.com/share/1duke.zip",
     # mirror of the identical original archive
     "http://www.classicdosgames.com/files/games/apogee/1duke.zip",
 ]
