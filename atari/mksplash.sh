@@ -28,6 +28,19 @@ fi
     echo " */"
     echo ""
     echo "const unsigned char nsdl_splash_pi1[32034] = {"
-    od -An -v -tu1 "$IN" | sed -e 's/^ *//' -e 's/  */,/g' -e 's/$/,/'
+    # trim leading AND trailing blanks and drop empty lines: BSD od
+    # (macOS) pads the final short line and appends a blank trailer,
+    # which would otherwise end up as stray commas in the array
+    od -An -v -tu1 "$IN" | sed -e 's/^ *//' -e 's/ *$//' \
+        -e '/^$/d' -e 's/  */,/g' -e 's/$/,/'
     echo "};"
 } > "$OUT"
+
+# one comma per byte value in the array body - anything else means
+# the od/sed pair misbehaved on this platform
+COMMAS=$(sed -n '/{/,$p' "$OUT" | tr -dc ',' | wc -c | tr -d ' ')
+if [ "$COMMAS" != "32034" ]; then
+    echo "mksplash: generated $COMMAS values, expected 32034" >&2
+    rm -f "$OUT"
+    exit 1
+fi
