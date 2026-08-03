@@ -59,17 +59,29 @@ Alternatively, the game data can be obtained:
 
 ## Building
 
-The easiest way to build the project is using
-[atarist-toolkit-docker](https://github.com/sidecartridge/atarist-toolkit-docker)
-(`m68k-atari-mint-gcc` via the `stcmd` wrapper):
+SDL is replaced by [STDL](https://github.com/neilrackett/atarist-stdl), a
+planar-native subset of SDL 1.2 for the Atari ST. Check it out next to this
+repository and build `libstdl.a` first:
 
 ```sh
-stcmd make -f Makefile.atari
+git clone https://github.com/neilrackett/atarist-stdl.git ../atarist-stdl
+(cd ../atarist-stdl && stcmd make)
 ```
 
-The executable is built to `dist/NUKUM.TOS`, with no dependencies beyond the
-game data files — SDL is replaced by a native ST implementation in
-[atari/nsdl](./atari/nsdl).
+Then build the game with
+[atarist-toolkit-docker](https://github.com/sidecartridge/atarist-toolkit-docker)
+(`m68k-atari-mint-gcc` via the `stcmd` wrapper). The toolkit container only
+sees the folder it is started in, so point it at the parent of both
+repositories:
+
+```sh
+ST_WORKING_FOLDER=$(cd .. && pwd) stcmd make -C atarist-freenukum -f Makefile.atari
+```
+
+The executable is built to `dist/NUKUM.TOS` and the loading screen to
+`dist/SPLASH.PI1`, with no dependencies beyond the game data files. Set
+`STDL=/path/to/atarist-stdl` if the library lives somewhere other than
+`../atarist-stdl`.
 
 ## To do
 

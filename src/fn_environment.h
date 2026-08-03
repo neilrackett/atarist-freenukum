@@ -207,6 +207,16 @@ void fn_environment_toggle_fullscreen(fn_environment_t * env);
 /* --------------------------------------------------------------- */
 
 /**
+ * Program the game palette into the display hardware. The startup
+ * splash keeps its own colours until this is called.
+ *
+ * @param  env  The environment.
+ */
+void fn_environment_apply_palette(fn_environment_t * env);
+
+/* --------------------------------------------------------------- */
+
+/**
  * Get the transparent color of an environment.
  *
  * @param  env  The environment.

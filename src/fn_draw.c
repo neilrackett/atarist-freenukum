@@ -121,8 +121,10 @@ int fn_draw_byterow(
         planes[1] = br->green & t;
         planes[2] = br->red & t;
         planes[3] = br->brighten & t;
-        nsdl_put_group(target, r.x, r.y, planes,
-            transcolor > 15 ? t : 0xFF);
+        /* STDL masks are transparency (bit set = destination
+         * preserved), the inverse of the decoder's opacity byte */
+        STDL_PutGroup8(target, r.x, r.y, planes,
+            transcolor > 15 ? (Uint8)~t : 0x00);
         return 0;
     }
 
@@ -152,7 +154,7 @@ int fn_draw_byterow(
             if (c & 4) planes[2] |= bit;
             if (c & 8) planes[3] |= bit;
         }
-        nsdl_put_group(target, r.x, r.y, planes, mask);
+        STDL_PutGroup8(target, r.x, r.y, planes, (Uint8)~mask);
         return 0;
     }
 
@@ -185,7 +187,7 @@ int fn_draw_byterow_run(
             + (Uint32)(Uint16)y * target->pitch
             + ((Uint32)(g0 >> 1) << 3) + (g0 & 1);
         Uint8 * mrow = target->mask
-            + (Uint32)(Uint16)y * target->maskpitch + g0;
+            + (Uint32)(Uint16)y * target->maskstride + g0;
         int transparent = (transcolor > 15);
         size_t done = 0;
 
@@ -201,13 +203,14 @@ int fn_draw_byterow_run(
                 p[2] = data[2] & t;   /* green = plane 1 */
                 p[4] = data[3] & t;   /* red   = plane 2 */
                 p[6] = data[4] & t;   /* brighten = plane 3 */
-                *m++ = transparent ? t : 0xFF;
+                /* transparency mask: bit set = destination kept */
+                *m++ = transparent ? (Uint8)~t : 0x00;
                 data += 5;
                 p += step;
                 step = 8 - step;
             }
             prow += target->pitch;
-            mrow += target->maskpitch;
+            mrow += target->maskstride;
             done += rowgroups;
         }
         return 0;

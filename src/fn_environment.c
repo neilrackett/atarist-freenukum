@@ -264,15 +264,25 @@ fn_environment_t * fn_environment_create()
     return env;
   }
 
+  /* something to look at while the tilecache is decoded from the
+   * original data files, which takes several seconds. This also
+   * replaces the logical palette, so it has to come before the
+   * game's own palette is installed below. */
+  STDL_ShowDegas("SPLASH.PI1");
+
+  /* the game is keyboard driven, so let STDL turn joystick moves
+   * into key events (arrows + left Alt, tagged KMOD_JOYSTICK) */
+  STDL_JoyKeyEmulation(1);
+
   /* On paletted displays (e.g. Atari ST 16-colour modes) install the
    * 16 EGA colours that fn_draw_byterow() computes, so that
    * SDL_MapRGB resolves to exact palette entries instead of
    * nearest-matching against the driver's default (grey) palette.
-   * Entry 16 is a dedicated transparency key which never appears in
-   * the graphics, so it cannot collide with a real colour.
+   * Only the logical palette for now: the loading splash keeps the
+   * hardware registers until fn_environment_apply_palette().
    */
   if (env->screen->format->palette != NULL) {
-    SDL_Color colors[17];
+    SDL_Color colors[16];
     int i;
     for (i = 0; i < 16; i++) {
       Uint8 bright = (i & 8) ? 0x54 : 0x00;
@@ -282,13 +292,14 @@ fn_environment_t * fn_environment_create()
     }
     /* EGA's brown: dark yellow has halved green */
     colors[6].g = 0x54;
-    colors[16].r = 100;
-    colors[16].g = 1;
-    colors[16].b = 1;
-    SDL_SetColors(env->screen, colors, 0, 17);
+    SDL_SetPalette(env->screen, SDL_LOGPAL, colors, 0, 16);
   }
 
-  env->transparent = SDL_MapRGB(env->screen->format, 100, 1, 1);
+  /* STDL reserves index 16 (STDL_TRANSPARENT) for transparency: it
+   * is not a palette colour, so it can never collide with a real
+   * one. Filling with it punches holes in a masked surface, and
+   * SDL_SetColorKey with it keeps the mask the decoder built. */
+  env->transparent = STDL_TRANSPARENT;
 
   SDL_WM_SetCaption("Freenukum " VERSION, "Freenukum " VERSION);
 
@@ -501,6 +512,17 @@ void fn_environment_toggle_fullscreen(fn_environment_t * env)
   if (res) {
     env->fullscreen = (env->fullscreen + 1) % 2;
     fn_settings_set_bool(env->settings, "fullscreen", env->fullscreen);
+  }
+}
+
+/* --------------------------------------------------------------- */
+
+void fn_environment_apply_palette(fn_environment_t * env)
+{
+  SDL_Palette * pal = env->screen->format->palette;
+  if (pal != NULL) {
+    SDL_SetPalette(env->screen, SDL_PHYSPAL, pal->colors, 0,
+        pal->ncolors);
   }
 }
 

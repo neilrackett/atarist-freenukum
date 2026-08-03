@@ -77,8 +77,9 @@ fn_level_t * fn_level_load(int fd,
   lv->do_play = 1;
 
   /* The level is composed in a full-width stripe that follows the
-   * camera vertically (surface->ybias); a full-level surface would
-   * need almost 3MB which does not fit small machines. */
+   * camera vertically (STDL_SetSurfaceOrigin); a full-level
+   * surface would need almost 3MB which does not fit small
+   * machines. */
   lv->surface_fixed = NULL;
   lv->surface = fn_environment_create_surface(
       env,
@@ -952,7 +953,7 @@ static void fn_level_compose_cells(fn_level_t * lv,
         Uint16 tilenr = fn_level_get_tile(lv, tx, ty);
         if (tilenr > 1 && tilenr < (48 * 8)) {
           tile = fn_environment_get_tile(env, tilenr);
-          opaque = nsdl_surface_is_opaque(tile);
+          opaque = STDL_SurfaceIsOpaque(tile);
         }
       }
       /* backdrop shows through where there is no tile or the
@@ -1029,8 +1030,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   }
 
   /* let the stripe follow the camera */
-  lv->surface->ybias =
-    sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize;
+  STDL_SetSurfaceOrigin(lv->surface, 0,
+      sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize);
 
   full_compose = !lv->prev_valid
     || sourcerect->y != lv->prev_sourcerect.y;
@@ -1364,7 +1365,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
 
   /* bring the composed image to the screen; the composed stripe
    * is fully opaque, so skip the colorkey for a faster blit */
-  lv->surface->usekey = 0;
+  lv->surface->flags &= ~SDL_SRCCOLORKEY;
   if (full_blit) {
     SDL_Rect src = *sourcerect;
     SDL_Rect dst = *targetrect;
@@ -1400,7 +1401,7 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     }
   }
 
-  lv->surface->usekey = 1;
+  lv->surface->flags |= SDL_SRCCOLORKEY;
 
 #ifdef FN_ATARI_PROFILE
   fn_prof[7] += FN_HZ200 - prof_t2;

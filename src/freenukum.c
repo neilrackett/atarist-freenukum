@@ -98,6 +98,9 @@ int main(int argc, char ** argv)
 
   fn_sound_init(fn_environment_get_datapath(env));
 
+  /* everything is loaded: the startup splash hands the hardware
+   * palette back to the game */
+  fn_environment_apply_palette(env);
 
   /* show the splash screen */
   res = fn_picture_splash_show(

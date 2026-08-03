@@ -4,43 +4,51 @@
 # Cross-compile FreeNukum for Atari ST/MiNT with m68k-atari-mint-gcc.
 # Output goes to dist/, which doubles as a Hatari GEMDOS drive when
 # the game data is extracted to dist/NUKUM/DATA/.
-# Run inside the toolkit container:  stcmd make -f Makefile.atari
-# or from the host with the stcmd wrapper doing the mounting.
+#
+# Needs libstdl.a from the STDL repository (default ../atarist-stdl).
+# The toolkit container only mounts the folder it is started in, so
+# run it from the parent of both checkouts:
+#
+#   ST_WORKING_FOLDER=$(cd .. && pwd) \
+#     stcmd make -C atarist-freenukum -f Makefile.atari
 
 CROSS   = m68k-atari-mint-
 CC      = $(CROSS)gcc
 STRIP   = $(CROSS)strip
 
-# Native SDL-subset shim (atari/nsdl) instead of the real SDL:
-# its SDL.h shadows the system one via include order.
+# STDL (Atari ST DirectMedia Layer) instead of the real SDL: its
+# compat SDL.h shadows the system one via include order.
+STDL   ?= ../atarist-stdl
+
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
           -DHAVE_CONFIG_H -DFN_ATARI_PROFILE \
-          -Iatari -Iatari/nsdl -Isrc
-LDLIBS  = -lm
+          -Iatari -I$(STDL)/include -I$(STDL)/include/compat -Isrc
+LDLIBS  = $(STDL)/libstdl.a -lm
 
 # GEMDOS 8.3 filename
 TARGET  = dist/NUKUM.TOS
 
+# the loading splash is a Degas picture read at startup
+SPLASH  = dist/SPLASH.PI1
+
 SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) \
-          src/freenukum.c atari/nsdl/nsdl.c atari/nsdl/sound.c atari/nsdl/splash.c
+          src/freenukum.c atari/sound.c
 OBJS    = $(SRCS:.c=.o)
 
-all: $(TARGET)
+all: $(TARGET) $(SPLASH)
 
-$(TARGET): $(OBJS)
+$(TARGET): $(OBJS) $(STDL)/libstdl.a
 	$(CC) -o $@ $(OBJS) $(LDLIBS)
 	$(STRIP) $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# the splash screen is embedded from the Degas picture; replace
-# atari/assets/SPLASH.PI1 and rebuild to update it
-atari/nsdl/splash.c: atari/assets/SPLASH.PI1 atari/mksplash.sh
-	sh atari/mksplash.sh atari/assets/SPLASH.PI1 $@
+$(SPLASH): atari/assets/SPLASH.PI1
+	cp $< $@
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(SPLASH)
 
 # Run the latest build in Hatari. This target runs on the host
 # (not through stcmd):  make -f Makefile.atari run
