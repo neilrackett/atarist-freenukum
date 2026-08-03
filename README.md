@@ -60,28 +60,32 @@ Alternatively, the game data can be obtained:
 ## Building
 
 SDL is replaced by [STDL](https://github.com/neilrackett/atarist-stdl), a
-planar-native subset of SDL 1.2 for the Atari ST. Check it out next to this
-repository and build `libstdl.a` first:
+planar-native subset of SDL 1.2 for the Atari ST. It is a submodule at
+`extern/stdl`, pinned to a release tag, so clone with it:
 
 ```sh
-git clone https://github.com/neilrackett/atarist-stdl.git ../atarist-stdl
-(cd ../atarist-stdl && stcmd make)
+git clone --recurse-submodules https://github.com/neilrackett/atarist-freenukum.git
 ```
 
-Then build the game with
+In a clone that already exists, `git submodule update --init` fetches it.
+
+Then build with
 [atarist-toolkit-docker](https://github.com/sidecartridge/atarist-toolkit-docker)
-(`m68k-atari-mint-gcc` via the `stcmd` wrapper). The toolkit container only
-sees the folder it is started in, so point it at the parent of both
-repositories:
+(`m68k-atari-mint-gcc` via the `stcmd` wrapper):
 
 ```sh
-ST_WORKING_FOLDER=$(cd .. && pwd) stcmd make -C atarist-freenukum -f Makefile.atari
+stcmd make -f Makefile.atari
 ```
 
-The executable is built to `dist/NUKUM.TOS` and the loading screen to
-`dist/SPLASH.PI1`, with no dependencies beyond the game data files. Set
-`STDL=/path/to/atarist-stdl` if the library lives somewhere other than
-`../atarist-stdl`.
+`libstdl.a` is built from the submodule as part of that, so there is nothing
+to build first. The executable is built to `dist/NUKUM.TOS` and the loading
+screen to `dist/SPLASH.PI1`, with no dependencies beyond the game data files.
+
+Set `STDL=/path/to/atarist-stdl` to build against a checkout of the library
+elsewhere; a sibling `../atarist-stdl` is picked up automatically when the
+submodule is absent. Note that the toolkit container only mounts the folder
+it starts in, so building against a checkout outside this one also needs
+`ST_WORKING_FOLDER` set to a common parent.
 
 ## To do
 

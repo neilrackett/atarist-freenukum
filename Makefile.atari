@@ -5,12 +5,15 @@
 # Output goes to dist/, which doubles as a Hatari GEMDOS drive when
 # the game data is extracted to dist/NUKUM/DATA/.
 #
-# Needs libstdl.a from the STDL repository (default ../atarist-stdl).
-# The toolkit container only mounts the folder it is started in, so
-# run it from the parent of both checkouts:
+#   STCMD_NO_TTY=1 stcmd make -f Makefile.atari
 #
-#   ST_WORKING_FOLDER=$(cd .. && pwd) \
-#     stcmd make -C atarist-freenukum -f Makefile.atari
+# stcmd mounts the current directory into the toolkit container and
+# runs there, so everything the build touches has to live inside this
+# repository. STDL does: extern/stdl is a submodule, and the library
+# is built from it automatically when libstdl.a is missing.
+#
+#   git clone --recurse-submodules <url>     # fresh clone
+#   git submodule update --init              # existing clone
 
 CROSS   = m68k-atari-mint-
 CC      = $(CROSS)gcc
@@ -18,12 +21,25 @@ STRIP   = $(CROSS)strip
 
 # STDL (Atari ST DirectMedia Layer) instead of the real SDL: its
 # compat SDL.h shadows the system one via include order.
-STDL   ?= ../atarist-stdl
+#
+# The submodule wins when it is present; a sibling checkout is the
+# fallback, so the library and a game can still be worked on
+# together. Override with STDL=<path>.
+STDL     ?= $(firstword $(wildcard extern/stdl) ../atarist-stdl)
+STDL_LIB  = $(STDL)/libstdl.a
+
+# Cloning without --recurse-submodules leaves extern/stdl an empty
+# directory; say so rather than failing on a missing SDL.h.
+ifeq ($(wildcard $(STDL)/include),)
+ifeq ($(filter clean run,$(MAKECMDGOALS)),)
+$(error STDL not found in $(STDL) - run: git submodule update --init)
+endif
+endif
 
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
           -DHAVE_CONFIG_H -DFN_ATARI_PROFILE \
           -Iatari -I$(STDL)/include -I$(STDL)/include/compat -Isrc
-LDLIBS  = $(STDL)/libstdl.a -lm
+LDLIBS  = $(STDL_LIB) -lm
 
 # GEMDOS 8.3 filename
 TARGET  = dist/NUKUM.TOS
@@ -42,9 +58,15 @@ all: $(TARGET) $(SPLASH)
 dist:
 	@mkdir -p $@
 
-$(TARGET): $(OBJS) $(STDL)/libstdl.a | dist
+$(TARGET): $(OBJS) $(STDL_LIB) | dist
 	$(CC) -o $@ $(OBJS) $(LDLIBS)
 	$(STRIP) $@
+
+# Build the library from the submodule when its archive is missing,
+# so a fresh clone needs one command. An existing archive is left
+# alone - rebuild it deliberately with make -C $(STDL).
+$(STDL_LIB):
+	$(MAKE) -C $(STDL) libstdl.a
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
