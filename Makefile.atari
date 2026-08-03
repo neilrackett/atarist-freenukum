@@ -37,14 +37,19 @@ OBJS    = $(SRCS:.c=.o)
 
 all: $(TARGET) $(SPLASH)
 
-$(TARGET): $(OBJS) $(STDL)/libstdl.a
+# dist/ is the build output and a Hatari GEMDOS drive; it is not
+# tracked, so a fresh clone has to create it before the link.
+dist:
+	@mkdir -p $@
+
+$(TARGET): $(OBJS) $(STDL)/libstdl.a | dist
 	$(CC) -o $@ $(OBJS) $(LDLIBS)
 	$(STRIP) $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(SPLASH): atari/assets/SPLASH.PI1
+$(SPLASH): atari/assets/SPLASH.PI1 | dist
 	cp $< $@
 
 clean:
