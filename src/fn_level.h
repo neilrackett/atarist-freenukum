@@ -54,11 +54,6 @@ typedef struct fn_level_t fn_level_t;
  */
 struct fn_level_t {
   /**
-   * Stores the raw data loaded from the level.
-   */
-  Uint16 raw[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
-
-  /**
    * Stores if tiles are solid or not.
    */
   Uint8 solid[FN_LEVEL_HEIGHT][FN_LEVEL_WIDTH];
@@ -77,6 +72,15 @@ struct fn_level_t {
    * The surface for blitting the level.
    */
   SDL_Surface * surface;
+
+  /**
+   * Width of that surface in tiles, and where its left edge
+   * currently sits in the level. A stripe as wide as the level
+   * never moves; a narrow one follows the camera and is fully
+   * recomposed each time it does.
+   */
+  Uint16 stripe_tiles;
+  Sint16 stripe_x;
 
   /**
    * The environment in which the level runs.
@@ -193,19 +197,6 @@ void fn_level_set_tile(
  * @return  The tile of the position.
  */
 Uint16 fn_level_get_tile(fn_level_t * lv, size_t x, size_t y);
-
-/* --------------------------------------------------------------- */
-
-/**
- * Get the raw value of a certain position inside the level.
- *
- * @param  lv  The level.
- * @param  x   The x coordinate.
- * @param  y   The y coordinate.
- *
- * @return  The raw tile number of the position.
- */
-Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y);
 
 /* --------------------------------------------------------------- */
 

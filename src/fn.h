@@ -68,6 +68,23 @@
 #define FN_TILECACHE_SIZE 1300
 
 /**
+ * The level is composed in a stripe that follows the camera. A
+ * stripe as wide as the level (128 tiles, 224K) never has to move
+ * sideways, so horizontal scrolling can reuse everything already
+ * composed - but it is a third of a 1MB machine's heap. When that
+ * does not fit, the stripe is this wide instead and is re-anchored
+ * (and fully recomposed) when the camera reaches its margin.
+ */
+#define FN_LEVEL_STRIPE_TILES 32
+
+/**
+ * How much heap the game wants left over after the full-width
+ * stripe: the level struct, the actors, message boxes and room to
+ * play. Below this the narrow stripe is used instead.
+ */
+#define FN_LEVEL_STRIPE_RESERVE 160000UL
+
+/**
  * The height of a level (in full tiles)
  */
 #define FN_LEVEL_HEIGHT     90
@@ -123,6 +140,28 @@
 
 #define FN_COLLISION_DEBUG_COLOR(format) SDL_MapRGB(format, \
     182, 6, 0)
+
+/* --------------------------------------------------------------- */
+
+/**
+ * Heap instrumentation. Prints the largest free block (GEMDOS
+ * Malloc(-1)) at a labelled point, so the cost of the tilecache,
+ * the level stripe and the backdrop can be compared against the
+ * heap a 1MB machine actually has. Compiled out unless the build
+ * defines FN_HEAP_DEBUG.
+ */
+#ifdef FN_HEAP_DEBUG
+void fn_heap_report(const char * what);
+#else
+#define fn_heap_report(what) ((void)0)
+#endif
+
+/**
+ * The largest block the system can still hand out, used to decide
+ * how much the level is allowed to spend. Everywhere except MiNT
+ * this is "as much as you like".
+ */
+unsigned long fn_heap_largest_free(void);
 
 /* --------------------------------------------------------------- */
 

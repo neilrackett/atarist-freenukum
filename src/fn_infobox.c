@@ -51,6 +51,12 @@ void fn_infobox_show(
       env,
       msg);
 
+  /* out of memory for the box: skipping it beats dereferencing
+   * NULL, which on the ST is a bus error rather than a segfault */
+  if (msgbox == NULL) {
+    return;
+  }
+
   SDL_Surface * screen = fn_environment_get_screen(env);
   dstrect.x = ((screen->w) - (msgbox->w))/2;
   dstrect.y = ((screen->h) - (msgbox->h))/2;

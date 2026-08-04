@@ -100,6 +100,9 @@ SDL_Surface * fn_msgbox(
       env,
       FN_FONT_WIDTH * (columns + 2),
       FN_FONT_HEIGHT * (rows + 2));
+  if (msgbox == NULL) {
+    return NULL;
+  }
   r.w = pixelsize * FN_TILE_WIDTH;
   r.h = pixelsize * FN_TILE_HEIGHT;
 

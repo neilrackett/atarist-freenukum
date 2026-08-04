@@ -52,6 +52,30 @@
 
 /* --------------------------------------------------------------- */
 
+#ifdef __MINT__
+#include <mint/osbind.h>
+#endif
+
+unsigned long fn_heap_largest_free(void)
+{
+#ifdef __MINT__
+  long free = Malloc(-1L);
+  return (free > 0) ? (unsigned long)free : 0UL;
+#else
+  return 0xFFFFFFFFUL;
+#endif
+}
+
+#ifdef FN_HEAP_DEBUG
+void fn_heap_report(const char * what)
+{
+  printf("HEAP %-22s %lu\n", what, fn_heap_largest_free());
+  fflush(stdout);
+}
+#endif /* FN_HEAP_DEBUG */
+
+/* --------------------------------------------------------------- */
+
 char * font_base_directories[] = {
   "/usr/share/fonts",
   "/usr/share/fonts/truetype",
@@ -544,9 +568,9 @@ SDL_Surface * fn_environment_create_surface(fn_environment_t * env,
 
 /* --------------------------------------------------------------- */
 
-SDL_Surface * fn_environment_create_surface_with_aboslute_size(
+static SDL_Surface * fn_environment_new_surface(
     fn_environment_t * env,
-    int width, int height)
+    int width, int height, int colorkey)
 {
   SDL_Surface * surface = SDL_CreateRGBSurface(
       env->screen->flags,
@@ -557,6 +581,12 @@ SDL_Surface * fn_environment_create_surface_with_aboslute_size(
       0,
       0,
       0);
+
+  /* out of memory: the caller decides what to do about it, but it
+   * must not be handed a surface that is half set up */
+  if (surface == NULL) {
+    return NULL;
+  }
 
   /* On paletted displays blits copy raw indices, so every surface
    * must share the screen's palette for colors to stay consistent.
@@ -569,9 +599,30 @@ SDL_Surface * fn_environment_create_surface_with_aboslute_size(
         env->screen->format->palette->ncolors);
   }
 
-  SDL_SetColorKey(surface, SDL_SRCCOLORKEY, env->transparent);
+  if (colorkey) {
+    SDL_SetColorKey(surface, SDL_SRCCOLORKEY, env->transparent);
+  }
 
   return surface;
+}
+
+/* --------------------------------------------------------------- */
+
+SDL_Surface * fn_environment_create_surface_with_aboslute_size(
+    fn_environment_t * env,
+    int width, int height)
+{
+  return fn_environment_new_surface(env, width, height, 1);
+}
+
+/* --------------------------------------------------------------- */
+
+SDL_Surface * fn_environment_create_opaque_surface(
+    fn_environment_t * env,
+    int width, int height)
+{
+  return fn_environment_new_surface(env,
+      width * env->pixelsize, height * env->pixelsize, 0);
 }
 
 /* --------------------------------------------------------------- */

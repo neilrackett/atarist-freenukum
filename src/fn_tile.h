@@ -57,6 +57,26 @@ int fn_tile_loadheader(int fd, fn_tileheader_t * h);
 
 /* --------------------------------------------------------------- */
 
+/**
+ * Read one tile from fd and decode it into an existing surface at
+ * (x, y), in unscaled pixels. Decoding straight into a bigger
+ * surface avoids a temporary surface per tile, which matters for
+ * anything that loads hundreds of them. The file bytes are
+ * consumed even when tile is NULL, so a failed slot does not
+ * desynchronise the rest of the file.
+ */
+int fn_tile_read(
+        int fd,
+        fn_environment_t * env,
+        fn_tileheader_t * h,
+        Uint8 transparent,
+        SDL_Surface * tile,
+        int x,
+        int y
+        );
+
+/* --------------------------------------------------------------- */
+
 SDL_Surface * fn_tile_load(
         int fd,
         fn_environment_t * env,

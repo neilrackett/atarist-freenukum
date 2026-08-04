@@ -11,7 +11,7 @@ Feature complete port of Duke Nukem, Episode 1 to Atari ST by
 sadly they never met... _Until now!_
 
 To celebrate their 35th Birthday I've ported the full Episode 1 (shareware
-version) of Duke Nukem to the Atari ST: it runs on any ST with at least 2MB of
+version) of Duke Nukem to the Atari ST: it runs on any ST with at least 1MB of
 RAM, and of course includes support for Mega STE features like Blitter and
 16MHz mode.
 
@@ -33,7 +33,8 @@ You can download the latest version from the
 ## System requirements
 
 - Atari ST/STE, Mega ST/STE or TT
-- 2MB+ RAM
+- 1MB+ RAM (2MB or more keeps the whole level strip in memory, which
+  makes horizontal scrolling cheaper)
 - ST low resolution
 - A hard disk with the game files:
   - `NUKUM.TOS`
@@ -88,8 +89,6 @@ it starts in, so building against a checkout outside this one also needs
 `ST_WORKING_FOLDER` set to a common parent.
 
 ## To do
-
-- 1MB version (the game currently needs about 1.1MB of free RAM)
 
 The ST version already goes well beyond the original FreeNukum to implements all
 of the shareware episode's enemies — including the flying bot, rabbitoid,

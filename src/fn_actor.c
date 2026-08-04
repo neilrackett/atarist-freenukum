@@ -2134,7 +2134,8 @@ void fn_actor_function_accesscard_slot_interact_start(fn_actor_t * actor)
         iter = fn_list_next(iter)) {
       fn_actor_t * dooractor = (fn_actor_t *)iter->data;
 
-      if (dooractor->type == FN_ACTOR_ACCESS_CARD_DOOR) {
+      if (dooractor != NULL
+          && dooractor->type == FN_ACTOR_ACCESS_CARD_DOOR) {
         dooractor->is_alive = 0;
         int x = dooractor->position.x / FN_TILE_WIDTH;
         int y = dooractor->position.y / FN_TILE_HEIGHT;

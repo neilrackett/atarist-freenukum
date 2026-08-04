@@ -36,9 +36,13 @@ $(error STDL not found in $(STDL) - run: git submodule update --init)
 endif
 endif
 
+# EXTRA_CFLAGS is a hook for one-off diagnostic builds, e.g.
+#   stcmd make -f Makefile.atari EXTRA_CFLAGS=-DFN_HEAP_DEBUG
+# (stcmd word-splits its arguments, so keep the value space-free).
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
           -DHAVE_CONFIG_H -DFN_ATARI_PROFILE \
-          -Iatari -I$(STDL)/include -I$(STDL)/include/compat -Isrc
+          -Iatari -I$(STDL)/include -I$(STDL)/include/compat -Isrc \
+          $(EXTRA_CFLAGS)
 LDLIBS  = $(STDL_LIB) -lm
 
 # GEMDOS 8.3 filename

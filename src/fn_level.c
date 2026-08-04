@@ -49,11 +49,67 @@ fn_level_t * fn_level_load(int fd,
     fn_environment_t * env)
 {
   size_t i = 0;
-  fn_level_t * lv = malloc(sizeof(fn_level_t));
-  memset(lv, 0, sizeof(fn_level_t));
+  fn_level_t * lv;
   Uint16 tilenr;
   Uint8 uppertile;
   Uint8 lowertile;
+
+  /* The level is composed in a stripe that follows the camera
+   * (STDL_SetSurfaceOrigin); a full-level surface would need
+   * almost 3MB, which does not fit small machines. Every cell of
+   * the stripe is painted - backdrop, black or a tile - so it is
+   * opaque, and asking for no colour key saves the transparency
+   * mask a surface this size would otherwise carry (and blits it
+   * to the screen faster).
+   *
+   * A stripe as wide as the level never has to move sideways, so
+   * horizontal scrolling reuses everything already composed. That
+   * costs 224K, which a 1MB ST does not have once the tile cache
+   * is loaded, so below FN_LEVEL_STRIPE_RESERVE of headroom the
+   * stripe is narrow and gets re-anchored as the camera travels.
+   *
+   * Either way it is claimed first: it is by far the biggest block
+   * the game asks for, and it has to come out of the one
+   * contiguous run that is still large enough for it. */
+  int stripe_tiles = FN_LEVEL_WIDTH;
+  SDL_Surface * surface;
+  {
+    unsigned long full = (unsigned long)FN_LEVEL_WIDTH
+      * FN_TILE_WIDTH / 2
+      * FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4);
+
+    if (fn_heap_largest_free() < full + FN_LEVEL_STRIPE_RESERVE) {
+      stripe_tiles = FN_LEVEL_STRIPE_TILES;
+    }
+  }
+  surface = fn_environment_create_opaque_surface(
+      env,
+      FN_TILE_WIDTH * stripe_tiles,
+      FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4));
+  if (surface == NULL && stripe_tiles != FN_LEVEL_STRIPE_TILES) {
+    stripe_tiles = FN_LEVEL_STRIPE_TILES;
+    surface = fn_environment_create_opaque_surface(
+        env,
+        FN_TILE_WIDTH * stripe_tiles,
+        FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4));
+  }
+  if (surface == NULL) {
+    fprintf(stderr, "Not enough memory for the level surface.\n");
+    return NULL;
+  }
+
+  fn_heap_report("level stripe done");
+
+  lv = malloc(sizeof(fn_level_t));
+  if (lv == NULL) {
+    SDL_FreeSurface(surface);
+    return NULL;
+  }
+  memset(lv, 0, sizeof(fn_level_t));
+  lv->surface_fixed = NULL;
+  lv->surface = surface;
+  lv->stripe_tiles = (Uint16)stripe_tiles;
+  lv->stripe_x = 0;
 
   lv->environment = env;
 
@@ -76,30 +132,13 @@ fn_level_t * fn_level_load(int fd,
 
   lv->do_play = 1;
 
-  /* The level is composed in a full-width stripe that follows the
-   * camera vertically (STDL_SetSurfaceOrigin); a full-level
-   * surface would need almost 3MB which does not fit small
-   * machines. */
-  lv->surface_fixed = NULL;
-  lv->surface = fn_environment_create_surface(
-      env,
-      FN_TILE_WIDTH * FN_LEVEL_WIDTH,
-      FN_TILE_HEIGHT * (FN_LEVELWINDOW_HEIGHT + 4));
-
-  /* bulk-read the level map: two 1-byte reads per tile cost a
-   * system call each, which alone took seconds per level */
-  Uint8 * levelmap = malloc(FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH * 2);
-  if (levelmap != NULL) {
-    size_t total = FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH * 2;
-    size_t got = 0;
-    while (got < total) {
-      ssize_t n = read(fd, levelmap + got, total - got);
-      if (n <= 0) {
-        break;
-      }
-      got += (size_t)n;
-    }
-  }
+  /* Stream the level map through a small buffer. Two 1-byte reads
+   * per tile cost a system call each and alone took seconds per
+   * level, but holding the whole 23K map in one block while the
+   * level is being built is more than a 1MB machine can spare. */
+  Uint8 levelmap[512];
+  size_t mapfill = 0;
+  size_t mappos = 0;
 
   while (i != FN_LEVEL_HEIGHT * FN_LEVEL_WIDTH)
   {
@@ -109,16 +148,24 @@ fn_level_t * fn_level_load(int fd,
     /* we don't only want to run on big-endian systems,
      * so we load the bytes separately.
      */
-    if (levelmap != NULL) {
-      lowertile = levelmap[i * 2];
-      uppertile = levelmap[i * 2 + 1];
+    if (mappos + 2 > mapfill) {
+      ssize_t n;
+      mapfill = 0;
+      mappos = 0;
+      n = read(fd, levelmap, sizeof(levelmap));
+      if (n > 0) {
+        mapfill = (size_t)n;
+      }
+    }
+    if (mappos + 2 <= mapfill) {
+      lowertile = levelmap[mappos];
+      uppertile = levelmap[mappos + 1];
+      mappos += 2;
     } else {
-      read(fd, &lowertile, 1);
-      read(fd, &uppertile, 1);
+      lowertile = 0;
+      uppertile = 0;
     }
     tilenr = (uppertile << 8) | lowertile;
-
-    lv->raw[y][x] = tilenr;
 
     if ((tilenr >= 4) && (tilenr <= 0x2fe0)) {
       lv->tiles[y][x] = tilenr / 0x20;
@@ -782,8 +829,6 @@ fn_level_t * fn_level_load(int fd,
     i++;
   }
 
-  free(levelmap);
-
   /* Put the correct tile behind the cameras. */
   fn_list_t * cameras =
     fn_level_get_items_of_type(lv,
@@ -863,13 +908,6 @@ Uint16 fn_level_get_tile(fn_level_t * lv, size_t x, size_t y)
     return 0;
   }
   return lv->tiles[y][x];
-}
-
-/* --------------------------------------------------------------- */
-
-Uint16 fn_level_get_raw(fn_level_t * lv, size_t x, size_t y)
-{
-  return lv->raw[y][x];
 }
 
 /* --------------------------------------------------------------- */
@@ -1029,8 +1067,37 @@ void fn_level_blit_to_surface(fn_level_t * lv,
     return;
   }
 
+  /* Keep the stripe covering the camera window. A level-wide
+   * stripe has nowhere to move to, so this is a no-op there and
+   * the horizontal-scroll path below keeps working as it always
+   * has; a narrow one re-centres when the window reaches its edge,
+   * and everything composed in it is stale when it does. */
+  {
+    Sint32 stripe_w = (Sint32)lv->stripe_tiles * tilesize;
+    Sint32 max_x = (Sint32)FN_LEVEL_WIDTH * tilesize - stripe_w;
+    Sint32 want = lv->stripe_x;
+
+    if (sourcerect->x < lv->stripe_x
+        || sourcerect->x + sourcerect->w > lv->stripe_x + stripe_w) {
+      want = sourcerect->x + sourcerect->w / 2 - stripe_w / 2;
+      if (want > max_x) {
+        want = max_x;
+      }
+      if (want < 0) {
+        want = 0;
+      }
+      /* stay on the tile grid: the stripe-to-screen blit relies on
+       * source and destination sharing their 16-pixel phase */
+      want &= ~((Sint32)tilesize - 1);
+    }
+    if (want != lv->stripe_x) {
+      lv->stripe_x = (Sint16)want;
+      lv->prev_valid = 0;
+    }
+  }
+
   /* let the stripe follow the camera */
-  STDL_SetSurfaceOrigin(lv->surface, 0,
+  STDL_SetSurfaceOrigin(lv->surface, lv->stripe_x,
       sourcerect->y - 2 * FN_TILE_HEIGHT * pixelsize);
 
   full_compose = !lv->prev_valid
@@ -1363,9 +1430,8 @@ void fn_level_blit_to_surface(fn_level_t * lv,
   fn_prof[6] += prof_t2 - prof_t1;
 #endif
 
-  /* bring the composed image to the screen; the composed stripe
-   * is fully opaque, so skip the colorkey for a faster blit */
-  lv->surface->flags &= ~SDL_SRCCOLORKEY;
+  /* bring the composed image to the screen; the stripe is created
+   * without a colour key, so this is the fast opaque blit */
   if (full_blit) {
     SDL_Rect src = *sourcerect;
     SDL_Rect dst = *targetrect;
@@ -1505,6 +1571,12 @@ int fn_level_act(fn_level_t * lv) {
       iter = fn_list_next(iter)) {
     fn_actor_t * actor = (fn_actor_t *)iter->data;
 
+    /* one actor's act function can kill another, which leaves a
+     * NULL entry behind until the sweep below */
+    if (actor == NULL) {
+      continue;
+    }
+
     if  (actor->acts_while_invisible || actor->is_visible) {
       sum++;
       res = fn_actor_act(actor);
@@ -1554,7 +1626,7 @@ int fn_level_hero_interact_start(fn_level_t * lv)
       iter = fn_list_next(iter)) {
     fn_actor_t * actor = (fn_actor_t *)iter->data;
 
-    if (fn_actor_hero_can_interact(actor)) {
+    if (actor != NULL && fn_actor_hero_can_interact(actor)) {
 
       fn_hero_t * hero = fn_level_get_hero(lv);
       SDL_Rect * heropos = fn_hero_get_position(hero);
@@ -1683,7 +1755,7 @@ fn_list_t * fn_level_get_items_of_type(fn_level_t * lv,
       iter != fn_list_last(lv->actors);
       iter = fn_list_next(iter)) {
     fn_actor_t * actor = iter->data;
-    if (actor->type == type) {
+    if (actor != NULL && actor->type == type) {
       ret = fn_list_append(ret, actor);
     }
   }

@@ -267,6 +267,26 @@ SDL_Surface * fn_environment_create_surface_with_aboslute_size(
 /* --------------------------------------------------------------- */
 
 /**
+ * Create a surface that is never blitted with transparency, so it
+ * gets no colour key and therefore no transparency mask. That is
+ * a quarter of the surface's memory for anything big - the level
+ * stripe is 2048x224 - and it puts blits from it on the fast
+ * opaque path.
+ *
+ * @param  env     The environment.
+ * @param  width   The width of the surface in original-game pixels.
+ * @param  height  The height of the surface in original-game pixels.
+ *
+ * @return The newly created surface.
+ */
+SDL_Surface * fn_environment_create_opaque_surface(
+    fn_environment_t * env,
+    int width,
+    int height);
+
+/* --------------------------------------------------------------- */
+
+/**
  * Get the screen to which the environment displays the game.
  *
  * @param  env    The environment.

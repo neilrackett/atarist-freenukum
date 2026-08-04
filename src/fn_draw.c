@@ -179,16 +179,24 @@ int fn_draw_byterow_run(
     if (pixelsize == 1 && (x & 7) == 0
             && fn_draw_cache_direct
             && (transcolor == 0 || transcolor > 15)
-            && target->mask != NULL
+            && (target->mask != NULL || transcolor == 0)
             && x + (int)rowgroups * 8 <= target->w
             && y + (int)(ngroups / rowgroups) <= target->h) {
         int g0 = x >> 3;
         Uint8 * prow = (Uint8 *)target->pixels
             + (Uint32)(Uint16)y * target->pitch
             + ((Uint32)(g0 >> 1) << 3) + (g0 & 1);
-        Uint8 * mrow = target->mask
-            + (Uint32)(Uint16)y * target->maskstride + g0;
         int transparent = (transcolor > 15);
+        /* an opaque surface (no mask) writes its all-zero mask
+         * bytes to a scratch byte with a zero stride, which keeps
+         * the inner loop free of a per-group branch */
+        Uint8 sink = 0;
+        Uint8 * mrow = (target->mask != NULL)
+            ? target->mask
+              + (Uint32)(Uint16)y * target->maskstride + g0
+            : &sink;
+        int mstep = (target->mask != NULL) ? 1 : 0;
+        int mpitch = (target->mask != NULL) ? target->maskstride : 0;
         size_t done = 0;
 
         target->opaque_state = 0;
@@ -204,13 +212,14 @@ int fn_draw_byterow_run(
                 p[4] = data[3] & t;   /* red   = plane 2 */
                 p[6] = data[4] & t;   /* brighten = plane 3 */
                 /* transparency mask: bit set = destination kept */
-                *m++ = transparent ? (Uint8)~t : 0x00;
+                *m = transparent ? (Uint8)~t : 0x00;
+                m += mstep;
                 data += 5;
                 p += step;
                 step = 8 - step;
             }
             prow += target->pitch;
-            mrow += target->maskstride;
+            mrow += mpitch;
             done += rowgroups;
         }
         return 0;

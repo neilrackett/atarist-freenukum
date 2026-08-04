@@ -200,6 +200,12 @@ void fn_shot_push(fn_shot_t * shot, Sint16 offset)
         iter = fn_list_next(iter)) {
       fn_actor_t * actor = (fn_actor_t *)iter->data;
 
+      /* an actor that died this frame is a NULL entry until the
+       * list is swept at the end of the tick */
+      if (actor == NULL) {
+        continue;
+      }
+
       if (fn_actor_can_get_shot(actor) &&
           fn_shot_touches_actor(shot, actor) &&
           fn_actor_shot(actor)) {

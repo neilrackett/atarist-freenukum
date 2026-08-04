@@ -40,40 +40,38 @@
 SDL_Surface * fn_drop_load(int fd, fn_environment_t * env)
 {
     SDL_Surface * drop;
-    SDL_Rect r;
     size_t num_read = 0;
     fn_tileheader_t h;
-    SDL_Surface * tile;
+    int x = 0;
+    int y = 0;
 
-    Uint8 pixelsize = fn_environment_get_pixelsize(env);
-
-    drop = fn_environment_create_surface(env,
+    /* backdrops are fully opaque, so they need no colour key and
+     * no transparency mask */
+    drop = fn_environment_create_opaque_surface(env,
             FN_DROP_WIDTH * FN_TILE_WIDTH,
             FN_DROP_HEIGHT * FN_TILE_WIDTH);
 
+    if (drop == NULL) {
+        return NULL;
+    }
+
     size_t num_loads = FN_DROP_WIDTH *  FN_DROP_HEIGHT;
 
-    r.x=0;
-    r.y=0;
-    r.w=FN_TILE_WIDTH * pixelsize;
-    r.h=FN_TILE_HEIGHT * pixelsize;
-
+    h.tiles = 0;
     h.width = 2;
     h.height = 16;
 
+    /* decode each tile straight into the backdrop: the surface per
+     * tile that this used to allocate and free 130 times over cost
+     * more heap than the backdrop itself on a 1MB machine */
     while(num_read != num_loads)
     {
-        tile = fn_tile_load(fd,
-            env,
-            &h,
-            0);
-        SDL_BlitSurface(tile, NULL, drop, &r);
-        SDL_FreeSurface(tile);
-        r.x += 16 * pixelsize;
-        if (r.x == 16 * FN_DROP_WIDTH * pixelsize)
+        fn_tile_read(fd, env, &h, 0, drop, x, y);
+        x += FN_TILE_WIDTH;
+        if (x == FN_TILE_WIDTH * FN_DROP_WIDTH)
         {
-            r.x = 0;
-            r.y += 16 * pixelsize;
+            x = 0;
+            y += FN_TILE_HEIGHT;
         }
         num_read++;
     }

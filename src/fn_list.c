@@ -121,25 +121,25 @@ fn_list_t * fn_list_remove_all(fn_list_t * list, void * data)
   fn_list_t * prev = NULL;
   fn_list_t * current = list;
 
-  while (current != fn_list_last(list)) {
+  /* Unlink every matching entry. The node that moves up into a
+   * removed one's place has to be tested as well, which the
+   * previous version skipped when it removed the head: two dead
+   * actors at the front of the level's list left the second one
+   * behind as a NULL entry, and the next frame's shot or act loop
+   * dereferenced it - a bus error on the ST. */
+  while (current != NULL) {
     if (current->data == data) {
-      /* found an occurrence - remove it */
       fn_list_t * todelete = current;
+      current = current->next;
       if (prev != NULL) {
-        prev->next = current->next;
-        current = prev;
+        prev->next = current;
       } else {
-        list = current->next;
-        current = list;
+        list = current;
       }
       free(todelete); todelete = NULL;
-    }
-
-    prev = current;
-    if (prev != NULL) {
-      current = prev->next;
     } else {
-      current = NULL;
+      prev = current;
+      current = current->next;
     }
   }
 

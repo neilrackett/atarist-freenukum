@@ -63,13 +63,15 @@ int fn_tile_loadheader(int fd, fn_tileheader_t * h)
 
 /* --------------------------------------------------------------- */
 
-SDL_Surface * fn_tile_load(
+int fn_tile_read(
         int fd,
         fn_environment_t * env,
         fn_tileheader_t * h,
-        Uint8 transparent)
+        Uint8 transparent,
+        SDL_Surface * tile,
+        int x,
+        int y)
 {
-    SDL_Surface * tile;
     SDL_Rect r;
     size_t num_read = 0;
     fn_byterow_t br = {0, 0, 0, 0, 0};
@@ -77,15 +79,10 @@ SDL_Surface * fn_tile_load(
 
     Uint8 pixelsize = fn_environment_get_pixelsize(env);
 
-    tile = fn_environment_create_surface(
-        env,
-        h->width * 8,
-        h->height);
-
     size_t num_loads = h->width * h->height;
-    
-    r.x = 0;
-    r.y = 0;
+
+    r.x = x * pixelsize;
+    r.y = y * pixelsize;
     r.w = 8 * pixelsize;
     r.h = 1 * pixelsize;
 
@@ -123,13 +120,18 @@ SDL_Surface * fn_tile_load(
     }
 
     if (data != NULL) {
+        /* the tile's bytes are consumed either way, so a missing
+         * destination does not desynchronise the file */
+        if (tile == NULL) {
+            return 0;
+        }
         /* decode the whole image in one call */
-        fn_draw_byterow_run(tile, 0, 0, data, num_loads,
+        fn_draw_byterow_run(tile, x, y, data, num_loads,
             h->width, transparent_color, pixelsize);
-        return tile;
+        return 1;
     }
 
-    while (num_read < num_loads)
+    while (num_read < num_loads && tile != NULL)
     {
         read(fd, readbuf, 5);
         br.trans  = readbuf[0];
@@ -146,13 +148,33 @@ SDL_Surface * fn_tile_load(
         /* wrap without the 32-bit modulo: that division was a
          * library call per 8-pixel group on the 68000 */
         r.x += 8 * pixelsize;
-        if (r.x >= 8 * h->width * pixelsize) {
-            r.x = 0;
+        if (r.x >= (x + 8 * h->width) * pixelsize) {
+            r.x = x * pixelsize;
             r.y += pixelsize;
         }
         num_read++;
     }
 
+    return 1;
+}
+
+/* --------------------------------------------------------------- */
+
+SDL_Surface * fn_tile_load(
+        int fd,
+        fn_environment_t * env,
+        fn_tileheader_t * h,
+        Uint8 transparent)
+{
+    SDL_Surface * tile = fn_environment_create_surface(
+        env,
+        h->width * 8,
+        h->height);
+
+    if (tile == NULL) {
+        return NULL;
+    }
+    fn_tile_read(fd, env, h, transparent, tile, 0, 0);
     return tile;
 }
 

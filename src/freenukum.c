@@ -85,6 +85,8 @@ int main(int argc, char ** argv)
 
   fn_error_set_handler(fn_error_print_commandline);
 
+  fn_heap_report("program start");
+
   fn_environment_t * env = fn_environment_create();
 
   /* check if all data is present */
@@ -93,8 +95,12 @@ int main(int argc, char ** argv)
     exit(retval);
   }
 
+  fn_heap_report("before tilecache");
+
   /* load the tilecache */
   res = fn_environment_load_tilecache(env);
+
+  fn_heap_report("after tilecache");
 
   fn_sound_init(fn_environment_get_datapath(env));
 

@@ -289,9 +289,6 @@ int fn_game_start_in_level(
         env);
     if (backdrop == NULL) {
       printf("could not load backdrop");
-    } else {
-      /* backdrops are fully opaque; skip the colorkey */
-      backdrop->flags &= ~SDL_SRCCOLORKEY;
     }
     close(fd);
   }
@@ -310,6 +307,8 @@ int fn_game_start_in_level(
     goto cleanup;
   }
 
+  fn_heap_report("before level");
+
   lv = fn_level_load(fd, env);
   if (lv == NULL)
   {
@@ -318,6 +317,8 @@ int fn_game_start_in_level(
     goto cleanup;
   }
   close(fd);
+
+  fn_heap_report("after level");
 
   Uint8 pixelsize = fn_environment_get_pixelsize(env);
   dstrect.x = FN_TILE_WIDTH * pixelsize;
@@ -758,6 +759,8 @@ cleanup:
     fn_level_free(lv);
   }
   SDL_RemoveTimer(tick);
+
+  fn_heap_report("level released");
 
   return returnvalue;
 }
