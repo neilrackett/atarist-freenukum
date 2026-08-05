@@ -291,8 +291,13 @@ fn_environment_t * fn_environment_create()
   /* something to look at while the tilecache is decoded from the
    * original data files, which takes several seconds. This also
    * replaces the logical palette, so it has to come before the
-   * game's own palette is installed below. */
-  STDL_ShowDegas("SPLASH.PI1");
+   * game's own palette is installed below. The picture travels
+   * appended to the end of NUKUM.TOS itself (GEMDOS loads only the
+   * segments named in the program header, so it costs no RAM); a
+   * loose SPLASH.PI1 is the fallback for a renamed binary. */
+  if (STDL_ShowDegasTrailer("NUKUM.TOS") != 0) {
+    STDL_ShowDegas("SPLASH.PI1");
+  }
 
   /* the game is keyboard driven, so let STDL turn joystick moves
    * into key events (arrows + left Alt, tagged KMOD_JOYSTICK) */

@@ -48,23 +48,25 @@ LDLIBS  = $(STDL_LIB) -lm
 # GEMDOS 8.3 filename
 TARGET  = dist/NUKUM.TOS
 
-# the loading splash is a Degas picture read at startup
-SPLASH  = dist/SPLASH.PI1
-
 SRCS    = $(filter-out src/fn_test_%.c,$(wildcard src/fn_*.c)) \
           src/freenukum.c atari/sound.c
 OBJS    = $(SRCS:.c=.o)
 
-all: $(TARGET) $(SPLASH)
+all: $(TARGET)
 
 # dist/ is the build output and a Hatari GEMDOS drive; it is not
 # tracked, so a fresh clone has to create it before the link.
 dist:
 	@mkdir -p $@
 
-$(TARGET): $(OBJS) $(STDL_LIB) | dist
+# The loading splash rides along appended to the executable: GEMDOS
+# loads only the segments named in the program header, so the
+# picture stays on disk (STDL_ShowDegasTrailer reads it from there)
+# and costs no RAM.
+$(TARGET): $(OBJS) $(STDL_LIB) atari/assets/SPLASH.PI1 | dist
 	$(CC) -o $@ $(OBJS) $(LDLIBS)
 	$(STRIP) $@
+	cat atari/assets/SPLASH.PI1 >> $@
 
 # Build the library from the submodule when its archive is missing,
 # so a fresh clone needs one command. An existing archive is left
@@ -75,11 +77,8 @@ $(STDL_LIB):
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(SPLASH): atari/assets/SPLASH.PI1 | dist
-	cp $< $@
-
 clean:
-	rm -f $(OBJS) $(TARGET) $(SPLASH)
+	rm -f $(OBJS) $(TARGET) dist/SPLASH.PI1
 
 # Run the latest build in Hatari. This target runs on the host
 # (not through stcmd):  make -f Makefile.atari run
