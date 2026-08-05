@@ -254,6 +254,7 @@ char fn_menu_get_choice(fn_menu_t * menu,
         case SDL_KEYDOWN:
           switch(event.key.keysym.sym) {
             case SDLK_RETURN:
+            case SDLK_LALT: /* joystick fire */
               entry = fn_menu_get_current_entry(menu);
               choice = entry->shortcut;
               choice_made = 1;

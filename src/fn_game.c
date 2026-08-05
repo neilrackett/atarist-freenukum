@@ -346,6 +346,11 @@ int fn_game_start_in_level(
   srcrect.w = FN_LEVELWINDOW_WIDTH * pixelsize * FN_TILE_WIDTH;
   srcrect.h = FN_LEVELWINDOW_HEIGHT * pixelsize * FN_TILE_HEIGHT;
 
+  /* drop input that queued up while the level was loading, so a
+   * stick waggle or held key from the menu cannot replay into the
+   * hero the moment the level appears */
+  while (SDL_PollEvent(&event));
+
   tick = SDL_AddTimer(80, fn_game_timer_triggered, 0);
 
   {
@@ -621,8 +626,10 @@ int fn_game_start_in_level(
               fn_hero_update_animation(hero);
               break;
             case SDL_BUTTON_RIGHT:
-              fn_hero_set_flying(hero, FN_HERO_FLYING_TRUE);
-              fn_hero_update_animation(hero);
+              /* the right button is also joystick 1's fire button
+               * (the IKBD shares the line), which already shoots
+               * through the joykey emulation - so no jump here or
+               * fire would jump too. Jump stays on the keyboard. */
               break;
             case SDL_BUTTON_MIDDLE:
               fn_level_hero_interact_start(lv);
@@ -649,6 +656,7 @@ int fn_game_start_in_level(
               /* do nothing on other buttons. */
               break;
           }
+          break;
         case SDL_VIDEOEXPOSE:
           SDL_UpdateRect(screen, 0, 0, 0, 0);
           break;
@@ -743,8 +751,8 @@ int fn_game_start_in_level(
           /* we don't do anything on mouse movement */
           break;
         default:
-          printf("unknown event happened.\n");
-          /* do nothing on any other events. */
+          /* do nothing on any other events (joystick input arrives
+           * as its own event types and is not handled yet). */
           break;
       }
     }
