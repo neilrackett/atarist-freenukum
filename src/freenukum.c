@@ -104,8 +104,16 @@ int main(int argc, char ** argv)
 
   fn_sound_init(fn_environment_get_datapath(env));
 
-  /* everything is loaded: the startup splash hands the hardware
-   * palette back to the game */
+  /* everything is loaded: take the loading splash off the screen
+   * before the game claims the hardware palette, so the PI1 is
+   * never shown recoloured in the game's colours (both palettes
+   * have black at index 0, so the blanked screen stays black
+   * across the swap) */
+  {
+    SDL_Surface * screen = fn_environment_get_screen(env);
+    SDL_FillRect(screen, NULL, 0);
+    SDL_UpdateRect(screen, 0, 0, 0, 0);
+  }
   fn_environment_apply_palette(env);
 
   /* show the splash screen */
