@@ -64,7 +64,7 @@ Alternatively, the game data can be obtained:
 
 SDL is replaced by [STDL](https://github.com/neilrackett/atarist-stdl), a
 planar-native subset of SDL 1.2 for the Atari ST. It is a submodule at
-`extern/stdl`, pinned to a release tag, so clone with it:
+`lib/stdl`, pinned to a release tag, so clone with it:
 
 ```sh
 git clone --recurse-submodules https://github.com/neilrackett/atarist-freenukum.git

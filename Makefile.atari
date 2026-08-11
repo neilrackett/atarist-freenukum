@@ -9,7 +9,7 @@
 #
 # stcmd mounts the current directory into the toolkit container and
 # runs there, so everything the build touches has to live inside this
-# repository. STDL does: extern/stdl is a submodule, and the library
+# repository. STDL does: lib/stdl is a submodule, and the library
 # is built from it automatically when libstdl.a is missing.
 #
 #   git clone --recurse-submodules <url>     # fresh clone
@@ -25,10 +25,10 @@ STRIP   = $(CROSS)strip
 # The submodule wins when it is present; a sibling checkout is the
 # fallback, so the library and a game can still be worked on
 # together. Override with STDL=<path>.
-STDL     ?= $(firstword $(wildcard extern/stdl) ../atarist-stdl)
+STDL     ?= $(firstword $(wildcard lib/stdl) ../atarist-stdl)
 STDL_LIB  = $(STDL)/libstdl.a
 
-# Cloning without --recurse-submodules leaves extern/stdl an empty
+# Cloning without --recurse-submodules leaves lib/stdl an empty
 # directory; say so rather than failing on a missing SDL.h.
 ifeq ($(wildcard $(STDL)/include),)
 ifeq ($(filter clean run,$(MAKECMDGOALS)),)
