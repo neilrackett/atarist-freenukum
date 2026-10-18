@@ -38,9 +38,10 @@ endif
 
 # EXTRA_CFLAGS is a hook for one-off diagnostic builds, e.g.
 #   stcmd make -f Makefile.atari EXTRA_CFLAGS=-DFN_HEAP_DEBUG
+# or EXTRA_CFLAGS=-DFN_ATARI_PROFILE for the fn_prof frame counters
 # (stcmd word-splits its arguments, so keep the value space-free).
 CFLAGS  = -O2 -fomit-frame-pointer -std=gnu99 -Wall \
-          -DHAVE_CONFIG_H -DFN_ATARI_PROFILE \
+          -DHAVE_CONFIG_H \
           -Iatari -I$(STDL)/include -I$(STDL)/include/compat -Isrc \
           $(EXTRA_CFLAGS)
 LDLIBS  = $(STDL_LIB) -lm
