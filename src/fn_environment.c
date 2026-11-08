@@ -301,7 +301,7 @@ fn_environment_t * fn_environment_create()
 
   /* the game is keyboard driven, so let STDL turn joystick moves
    * into key events (arrows + left Alt, tagged KMOD_JOYSTICK) */
-  STDL_JoyKeyEmulation(1);
+  STDL_JoystickKeyEmulation(1);
 
   /* On paletted displays (e.g. Atari ST 16-colour modes) install the
    * 16 EGA colours that fn_draw_byterow() computes, so that
